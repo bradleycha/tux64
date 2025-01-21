@@ -1,0 +1,487 @@
+# ------------------------------------------------------------------------------
+# tux64: A linux distribution for the Nintendo 64.
+# ------------------------------------------------------------------------------
+# Guide written by Chase Bradley (bradleycha@proton.me).
+# Last updated: January 19th, 2025
+# ------------------------------------------------------------------------------
+
+This is a guide for how to create a Linux distribution for the Nintendo 64.  The
+end goal is to produce a ROM which can boot a Linux kernel on original hardware,
+along with providing a minimal userspace.  Once complete, additional software
+may be installed.
+
+This is an advanced guide designed for experienced Linux users.  If this is your
+first time doing a "from-scratch" Linux installation, it is recommended to at
+least be familiar with "minimal" distributions such as Arch or Gentoo.
+Familiarity with building software from source is recommended, as everything
+will be built from source.  Additionally, familiarity with C or C++ programming
+alongside experience with using compilers such as GCC or Clang is recommended.
+
+# ------------------------------------------------------------------------------
+# Part 0 - Setting up a working directory
+# ------------------------------------------------------------------------------
+
+While possible to do everything in a single directory, it will quickly spiral
+out-of-control and become a nightmare to work with.  It is recommended to use
+the following directory structure to keep everything organized:
+
+tux64/         | The top-level working directory
+   sources/    | Downloaded source code for each package
+   builds/     | The working directory for compiling packages
+   tools/      | Tools used by the host for building packages
+   scripts/    | Helper scripts to set environment variables, for example
+   initramfs/  | Files to be contained in the initramfs image for the N64
+   rootfs/     | Files to be contained in the root filesystem for the N64
+
+For convenience, it is recommended to export the following environment variable
+to your shell:
+
+export TUX64ROOT=(absolute path to tux64 root directory)
+
+This will be used extensively to refer to the root directory for the
+distribution.  Note that this environment variable must be exported for every
+shell which uses it.  Also note that if the tux64 root directory is moved, this
+environment variable must be updated accordingly.
+
+# ------------------------------------------------------------------------------
+# Part 1 - Acquiring the sources
+# ------------------------------------------------------------------------------
+
+Before building our distribution, we first must download the sources for our
+packages.  We will need the following packages:
+
+GNU Binutils            (binutils)     [https://www.gnu.org/software/binutils]
+GNU Compiler Collection (gcc)          [https://www.gcc.gnu.org]
+Newlib                  (newlib)       [https://www.sourceware.org/newlib]
+musl libc               (musl)         [https://www.musl.libc.org]
+Linux Kernel 5.10.*     (linux-5.10.*) [https://www.kernel.org]
+libdragon               (libdragon)    [https://www.libdragon.dev]
+
+TODO: rest of the packages
+
+Unless explicity stated, it is recommended to use the latest version of each
+package, as it can provide optimizations, bug fixes, and security patches.
+
+While optional, it is highly recommended to verify the authenticity of the
+packages once downloaded when possible.  This provides protection against
+corrupted downloads and man in the middle attacks.  Not all packages provide
+signatures, and some don't require signatures, such as packages downloaded over
+HTTPS.
+
+Two components are required to verify signatures.  The first is the signer's
+public key.  This is used to verify that a signature has been created by the
+intended user.  Sometimes this can be tricky to find, as not all package
+maintainers provide their public key in an obvious location.  If you struggle
+to locate the package signer's public key, I'd recommend searching the package's
+download page, the current maintainer's public website, or using a search
+engine.  Once the public key is located, it may be imported with the following:
+
+gpg --import [PUBLIC_KEY]
+
+The second component is the digital signature for the package.  This proves that
+the source tarball hasn't been tampered with and originates from the maintainer.
+These are usually located adjacent to the download for the package.  Once
+downloaded, the source tarball can be verified with the following command:
+
+gpg --verify [SIGNATURE]
+
+You should expect output similar to the following:
+
+gpg: assuming signed data in 'binutils-2.43.tar.xz'
+gpg: Signature made Sun 04 Aug 2024 10:06:55 AM EDT
+gpg:                using RSA key 3A24BC1E8FB409FA9F14371813FCEF89DD9E3C4F
+gpg: Good signature from "Nick Clifton (Chief Binutils Maintainer) <nickc@redhat.com>" [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 3A24 BC1E 8FB4 09FA 9F14  3718 13FC EF89 DD9E 3C4F
+
+Note that you may see a warning about the key not being certified by a trusted
+signature.  This warning can be safely ignored.
+
+However, if you receive output such as the following:
+
+gpg: assuming signed data in 'binutils-2.43.tar.xz'
+gpg: Signature made Sun 04 Aug 2024 10:06:55 AM EDT
+gpg:                using RSA key 3A24BC1E8FB409FA9F14371813FCEF89DD9E3C4F
+gpg: BAD signature from "Nick Clifton (Chief Binutils Maintainer) <nickc@redhat.com>" [unknown]
+
+This means that the source tarball was either corrupted or tampered with by an
+attacker, and should be presumed malicious.  If this happens, try using a
+different network or download mirror to see if it's deliberate tampering or some
+other issue, such as filesystem corruption.
+
+# ------------------------------------------------------------------------------
+# Part 2 - Building the toolchain
+# ------------------------------------------------------------------------------
+
+In order to compile software targetting the N64, we first must create a
+toolchain capable of compiling software which can run on the MIPS R4300i, the
+N64's CPU, as well as create N64 ROM images.  This will require creating two
+cross-compilers, as well as compiling libdragon.
+
+Creating the cross-compilers is compicated by the fact that we run into a
+chicken-and-egg problem.  To create our full cross-compiler, we need a compiled
+version of the N64's libc.  However, to compile the N64's libc, we need a
+cross-compiler.  This issue can be solved with a series of bootstrapping
+the full cross-compiler with a more barebones cross-compiler that can mitigate
+the circular dependency.
+
+It's also worth noting that compiling each target toolchain can take upwards of
+an hour to complete.  Expect this process to take at least a couple of hours to
+complete.  It's recommended to have patience, and possibly a beer or two, when
+compiling the toolchains.
+
+We have three different target platforms we will be working with.  The first
+is the host machine.  This is the computer that will be running the toolchain
+and compiling software.  The second platform is the freestanding N64 target.
+This is a toolchain which can compile code to run directly on the N64 using
+libdragon.  However, we can't produce binaries which run under Linux using this
+toolchain.  For this, we need our third platform, the Linux N64 target.  This
+toolchain will produce binaries which run under Linux on the N64.  This
+toolchain may also be able to substitute the freestanding toolchain, however
+this should not be assumed, as there may be subtle differences in compiler
+behavior.
+
+In addition, we should specify the optimization flags and target architecture
+for our compilers.  For the host, we simply use a generic optimization profile
+that should work fine on most computers.  For the N64 targets, we prefer
+aggressive size optimizations as the N64 is heavily memory bottlenecked, both
+in terms of memory capacity (4MB with the jumper pak, 8MB with the expansion
+pak), and memory speed (ok read/write speed, but horrible latency).
+
+To be less redundant, the following terms will refer to a target platform
+and its compiler flags.
+
+TARGET_HOST             (depends, see below)
+TARGET_N64_FREESTANDING mips64-elf
+TARGET_N64_LINUX        mips64-linux-musl
+CFLAGS_HOST             "-march=native -O2"
+CFLAGS_N64_FREESTANDING "-march=vr4300 -mfix4300 -Oz -fno-stack-protector"
+CFLAGS_N64_LINUX        "${CFLAGS_N64_FREESTANDING}"
+
+The native target depends on operating system, libc type, and processor.  For
+example, an AMD64 (sometimes also called x86-64, or just x64) processor running
+Linux with glibc (GNU libc) would have the following target:
+
+x86_64-pc-linux-gnu
+
+Additionally, the following CFLAGS are specified for the following reasons:
+
+-march=native           generates code targetting the host's native processor
+-O2                     perform maximum safe optimizations, targetting speed
+
+-march=vr4300           generates code for the MIPS r4300i, the N64's processor
+-mfix4300               work around certain hardware bugs present in the r4300i
+-Oz                     perform aggressive optimizations, targetting size
+-fno-stack-protector    disable the stack protector, as it results in leaner code
+
+It is recommended to create a script which exports these as environment
+variables, as typing out these flags can be very cumbersome.  This can be done
+by creating a shell script.
+
+touch ${TUX64ROOT}/scripts/export-targets-and-cflags.sh
+chmod +x ${TUX64ROOT}/scripts/export-targets-and-cflags.sh
+
+Open this script with a text editor and insert the following:
+
+#!/bin/sh
+
+export TARGET_HOST=...
+export TARGET_N64_FREESTANDING=mips64-elf
+export TARGET_N64_LINUX=mips64-linux-musl
+export CFLAGS_HOST="-march=native -O2"
+export CFLAGS_N64_FREESTANDING="-march=vr4300 -mfix4300 -Oz -fno-stack-protector"
+export CFLAGS_N64_LINUX="${CFLAGS_N64_FREESTANDING}"
+
+This script can then be executed with the following:
+
+. ${TUX64ROOT}/scripts/export-targets-and-cflags.sh
+
+This command will execute the script in our current shell, which means it will
+export the environment variables outside the script.
+
+Note that if we close our shell, all the environment variables will be gone.
+This will require executing the script again, which will restore the environment
+variables until we close our shell again.
+
+We will also create a script which will set the path to all the binaries in our
+toolchain.  This will be useful once we start bootstrapping our toolchain and
+creating our cross toolchain.
+
+touch ${TUX64ROOT}/scripts/export-toolchain.sh
+chmod +x ${TUX64ROOT}/scripts/export-toolchain.sh
+
+Edit this file in our text editor and insert the following:
+
+#!/bin/sh
+
+export CC=${1}-gcc
+export CXX=${1}-g++
+export AR=${1}-ar
+export AS=${1}-as
+export LD=${1}-ld
+export NM=${1}-nm
+export RANLIB=${1}-ranlib
+export STRIP=${1}-strip
+export OBJCOPY=${1}-objcopy
+export OBJDUMP=${1}-objdump
+export READELF=${1}-readelf
+
+Also create the following script file:
+
+touch ${TUX64ROOT}/scripts/export-target-toolchain.sh
+chmod +x ${TUX64ROOT}/scripts/export-target-toolchain.sh
+
+Edit this file and insert the following:
+
+#!/bin/sh
+
+export CC_FOR_TARGET=${1}-gcc
+export CXX_FOR_TARGET=${1}-g++
+export AR_FOR_TARGET=${1}-ar
+export AS_FOR_TARGET=${1}-as
+export LD_FOR_TARGET=${1}-ld
+export NM_FOR_TARGET=${1}-nm
+export RANLIB_FOR_TARGET=${1}-ranlib
+export STRIP_FOR_TARGET=${1}-strip
+export OBJCOPY_FOR_TARGET=${1}-objcopy
+export OBJDUMP_FOR_TARGET=${1}-objdump
+export READELF_FOR_TARGET=${1}-readelf
+
+These files will be used when configuring the builds for software.
+
+# ------------------------------------------------------------------------------
+# Part 2.1 - Compiling the native toolchain
+# ------------------------------------------------------------------------------
+
+Before creating the cross toolchain, we first need to create the native
+toolchain.  While not strictly necessary, it is recommended as weird issues can
+come up if a non-GCC compiler is used to compile the rest of the software.
+
+First, we must build the stage-1 binutils.  These are required for basic binary
+functions, such as assembling, linking, and more.
+
+First, we make a directory in which we will build the native binutils.
+
+mkdir ${TUX64ROOT}/builds/${TARGET_HOST}-binutils-stage1
+cd ${TUX64ROOT}/builds/${TARGET_HOST}-binutils-stage1
+
+Next, we need to configure the binutils build.  We only need basic
+functionality, so a minimal configuration will be used:
+
+../../sources/binutils-*/configure \
+   --prefix=${TUX64ROOT}/tools \
+   --program-prefix=${TARGET_HOST}- \
+   CFLAGS="${CFLAGS_HOST}"
+
+This will specify the installation directory to be in our local tools directory,
+as opposed to our system's default install directory (/bin, /lib, etc).  It will
+also prefix all binaries with our host target as to avoid confusion.  Lastly, we
+will build using our host's compiler flags.  Also note the extra hyphen at the
+end of the program prefix.  This is so we follow the standard cross toolchain
+naming convention of target-bin.  Example: x86_64-pc-linux-gnu-ld vs.
+x86_64-pc-linux-gnuld.  We will use this convention for all cross toolchains.
+
+We can then build binutils with the following:
+
+make -j$(nproc)
+
+This will compile binutils using all available CPU cores.  If you would like to
+use less than all available CPU cores, you can specify a core count manually,
+such as using only 2 cores.
+
+make -j2
+
+This may be desirable if you would like to use your computer to do other work
+while binutils, or any other software, compiles.  It can also reduce memory
+usage if it becomes a problem.
+
+Once this completes, we then install binutils to our tools directory:
+
+make install-strip -j$(nproc)
+
+This will install binutils, as well as strip debugging symbols.  These are only
+useful to developers trying to debug issues in software, and only waste disk
+space for us, so we remove them.
+
+At this point, we can delete the build directory for binutils, however this is
+discouraged at this stage.  If we run into issues that require reinstalling all
+of our tools, we can simply run make install-strip instead of having to do a
+full recompile.  We will delete build directories once a fully working and
+bootstrapped toolchain is created.
+
+Next, we will start compiling our native GCC build.  We will do a 3-stage
+compile.  First, we compile GCC using our system's C compiler.  Next, we compile
+GCC with the stage-1 GCC compiler.  Lastly, we compile GCC again with the
+stage-2 compiler to verify the binaries are identical.  This results in a GCC
+compiler which was compiled by itself.
+
+mkdir ${TUX64ROOT}/builds/${TARGET_HOST}-gcc
+cd ${TUX64ROOT}/builds/${TARGET_HOST}-gcc
+
+../../sources/gcc-*/configure \
+   --prefix=${TUX64ROOT}/tools \
+   --program-prefix=${TARGET_HOST}- \
+   CFLAGS="${CFLAGS_HOST}" \
+   --enable-languages=c,c++ \
+   --enable-bootstrap \
+   --enable-lto
+
+We only want to enable C and C++, since we are only using this toolchain to
+bootstrap our cross-toolchain.  We also enable link-time optimization to
+produce a slightly faster compiler.  GCC is able to do the 3-stage bootstrapping
+on its own, so we specify it to bootstrap itself.
+
+We then build and install the bootstrapped native GCC toolchain.
+
+make all -j$(nproc)
+make install-strip -j$(nproc)
+
+Once we finish compiling our native GCC toolchain, we will recompile binutils
+using our bootstrapped toolchain.
+
+mkdir ${TUX64ROOT}/builds/${TARGET_HOST}-binutils-stage3
+cd ${TUX64ROOT}/builds/${TARGET_HOST}-binutils-stage3
+
+( \
+   . ${TUX64ROOT}/scripts/export-toolchain.sh ${TUX64ROOT}/tools/bin/${TARGET_HOST} \
+   && \
+   ../../sources/binutils-*/configure \
+      --prefix=${TUX64ROOT}/tools \
+      --program-prefix=${TARGET_HOST}- \
+      CFLAGS="${CFLAGS_HOST}" \
+      --enable-lto \
+)
+
+Note how we need to manually specify the path to our toolchain.  This is
+required to make configure use our bootstrapped toolchain instead of the
+system's toolchain.
+
+make -j$(nproc)
+make install-strip -j$(nproc)
+
+Now we have a fully bootstrapped host toolchain compiled from source.  However,
+this toolchain can only produce code for our native processor.  In order to
+compile code targetting our N64, we're going to have to create our cross
+toolchains.
+
+# ------------------------------------------------------------------------------
+# Part 2.2 - Compiling the freestanding cross toolchain
+# ------------------------------------------------------------------------------
+
+Using the toolchain we compiled which targets our native system, we will begin
+to bootstrap our cross compiler.
+
+First, we will build binutils for the freestanding cross target, specifying
+support for the N64's processor.
+
+mkdir ${TUX64ROOT}/builds/${TARGET_N64_FREESTANDING}-binutils
+cd ${TUX64ROOT}/builds/${TARGET_N64_FREESTANDING}-binutils
+
+( \
+   . ${TUX64ROOT}/scripts/export-toolchain.sh ${TUX64ROOT}/tools/bin/${TARGET_HOST} \
+   && \
+   ../../sources/binutils-*/configure \
+      --host=${TARGET_HOST} \
+      --target=${TARGET_N64_FREESTANDING} \
+      --prefix=${TUX64ROOT}/tools \
+      --program-prefix=${TARGET_N64_FREESTANDING}- \
+      CFLAGS="${CFLAGS_HOST}" \
+      CFLAGS_FOR_TARGET="${CFLAGS_N64_FREESTANDING}" \
+      --enable-lto \
+      --with-cpu=mips64vr4300 \
+)
+
+make -j$(nproc)
+make install-strip -j$(nproc)
+
+Since we already have our fully bootstrapped native compiler, we don't need to
+bootstrap binutils any further.
+
+Now we begin to compile GCC.  Since we don't have a libc available yet, we
+first build the C compiler, alongside its runtime library.  We also disable
+shared libraries as they complicate the build process, and all N64 ROMs must be
+statically linked, so there is no value to dynamic linking.
+
+mkdir ${TUX64ROOT}/builds/${TARGET_N64_FREESTANDING}-gcc
+cd ${TUX64ROOT}/builds/${TARGET_N64_FREESTANDING}-gcc
+
+( \
+   . ${TUX64ROOT}/scripts/export-toolchain.sh ${TUX64ROOT}/tools/bin/${TARGET_HOST} \
+   && \
+   ../../sources/gcc-*/configure \
+      --host=${TARGET_HOST} \
+      --target=${TARGET_N64_FREESTANDING} \
+      --prefix=${TUX64ROOT}/tools \
+      --program-prefix=${TARGET_N64_FREESTANDING}- \
+      CFLAGS="${CFLAGS_HOST}" \
+      CXXFLAGS="${CFLAGS_HOST}" \
+      CFLAGS_FOR_TARGET="${CFLAGS_N64_FREESTANDING}" \
+      CXXFLAGS_FOR_TARGET="${CFLAGS_N64_FREESTANDING}" \
+      --enable-languages=c,c++ \
+      --enable-lto \
+      --with-arch=vr4300 \
+      --with-tune=vr4300 \
+      --with-abi=64 \
+      --enable-multilib \
+      --without-headers \
+      --disable-shared \
+      --disable-libssp \
+      --with-newlib \
+)
+
+make all-gcc -j$(nproc)
+make install-strip-gcc -j$(nproc)
+
+We now have the standalone C compiler, however its missing its runtime library,
+as well as many other components.  Next, we build the runtime library.
+
+make all-target-libgcc -j$(nproc)
+make install-target-libgcc -j$(nproc)
+
+Next, we need to compile libc.  For this compiler, we will use newlib since it
+simplifies the build process and is designed for embedded uses.
+
+mkdir ${TUX64ROOT}/builds/${TARGET_N64_FREESTANDING}-newlib
+cd ${TUX64ROOT}/builds/${TARGET_N64_FREESTANDING}-newlib
+
+( \
+   . ${TUX64ROOT}/scripts/export-toolchain.sh ${TUX64ROOT}/tools/bin/${TARGET_HOST} \
+   && \
+   . ${TUX64ROOT}/scripts/export-target-toolchain.sh ${TUX64ROOT}/tools/bin/${TARGET_N64_FREESTANDING} \
+   && \
+   ../../sources/newlib-*/configure \
+      --prefix=${TUX64ROOT}/tools \
+      --host=${TARGET_HOST} \
+      --target=${TARGET_N64_FREESTANDING} \
+      CFLAGS="${CFLAGS_HOST}" \
+      CXXFLAGS="${CFLAGS_HOST}" \
+      CFLAGS_FOR_TARGET="${CFLAGS_N64_FREESTANDING} -fpermissive" \
+      CXXFLAGS_FOR_TARGET="${CFLAGS_N64_FREESTANDING} -fpermissive" \
+      --enable-lto \
+      --with-cpu=mips64vr4300 \
+      --enable-newlib-multithread \
+      --enable-newlib-retargetable-locking \
+      --disable-libssp \
+      --disable-werror \
+)
+
+make -j$(nproc)
+make install -j$(nproc)
+
+Note that we have to specify "-fpermissive" and --disable-werror.  This is
+because the code for newlib is bad and does dumb shit, so we have to work
+around their bad code as end-users.
+
+Finally, we finish compiling GCC for our freestanding N64 target.
+
+cd ${TUX64ROOT}/builds/${TARGET_N64_FREESTANDING}-gcc
+make all -j$(nproc)
+make install-strip -j$(nproc)
+
+We now have our fully bootstrapped freestanding N64 target.
+
+# ------------------------------------------------------------------------------
+# Part 2.3 - Compiling the Linux cross toolchain
+# ------------------------------------------------------------------------------
+
