@@ -6,33 +6,33 @@
 # usetoolchain.sh - Configures the toolchain for a GNU autoconf script.
 # ----------------------------------------------------------------------------
 
-CC=${1}-gcc
-CXX=${1}-g++
-AR=${1}-ar
-AS=${1}-as
-DSYMUTIL=${1}-dsymutil
-LD=${1}-ld
-NM=${1}-nm
-RANLIB=${1}-ranlib
-STRIP=${1}-strip
-OBJCOPY=${1}-objcopy
-OBJDUMP=${1}-objdump
-OTOOL=${1}-otool
-READELF=${1}-readelf
+export CC=${1}-gcc
+export CXX=${1}-g++
+export AR=${1}-ar
+export AS=${1}-as
+export DSYMUTIL=${1}-dsymutil
+export LD=${1}-ld
+export NM=${1}-nm
+export RANLIB=${1}-ranlib
+export STRIP=${1}-strip
+export OBJCOPY=${1}-objcopy
+export OBJDUMP=${1}-objdump
+export OTOOL=${1}-otool
+export READELF=${1}-readelf
 
 if [ -v 2 ]; then
-   CC_FOR_TARGET=${2}-gcc
-   CXX_FOR_TARGET=${2}-g++
-   AR_FOR_TARGET=${2}-ar
-   AS_FOR_TARGET=${2}-as
-   DSYMUTIL_FOR_TARGET=${2}-dsymutil
-   LD_FOR_TARGET=${2}-ld
-   NM_FOR_TARGET=${2}-nm
-   RANLIB_FOR_TARGET=${2}-ranlib
-   STRIP_FOR_TARGET=${2}-strip
-   OBJCOPY_FOR_TARGET=${2}-objcopy
-   OBJDUMP_FOR_TARGET=${2}-objdump
-   OTOOL_FOR_TARGET=${2}-otool
-   READELF_FOR_TARGET=${2}-readelf;
+   export CC_FOR_TARGET=${2}-gcc
+   export CXX_FOR_TARGET=${2}-g++
+   export AR_FOR_TARGET=${2}-ar
+   export AS_FOR_TARGET=${2}-as
+   export DSYMUTIL_FOR_TARGET=${2}-dsymutil
+   export LD_FOR_TARGET=${2}-ld
+   export NM_FOR_TARGET=${2}-nm
+   export RANLIB_FOR_TARGET=${2}-ranlib
+   export STRIP_FOR_TARGET=${2}-strip
+   export OBJCOPY_FOR_TARGET=${2}-objcopy
+   export OBJDUMP_FOR_TARGET=${2}-objdump
+   export OTOOL_FOR_TARGET=${2}-otool
+   export READELF_FOR_TARGET=${2}-readelf;
 fi
 
