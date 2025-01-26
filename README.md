@@ -36,5 +36,5 @@ documentation and custom software to fix these issues, while building upon the
 original with an improved bootloader, up-to-date kernel patches, and more.
 
 ## Getting Started
-To get started, read INSTALL.md.
+To get started, read the [Installation Guide](https://github.com/bradleycha/tux64/wiki/Installation-Guide).
 
