@@ -121,8 +121,6 @@ Every package listed should be stored uncompressed inside of `sources/`, with th
 | [tux64](https://github.com/bradleycha/tux64/) | master | Currently no stable release.  Use `git` to clone the latest version of the 'master' branch. |
 | [binutils](https://www.gnu.org/software/binutils/) | 2.43.1 | |
 | [gcc](https://gcc.gnu.org/) | 14.2.0 | |
-| [newlib](https://sourceware.org/newlib/) | 4.5.0 | No signatures available.  Make sure to download over HTTPS, as the default download is over unencrypted FTP. |
-| [libdragon](https://libdragon.dev/) | trunk-e037067 | Use `git` to clone the specified commit from the 'trunk' branch. |
 | [musl](https://musl.libc.org/) | 1.2.5 | |
 | [linux](https://kernel.org/) | 5.10.233 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 
@@ -135,7 +133,7 @@ In order to build code for the Nintendo 64, we need to create a toolchain which 
 A couple of helper scripts are provided to make build commands less redundant.  To do this, execute the following command:
 
 ```
-cp [TUX64 BUILD ROOT]/sources/tux64-*/*.sh [TUX64 BUILD ROOT]/scripts/
+cp [TUX64 BUILD ROOT]/sources/tux64-*/scripts/*.sh [TUX64 BUILD ROOT]/scripts/
 ```
 
 This will copy the helper scripts to a more convenient location, and also allow us to configure them for our system.  Speaking of which, the `buildconf.sh` script is used to set various global configuration options for the entire Tux64 build.  The following environment variables are provided:
@@ -305,11 +303,11 @@ make -j${TUX64_MAKEOPTS}
 make install-strip -j${TUX64_MAKEOPTS}
 ```
 
-Next, we will build `gcc`.  This part is tricky, because we need `newlib` in order to build `gcc`.  `newlib` is an implementation of `libc` for embedded use-cases, and is the `libc` implementation we will use for our bootloader's toolchain.  However, we need `gcc` to build `newlib`.  This leads to a circular dependency which can be resolved by first building the `gcc` C compiler binaries, and then using that to compile `newlib`, then finally using both to build the rest of `gcc`.
+Next, we will build `gcc`.  This part is tricky, because we need `musl` in order to build `gcc`.  `musl` is an implementation of `libc` optimized for size and embedded platforms, and is the `libc` implementation we will use for our bootloader's toolchain.  However, we need `gcc` to build `musl`.  This leads to a circular dependency which can be resolved by first building the `gcc` C compiler binaries, and then using that to compile `musl`, then finally using both to build the rest of `gcc`.
 
 Note that we are building a multilib toolchain, which means it supports building both 32-bit and 64-bit code.  This will be used later when we decide whether we want to install a 32-bit or 64-bit version of Tux64.
 
-Also note that we disable building shared libraries.  Since we are building flat code to run without an operating system (_techincally_ our operating system is `libdragon`, but the point remains the same), there is no dynamic linker.  We are also only building a single application 
+Also note that we disable building shared libraries.  Since we are building flat code to run without an operating system, there is no dynamic linker.  We are also only building a single application which has no dependencies, so dynamic linking only complicates the build process for no added value.
 
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
@@ -340,8 +338,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
       --enable-multilib \
       --without-headers \
       --without-shared \
-      --disable-libssp \
-      --with-newlib
+      --disable-libssp
 )
 
 make all-gcc -j${TUX64_MAKEOPTS}
@@ -350,94 +347,5 @@ make all-target-libgcc -j${TUX64_MAKEOPTS}
 make install-target-libgcc -j${TUX64_MAKEOPTS}
 ```
 
-Next, we use these C compiler binaries to build `newlib`.  Note that we need to pass the flag `-fpermissive` for `CFLAGS` and `CXXFLAGS`, as well as use `--disable-werror`.  For unknown reasons, there is code in `newlib` which should not compile, but it's in a stable release...so this is the best we can do.
+TODO: compiling `musl` then the rest of `gcc`.
 
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-newlib
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-newlib
-
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST} \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}
-   ../../sources/newlib-*/configure \
-      --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_N64_BOOTLOADER} \
-      --prefix=${TUX64_BUILD_ROOT}/tools \
-      CFLAGS="${TUX64_CFLAGS_HOST}" \
-      CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
-      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
-      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
-      CFLAGS_FOR_TARGET="${TUX64_CFLAGS_N64_BOOTLOADER} -fpermissive" \
-      CXXFLAGS_FOR_TARGET="${TUX64_CXXFLAGS_N64_BOOTLOADER} -fpermissive" \
-      ASFLAGS_FOR_TARGET="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
-      LDFLAGS_FOR_TARGET="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
-      --enable-lto \
-      --disable-bootstrap \
-      --disable-libssp \
-      --disable-werror
-)
-
-make -j${TUX64_MAKEOPTS}
-make install -j${TUX64_MAKEOPTS}
-```
-
-Now we can resume building the rest of `gcc` for the bootloader.
-
-```
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
-make all -j${TUX64_MAKEOPTS}
-make install-strip -j${TUX64_MAKEOPTS}
-```
-
-We now have a toolchain which can compile C and C++ source code into `.o` and `.elf` files.  However, we need one last component for our bootloader toolchain.  We need to be able to create Nintendo 64 ROM images, as well as have a library to handle basic hardware functions.  For these, we use `libdragon`.
-
-Fun fact:  Official games for the Nintendo 64 used something called `libultra` to accomplish basic hardware functions.  The problem is `libultra` is ancient by this point, and using it also gives Nintendo leverage to DMCA projects which use it.  My personal opinions on this aside, this is why modern Nintendo 64 homebrew uses `libdragon` as a replacement for `libultra`, as it solves both of these problems.
-
-Before building, we have to make a couple of modifications to the `Makefile`, as the current version of `libdragon` has a flawed build system.
-
-```
-@@ ${TUX64_BUILD_ROOT}/sources/libdragon-*/Makefile:5
---BUILD_DIR = build
-++BUILD_DIR ?= build
-
-@@ ${TUX64_BUILD_ROOT}/sources/libdragon-*/Makefile:21
---libdragon: CFLAGS+=$(N64_CFLAGS) $(LIBDRAGON_CFLAGS)
---libdragon: CXXFLAGS+=$(N64_CXXFLAGS) $(LIBDRAGON_CFLAGS)
---libdragon: ASFLAGS+=$(N64_ASFLAGS) $(LIBDRAGON_CFLAGS)
---libdragon: RSPASFLAGS+=$(N64_RSPASFLAGS) $(LIBDRAGON_CFLAGS)
---libdragon: LDFLAGS+=$(N64_LDFLAGS) $(LIBDRAGON_CFLAGS)
-++libdragon: CFLAGS=$(N64_CFLAGS) $(LIBDRAGON_CFLAGS) $(N64_CFLAGS_EXTRA)
-++libdragon: CXXFLAGS=$(N64_CXXFLAGS) $(LIBDRAGON_CFLAGS) $(N64_CXXFLAGS_EXTRA)
-++libdragon: ASFLAGS=$(N64_ASFLAGS) $(LIBDRAGON_CFLAGS) $(N64_ASFLAGS_EXTRA)
-++libdragon: RSPASFLAGS=$(N64_RSPASFLAGS) $(LIBDRAGON_CFLAGS) $(N64_RSPASFLAGS_EXTRA)
-++libdragon: LDFLAGS=$(N64_LDFLAGS) $(LIBDRAGON_CFLAGS) $(N64_LDFLAGS_EXTRA)
-
-@@ ${TUX64_BUILD_ROOT}/sources/libdragon-*/tools/Makefile:5
-++ CFLAGS+=$(CFLAGS_EXTRA)
-++ CXXFLAGS+=$(CXXFLAGS_EXTRA)
-++ LDFLAGS+=$(LDFLAGS_EXTRA)
-```
-
-These modifications allow us to specify our own build directory and override `libdragon`'s compiler flags.  I plan on opening a pull request to fix these issues, but for now we have to modify the code using the current version.
-
-After applying the above patches, we can build `libdragon`.
-
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/libdragon
-cd ${TUX64_BUILD_ROOT}/builds/libdragon
-
-make -C ${TUX64_BUILD_ROOT}/sources/libdragon-* -j${TUX64_MAKEOPTS} \
-   N64_INST=${TUX64_BUILD_ROOT}/tools \
-   BUILD_DIR=${TUX64_BUILD_ROOT}/builds/libdragon \
-   CFLAGS_EXTRA="${TUX64_CFLAGS_HOST}" \
-   CXXFLAGS_EXTRA="${TUX64_CXXFLAGS_HOST}" \
-   LDFLAGS_EXTRA="${TUX64_LDFLAGS_HOST}" \
-   N64_CFLAGS_EXTRA="${TUX64_CFLAGS_N64_BOOTLOADER}" \
-   N64_CXXFLAGS_EXTRA="${TUX64_CXXFLAGS_N64_BOOTLOADER}" \
-   N64_ASFLAGS_EXTRA="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
-   N64_LDFLAGS_EXTRA="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
-   install-mk libdragon tools install tools-install
-```
-
-TODO: I hate this build system.  Why in the unholy name of non-standard fuck do we have to do these patches for such a simple fucking thing?  Also this shit fails to build because fuck you.  I give up for now.
