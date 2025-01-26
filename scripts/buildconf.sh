@@ -25,10 +25,10 @@ export TUX64_CXXFLAGS_HOST="${TUX64_CFLAGS_HOST}"
 export TUX64_ASFLAGS_HOST=""
 export TUX64_LDFLAGS_HOST=""
 
-export TUX64_CFLAGS_N64_COMMON="-march=vr4300 -mfix4300 -Oz -fno-stack-protector -fomit-frame-pointer -ffunction-sections -fdata-sections"
+export TUX64_CFLAGS_N64_COMMON="-march=vr4300 -mfix4300 -Oz -flto -fno-stack-protector -fomit-frame-pointer -ffunction-sections -fdata-sections"
 export TUX64_CXXFLAGS_N64_COMMON="${TUX64_CFLAGS_N64_COMMON}"
 export TUX64_ASFLAGS_N64_COMMON="-march=vr4300 -mtune=vr4300"
-export TUX64_LDFLAGS_N64_COMMON="-Wl,--gc-sections"
+export TUX64_LDFLAGS_N64_COMMON="-flto -Wl,--gc-sections -s"
 
 export TUX64_CFLAGS_N64_BOOTLOADER="${TUX64_CFLAGS_N64_COMMON}"
 export TUX64_CXXFLAGS_N64_BOOTLOADER="${TUX64_CXXFLAGS_N64_COMMON}"
