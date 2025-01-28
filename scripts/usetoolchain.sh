@@ -6,7 +6,8 @@
 # This file is licensed under the GPLv3 license.  For more information, see
 # LICENSE.
 # ----------------------------------------------------------------------------
-# usetoolchain.sh - Configures the toolchain for a GNU autoconf script.
+# scripts/usetoolchain.sh - Configures the toolchain for a GNU autoconf
+#    script.
 # ----------------------------------------------------------------------------
 
 export CC=${1}-gcc

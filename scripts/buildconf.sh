@@ -6,7 +6,7 @@
 # This file is licensed under the GPLv3 license.  For more information, see
 # LICENSE.
 # ----------------------------------------------------------------------------
-# buildconf.sh - Global build configuration script template.
+# scripts/buildconf.sh - Global build configuration script template.
 # ----------------------------------------------------------------------------
 
 # You can update these environment variables according to your desired setup.
