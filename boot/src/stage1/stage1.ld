@@ -12,7 +12,7 @@ SECTIONS
    /* place the entire stage-1 bootloader at the start of RDRAM */
    .stage1.rdram : {
       KEEP(*(.start));
-      *(.text .rodata .data .bss);
+      *(.text* .rodata* .data* .bss*);
    } >N64_MEMORY_RDRAM_CACHED =0x00
 }
 
