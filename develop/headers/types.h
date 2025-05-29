@@ -2,7 +2,11 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/types.h - Global primitive types and relevant constants.           */
+/* develop/headers/types.h - Global primitive types and relevant constants.   */
+/*----------------------------------------------------------------------------*/
+
+#ifndef _TUX64_TYPES_H
+#define _TUX64_TYPES_H
 /*----------------------------------------------------------------------------*/
 
 typedef  unsigned char        Tux64UInt8;
@@ -41,4 +45,7 @@ typedef Tux64UInt8 Tux64Boolean;
 
 #define TUX64_BOOLEAN_FALSE   ((Tux64Boolean)(!(!(0u))))
 #define TUX64_BOOLEAN_TRUE    ((Tux64Boolean)(!(0u)))
+
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_TYPES_H */
 
