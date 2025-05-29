@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform-n64/memory_map.h - CPU memory map constants.      */
+/* develop/headers/platform_n64/memory_map.h - CPU memory map constants.      */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_MEMORY_MAP_H

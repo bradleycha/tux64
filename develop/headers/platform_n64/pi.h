@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform-n64/pi.h - Peripheral Interface (PI) header.      */
+/* develop/headers/platform_n64/pi.h - Peripheral Interface (PI) header.      */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_PI_H
@@ -10,7 +10,7 @@
 /*------------------------------------------------------------------------------*/
 
 #include "tux64/tux64.h"
-#include "tux64/platform-n64/memory_map.h"
+#include "tux64/platform_n64/memory_map.h"
 
 /* addresses of PI MMIO registers */
 #define TUX64_PLATFORM_N64_PI_MMIO_ADDRESS_DRAM_ADDR\

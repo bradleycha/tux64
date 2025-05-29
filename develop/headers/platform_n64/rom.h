@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform-n64/rom.h - Nintendo 64 cartridge ROM interfaces. */
+/* develop/headers/platform_n64/rom.h - Nintendo 64 cartridge ROM interfaces. */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_ROM_H

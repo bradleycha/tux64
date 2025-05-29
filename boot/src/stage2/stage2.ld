@@ -5,7 +5,7 @@
 /* boot/src/stage2/stage2.ld - Stage-2 bootloader linker script.              */
 /*----------------------------------------------------------------------------*/
 
-INCLUDE tux64/platform-n64.ld
+INCLUDE tux64/tux64.ld
 
 SECTIONS
 {
@@ -13,11 +13,11 @@ SECTIONS
    .stage2.rsp_dmem : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
-   } >N64_MEMORY_RSP_DMEM =0x00
+   } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 
    /* place the stage-2 uninitialized variables into RSP IMEM */
    .stage2.rsp_imem : {
       *(.bss*);
-   } >N64_MEMORY_RSP_IMEM =0x00
+   } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
 }
 
