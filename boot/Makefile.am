@@ -77,7 +77,7 @@ $(stage2_BIN) : $(stage2_ELF)
 all-local : $(BIN_FILES)
 
 clean-local :
-	rm -f $(top_builddir)/*.bin*
+	rm -f $(BIN_FILES)
 
 # TODO: install .bin files instead of ELF files
 
