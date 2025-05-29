@@ -2,17 +2,18 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/stage1/stage1.ld - Stage-1 bootloader linker script.              */
+/* boot/src/stage2/stage2.c - Stage-2 bootloader main entrypoint.             */
 /*----------------------------------------------------------------------------*/
 
-INCLUDE tux64/platform-n64.ld
+#include <tux64/tux64.h>
 
-SECTIONS
-{
-   /* place the entire stage-1 bootloader at the start of RDRAM */
-   .stage1.rdram : {
-      KEEP(*(.start));
-      *(.text .rodata .data .bss);
-   } >N64_MEMORY_RDRAM_CACHED =0x00
+void
+tux64_boot_stage2_start(void)
+__attribute__((noreturn, section(".start")));
+
+void
+tux64_boot_stage2_start(void) {
+   /* TODO: implement */
+   for (;;) {}
 }
 
