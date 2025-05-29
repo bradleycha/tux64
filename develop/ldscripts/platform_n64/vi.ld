@@ -1,0 +1,89 @@
+/*----------------------------------------------------------------------------*/
+/*                          Copyright (C) Tux64 2025                          */
+/*                    https://github.com/bradleycha/tux64                     */
+/*----------------------------------------------------------------------------*/
+/* develop/ldscripts/platform_n64/vi.ld - Video Interface (VI) linker script. */
+/*----------------------------------------------------------------------------*/
+
+/* addresses of VI MMIO registers */
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_CTRL =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000000
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_ORIGIN =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000004
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_WIDTH =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000008
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_V_INTR =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x0000000c
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_V_CURRENT =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000010
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_BURST =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000014
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_V_TOTAL =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000018
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_H_TOTAL =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x0000001c
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_H_TOTAL_LEAP =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000020
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_H_VIDEO =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000024
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_V_VIDEO =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000028
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_V_BURST =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x0000002c
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_X_SCALE =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000030
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_Y_SCALE =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000034
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_TEST_ADDR =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x00000038
+   );
+TUX64_PLATFORM_N64_VI_MMIO_ADDRESS_STAGED_DATA =
+   (
+      TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_VI +
+      0x0000003c
+   );
+
