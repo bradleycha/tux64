@@ -5,10 +5,6 @@
 # boot/Makefile.am - GNU Automake script for the bootloader.			 			 #
 #------------------------------------------------------------------------------#
 
-# TODO: remove this once we install N64 system files using another project
-LDADD = \
-	-L $(top_srcdir)/src
-
 bin_PROGRAMS = \
 	stage0
 

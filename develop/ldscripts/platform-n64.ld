@@ -2,11 +2,9 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/n64.ld - Project-wide N64 linker script configuration.            */
+/* develop/ldscripts/platform-n64.ld - Nintendo 64 specific linker script     */
+/*    settings.                                                               */
 /*----------------------------------------------------------------------------*/
-
-/* TODO: move this file into a seperate project dir which is installed to the */
-/* ${TUX64_BUILD_ROOT}/tools/ directory. */
 
 /* different virtual address segments */
 N64_ADDRESS_SEGMENT_DIRECT_CACHED   = 0x80000000;

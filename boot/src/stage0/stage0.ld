@@ -5,8 +5,7 @@
 /* boot/src/stage0/stage0.ld - Stage-0 bootloader linker script.              */
 /*----------------------------------------------------------------------------*/
 
-/* TODO: use tools dir linker script instead of local path */
-INCLUDE n64.ld
+INCLUDE tux64/platform-n64.ld
 
 SECTIONS
 {
