@@ -18,16 +18,26 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic \
 	-Werror
+LDADD = \
+	-L $(top_srcdir)/src
+
+SHARED_SOURCES = \
+	src/tux64_boot.h
 
 stage0_SOURCES = \
+	$(SHARED_SOURCES) \
 	src/stage0/stage0.ld \
 	src/stage0/stage0.s
 stage1_SOURCES = \
+	$(SHARED_SOURCES) \
 	src/stage1/stage1.ld \
 	src/stage1/stage1.c
 stage2_SOURCES = \
+	$(SHARED_SOURCES) \
 	src/stage2/stage2.ld \
-	src/stage2/stage2.c
+	src/stage2/stage2.c \
+	src/stage2/payload.h \
+	src/stage2/payload.ld
 
 stage0_LDFLAGS = \
 	-T $(top_srcdir)/src/stage0/stage0.ld
@@ -71,13 +81,16 @@ $(stage1_BIN) : $(stage1_ELF)
 	chmod -x $@
 
 $(stage2_BIN) : $(stage2_ELF)
-	$(OBJCOPY) $< --dump-section .rsp_dmem=$@
+	$(OBJCOPY) $< --dump-section .rsp_imem=$@
 	chmod -x $@
 
 all-local : $(BIN_FILES)
 
 clean-local :
 	rm -f $(BIN_FILES)
+
+# TODO: generate stage1.bin.bss, currently we have no idea how big .rdram.bss
+# is since we strip all section information in stage1.bin
 
 # TODO: install .bin files instead of ELF files
 

@@ -2,20 +2,16 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/stage2/stage2.c - Stage-2 bootloader main entrypoint.             */
+/* boot/src/tux64_boot.h - The project-wide header for tux64-boot.            */
 /*----------------------------------------------------------------------------*/
 
-#include "tux64_boot.h"
+#ifndef _TUX64_BOOT_H
+#define _TUX64_BOOT_H
+/*----------------------------------------------------------------------------*/
 
-#include "stage2/payload.h"
+#define TUX64_CONFIG_PLATFORM_IS_N64 1
+#include <tux64/tux64.h>
 
-void
-tux64_boot_stage2_start(void)
-__attribute__((noreturn, section(".start")));
-
-void
-tux64_boot_stage2_start(void) {
-   /* TODO: implement */
-   for (;;) {}
-}
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_BOOT_H */
 

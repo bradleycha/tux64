@@ -12,23 +12,15 @@
 
 #include "tux64/tux64.h"
 
-/* stores the length of various boot items, used by all stages of the */
-/* bootloader. */
+/* stores the lengths of the various boot items */
 struct Tux64PlatformN64BootItemLengths {
-   Tux64UInt32 kernel;
+   Tux64UInt32 kernel_data;
+   Tux64UInt32 kernel_bss;
    Tux64UInt32 initramfs;
    Tux64UInt16 command_line;
    Tux64UInt16 bootloader_stage2;
-   Tux64UInt32 bootloader_stage1;
-};
-
-/* stores information about the current hardware configuration. this is */
-/* created by the stage-0 bootloader and passed to the stage-1 bootloader. */
-struct Tux64PlatformN64BootHardwareConfiguration {
-   struct Tux64PlatformN64BootItemLengths item_lengths;
-
-   /* the total amount of detected RDRAM memory, in bytes */
-   Tux64UInt32 available_rdram;
+   Tux64UInt32 bootloader_stage1_data;
+   Tux64UInt32 bootloader_stage1_bss;
 };
 
 struct Tux64PlatformN64BootVersion {
@@ -53,15 +45,19 @@ struct Tux64PlatformN64BootHeader {
    /* this should always be TUX64_BOOT_HEADER_MAGIC */
    Tux64UInt8 magic [TUX64_BOOT_HEADER_MAGIC_BYTES];
 
-   struct Tux64PlatformN64BootVersion version;
-   struct Tux64PlatformN64BootItemLengths item_lengths_d4;
-
-   /* the offset from cartridge ROM + 0x1000 where to find all the boot items */
-   /* located in cartridge ROM. */
-   Tux64UInt16 offset_d4;
-
    /* miscellaneous bitflags used to control the boot process */
    Tux64UInt16 flags;
+
+   /* the bootloader header version, used to define extended bootloader */
+   /* header versions */
+   struct Tux64PlatformN64BootVersion version;
+
+   /* the size of the bootloader header, used for future extensions of the */
+   /* boot header. */
+   Tux64UInt16 length_d4;
+
+   /* the lengths of the various boot items */
+   struct Tux64PlatformN64BootItemLengths item_lengths_d4;
 };
 
 /*------------------------------------------------------------------------------*/

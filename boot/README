@@ -15,6 +15,10 @@ The following files are created:
    * stage1.bin - The main bootloader binary.  This is what most users will
                   interact with and contains most of the bootloader code.
 
+   * stage1.bin.bss - A big-endian binary integer which stores the length of the
+                      .bss section in the stage-1 binary.  This is used to
+                      allocate space in memory at runtime for .bss variables.
+
    * stage2.bin - The code used to free stage 1 from memory and load the kernel,
                   initramfs, and command-line into main memory and start the
                   kernel.
@@ -59,26 +63,23 @@ power-on to kernel entry:
              stage-0 bootloader.
 
    4: stage-0 bootloader - this primarily initializes RDRAM, initializes the CPU
-                           cache, and checks for available memory.  next, a
-                           small struct which contains the bootloader
-                           configuration will be loaded from cartridge ROM
-                           right after the stage-0 bootloader.  this will
-                           contain the length of the kernel, initramfs, and
-                           the kernel command-line.  this, along with the
-                           amount of detected memory, will be stored at the
-                           start of RDRAM.
+                           cache, and detects the amount of free memory.  the
+                           bootloader header will be read to determine if the
+                           stage-1 bootloader will fit into memory, as well as
+                           configure boot parameters and more.
 
-                           before starting the stage-1 bootloader, a check for
-                           available memory will be done to ensure the stage-1
-                           bootloader will fit into memory.  it it can't fit,
-                           the boot process will halt.
-
-                           once all checks pass, a small stack will be created
-                           after the bootloader struct, and the stage-1
-                           bootloader will be loaded via RSP DMA into RDRAM.
-                           the stage-0 bootloader will now jump to the start of
-                           the stage-1 bootloader, which is where the start
-                           function resides.
+                           once all checks pass, we will prepare to run the
+                           stage-1 bootloader.  we start an RSP DMA transfer to
+                           load the stage-1 bootloader into RDRAM+0x1000.  next,
+                           we store the bootloader header after the allocated
+                           space for the bootloader.  this is so we can have
+                           future bootloader versions allow for extensions to
+                           the base bootloader header while remaining fully
+                           backwards-compatible.  we store the pointer to the
+                           bootloader header, initialize the stack pointer to
+                           RDRAM + 0x1000 to give us a 4kb stack, then move the
+                           program counter to RDRAM + 0x1000 to start the
+                           stage-1 bootloader.
 
    5. stage-1 bootloader - this is the main bootloader.  at this point, we have
                            all of the console's resources available, so we can
@@ -92,12 +93,12 @@ power-on to kernel entry:
 
                            once all checks pass and we are ready to load the
                            kernel, initramfs, and kernel command-line, we will
-                           copy the bootloader struct into RSP DMEM, initialize
-                           the stack into RSP DMEM, and load the stage-2
-                           bootloader into RSP IMEM.  this will allow us to free
-                           the stage-1 bootloader from memory so that no memory
-                           is wasted.  we then jump to RSP IMEM to execute the
-                           stage-2 bootloader.
+                           copy the stage-2 bootloader header into RSP DMEM,
+                           initialize the stack into RSP DMEM, and load the
+                           stage-2 bootloader into RSP IMEM.  this will allow us
+                           to free the stage-1 bootloader from memory so that no
+                           memory is wasted.  we then jump to RSP IMEM to
+                           execute the stage-2 bootloader.
 
    6. stage-2 bootloader - this uses RSP DMA to load the kernel, initramfs, and
                            kernel command-line into RDRAM and nothing else.  all

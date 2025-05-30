@@ -109,6 +109,9 @@ struct Tux64PlatformN64MmioRegistersSi {
    const Tux64UInt32 status;
 };
 
+#if TUX64_CONFIG_PLATFORM_IS_N64
+/*------------------------------------------------------------------------------*/
+
 /* Memory-mapped I/O registers which can be directly accessed.  These will be */
 /* defined and relocated to the correct memory address by the linker. */
 extern volatile struct Tux64PlatformN64MmioRegistersMi
@@ -129,6 +132,9 @@ __attribute__((section(".tux64.platform_n64.mmio.ri")));
 extern volatile struct Tux64PlatformN64MmioRegistersSi
 tux64_platform_n64_mmio_registers_si
 __attribute__((section(".tux64.platform_n64.mmio.si")));
+
+/*------------------------------------------------------------------------------*/
+#endif /* TUX64_CONFIG_PLATFORM_IS_N64 */
 
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_N64_MMIO_H */
