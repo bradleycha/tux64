@@ -7,10 +7,5 @@
 /*----------------------------------------------------------------------------*/
 
 INCLUDE tux64/platform_n64/memory_map.ld
-INCLUDE tux64/platform_n64/mi.ld
-INCLUDE tux64/platform_n64/vi.ld
-INCLUDE tux64/platform_n64/ai.ld
-INCLUDE tux64/platform_n64/pi.ld
-INCLUDE tux64/platform_n64/ri.ld
-INCLUDE tux64/platform_n64/si.ld
+INCLUDE tux64/platform_n64/mmio.ld
 
