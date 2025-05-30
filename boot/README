@@ -23,3 +23,87 @@ In order to build this, you will need a cross-compiler which can target
 mips64-elf.  To accomplish this, please refer to the installation instructions
 for Tux64.
 
+For developers and the curious reader, here is the boot process from console
+power-on to kernel entry:
+
+   1: Power ON/Reset - hardware powers on and performs their own specific basic
+                       initialization, CPU program counter is set to
+                       0xbfc00000, which maps to the start of PIF ROM, which
+                       contains the IPL1 and IPL2.  The CPU now begins executing
+                       the IPL1 directly from PIF ROM.
+
+   2: IPL1 - this essentially does little more than set some basic hardware
+             registers to a consistent state and load the IPL2 from PIF ROM into
+             RSP IMEM.  This is done because executing directly from PIF ROM is
+             extremely slow.  Once this finishes, the CPU jumps to RSP IMEM and
+             executues the IPL2.
+
+   3: IPL2 - this initializes the PI cartridge timings to their slowest valies
+             to allow reading the cartridge ROM header, which contains the
+             fastest PI cartridge timings supported by the cartridge ROM.
+
+             next, the 4096 bytes of cartridge ROM are copied into RSP DMEM.
+             this contains the full ROM header as well as the IPL3.  for
+             tux64-boot, we instead store the stage-0 bootloader where the IPL3
+             should be.
+
+             however, before the IPL2 jumps to RSP DMEM, it uses the CIC to
+             compute and verify the checksum of the IPL3.  if it doesn't match
+             the checksum expected by the cartridge's CIC, it will halt the main
+             CPU, effectively halting the boot process.  this means we must add
+             data to stage-0 to force the checksum to match the CIC,
+             specifically the CIC-6102.  this is the reason for stage0.bin.cic.
+
+             once the checksum verification passes, the IPL2 jumps to
+             RSP DMEM + 64, which is the start of the IPL3, or in this case, the
+             stage-0 bootloader.
+
+   4: stage-0 bootloader - this primarily initializes RDRAM, initializes the CPU
+                           cache, and checks for available memory.  next, a
+                           small struct which contains the bootloader
+                           configuration will be loaded from cartridge ROM
+                           right after the stage-0 bootloader.  this will
+                           contain the length of the kernel, initramfs, and
+                           the kernel command-line.  this, along with the
+                           amount of detected memory, will be stored at the
+                           start of RDRAM.
+
+                           before starting the stage-1 bootloader, a check for
+                           available memory will be done to ensure the stage-1
+                           bootloader will fit into memory.  it it can't fit,
+                           the boot process will halt.
+
+                           once all checks pass, a small stack will be created
+                           after the bootloader struct, and the stage-1
+                           bootloader will be loaded via RSP DMA into RDRAM.
+                           the stage-0 bootloader will now jump to the start of
+                           the stage-1 bootloader, which is where the start
+                           function resides.
+
+   5. stage-1 bootloader - this is the main bootloader.  at this point, we have
+                           all of the console's resources available, so we can
+                           initialize graphics, poll controller input, and do
+                           many other fancy things previously not possible.
+
+                           this will provide diagnostics information on-screen,
+                           allow tweaking boot options by the user, and also do
+                           checks on the rest of the boot items to make sure
+                           nothing was corrupted due to a dirty cartridge.
+
+                           once all checks pass and we are ready to load the
+                           kernel, initramfs, and kernel command-line, we will
+                           copy the bootloader struct into RSP DMEM, initialize
+                           the stack into RSP DMEM, and load the stage-2
+                           bootloader into RSP IMEM.  this will allow us to free
+                           the stage-1 bootloader from memory so that no memory
+                           is wasted.  we then jump to RSP IMEM to execute the
+                           stage-2 bootloader.
+
+   6. stage-2 bootloader - this uses RSP DMA to load the kernel, initramfs, and
+                           kernel command-line into RDRAM and nothing else.  all
+                           sanity checks were done by the stage-1 bootloader, so
+                           we can make many assumptions here.
+
+                           once complete, we jump to the kernel start address
+                           and execute the kernel.
+
