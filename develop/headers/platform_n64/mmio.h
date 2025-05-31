@@ -11,6 +11,11 @@
 
 #include "tux64/tux64.h"
 
+#if TUX64_CONFIG_PLATFORM_IS_N64
+/*------------------------------------------------------------------------------*/
+
+#include "tux64/platform_64/pi.h"
+
 struct Tux64PlatformN64MmioRegistersMi {
    Tux64UInt32       mode;
    const Tux64UInt32 version;
@@ -53,11 +58,6 @@ struct Tux64PlatformN64MmioRegistersAi {
    Tux64UInt32       bit_rate;
 };
 
-#define TUX64_PLATFORM_N64_MMIO_REGISTERS_PI_BSD_DOM_COUNT\
-   (2u)
-#define TUX64_PLATFORM_N64_MMIO_REGISTERS_PI_IQUE_ATB_LOWER_COUNT\
-   (192u)
-
 struct Tux64PlatformN64MmioRegistersPiBsdDom {
    Tux64UInt32 lat;
    Tux64UInt32 pwd;
@@ -72,7 +72,7 @@ struct Tux64PlatformN64MmioRegistersPi {
    Tux64UInt32 wr_len;
    Tux64UInt32 status;
    struct Tux64PlatformN64MmioRegistersPiBsdDom
-   bsd_dom [TUX64_PLATFORM_N64_MMIO_REGISTERS_PI_BSD_DOM_COUNT];
+   bsd_dom [TUX64_PLATFORM_N64_PI_BSD_DOM_COUNT];
    Tux64UInt8 __pad_0030 [0x0c];
    Tux64UInt32 ique_atb_upper;
    Tux64UInt8 __pad_0034 [0x04];
@@ -85,7 +85,7 @@ struct Tux64PlatformN64MmioRegistersPi {
    Tux64UInt8 __pad_0064 [0x0c];
    Tux64UInt32 ique_nand_addr;
    Tux64UInt8 __pad_0074 [0x0001048c];
-   Tux64UInt32 ique_atb_lower [TUX64_PLATFORM_N64_MMIO_REGISTERS_PI_IQUE_ATB_LOWER_COUNT];
+   Tux64UInt32 ique_atb_lower [TUX64_PLATFORM_N64_PI_IQUE_ATB_LOWER_COUNT];
 };
 
 struct Tux64PlatformN64MmioRegistersRi {
@@ -108,9 +108,6 @@ struct Tux64PlatformN64MmioRegistersSi {
    Tux64UInt32       pif_ad_rd4b;
    const Tux64UInt32 status;
 };
-
-#if TUX64_CONFIG_PLATFORM_IS_N64
-/*------------------------------------------------------------------------------*/
 
 /* Memory-mapped I/O registers which can be directly accessed.  These will be */
 /* defined and relocated to the correct memory address by the linker. */
