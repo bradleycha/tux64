@@ -119,7 +119,7 @@
       0x00010500u\
    )
 
-/* numer of PI register table entries */
+/* number of PI register table entries */
 #define TUX64_PLATFORM_N64_PI_BSD_DOM_COUNT\
    (2u)
 #define TUX64_PLATFORM_N64_PI_IQUE_ATB_LOWER_COUNT\

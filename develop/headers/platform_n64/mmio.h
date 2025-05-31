@@ -14,7 +14,7 @@
 #if TUX64_CONFIG_PLATFORM_IS_N64
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/platform_64/pi.h"
+#include "tux64/platform_n64/pi.h"
 
 struct Tux64PlatformN64MmioRegistersMi {
    Tux64UInt32       mode;
