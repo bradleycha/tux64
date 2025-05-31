@@ -12,7 +12,7 @@
 
 #include "tux64_boot.h"
 
-struct Tux64PlatformN64BootStage2PayloadItemLengths {
+struct Tux64BootStage2PayloadItemLengths {
    Tux64UInt32 kernel_data;
    Tux64UInt32 kernel_bss;
    Tux64UInt32 initramfs;
@@ -24,14 +24,14 @@ struct Tux64PlatformN64BootStage2PayloadItemLengths {
 /* WARNING: the size of this struct must be defined in stage2/payload.ld in */
 /* order to define the location of .bss afterwards.  if you modify this */
 /* struct, make sure to update its size in stage2/payload.ld! */
-struct Tux64PlatformN64BootStage2Payload {
-   struct Tux64PlatformN64BootStage2PayloadItemLengths item_lengths;
+struct Tux64BootStage2Payload {
+   struct Tux64BootStage2PayloadItemLengths item_lengths;
 };
 
 /* this is defined in the linker script, so don't think too much about it. */
 /* we don't need to use volatile here because it's just normal memory only */
 /* being written to/read from a single thread. */
-extern struct Tux64PlatformN64BootStage2Payload
+extern struct Tux64BootStage2Payload
 tux64_boot_stage2_payload
 __attribute__((section(".stage2.payload")));
 
