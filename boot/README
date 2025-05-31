@@ -15,9 +15,11 @@ The following files are created:
    * stage1.bin - The main bootloader binary.  This is what most users will
                   interact with and contains most of the bootloader code.
 
-   * stage1.bin.bss - A big-endian binary integer which stores the length of the
-                      .bss section in the stage-1 binary.  This is used to
-                      allocate space in memory at runtime for .bss variables.
+   * stage1.bin.bss - A text file which contains a hexadecmal string storing the
+                      length of the .bss section for stage1.bin.  This is used
+                      to store the amount of memory to allocate for the stage-1
+                      bootloader.  If this is empty, that means there is no
+                      memory to allocate.
 
    * stage2.bin - The code used to free stage 1 from memory and load the kernel,
                   initramfs, and command-line into main memory and start the
