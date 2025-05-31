@@ -69,20 +69,16 @@ BIN_FILES = \
 	$(stage2_BIN)
 
 $(stage0_BIN) : $(stage0_ELF)
-	$(OBJCOPY) $< --dump-section .rsp_dmem=$@
-	chmod -x $@
+	$(OBJCOPY) $< --dump-section .rsp_dmem=$@ && chmod -x $@
 
 $(stage0_BIN_CIC) : $(stage0_ELF)
-	$(OBJCOPY) $< --dump-section .cic=$@
-	chmod -x $@
+	$(OBJCOPY) $< --dump-section .cic=$@ && chmod -x $@
 
 $(stage1_BIN) : $(stage1_ELF)
-	$(OBJCOPY) $< --dump-section .rdram=$@
-	chmod -x $@
+	$(OBJCOPY) $< --dump-section .rdram=$@ && chmod -x $@
 
 $(stage2_BIN) : $(stage2_ELF)
-	$(OBJCOPY) $< --dump-section .rsp_imem=$@
-	chmod -x $@
+	$(OBJCOPY) $< --dump-section .rsp_imem=$@ && chmod -x $@
 
 all-local : $(BIN_FILES)
 
