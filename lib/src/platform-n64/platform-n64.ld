@@ -7,6 +7,6 @@
 /*    environment.                                                            */
 /*----------------------------------------------------------------------------*/
 
-INCLUDE memory_map.ld
+INCLUDE memory-map.ld
 INCLUDE mmio.ld
 
