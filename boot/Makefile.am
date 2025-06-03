@@ -26,14 +26,16 @@ stage0_SOURCES = \
 stage1_SOURCES = \
 	src/stage1/stage1.c
 stage2_SOURCES = \
-	src/stage2/stage2.c
+	src/stage2/stage2.c \
+	src/stage2/payload.h
+
+noinst_HEADERS = \
+	src/tux64_boot.h
 
 EXTRA_DIST = \
-	src/tux64_boot.h \
 	src/stage0/stage0.ld \
 	src/stage1/stage1.ld \
 	src/stage2/stage2.ld \
-	src/stage2/payload.h \
 	src/stage2/payload.ld
 
 stage0_LDFLAGS = \
