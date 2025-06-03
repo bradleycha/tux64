@@ -2,7 +2,8 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/ldscripts/platform_n64/memory_map.ld - CPU memory map constants.       */
+/* lib/src/platform_n64/memory_map.ld - CPU memory map linker script          */
+/*    constants.                                                              */
 /*----------------------------------------------------------------------------*/
 
 /* MMU address segments which change how virtual addresses are mapped to */
