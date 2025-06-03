@@ -31,8 +31,10 @@ libtux64_platform_n64_include_HEADERS = \
 	src/platform_n64/rom.h \
 	src/platform_n64/boot.h
 
-# TODO: don't strip the 'platform_n64' part
-dist_pkgdata_DATA = \
+ldscripts_pkgdatadir = $(pkgdatadir)/ldscripts
+platform_n64_ldscripts_pkgdatadir = $(ldscripts_pkgdatadir)/platform_n64
+
+dist_platform_n64_ldscripts_pkgdata_DATA = \
 	src/platform_n64/platform_n64.ld \
 	src/platform_n64/memory_map.ld \
 	src/platform_n64/mmio.ld
