@@ -15,8 +15,11 @@ AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_MACRO_DIRS([configdir/m4])
 
 AC_PROG_CC
+AM_PROG_AR
+LT_INIT
 
 AC_OUTPUT
 
