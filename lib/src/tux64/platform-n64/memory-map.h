@@ -9,7 +9,7 @@
 #define _TUX64_PLATFORM_N64_MEMORY_MAP_H
 /*----------------------------------------------------------------------------*/
 
-#include "tux64.h"
+#include "tux64/tux64.h"
 
 /* MMU address segments which change how virtual addresses are mapped to */
 /* physical addresses. */

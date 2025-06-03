@@ -10,7 +10,7 @@
 #define _TUX64_PLATFORM_N64_BOOT_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64.h"
+#include "tux64/tux64.h"
 
 /* stores the lengths of the various boot items */
 struct Tux64PlatformN64BootItemLengths {

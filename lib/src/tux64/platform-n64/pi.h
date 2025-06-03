@@ -9,8 +9,8 @@
 #define _TUX64_PLATFORM_N64_PI_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64.h"
-#include "platform_n64/memory_map.h"
+#include "tux64/tux64.h"
+#include "tux64/platform-n64/memory-map.h"
 
 /* addresses of PI registers */
 #define TUX64_PLATFORM_N64_PI_ADDRESS_DRAM_ADDR\

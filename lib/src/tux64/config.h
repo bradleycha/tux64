@@ -9,7 +9,7 @@
 #define _TUX64_CONFIG_H
 /*------------------------------------------------------------------------------*/
 
-#include "types.h"
+#include "tux64/types.h"
 
 /* these are a list of global macros used to configure the Tux64 headers. */
 /* these should be defined before including tux64.h so that we can detect if */

@@ -7,7 +7,7 @@
 
 AC_INIT([tux64], 0.1.0+setup, [bradleycha@proton.me])
 
-AC_CONFIG_SRCDIR([src/tux64.h])
+AC_CONFIG_SRCDIR([src/tux64/tux64.h])
 AC_CONFIG_AUX_DIR([configdir])
 AC_CONFIG_HEADERS([configdir/config.h])
 

@@ -9,12 +9,12 @@
 #define _TUX64_PLATFORM_N64_MMIO_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64.h"
+#include "tux64/tux64.h"
 
 #if TUX64_CONFIG_PLATFORM_IS_N64
 /*------------------------------------------------------------------------------*/
 
-#include "platform_n64/pi.h"
+#include "tux64/platform-n64/pi.h"
 
 struct Tux64PlatformN64MmioRegistersMi {
    Tux64UInt32       mode;

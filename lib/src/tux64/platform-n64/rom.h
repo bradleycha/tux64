@@ -9,7 +9,7 @@
 #define _TUX64_PLATFORM_N64_ROM_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64.h"
+#include "tux64/tux64.h"
 
 #define TUX64_PLATFORM_N64_ROM_HEADER_PI_DOM1_CONFIGURATION_RESERVED_BYTE\
    (0x80u)
