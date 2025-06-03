@@ -31,6 +31,7 @@ libtux64_platform_n64_include_HEADERS = \
 	src/platform_n64/rom.h \
 	src/platform_n64/boot.h
 
+# TODO: don't strip the 'platform_n64' part
 dist_pkgdata_DATA = \
 	src/platform_n64/platform_n64.ld \
 	src/platform_n64/memory_map.ld \

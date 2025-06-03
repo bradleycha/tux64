@@ -5,7 +5,7 @@
 # lib/configure.ac - GNU Autoconf script for tux64-lib.                        #
 #------------------------------------------------------------------------------#
 
-AC_INIT([tux64-lib], 0.1.0+setup, [bradleycha@proton.me])
+AC_INIT([tux64], 0.1.0+setup, [bradleycha@proton.me])
 
 AC_CONFIG_SRCDIR([src/tux64.h])
 AC_CONFIG_AUX_DIR([configdir])
