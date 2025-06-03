@@ -5,7 +5,7 @@
 # boot/Makefile.am - GNU Automake script for the bootloader.			 			 #
 #------------------------------------------------------------------------------#
 
-bin_PROGRAMS = \
+noinst_PROGRAMS = \
 	stage0 \
 	stage1 \
 	stage2
@@ -71,6 +71,9 @@ BIN_FILES = \
 	$(stage1_BIN_BSS) \
 	$(stage2_BIN)
 
+pkgdata_DATA = \
+	$(BIN_FILES)
+
 $(stage0_BIN) : $(stage0_ELF)
 	$(OBJCOPY) $< --dump-section .rsp_dmem=$@ && chmod -x $@
 
@@ -93,6 +96,4 @@ all-local : $(BIN_FILES)
 
 clean-local :
 	rm -f $(BIN_FILES)
-
-# TODO: install .bin files instead of ELF files
 
