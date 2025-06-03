@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64_boot.h - The project-wide header for tux64-boot.            */
+/* boot/src/tux64-boot.h - The project-wide header for tux64-boot.            */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_BOOT_H

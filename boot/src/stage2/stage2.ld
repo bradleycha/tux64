@@ -5,7 +5,7 @@
 /* boot/src/stage2/stage2.ld - Stage-2 bootloader linker script.              */
 /*----------------------------------------------------------------------------*/
 
-INCLUDE tux64/tux64.ld
+INCLUDE tux64/ldscripts/platform-n64/platform-n64.ld
 INCLUDE stage2/payload.ld
 
 SECTIONS

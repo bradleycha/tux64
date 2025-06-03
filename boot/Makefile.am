@@ -30,7 +30,7 @@ stage2_SOURCES = \
 	src/stage2/payload.h
 
 noinst_HEADERS = \
-	src/tux64_boot.h
+	src/tux64-boot.h
 
 EXTRA_DIST = \
 	src/stage0/stage0.ld \

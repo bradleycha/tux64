@@ -5,9 +5,9 @@
 /* boot/src/stage1/stage1.c - Stage-1 bootloader main entrypoint.             */
 /*----------------------------------------------------------------------------*/
 
-#include "tux64_boot.h"
+#include "tux64-boot.h"
 
-#include <tux64/platform_n64/boot.h>
+#include <tux64/platform-n64/boot.h>
 #include "stage2/payload.h"
 
 void
