@@ -2,14 +2,14 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform_n64/rom.h - Cartridge ROM types and constants.    */
+/* lib/headers/platform_n64/rom.h - Cartridge ROM types and constants.        */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_ROM_H
 #define _TUX64_PLATFORM_N64_ROM_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/tux64.h"
+#include "tux64.h"
 
 #define TUX64_PLATFORM_N64_ROM_HEADER_PI_DOM1_CONFIGURATION_RESERVED_BYTE\
    (0x80u)

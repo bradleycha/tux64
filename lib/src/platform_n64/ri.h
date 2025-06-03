@@ -2,15 +2,15 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform_n64/ri.h - RDRAM Interface (RI) header.           */
+/* lib/headers/platform_n64/ri.h - RDRAM Interface (RI) header.               */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_RI_H
 #define _TUX64_PLATFORM_N64_RI_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/tux64.h"
-#include "tux64/platform_n64/memory_map.h"
+#include "tux64.h"
+#include "platform_n64/memory_map.h"
 
 /* addresses of RI registers */
 #define TUX64_PLATFORM_N64_RI_ADDRESS_MODE\

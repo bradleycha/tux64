@@ -2,15 +2,15 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform_n64/vi.h - Video Interface (VI) header.           */
+/* lib/headers/platform_n64/vi.h - Video Interface (VI) header.               */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_VI_H
 #define _TUX64_PLATFORM_N64_VI_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/tux64.h"
-#include "tux64/platform_n64/memory_map.h"
+#include "tux64.h"
+#include "platform_n64/memory_map.h"
 
 /* addresses of VI registers */
 #define TUX64_PLATFORM_N64_VI_ADDRESS_CTRL\

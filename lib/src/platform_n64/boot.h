@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform_n64/boot.h - Common structs and types used by the */
+/* lib/headers/platform_n64/boot.h - Common structs and types used by the     */
 /*    bootloader.                                                             */
 /*----------------------------------------------------------------------------*/
 
@@ -10,7 +10,7 @@
 #define _TUX64_PLATFORM_N64_BOOT_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/tux64.h"
+#include "tux64.h"
 
 /* stores the lengths of the various boot items */
 struct Tux64PlatformN64BootItemLengths {

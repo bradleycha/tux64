@@ -2,19 +2,19 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform_n64/mmio.h - Memory-mapped I/O (MMIO).            */
+/* lib/headers/platform_n64/mmio.h - Memory-mapped I/O (MMIO).                */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_MMIO_H
 #define _TUX64_PLATFORM_N64_MMIO_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/tux64.h"
+#include "tux64.h"
 
 #if TUX64_CONFIG_PLATFORM_IS_N64
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/platform_n64/pi.h"
+#include "platform_n64/pi.h"
 
 struct Tux64PlatformN64MmioRegistersMi {
    Tux64UInt32       mode;

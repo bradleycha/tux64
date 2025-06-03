@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/ldscripts/platform_n64/mmio.ld - Memory-mapped I/O (MMIO) linker   */
+/* lib/ldscripts/platform_n64/mmio.ld - Memory-mapped I/O (MMIO) linker       */
 /*    script to place tux64-develop MMIO structs in the correct location.     */
 /*----------------------------------------------------------------------------*/
 

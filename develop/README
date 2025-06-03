@@ -1,3 +1,0 @@
-tux64-develop contains all the headers, linker scripts, and any other files
-required to build Tux64 programs.  These must be installed before building any
-other Tux64 programs.

@@ -2,14 +2,14 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/config.h - Configuration macros for tux64-develop headers. */
+/* lib/headers/config.h - Configuration macros for tux64-lib headers.         */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_CONFIG_H
 #define _TUX64_CONFIG_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/types.h"
+#include "types.h"
 
 /* these are a list of global macros used to configure the Tux64 headers. */
 /* these should be defined before including tux64.h so that we can detect if */

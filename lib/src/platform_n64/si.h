@@ -2,15 +2,15 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* develop/headers/platform_n64/si.h - Serial Interface (SI) header.          */
+/* lib/headers/platform_n64/si.h - Serial Interface (SI) header.              */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_SI_H
 #define _TUX64_PLATFORM_N64_SI_H
 /*------------------------------------------------------------------------------*/
 
-#include "tux64/tux64.h"
-#include "tux64/platform_n64/memory_map.h"
+#include "tux64.h"
+#include "platform_n64/memory_map.h"
 
 /* addresses of SI registers */
 #define TUX64_PLATFORM_N64_SI_ADDRESS_DRAM_ADDR\

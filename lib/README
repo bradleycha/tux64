@@ -1,0 +1,5 @@
+tux64-lib, also called libtux64, is a library containing shared code used
+across all Tux64 programs.  This code is highly dependent on configuration
+variables, as its designed to run on the build system, bootloader, and Nintendo
+64.  Thus, take care when running the configure command, as a misconfiguration
+can easily lead to lots of breakage and madness.
