@@ -19,7 +19,9 @@ AM_CFLAGS = \
 	-Wpedantic \
 	-Werror
 LDADD = \
-	-L $(top_srcdir)/src
+	-L $(top_srcdir)/src \
+	-L $(datadir) \
+	$(libdir)/libtux64.a
 
 stage0_SOURCES = \
 	src/stage0/stage0.s

@@ -10,7 +10,7 @@
 #define _TUX64_BOOT_STAGE2_PAYLOAD_H
 /*----------------------------------------------------------------------------*/
 
-#include "tux64_boot.h"
+#include "tux64-boot.h"
 
 struct Tux64BootStage2PayloadItemLengths {
    Tux64UInt32 kernel_data;
