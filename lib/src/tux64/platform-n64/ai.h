@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/platform-n64/ai.h - Audio Interface (AI) header.                   */
+/* lib/src/tux64/platform-n64/ai.h - Audio Interface (AI) header.             */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_AI_H

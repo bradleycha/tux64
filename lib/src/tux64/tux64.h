@@ -2,15 +2,15 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/tux64.h - Main global header for Tux64.                            */
+/* lib/src/tux64/tux64.h - Main global header for Tux64.                      */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_H
 #define _TUX64_H
 /*------------------------------------------------------------------------------*/
 
-#include "config.h"
-#include "types.h"
+#include "tux64/config.h"
+#include "tux64/types.h"
 
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_H */

@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/config.h - Configuration macros for tux64-lib headers.             */
+/* lib/src/tux64/config.h - Configuration macros for tux64-lib headers.       */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_CONFIG_H

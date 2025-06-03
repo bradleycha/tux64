@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/types.h - Global primitive types and relevant constants.           */
+/* lib/src/tux64/types.h - Global primitive types and relevant constants.     */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_TYPES_H
