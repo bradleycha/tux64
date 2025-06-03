@@ -2,29 +2,20 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/stage1/stage1.c - Stage-1 bootloader main entrypoint.             */
+/* boot/src/tux64-boot/stage3/stage3.c - Stage-3 bootloader main entrypoint.  */
 /*----------------------------------------------------------------------------*/
 
-#include "tux64-boot.h"
+#include "tux64-boot/tux64-boot.h"
 
-#include <tux64/platform-n64/boot.h>
-#include "stage2/payload.h"
+#include "tux64-boot/stage3/payload.h"
 
 void
-tux64_boot_stage1_start(
-   const struct Tux64PlatformN64BootHeader *,
-   Tux64UInt32
-)
+tux64_boot_stage3_start(void)
 __attribute__((noreturn, section(".start")));
 
 void
-tux64_boot_stage1_start(
-   const struct Tux64PlatformN64BootHeader * boot_header,
-   Tux64UInt32 total_memory
-) {
+tux64_boot_stage3_start(void) {
    /* TODO: implement */
-   (void)boot_header;
-   (void)total_memory;
    for (;;) {}
 }
 

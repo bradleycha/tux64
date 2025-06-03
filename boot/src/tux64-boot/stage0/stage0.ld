@@ -2,24 +2,27 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/stage2/stage2.ld - Stage-2 bootloader linker script.              */
+/* boot/src/tux64-boot/stage0/stage0.ld - Stage-0 bootloader linker script.   */
 /*----------------------------------------------------------------------------*/
 
 INCLUDE tux64/ldscripts/platform-n64/platform-n64.ld
-INCLUDE stage2/payload.ld
 
 SECTIONS
 {
-   /* place the stage-2 code and data into RSP IMEM */
-   .rsp_imem : {
+   /* the stage-0 code binary to load in place of the IPL3 */
+   .rsp_dmem (TUX64_PLATFORM_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x40) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
+   } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+
+   /* store .bss items at the start of RSP IMEM */
+   .rsp_imem : {
+      *(.bss*);
    } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
 
-   /* place the stage-2 uninitialized variables into RSP DMEM after the */
-   /* stage-1 payload */
-   .rsp_dmem.bss (ADDR(.stage2.rsp_dmem.payload) + SIZEOF(.stage2.rsp_dmem.payload)) : {
-      *(.bss*);
-   } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+   /* store CIC data in seperate section to be extracted as binary data */
+   .cic : {
+      KEEP(*(.cic));
+   } =0x00
 }
 

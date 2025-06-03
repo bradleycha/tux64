@@ -4,24 +4,28 @@ intended to be used with tux64-mkrom to create a Nintendo 64 ROM image which can
 boot and run Linux.
 
 The following files are created:
-   
-   * stage0.bin - The code to run in place of the IPL3 and perform basic
-                  hardware initialization required for stage 1.
+
+   * stage0.bin - The code to run in place of the IPL3.  It loads the bootloader
+                  header into memory, does some basic checks, and then loads the
+                  stage-1 bootloader into RSP IMEM.
 
    * stage0.bin.cic - Data placed at the end of RSP DMEM to force the CIC
                       checksum to match the CIC-6102's IPL3 checksum.  This is
                       required in order to boot on real hardware.
 
-   * stage1.bin - The main bootloader binary.  This is what most users will
+   * stage1.bin - This initializes RDRAM and the CPU cache, then proceeds to
+                  load the stage-2 bootloader into cached RDRAM.
+
+   * stage2.bin - The main bootloader binary.  This is what most users will
                   interact with and contains most of the bootloader code.
 
-   * stage1.bin.bss - A text file which contains a hexadecmal string storing the
-                      length of the .bss section for stage1.bin.  This is used
-                      to store the amount of memory to allocate for the stage-1
+   * stage2.bin.bss - A text file which contains a hexadecmal string storing the
+                      length of the .bss section for stage2.bin.  This is used
+                      to store the amount of memory to allocate for the stage-2
                       bootloader.  If this is empty, that means there is no
                       memory to allocate.
 
-   * stage2.bin - The code used to free stage 1 from memory and load the kernel,
+   * stage3.bin - The code used to free stage 2 from memory and load the kernel,
                   initramfs, and command-line into main memory and start the
                   kernel.
 
@@ -64,7 +68,13 @@ power-on to kernel entry:
              RSP DMEM + 64, which is the start of the IPL3, or in this case, the
              stage-0 bootloader.
 
-   4: stage-0 bootloader - this primarily initializes RDRAM, initializes the CPU
+   4: stage-0 bootloader - this reads the bootloader header from cartridge ROM
+                           into RSP IMEM in a temporary buffer, then checks the
+                           magic to make sure it matches.  If it matches, then
+                           the stage-1 bootloader is read into RSP IMEM and
+                           executed.
+
+   5: stage-1 bootloader - this primarily initializes RDRAM, initializes the CPU
                            cache, and detects the amount of free memory.  the
                            bootloader header will be read to determine if the
                            stage-1 bootloader will fit into memory, as well as
@@ -83,7 +93,7 @@ power-on to kernel entry:
                            program counter to RDRAM + 0x1000 to start the
                            stage-1 bootloader.
 
-   5. stage-1 bootloader - this is the main bootloader.  at this point, we have
+   6: stage-2 bootloader - this is the main bootloader.  at this point, we have
                            all of the console's resources available, so we can
                            initialize graphics, poll controller input, and do
                            many other fancy things previously not possible.
@@ -102,7 +112,7 @@ power-on to kernel entry:
                            memory is wasted.  we then jump to RSP IMEM to
                            execute the stage-2 bootloader.
 
-   6. stage-2 bootloader - this uses RSP DMA to load the kernel, initramfs, and
+   7: stage-3 bootloader - this uses RSP DMA to load the kernel, initramfs, and
                            kernel command-line into RDRAM and nothing else.  all
                            sanity checks were done by the stage-1 bootloader, so
                            we can make many assumptions here.

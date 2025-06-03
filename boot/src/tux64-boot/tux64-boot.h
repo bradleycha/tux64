@@ -2,18 +2,16 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/stage2/payload.ld - Stage-2 bootloader payload linker script.     */
+/* boot/src/tux64-boot/tux64-boot.h - The project-wide header for tux64-boot. */
 /*----------------------------------------------------------------------------*/
 
-/* WARNING: the payload's size must be manually maintained. */
-TUX64_BOOT_STAGE2_PAYLOAD_SIZE = 16;
+#ifndef _TUX64_BOOT_H
+#define _TUX64_BOOT_H
+/*----------------------------------------------------------------------------*/
 
-SECTIONS
-{
-   .stage2.rsp_dmem.payload : {
-      tux64_boot_stage2_payload = .;
-      *(.stage2.payload);
-      . += TUX64_BOOT_STAGE2_PAYLOAD_SIZE;
-   } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
-}
+#define TUX64_CONFIG_PLATFORM_IS_N64 1
+#include <tux64/tux64.h>
+
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_BOOT_H */
 
