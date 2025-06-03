@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/platform_n64/memory_map.ld - CPU memory map linker script          */
+/* lib/src/platform-n64/memory-map.ld - CPU memory map linker script          */
 /*    constants.                                                              */
 /*----------------------------------------------------------------------------*/
 

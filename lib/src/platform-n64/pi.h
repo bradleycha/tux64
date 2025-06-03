@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/headers/platform_n64/pi.h - Peripheral Interface (PI) header.          */
+/* lib/src/platform-n64/pi.h - Peripheral Interface (PI) header.              */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_PI_H

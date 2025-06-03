@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/headers/platform_n64/boot.h - Common structs and types used by the     */
+/* lib/src/platform-n64/boot.h - Common structs and types used by the         */
 /*    bootloader.                                                             */
 /*----------------------------------------------------------------------------*/
 

@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/headers/platform_n64/mmio.h - Memory-mapped I/O (MMIO).                */
+/* lib/src/platform-n64/mmio.h - Memory-mapped I/O (MMIO).                    */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_MMIO_H

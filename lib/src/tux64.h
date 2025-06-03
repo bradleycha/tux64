@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/headers/tux64.h - Main global header for Tux64.                        */
+/* lib/src/tux64.h - Main global header for Tux64.                            */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_H

@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/headers/platform_n64/rom.h - Cartridge ROM types and constants.        */
+/* lib/src/platform-n64/rom.h - Cartridge ROM types and constants.            */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_ROM_H

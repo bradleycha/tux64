@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/headers/platform_n64/vi.h - Video Interface (VI) header.               */
+/* lib/src/platform-n64/vi.h - Video Interface (VI) header.                   */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_N64_VI_H
