@@ -7,6 +7,6 @@
 /*    environment.                                                            */
 /*----------------------------------------------------------------------------*/
 
-INCLUDE memory-map.ld
-INCLUDE mmio.ld
+INCLUDE tux64/ldscripts/platform-n64/memory-map.ld
+INCLUDE tux64/ldscripts/platform-n64/mmio.ld
 
