@@ -15,7 +15,7 @@
 /* i tried using AC_C_BIGENDIAN, but it fails to detect endianess for mips64 */
 #ifndef TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG
 #ifndef __BYTE_ORDER__
-#error unable to detect the target platform CPU's endianess.  try manually defining TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG if all else fails.
+#error "unable to detect the target platform CPU's endianess.  try manually defining TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG if all else fails."
 #endif /* __BYTE_ORDER__ */
 #define TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG\
    (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
