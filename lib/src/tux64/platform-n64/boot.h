@@ -18,9 +18,10 @@ struct Tux64PlatformN64BootItemLengths {
    Tux64UInt32 kernel_bss;
    Tux64UInt32 initramfs;
    Tux64UInt16 command_line;
-   Tux64UInt16 bootloader_stage2;
-   Tux64UInt32 bootloader_stage1_data;
-   Tux64UInt32 bootloader_stage1_bss;
+   Tux64UInt16 bootloader_stage1;
+   Tux64UInt32 bootloader_stage2_data;
+   Tux64UInt32 bootloader_stage2_bss;
+   Tux64UInt16 bootloader_stage3;
 };
 
 struct Tux64PlatformN64BootVersion {
