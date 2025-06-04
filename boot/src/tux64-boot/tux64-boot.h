@@ -9,8 +9,11 @@
 #define _TUX64_BOOT_H
 /*----------------------------------------------------------------------------*/
 
-#define TUX64_CONFIG_PLATFORM_IS_N64 1
 #include <tux64/tux64.h>
+
+#if !TUX64_CONFIG_PLATFORM_N64
+#error tux64-lib has TUX64_CONFIG_PLATFORM_N64 disabled.  please rebuild tux64-lib with --enable-platform-n64.
+#endif /* !TUX64_CONFIG_PLATFORM_N64 */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_H */
