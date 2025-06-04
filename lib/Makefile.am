@@ -23,10 +23,11 @@ libtux64_la_SOURCES =
 libtux64_includedir = $(pkgincludedir)
 libtux64_platform_n64_includedir = $(libtux64_includedir)/platform-n64
 
+nodist_libtux64_include_HEADERS = \
+	$(top_builddir)/configdir/tux64/config.h
 libtux64_include_HEADERS = \
 	src/tux64/tux64.h \
-	src/tux64/types.h \
-	src/tux64/config.h
+	src/tux64/types.h
 libtux64_platform_n64_include_HEADERS = \
 	src/tux64/platform-n64/memory-map.h \
 	src/tux64/platform-n64/mmio.h \
