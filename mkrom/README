@@ -1,0 +1,5 @@
+tux64-mkrom is a command-line tool used to create a bootable Nintendo 64 ROM
+image which contains a bootloader, kernel, initramfs, and root filesystem.  This
+ROM image can then either be used in emulators, flash carts, or flashed directly
+to a ROM chip and run on real hardware.  For more information, run tux64-mkrom
+without any arguments to display the help menu.
