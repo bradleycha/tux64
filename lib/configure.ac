@@ -31,6 +31,7 @@ AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
+AC_CHECK_SIZEOF([void *])
 
 AC_CHECK_HEADER([stdint.h])
 

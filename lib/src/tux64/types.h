@@ -145,6 +145,30 @@
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_HAVE_STDINT_H */
 
+#ifndef _TUX64_TYPES_INTPTR
+#if TUX64_SIZEOF_VOID_P == 1
+#define _TUX64_TYPES_INTPTR _TUX64_TYPES_INT8
+#endif /* TUX64_SIZEOF_VOID_P == 1 */
+#endif /* _TUX64_TYPES_INTPTR */
+#ifndef _TUX64_TYPES_INTPTR
+#if TUX64_SIZEOF_VOID_P == 2
+#define _TUX64_TYPES_INTPTR _TUX64_TYPES_INT16
+#endif /* TUX64_SIZEOF_VOID_P == 2 */
+#endif /* _TUX64_TYPES_INTPTR */
+#ifndef _TUX64_TYPES_INTPTR
+#if TUX64_SIZEOF_VOID_P == 4
+#define _TUX64_TYPES_INTPTR _TUX64_TYPES_INT32
+#endif /* TUX64_SIZEOF_VOID_P == 4 */
+#endif /* _TUX64_TYPES_INTPTR */
+#ifndef _TUX64_TYPES_INTPTR
+#if TUX64_SIZEOF_VOID_P == 8
+#define _TUX64_TYPES_INTPTR _TUX64_TYPES_INT64
+#endif /* TUX64_SIZEOF_VOID_P == 8 */
+#endif /* _TUX64_TYPES_INTPTR */
+
+#define _TUX64_TYPES_UINTPTR unsigned _TUX64_TYPES_INTPTR
+#define _TUX64_TYPES_SINTPTR signed _TUX64_TYPES_INTPTR
+
 #ifndef _TUX64_TYPES_FLOAT32
 #if TUX64_SIZEOF_FLOAT == 4
 #define _TUX64_TYPES_FLOAT32 float
@@ -167,16 +191,18 @@
 #endif /* TUX64_SIZEOF_DOUBLE == 8 */
 #endif /* _TUX64_TYPES_FLOAT64 */
 
-typedef  _TUX64_TYPES_UINT8   Tux64UInt8;
-typedef  _TUX64_TYPES_UINT16  Tux64UInt16;
-typedef  _TUX64_TYPES_UINT32  Tux64UInt32;
-typedef  _TUX64_TYPES_UINT64  Tux64UInt64;
-typedef  _TUX64_TYPES_SINT8   Tux64SInt8;
-typedef  _TUX64_TYPES_SINT16  Tux64SInt16;
-typedef  _TUX64_TYPES_SINT32  Tux64SInt32;
-typedef  _TUX64_TYPES_SINT64  Tux64SInt64;
-typedef  _TUX64_TYPES_FLOAT32 Tux64Float32;
-typedef  _TUX64_TYPES_FLOAT64 Tux64Float64;
+typedef _TUX64_TYPES_UINT8    Tux64UInt8;
+typedef _TUX64_TYPES_UINT16   Tux64UInt16;
+typedef _TUX64_TYPES_UINT32   Tux64UInt32;
+typedef _TUX64_TYPES_UINT64   Tux64UInt64;
+typedef _TUX64_TYPES_UINTPTR  Tux64UIntPtr;
+typedef _TUX64_TYPES_SINT8    Tux64SInt8;
+typedef _TUX64_TYPES_SINT16   Tux64SInt16;
+typedef _TUX64_TYPES_SINT32   Tux64SInt32;
+typedef _TUX64_TYPES_SINT64   Tux64SInt64;
+typedef _TUX64_TYPES_SINTPTR  Tux64SIntPtr;
+typedef _TUX64_TYPES_FLOAT32  Tux64Float32;
+typedef _TUX64_TYPES_FLOAT64  Tux64Float64;
 
 union Tux64Int8 {
    Tux64UInt8 uint;
@@ -197,6 +223,11 @@ union Tux64Int64 {
    Tux64UInt64 uint;
    Tux64SInt64 sint;
    Tux64UInt8 bytes [sizeof(Tux64UInt64)];
+};
+union Tux64IntPtr {
+   Tux64UIntPtr uint;
+   Tux64SIntPtr sint;
+   Tux64UInt8 bytes [sizeof(Tux64UIntPtr)];
 };
 
 typedef Tux64UInt8 Tux64Boolean;
