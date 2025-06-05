@@ -28,14 +28,14 @@ enum Tux64EndianFormat {
 /*----------------------------------------------------------------------------*/
 void
 tux64_endian_convert_inplace(
-   Tux64UInt8 data [],
+   Tux64UInt8 * restrict data,
    Tux64UInt32 bytes,
    enum Tux64EndianFormat format
 );
 void
 tux64_endian_convert_copy(
-   const Tux64UInt8 data [],
-   Tux64UInt8 output [],
+   Tux64UInt8 * restrict output,
+   const Tux64UInt8 * restrict data,
    Tux64UInt32 bytes,
    enum Tux64EndianFormat format
 );

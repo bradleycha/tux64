@@ -8,13 +8,15 @@
 #include "tux64/tux64.h"
 #include "tux64/endian.h"
 
+#include "tux64/memory.h"
+
 static void
 tux64_endian_swap_inplace(
-   Tux64UInt8 data [],
+   Tux64UInt8 * restrict data,
    Tux64UInt32 bytes
 ) {
-   Tux64UInt8 * iter_start;
-   Tux64UInt8 * iter_end;
+   Tux64UInt8 * restrict iter_start;
+   Tux64UInt8 * restrict iter_end;
    Tux64UInt8 temp;
 
    iter_start = data;
@@ -33,12 +35,12 @@ tux64_endian_swap_inplace(
 
 static void
 tux64_endian_swap_copy(
-   const Tux64UInt8 data [],
-   Tux64UInt8 output [],
+   Tux64UInt8 * restrict output,
+   const Tux64UInt8 * restrict data,
    Tux64UInt32 bytes
 ) {
-   const Tux64UInt8 * iter_data;
-   Tux64UInt8 * iter_output;
+   const Tux64UInt8 * restrict iter_data;
+   Tux64UInt8 * restrict iter_output;
 
    iter_data = data;
    iter_output = output + bytes - 1u;
@@ -55,7 +57,7 @@ tux64_endian_swap_copy(
 
 void
 tux64_endian_convert_inplace(
-   Tux64UInt8 data [],
+   Tux64UInt8 * restrict data,
    Tux64UInt32 bytes,
    enum Tux64EndianFormat format
 ) {
@@ -69,16 +71,17 @@ tux64_endian_convert_inplace(
 
 void
 tux64_endian_convert_copy(
-   const Tux64UInt8 data [],
-   Tux64UInt8 output [],
+   Tux64UInt8 * restrict output,
+   const Tux64UInt8 * restrict data,
    Tux64UInt32 bytes,
    enum Tux64EndianFormat format
 ) {
    if (format == TUX64_ENDIAN_FORMAT_NATIVE) {
+      tux64_memory_copy(output, data, bytes);
       return;
    }
 
-   tux64_endian_swap_copy(data, output, bytes);
+   tux64_endian_swap_copy(output, data, bytes);
    return;
 }
 
