@@ -205,5 +205,30 @@ typedef Tux64UInt8 Tux64Boolean;
 #define TUX64_BOOLEAN_TRUE    ((Tux64Boolean)(!(0u)))
 
 /*----------------------------------------------------------------------------*/
+/* Defines a typed literal.  Do not use this with variables or constants      */
+/* which can't be evaluated at compile-time.                                  */
+/*----------------------------------------------------------------------------*/
+#define TUX64_LITERAL_UINT8(value)\
+   ((Tux64UInt8)(value))
+#define TUX64_LITERAL_UINT16(value)\
+   ((Tux64UInt16)(value))
+#define TUX64_LITERAL_UINT32(value)\
+   ((Tux64UInt32)(value))
+#define TUX64_LITERAL_UINT64(value)\
+   ((Tux64UInt64)(value))
+#define TUX64_LITERAL_SINT8(value)\
+   ((Tux64SInt8)(value))
+#define TUX64_LITERAL_SINT16(value)\
+   ((Tux64SInt16)(value))
+#define TUX64_LITERAL_SINT32(value)\
+   ((Tux64SInt32)(value))
+#define TUX64_LITERAL_SINT64(value)\
+   ((Tux64SInt64)(value))
+#define TUX64_LITERAL_FLOAT32(value)\
+   ((Tux64Float32)(value))
+#define TUX64_LITERAL_FLOAT64(value)\
+   ((Tux64Float64)(value))
+
+/*----------------------------------------------------------------------------*/
 #endif /* _TUX64_TYPES_H */
 
