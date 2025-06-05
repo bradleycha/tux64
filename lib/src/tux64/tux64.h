@@ -23,6 +23,11 @@
 
 #include "tux64/types.h"
 
+#define TUX64_NULLPTR_SENTINEL\
+   (0u)
+#define TUX64_NULLPTR\
+   ((void *)(TUX64_NULLPTR_SENTINEL))
+
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
 
