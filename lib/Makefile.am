@@ -19,7 +19,8 @@ libtux64_la_CFLAGS = \
 	-Werror
 
 libtux64_la_SOURCES = \
-	src/tux64/bitwise.c
+	src/tux64/bitwise.c \
+	src/tux64/endian.c
 
 libtux64_includedir = $(pkgincludedir)
 libtux64_platform_n64_includedir = $(libtux64_includedir)/platform-n64
@@ -29,7 +30,8 @@ nodist_libtux64_include_HEADERS = \
 libtux64_include_HEADERS = \
 	src/tux64/tux64.h \
 	src/tux64/types.h \
-	src/tux64/bitwise.h
+	src/tux64/bitwise.h \
+	src/tux64/endian.h
 libtux64_platform_n64_include_HEADERS = \
 	src/tux64/platform-n64/memory-map.h \
 	src/tux64/platform-n64/mmio.h \
