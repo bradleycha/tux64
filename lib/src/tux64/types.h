@@ -27,6 +27,35 @@
 #define _TUX64_TYPES_SINT32   int32_t
 #define _TUX64_TYPES_SINT64   int64_t
 
+#ifndef _TUX64_TYPES_INTPTR_DEFINED
+#if TUX64_SIZEOF_VOID_P == 1
+#define _TUX64_TYPES_UINTPTR _TUX64_TYPES_UINT8
+#define _TUX64_TYPES_SINTPTR _TUX64_TYPES_SINT8
+#define _TUX64_TYPES_INTPTR_DEFINED
+#endif /* TUX64_SIZEOF_VOID_P == 1 */
+#endif /* _TUX64_TYPES_INTPTR_DEFINED */
+#ifndef _TUX64_TYPES_INTPTR_DEFINED
+#if TUX64_SIZEOF_VOID_P == 2
+#define _TUX64_TYPES_UINTPTR _TUX64_TYPES_UINT16
+#define _TUX64_TYPES_SINTPTR _TUX64_TYPES_SINT16
+#define _TUX64_TYPES_INTPTR_DEFINED
+#endif /* TUX64_SIZEOF_VOID_P == 2 */
+#endif /* _TUX64_TYPES_INTPTR_DEFINED */
+#ifndef _TUX64_TYPES_INTPTR_DEFINED
+#if TUX64_SIZEOF_VOID_P == 4
+#define _TUX64_TYPES_UINTPTR _TUX64_TYPES_UINT32
+#define _TUX64_TYPES_SINTPTR _TUX64_TYPES_SINT32
+#define _TUX64_TYPES_INTPTR_DEFINED
+#endif /* TUX64_SIZEOF_VOID_P == 4 */
+#endif /* _TUX64_TYPES_INTPTR_DEFINED */
+#ifndef _TUX64_TYPES_INTPTR_DEFINED
+#if TUX64_SIZEOF_VOID_P == 8
+#define _TUX64_TYPES_UINTPTR _TUX64_TYPES_UINT64
+#define _TUX64_TYPES_SINTPTR _TUX64_TYPES_SINT64
+#define _TUX64_TYPES_INTPTR_DEFINED
+#endif /* TUX64_SIZEOF_VOID_P == 8 */
+#endif /* _TUX64_TYPES_INTPTR_DEFINED */
+
 /*----------------------------------------------------------------------------*/
 #else /* TUX64_HAVE_STDINT_H */
 /*----------------------------------------------------------------------------*/
@@ -134,17 +163,6 @@
 #endif /* TUX64_SIZEOF_LONG_LONG == 8 */
 #endif /* _TUX64_TYPES_INT64 */
 
-#define _TUX64_TYPES_UINT8    unsigned _TUX64_TYPES_INT8
-#define _TUX64_TYPES_UINT16   unsigned _TUX64_TYPES_INT16
-#define _TUX64_TYPES_UINT32   unsigned _TUX64_TYPES_INT32
-#define _TUX64_TYPES_UINT64   unsigned _TUX64_TYPES_INT64
-#define _TUX64_TYPES_SINT8    signed   _TUX64_TYPES_INT8
-#define _TUX64_TYPES_SINT16   signed   _TUX64_TYPES_INT16
-#define _TUX64_TYPES_SINT32   signed   _TUX64_TYPES_INT32
-#define _TUX64_TYPES_SINT64   signed   _TUX64_TYPES_INT64
-/*----------------------------------------------------------------------------*/
-#endif /* TUX64_HAVE_STDINT_H */
-
 #ifndef _TUX64_TYPES_INTPTR
 #if TUX64_SIZEOF_VOID_P == 1
 #define _TUX64_TYPES_INTPTR _TUX64_TYPES_INT8
@@ -166,8 +184,19 @@
 #endif /* TUX64_SIZEOF_VOID_P == 8 */
 #endif /* _TUX64_TYPES_INTPTR */
 
-#define _TUX64_TYPES_UINTPTR unsigned _TUX64_TYPES_INTPTR
-#define _TUX64_TYPES_SINTPTR signed _TUX64_TYPES_INTPTR
+
+#define _TUX64_TYPES_UINT8    unsigned _TUX64_TYPES_INT8
+#define _TUX64_TYPES_UINT16   unsigned _TUX64_TYPES_INT16
+#define _TUX64_TYPES_UINT32   unsigned _TUX64_TYPES_INT32
+#define _TUX64_TYPES_UINT64   unsigned _TUX64_TYPES_INT64
+#define _TUX64_TYPES_SINT8    signed   _TUX64_TYPES_INT8
+#define _TUX64_TYPES_SINT16   signed   _TUX64_TYPES_INT16
+#define _TUX64_TYPES_SINT32   signed   _TUX64_TYPES_INT32
+#define _TUX64_TYPES_SINT64   signed   _TUX64_TYPES_INT64
+#define _TUX64_TYPES_UINTPTR  unsigned _TUX64_TYPES_INTPTR
+#define _TUX64_TYPES_SINTPTR  signed   _TUX64_TYPES_INTPTR
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_HAVE_STDINT_H */
 
 #ifndef _TUX64_TYPES_FLOAT32
 #if TUX64_SIZEOF_FLOAT == 4
@@ -259,6 +288,70 @@ typedef Tux64UInt8 Tux64Boolean;
    ((Tux64Float32)(value))
 #define TUX64_LITERAL_FLOAT64(value)\
    ((Tux64Float64)(value))
+
+/*----------------------------------------------------------------------------*/
+/* Untyped integer limits.  These should only be used in preprocessor         */
+/* statements.                                                                */
+/*----------------------------------------------------------------------------*/
+#define TUX64_UINT8_MAX_LITERAL  (0xffu)
+#define TUX64_UINT16_MAX_LITERAL (0xffffu)
+#define TUX64_UINT32_MAX_LITERAL (0xffffffffu)
+#define TUX64_UINT64_MAX_LITERAL (0xffffffffffffffffllu)
+#define TUX64_UINT8_MIN_LITERAL  (0x00u)
+#define TUX64_UINT16_MIN_LITERAL (0x0000u)
+#define TUX64_UINT32_MIN_LITERAL (0x00000000u)
+#define TUX64_UINT64_MIN_LITERAL (0x0000000000000000llu)
+#if TUX64_CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_SIGN_MAGNITUDE
+#define TUX64_SINT8_MAX_LITERAL  (0x7f)
+#define TUX64_SINT16_MAX_LITERAL (0x7fff)
+#define TUX64_SINT32_MAX_LITERAL (0x7fffffff)
+#define TUX64_SINT64_MAX_LITERAL (0x7fffffffffffffffll)
+#define TUX64_SINT8_MIN_LITERAL  (-0x7f)
+#define TUX64_SINT16_MIN_LITERAL (-0x7fff)
+#define TUX64_SINT32_MIN_LITERAL (-0x7fffffff)
+#define TUX64_SINT64_MIN_LITERAL (-0x7fffffffffffffffll)
+#endif /* TUX64_CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_SIGN_MAGNITUDE */
+#if TUX64_CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_ONES_COMPLEMENT
+#define TUX64_SINT8_MAX_LITERAL  (0x7f)
+#define TUX64_SINT16_MAX_LITERAL (0x7fff)
+#define TUX64_SINT32_MAX_LITERAL (0x7fffffff)
+#define TUX64_SINT64_MAX_LITERAL (0x7fffffffffffffffll)
+#define TUX64_SINT8_MIN_LITERAL  (-0x7f)
+#define TUX64_SINT16_MIN_LITERAL (-0x7fff)
+#define TUX64_SINT32_MIN_LITERAL (-0x7fffffff)
+#define TUX64_SINT64_MIN_LITERAL (-0x7fffffffffffffffll)
+#endif /* TUX64_CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_ONES_COMPLEMENT */
+#if TUX64_CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_TWOS_COMPLEMENT
+#define TUX64_SINT8_MAX_LITERAL  (0x7f)
+#define TUX64_SINT16_MAX_LITERAL (0x7fff)
+#define TUX64_SINT32_MAX_LITERAL (0x7fffffff)
+#define TUX64_SINT64_MAX_LITERAL (0x7fffffffffffffffll)
+#define TUX64_SINT8_MIN_LITERAL  (-0x80)
+#define TUX64_SINT16_MIN_LITERAL (-0x8000)
+#define TUX64_SINT32_MIN_LITERAL (-0x80000000)
+#define TUX64_SINT64_MIN_LITERAL (-0x8000000000000000ll)
+#endif /* TUX64_CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_TWOS_COMPLEMENT */
+
+/*----------------------------------------------------------------------------*/
+/* Typed integer limits.  These should be used everywhere except for          */
+/* preprocessor statements.                                                   */
+/*----------------------------------------------------------------------------*/
+#define TUX64_UINT8_MAX    TUX64_LITERAL_UINT8(TUX64_UINT8_MAX_LITERAL)
+#define TUX64_UINT16_MAX   TUX64_LITERAL_UINT16(TUX64_UINT16_MAX_LITERAL)
+#define TUX64_UINT32_MAX   TUX64_LITERAL_UINT32(TUX64_UINT32_MAX_LITERAL)
+#define TUX64_UINT64_MAX   TUX64_LITERAL_UINT64(TUX64_UINT64_MAX_LITERAL)
+#define TUX64_UINT8_MIN    TUX64_LITERAL_UINT8(TUX64_UINT8_MIN_LITERAL)
+#define TUX64_UINT16_MIN   TUX64_LITERAL_UINT16(TUX64_UINT16_MIN_LITERAL)
+#define TUX64_UINT32_MIN   TUX64_LITERAL_UINT32(TUX64_UINT32_MIN_LITERAL)
+#define TUX64_UINT64_MIN   TUX64_LITERAL_UINT64(TUX64_UINT64_MIN_LITERAL)
+#define TUX64_SINT8_MAX    TUX64_LITERAL_SINT8(TUX64_SINT8_MAX_LITERAL)
+#define TUX64_SINT16_MAX   TUX64_LITERAL_SINT16(TUX64_SINT16_MAX_LITERAL)
+#define TUX64_SINT32_MAX   TUX64_LITERAL_SINT32(TUX64_SINT32_MAX_LITERAL)
+#define TUX64_SINT64_MAX   TUX64_LITERAL_SINT64(TUX64_SINT64_MAX_LITERAL)
+#define TUX64_SINT8_MIN    TUX64_LITERAL_SINT8(TUX64_SINT8_MIN_LITERAL)
+#define TUX64_SINT16_MIN   TUX64_LITERAL_SINT16(TUX64_SINT16_MIN_LITERAL)
+#define TUX64_SINT32_MIN   TUX64_LITERAL_SINT32(TUX64_SINT32_MIN_LITERAL)
+#define TUX64_SINT64_MIN   TUX64_LITERAL_SINT64(TUX64_SINT64_MIN_LITERAL)
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_TYPES_H */
