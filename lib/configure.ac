@@ -34,14 +34,44 @@ AC_CHECK_SIZEOF([double])
 
 AC_CHECK_HEADER([stdint.h])
 
+tux64_config_platform_cpu_signed_integer_format_sign_magnitude=0
+tux64_config_platform_cpu_signed_integer_format_ones_complement=0
+tux64_config_platform_cpu_signed_integer_format_twos_complement=1
 tux64_config_platform_n64=0
 
+AC_ARG_ENABLE([platform-cpu-signed-integer-format-sign-magnitude],
+   AS_HELP_STRING([--enable-platform-cpu-signed-integer-format-sign-magnitude], [Assume the platform CPU's signed integer format is sign-magnitude]),
+   [tux64_config_platform_cpu_signed_integer_format_sign_magnitude=1],
+   [tux64_config_platform_cpu_signed_integer_format_sign_magnitude=0]
+)
+AC_ARG_ENABLE([platform-cpu-signed-integer-format-ones-complement],
+   AS_HELP_STRING([--enable-platform-cpu-signed-integer-format-ones-complement], [Assume the platform CPU's signed integer format is one's complement]),
+   [tux64_config_platform_cpu_signed_integer_format_ones_complement=1],
+   [tux64_config_platform_cpu_signed_integer_format_ones_complement=0]
+)
+AC_ARG_ENABLE([platform-cpu-signed-integer-format-twos-complement],
+   AS_HELP_STRING([--enable-platform-cpu-signed-integer-format-twos-complement], [Assume the platform CPU's signed integer format is two's complement]),
+   [tux64_config_platform_cpu_signed_integer_format_twos_complement=1],
+   [tux64_config_platform_cpu_signed_integer_format_twos_complement=0]
+)
 AC_ARG_ENABLE([platform-n64],
    AS_HELP_STRING([--enable-platform-n64], [Enable N64-specific features]),
    [tux64_config_platform_n64=1],
    [tux64_config_platform_n64=0]
 )
 
+AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_SIGN_MAGNITUDE],
+   [$tux64_config_platform_cpu_signed_integer_format_sign_magnitude],
+   [Assume the platform CPU's signed integer format is sign-magnitude]
+)
+AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_ONES_COMPLEMENT],
+   [$tux64_config_platform_cpu_signed_integer_format_ones_complement],
+   [Assume the platform CPU's signed integer format is one's complement]
+)
+AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_TWOS_COMPLEMENT],
+   [$tux64_config_platform_cpu_signed_integer_format_twos_complement],
+   [Assume the platform CPU's signed integer format is two's complement]
+)
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_N64],
    [$tux64_config_platform_n64],
    [Enable N64-specific features]
