@@ -19,7 +19,7 @@ AC_CONFIG_FILES([Makefile])
 AC_PROG_CC
 
 AC_CHECK_HEADER([tux64/tux64.h])
-AC_CHECK_HEADER([argp.h])
+
 AX_PREFIX_CONFIG_H(configdir/tux64-mkrom/config.h)
 
 AC_OUTPUT

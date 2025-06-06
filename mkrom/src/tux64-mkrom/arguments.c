@@ -8,8 +8,6 @@
 #include "tux64-mkrom/tux64-mkrom.h"
 #include "tux64-mkrom/arguments.h"
 
-#include <argp.h>
-
 struct Tux64MkromArgumentsParseResult
 tux64_mkrom_arguments_parse(
    int argc,
