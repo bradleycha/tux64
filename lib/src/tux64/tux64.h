@@ -28,6 +28,11 @@
 #define TUX64_NULLPTR\
    ((void *)(TUX64_NULLPTR_SENTINEL))
 
+#define TUX64_HALT\
+   {for (;;) {}}
+#define TUX64_UNREACHABLE\
+   __builtin_unreachable()
+
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
 
