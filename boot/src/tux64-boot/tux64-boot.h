@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include <tux64/tux64.h>
+#include "tux64-boot/config.h"
 
 #if !TUX64_CONFIG_PLATFORM_N64
 #error "tux64-lib has TUX64_CONFIG_PLATFORM_N64 disabled.  please rebuild tux64-lib with --enable-platform-n64."
