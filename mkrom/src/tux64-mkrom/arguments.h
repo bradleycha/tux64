@@ -11,16 +11,24 @@
 
 #include "tux64-mkrom/tux64-mkrom.h"
 
-struct Tux64MkromArguments {
-   const char * path_bootloader_stage0;
-   const char * path_bootloader_stage0_cic;
-   const char * path_bootloader_stage1;
-   const char * path_bootloader_stage2;
-   const char * path_bootloader_stage2_bss;
-   const char * path_bootloader_stage3;
-   const char * path_kernel;
+struct Tux64MkromArgumentsBootloader {
+   const char * path_stage0;
+   const char * path_stage0_cic;
+   const char * path_stage1;
+   const char * path_stage2;
+   const char * path_stage2_bss;
+   const char * path_stage3;
+};
+
+struct Tux64MkromArgumentsKernel {
+   const char * path_image;
    const char * path_initramfs;
    const char * command_line;
+};
+
+struct Tux64MkromArguments {
+   struct Tux64MkromArgumentsBootloader bootloader;
+   struct Tux64MkromArgumentsKernel kernel;
 };
 
 enum Tux64MkromArgumentsParseStatus {
