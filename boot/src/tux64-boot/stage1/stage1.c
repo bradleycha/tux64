@@ -14,6 +14,6 @@ __attribute__((noreturn, section(".start")));
 void
 tux64_boot_stage1_start(void) {
    /* TODO: implement */
-   for (;;) {}
+   TUX64_HALT;
 }
 

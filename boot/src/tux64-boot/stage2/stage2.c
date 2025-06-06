@@ -25,6 +25,6 @@ tux64_boot_stage2_start(
    /* TODO: implement */
    (void)boot_header;
    (void)total_memory;
-   for (;;) {}
+   TUX64_HALT;
 }
 
