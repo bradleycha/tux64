@@ -20,5 +20,7 @@ LDADD = \
 
 tux64_mkrom_SOURCES = \
 	src/tux64-mkrom/tux64-mkrom.c \
-	src/tux64-mkrom/tux64-mkrom.h
+	src/tux64-mkrom/tux64-mkrom.h \
+	src/tux64-mkrom/arguments.c \
+	src/tux64-mkrom/arguments.h
 
