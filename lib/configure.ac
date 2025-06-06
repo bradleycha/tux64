@@ -40,6 +40,9 @@ tux64_config_platform_cpu_signed_integer_format_sign_magnitude=0
 tux64_config_platform_cpu_signed_integer_format_ones_complement=0
 tux64_config_platform_cpu_signed_integer_format_twos_complement=1
 tux64_config_platform_n64=0
+tux64_config_log=0
+tux64_config_log_origin=0
+tux64_config_log_ansi=0
 
 AC_ARG_ENABLE([platform-cpu-signed-integer-format-sign-magnitude],
    AS_HELP_STRING([--enable-platform-cpu-signed-integer-format-sign-magnitude], [Assume the platform CPU's signed integer format is sign-magnitude]),
@@ -61,6 +64,21 @@ AC_ARG_ENABLE([platform-n64],
    [tux64_config_platform_n64=1],
    [tux64_config_platform_n64=0]
 )
+AC_ARG_ENABLE([log],
+   AS_HELP_STRING([--enable-log], [Enable logging functions]),
+   [tux64_config_log=1],
+   [tux64_config_log=0]
+)
+AC_ARG_ENABLE([log-origin],
+   AS_HELP_STRING([--enable-log-origin], [Display the location in the source file for each log message]),
+   [tux64_config_log_origin=1],
+   [tux64_config_log_origin=0]
+)
+AC_ARG_ENABLE([log-ansi],
+   AS_HELP_STRING([--enable-log-ansi], [Format log messages using ANSI escape sequences to enable colored text]),
+   [tux64_config_log_ansi=1],
+   [tux64_config_log_ansi=0]
+)
 
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_SIGN_MAGNITUDE],
    [$tux64_config_platform_cpu_signed_integer_format_sign_magnitude],
@@ -77,6 +95,18 @@ AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_TWOS_COMPLEMENT],
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_N64],
    [$tux64_config_platform_n64],
    [Enable N64-specific features]
+)
+AC_DEFINE_UNQUOTED([CONFIG_LOG],
+   [$tux64_config_log],
+   [Enable logging functions]
+)
+AC_DEFINE_UNQUOTED([CONFIG_LOG_ORIGIN],
+   [$tux64_config_log_origin],
+   [Display the location in the source file for each log message]
+)
+AC_DEFINE_UNQUOTED([CONFIG_LOG_ANSI],
+   [$tux64_config_log_ansi],
+   [Format log messages using ANSI escape sequences to enable colored text]
 )
 
 AC_OUTPUT
