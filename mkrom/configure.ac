@@ -17,6 +17,7 @@ AC_CONFIG_FILES([Makefile])
 AC_PROG_CC
 
 AC_CHECK_HEADER([tux64/tux64.h])
+AC_CHECK_HEADER([argp.h])
 
 AC_OUTPUT
 
