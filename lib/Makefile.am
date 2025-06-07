@@ -22,7 +22,8 @@ libtux64_la_SOURCES = \
 	src/tux64/bitwise.c \
 	src/tux64/endian.c \
 	src/tux64/memory.c \
-	src/tux64/log.c
+	src/tux64/log.c \
+	src/tux64/arguments.c
 
 libtux64_includedir = $(pkgincludedir)
 libtux64_platform_n64_includedir = $(libtux64_includedir)/platform-n64
@@ -35,7 +36,8 @@ libtux64_include_HEADERS = \
 	src/tux64/bitwise.h \
 	src/tux64/endian.h \
 	src/tux64/memory.h \
-	src/tux64/log.h
+	src/tux64/log.h \
+	src/tux64/arguments.h
 libtux64_platform_n64_include_HEADERS = \
 	src/tux64/platform-n64/memory-map.h \
 	src/tux64/platform-n64/mmio.h \
