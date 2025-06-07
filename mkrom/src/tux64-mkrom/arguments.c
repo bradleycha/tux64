@@ -14,19 +14,23 @@
 static enum Tux64ArgumentsParseStatus
 tux64_mkrom_arguments_parser_path(
    const char * parameter,
-   const char * * arguments_entry
+   Tux64UInt32 parameter_characters,
+   const char * * arguments_entry,
+   Tux64UInt32 * arguments_entry_characters
 ) {
-   if (parameter == TUX64_NULLPTR) {
+   if (parameter_characters == TUX64_LITERAL_UINT32(0u)) {
       return TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
    }
 
    *arguments_entry = parameter;
+   *arguments_entry_characters = parameter_characters;
    return TUX64_ARGUMENTS_PARSE_STATUS_OK;
 }
 
 static enum Tux64ArgumentsParseStatus
 tux64_mkrom_arguments_parser_config(
    const char * parameter,
+   Tux64UInt32 parameter_characters,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
@@ -35,13 +39,16 @@ tux64_mkrom_arguments_parser_config(
 
    return tux64_mkrom_arguments_parser_path(
       parameter,
-      &arguments->path_config
+      parameter_characters,
+      &arguments->path_config,
+      &arguments->path_config_characters
    );
 }
 
 static enum Tux64ArgumentsParseStatus
 tux64_mkrom_arguments_parser_output(
    const char * parameter,
+   Tux64UInt32 parameter_characters,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
@@ -50,13 +57,16 @@ tux64_mkrom_arguments_parser_output(
 
    return tux64_mkrom_arguments_parser_path(
       parameter,
-      &arguments->path_output
+      parameter_characters,
+      &arguments->path_output,
+      &arguments->path_output_characters
    );
 }
 
 static enum Tux64ArgumentsParseStatus
 tux64_mkrom_arguments_parser_prefix(
    const char * parameter,
+   Tux64UInt32 parameter_characters,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
@@ -65,20 +75,23 @@ tux64_mkrom_arguments_parser_prefix(
 
    return tux64_mkrom_arguments_parser_path(
       parameter,
-      &arguments->path_prefix
+      parameter_characters,
+      &arguments->path_prefix,
+      &arguments->path_prefix_characters
    );
 }
 
 static enum Tux64ArgumentsParseStatus
 tux64_mkrom_arguments_parser_help(
    const char * parameter,
+   Tux64UInt32 parameter_characters,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
 
    arguments = (struct Tux64MkromArguments *)context;
 
-   if (parameter != TUX64_NULLPTR) {
+   if (parameter_characters != TUX64_LITERAL_UINT32(0u)) {
       return TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
    }
 
@@ -91,13 +104,14 @@ tux64_mkrom_arguments_parser_help(
 static enum Tux64ArgumentsParseStatus
 tux64_mkrom_arguments_parser_version(
    const char * parameter,
+   Tux64UInt32 parameter_characters,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
 
    arguments = (struct Tux64MkromArguments *)context;
 
-   if (parameter != TUX64_NULLPTR) {
+   if (parameter_characters != TUX64_LITERAL_UINT32(0u)) {
       return TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
    }
 
