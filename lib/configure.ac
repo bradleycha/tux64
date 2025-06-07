@@ -33,8 +33,7 @@ AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([void *])
 
-AC_CHECK_HEADER([stdint.h])
-AC_CHECK_HEADER([string.h])
+AC_CHECK_HEADERS([stdint.h, string.h, stdio.h, stdarg.h])
 
 tux64_config_platform_cpu_signed_integer_format_sign_magnitude=0
 tux64_config_platform_cpu_signed_integer_format_ones_complement=0
@@ -65,7 +64,7 @@ AC_ARG_ENABLE([platform-n64],
    [tux64_config_platform_n64=0]
 )
 AC_ARG_ENABLE([log],
-   AS_HELP_STRING([--enable-log], [Enable logging functions]),
+   AS_HELP_STRING([--enable-log], [Enable logging functions, requires stdio.h and stdarg.h]),
    [tux64_config_log=1],
    [tux64_config_log=0]
 )
@@ -98,7 +97,7 @@ AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_N64],
 )
 AC_DEFINE_UNQUOTED([CONFIG_LOG],
    [$tux64_config_log],
-   [Enable logging functions]
+   [Enable logging functions, requires stdio.h and stdarg.h]
 )
 AC_DEFINE_UNQUOTED([CONFIG_LOG_ORIGIN],
    [$tux64_config_log_origin],
