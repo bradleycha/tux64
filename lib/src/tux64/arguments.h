@@ -120,6 +120,7 @@ struct Tux64ArgumentsParseResult {
 
 typedef enum Tux64ArgumentsParseStatus (*Tux64ArgumentsParseFunction)(
    const char * parameter,
+   Tux64UInt32 parameter_characters,
    void * context
 );
 
