@@ -9,50 +9,13 @@
 #include "tux64-mkrom/tux64-mkrom.h"
 
 #include "tux64-mkrom/arguments.h"
-#include <stdarg.h>
-#include <stdio.h>
+#include <tux64/log.h>
 
 enum Tux64MkromLogLevel {
    TUX64_MKROM_LOG_LEVEL_INFO,
    TUX64_MKROM_LOG_LEVEL_WARNING,
    TUX64_MKROM_LOG_LEVEL_ERROR
 };
-
-static void
-tux64_mkrom_log(
-   enum Tux64MkromLogLevel level,
-   const char * fmt,
-   ...
-) {
-   FILE * file;
-   const char * prefix;
-   va_list args;
-   va_start(args, fmt);
-
-   switch (level) {
-      case TUX64_MKROM_LOG_LEVEL_INFO:
-         file = stdout;
-         prefix = "info: ";
-         break;
-      case TUX64_MKROM_LOG_LEVEL_WARNING:
-         file = stderr;
-         prefix = "warning: ";
-         break;
-      case TUX64_MKROM_LOG_LEVEL_ERROR:
-         file = stderr;
-         prefix = "error: ";
-         break;
-      default:
-         TUX64_UNREACHABLE;
-   }
-
-   (void)fputs(prefix, file);
-   (void)vfprintf(file, fmt, args);
-   (void)fputs("\n", file);
-
-   va_end(args);
-   return;
-}
 
 enum Tux64MkromExitStatus {
    TUX64_MKROM_EXIT_STATUS_OK = 0u,
@@ -77,14 +40,14 @@ tux64_mkrom_exit_result_display_invalid_arguments_invalid(
    const struct Tux64MkromArgumentsParsePayloadInvalid * self
 ) {
    if (self->parameter == TUX64_NULLPTR) {
-      tux64_mkrom_log(TUX64_MKROM_LOG_LEVEL_ERROR,
+      TUX64_LOG_ERROR_FMT(
          "invalid argument \'%s\'",
          self->argument
       );
       return;
    }
 
-   tux64_mkrom_log(TUX64_MKROM_LOG_LEVEL_ERROR,
+   TUX64_LOG_ERROR_FMT(
       "invalid parameter \'%s\' for argument \'%s\'",
       self->parameter,
       self->argument
@@ -102,9 +65,7 @@ tux64_mkrom_exit_result_display_invalid_arguments(
       case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_EXIT:
          TUX64_UNREACHABLE;
       case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_OUT_OF_MEMORY:
-         tux64_mkrom_log(TUX64_MKROM_LOG_LEVEL_ERROR,
-            "arguments parser ran out of memory"
-         );
+        TUX64_LOG_ERROR("arguments parser ran out of memory");
          break;
       case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_INVALID:
          tux64_mkrom_exit_result_display_invalid_arguments_invalid(&self->info.payload.invalid);
