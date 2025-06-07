@@ -57,7 +57,8 @@ struct Tux64ArgumentsParseResult
 tux64_arguments_parse(
    const struct Tux64ArgumentsList * list,
    struct Tux64ArgumentsIterator * iterator,
-   void * context
+   void * context,
+   Tux64UInt8 * required_storage
 ) {
    struct Tux64ArgumentsParseResult result;
 
@@ -65,6 +66,7 @@ tux64_arguments_parse(
    (void)list;
    (void)iterator;
    (void)context;
+   (void)required_storage;
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
    result.payload.parameter_invalid.name = "fuck-downstream";
    result.payload.parameter_invalid.parameter = "enable";

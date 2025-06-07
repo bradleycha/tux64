@@ -11,6 +11,45 @@
 
 #include "tux64/tux64.h"
 
+#define TUX64_ARGUMENTS_ITERATOR_TYPE_COUNT 1u
+enum Tux64ArgumentsIteratorType {
+   TUX64_ARGUMENTS_ITERATOR_TYPE_COMMAND_LINE = 0u
+};
+
+struct Tux64ArgumentsIteratorImplementationCommandLine {
+   const char * const * argv;
+   Tux64UInt8 argc;
+   Tux64UInt8 index;
+};
+
+union Tux64ArgumentsIteratorImplementation {
+   struct Tux64ArgumentsIteratorImplementationCommandLine command_line;
+};
+
+struct Tux64ArgumentsIterator {
+   enum Tux64ArgumentsIteratorType type;
+   union Tux64ArgumentsIteratorImplementation implementation;
+};
+
+/*----------------------------------------------------------------------------*/
+/* Initializes the arguments iterator from command-line arguments.  Lifetimes */
+/* of arguments will be the same as 'argv'.                                   */
+/*----------------------------------------------------------------------------*/
+void
+tux64_arguments_iterator_initialize_command_line(
+   struct Tux64ArgumentsIterator * self,
+   Tux64UInt8 argc,
+   const char * const * argv
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to get the next argument, returning nullptr if no more exist.     */
+/*----------------------------------------------------------------------------*/
+const char *
+tux64_arguments_iterator_next(
+   struct Tux64ArgumentsIterator * self
+);
+
 enum Tux64ArgumentsParseStatus {
    _TUX64_ARGUMENTS_PARSE_STATUS_START_OFFSET = -1,
 
@@ -83,56 +122,20 @@ struct Tux64ArgumentsList {
    Tux64UInt32 options_optional_count;
 };
 
-
-#define TUX64_ARGUMENTS_ITERATOR_TYPE_COUNT 1u
-enum Tux64ArgumentsIteratorType {
-   TUX64_ARGUMENTS_ITERATOR_TYPE_COMMAND_LINE = 0u
-};
-
-struct Tux64ArgumentsIteratorImplementationCommandLine {
-   const char * const * argv;
-   Tux64UInt8 argc;
-   Tux64UInt8 index;
-};
-
-union Tux64ArgumentsIteratorImplementation {
-   struct Tux64ArgumentsIteratorImplementationCommandLine command_line;
-};
-
-struct Tux64ArgumentsIterator {
-   enum Tux64ArgumentsIteratorType type;
-   union Tux64ArgumentsIteratorImplementation implementation;
-};
-
-/*----------------------------------------------------------------------------*/
-/* Initializes the arguments iterator from command-line arguments.  Lifetimes */
-/* of arguments will be the same as 'argv'.                                   */
-/*----------------------------------------------------------------------------*/
-void
-tux64_arguments_iterator_initialize_command_line(
-   struct Tux64ArgumentsIterator * self,
-   Tux64UInt8 argc,
-   const char * const * argv
-);
-
-/*----------------------------------------------------------------------------*/
-/* Attempts to get the next argument, returning nullptr if no more exist.     */
-/*----------------------------------------------------------------------------*/
-const char *
-tux64_arguments_iterator_next(
-   struct Tux64ArgumentsIterator * self
-);
-
 /*----------------------------------------------------------------------------*/
 /* Attempts to parse arguments according to the arguments list and context.   */
 /* The lifetimes of all pointers will either be the same as 'iterator' or     */
 /* will come from the context struct.                                         */
+/*                                                                            */
+/* 'required_storage' is an array used to store which required arguments have */
+/* been parsed.  This should be of size ceil(|required| / 8).                 */
 /*----------------------------------------------------------------------------*/
 struct Tux64ArgumentsParseResult
 tux64_arguments_parse(
    const struct Tux64ArgumentsList * list,
    struct Tux64ArgumentsIterator * iterator,
-   void * context
+   void * context,
+   Tux64UInt8 * required_storage
 );
 
 /*----------------------------------------------------------------------------*/
