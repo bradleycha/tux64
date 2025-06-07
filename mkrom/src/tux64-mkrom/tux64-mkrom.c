@@ -8,26 +8,24 @@
 
 #include "tux64-mkrom/tux64-mkrom.h"
 
-#include "tux64-mkrom/arguments.h"
 #include <tux64/log.h>
+#include <inttypes.h>
+#include "tux64-mkrom/arguments.h"
 
-enum Tux64MkromLogLevel {
-   TUX64_MKROM_LOG_LEVEL_INFO,
-   TUX64_MKROM_LOG_LEVEL_WARNING,
-   TUX64_MKROM_LOG_LEVEL_ERROR
-};
+#define TUX64_MKROM_ARGC_MAX TUX64_UINT8_MAX
 
 enum Tux64MkromExitStatus {
    TUX64_MKROM_EXIT_STATUS_OK = 0u,
-   TUX64_MKROM_EXIT_STATUS_INVALID_ARGUMENTS
+   TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS
 };
 
-struct Tux64MkromExitPayloadInvalidArguments {
-   struct Tux64MkromArgumentsParseResult info;
+struct Tux64MkromExitPayloadTooManyArguments {
+   int argc_given;
+   Tux64UInt8 argc_max;
 };
 
 union Tux64MkromExitPayload {
-   struct Tux64MkromExitPayloadInvalidArguments invalid_arguments;
+   struct Tux64MkromExitPayloadTooManyArguments too_many_arguments;
 };
 
 struct Tux64MkromExitResult {
@@ -36,44 +34,14 @@ struct Tux64MkromExitResult {
 };
 
 static void
-tux64_mkrom_exit_result_display_invalid_arguments_invalid(
-   const struct Tux64MkromArgumentsParsePayloadInvalid * self
+tux64_mkrom_exit_result_display_too_many_arguments(
+   const struct Tux64MkromExitPayloadTooManyArguments * self
 ) {
-   if (self->parameter == TUX64_NULLPTR) {
-      TUX64_LOG_ERROR_FMT(
-         "invalid argument \'%s\'",
-         self->argument
-      );
-      return;
-   }
-
    TUX64_LOG_ERROR_FMT(
-      "invalid parameter \'%s\' for argument \'%s\'",
-      self->parameter,
-      self->argument
+      "unable to handle %d arguments at once, maximum is %" PRIu8,
+      self->argc_given,
+      self->argc_max
    );
-
-   return;
-}
-
-static void
-tux64_mkrom_exit_result_display_invalid_arguments(
-   const struct Tux64MkromExitPayloadInvalidArguments * self      
-) {
-   switch (self->info.status) {
-      case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_OK:
-      case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_EXIT:
-         TUX64_UNREACHABLE;
-      case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_OUT_OF_MEMORY:
-        TUX64_LOG_ERROR("arguments parser ran out of memory");
-         break;
-      case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_INVALID:
-         tux64_mkrom_exit_result_display_invalid_arguments_invalid(&self->info.payload.invalid);
-         break;
-      default:
-         TUX64_UNREACHABLE;
-   }
-
    return;
 }
 
@@ -84,8 +52,8 @@ tux64_mkrom_exit_result_display(
    switch (self->status) {
       case TUX64_MKROM_EXIT_STATUS_OK:
          break;
-      case TUX64_MKROM_EXIT_STATUS_INVALID_ARGUMENTS:
-         tux64_mkrom_exit_result_display_invalid_arguments(&self->payload.invalid_arguments);
+      case TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS:
+         tux64_mkrom_exit_result_display_too_many_arguments(&self->payload.too_many_arguments);
          break;
       default:
          TUX64_UNREACHABLE;
@@ -95,27 +63,16 @@ tux64_mkrom_exit_result_display(
 }
 
 static struct Tux64MkromExitResult
-tux64_mkrom_main(int argc, char ** argv) {
+tux64_mkrom_main(
+   Tux64UInt8 argc,
+   const char * const * argv
+) {
    struct Tux64MkromExitResult result;
-   struct Tux64MkromArgumentsParseResult args_parse_result;
-   struct Tux64MkromArguments args;
-
-   args_parse_result = tux64_mkrom_arguments_parse(argc, argv, &args);
-   switch (args_parse_result.status) {
-      case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_OK:
-         break;
-      case TUX64_MKROM_ARGUMENTS_PARSE_STATUS_EXIT:
-         result.status = TUX64_MKROM_EXIT_STATUS_OK;
-         return result;
-      default:
-         result.status = TUX64_MKROM_EXIT_STATUS_INVALID_ARGUMENTS;
-         result.payload.invalid_arguments.info = args_parse_result;
-         return result;
-   }
 
    /* TODO: implement */
-   (void)args;
-
+   (void)argc;
+   (void)argv;
+   TUX64_LOG_INFO("hello from tux64_mkrom_main()!");
    result.status = TUX64_MKROM_EXIT_STATUS_OK;
    return result;
 }
@@ -123,8 +80,19 @@ tux64_mkrom_main(int argc, char ** argv) {
 int main(int argc, char ** argv) {
    struct Tux64MkromExitResult exit_result;
 
-   exit_result = tux64_mkrom_main(argc, argv);
+   if (argc > TUX64_LITERAL_UINT8(TUX64_MKROM_ARGC_MAX)) {
+      exit_result.status = TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS;
+      exit_result.payload.too_many_arguments.argc_given = argc;
+      exit_result.payload.too_many_arguments.argc_max = TUX64_LITERAL_UINT8(TUX64_MKROM_ARGC_MAX);
+      goto exit;
+   }
 
+   exit_result = tux64_mkrom_main(
+      (Tux64UInt8)argc,
+      (const char * const *)argv
+   );
+
+exit:
    tux64_mkrom_exit_result_display(&exit_result);
    return (int)exit_result.status;
 }
