@@ -193,6 +193,14 @@ tux64_mkrom_arguments_parse(
    "      The path to prepend to all file paths, both on the command-line and in the\n"\
    "      configuration file.\n"\
    "\n"\
+   "   --help\n"\
+   "\n"\
+   "      Prints the program's help menu and usage information.\n"\
+   "\n"\
+   "   --version\n"\
+   "\n"\
+   "      Prints the program's name and version.\n"\
+   "\n"\
    "CONFIGURATION FILE:\n"\
    "\n"\
    "   Most of the boot parameters required to build the ROM image are stored in a\n"\
