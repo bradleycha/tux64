@@ -140,7 +140,8 @@ struct Tux64ArgumentsList {
    Tux64UInt32 options_optional_count;
    const char * prefix_long;
    const char * prefix_short;
-   char token_split_identifier_parameter;
+   Tux64UInt32 prefix_long_characters;
+   Tux64UInt32 prefix_short_characters;
 };
 
 /*----------------------------------------------------------------------------*/
