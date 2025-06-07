@@ -83,10 +83,25 @@ struct Tux64ArgumentsList {
    Tux64UInt32 options_optional_count;
 };
 
-struct Tux64ArgumentsIterator {
+
+#define TUX64_ARGUMENTS_ITERATOR_TYPE_COUNT 1u
+enum Tux64ArgumentsIteratorType {
+   TUX64_ARGUMENTS_ITERATOR_TYPE_COMMAND_LINE = 0u
+};
+
+struct Tux64ArgumentsIteratorImplementationCommandLine {
    const char * const * argv;
    Tux64UInt8 argc;
    Tux64UInt8 index;
+};
+
+union Tux64ArgumentsIteratorImplementation {
+   struct Tux64ArgumentsIteratorImplementationCommandLine command_line;
+};
+
+struct Tux64ArgumentsIterator {
+   enum Tux64ArgumentsIteratorType type;
+   union Tux64ArgumentsIteratorImplementation implementation;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -94,7 +109,7 @@ struct Tux64ArgumentsIterator {
 /* of arguments will be the same as 'argv'.                                   */
 /*----------------------------------------------------------------------------*/
 void
-tux64_arguments_iterator_initialize(
+tux64_arguments_iterator_initialize_command_line(
    struct Tux64ArgumentsIterator * self,
    Tux64UInt8 argc,
    const char * const * argv
