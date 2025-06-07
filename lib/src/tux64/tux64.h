@@ -33,6 +33,9 @@
 #define TUX64_UNREACHABLE\
    __builtin_unreachable()
 
+#define TUX64_ARRAY_ELEMENTS(array)\
+   (sizeof(array) / sizeof(array[0]))
+
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
 
