@@ -9,6 +9,8 @@
 #include "tux64/tux64.h"
 #include "tux64/arguments.h"
 
+#include <tux64/memory.h>
+
 void
 tux64_arguments_iterator_initialize_command_line(
    struct Tux64ArgumentsIterator * self,
@@ -22,23 +24,41 @@ tux64_arguments_iterator_initialize_command_line(
    return;
 }
 
-typedef const char * (*Tux64ArgumentsIteratorNextFunction)(
+typedef struct Tux64ArgumentsIteratorNextResult (*Tux64ArgumentsIteratorNextFunction)(
    struct Tux64ArgumentsIterator * self
 );
 
-static const char *
+static struct Tux64ArgumentsIteratorNextResult
 tux64_arguments_iterator_next_command_line(
    struct Tux64ArgumentsIterator * self
 ) {
    struct Tux64ArgumentsIteratorImplementationCommandLine * command_line;
+   struct Tux64ArgumentsIteratorNextResult result;
+   struct Tux64MemoryFindResult result_string_length;
+   char terminator;
 
    command_line = &self->implementation.command_line;
 
    if (command_line->index == command_line->argc) {
-      return TUX64_NULLPTR;
+      result.status = TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_END_OF_STREAM;
+      return result;
    }
 
-   return command_line->argv[command_line->index++];
+   result.status = TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_OK;
+   result.payload.ok.ptr = command_line->argv[command_line->index++];
+
+   /* implements strlen() by finding the null terminator.  assumes the null */
+   /* terminator is always present. */
+   terminator = '\0';
+   result_string_length = tux64_memory_find(
+      result.payload.ok.ptr,
+      &terminator,
+      TUX64_UINT32_MAX,
+      TUX64_LITERAL_UINT32(sizeof(terminator))
+   );
+
+   result.payload.ok.characters = result_string_length.payload.found.position;
+   return result;
 }
 
 static const Tux64ArgumentsIteratorNextFunction
@@ -46,7 +66,7 @@ tux64_arguments_iterator_next_functions [TUX64_ARGUMENTS_ITERATOR_TYPE_COUNT] = 
    tux64_arguments_iterator_next_command_line
 };
 
-const char *
+struct Tux64ArgumentsIteratorNextResult
 tux64_arguments_iterator_next(
    struct Tux64ArgumentsIterator * self
 ) {

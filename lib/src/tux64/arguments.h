@@ -42,10 +42,29 @@ tux64_arguments_iterator_initialize_command_line(
    const char * const * argv
 );
 
+enum Tux64ArgumentsIteratorNextStatus {
+   TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_OK,
+   TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_END_OF_STREAM
+};
+
+struct Tux64ArgumentsIteratorNextPayloadOk {
+   const char * ptr;
+   Tux64UInt32 characters;
+};
+
+union Tux64ArgumentsIteratorNextPayload {
+   struct Tux64ArgumentsIteratorNextPayloadOk ok;
+};
+
+struct Tux64ArgumentsIteratorNextResult {
+   enum Tux64ArgumentsIteratorNextStatus status;
+   union Tux64ArgumentsIteratorNextPayload payload;
+};
+
 /*----------------------------------------------------------------------------*/
-/* Attempts to get the next argument, returning nullptr if no more exist.     */
+/* Attempts to get the next argument.                                         */
 /*----------------------------------------------------------------------------*/
-const char *
+struct Tux64ArgumentsIteratorNextResult
 tux64_arguments_iterator_next(
    struct Tux64ArgumentsIterator * self
 );
@@ -74,6 +93,7 @@ struct Tux64ArgumentsParsePayloadParameterMissing {
 
 struct Tux64ArgumentsParsePayloadParameterUnexpected {
    const char * name;
+   const char * parameter;
 };
 
 struct Tux64ArgumentsParsePayloadParameterInvalid {
@@ -103,15 +123,10 @@ typedef enum Tux64ArgumentsParseStatus (*Tux64ArgumentsParseFunction)(
    void * context
 );
 
-/* stop parsing arguments and exit the program when encountered */
-#define TUX64_ARGUMENTS_OPTION_FLAG_EXIT\
-   TUX64_LITERAL_UINT8(1u << 0u)
-
 /* defines a single option */
 struct Tux64ArgumentsOption {
    const char * name;
    Tux64ArgumentsParseFunction parser;
-   Tux64UInt8 flags;
 };
 
 /* defines a list of arguments in which to parse */
