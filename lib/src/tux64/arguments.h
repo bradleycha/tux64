@@ -99,6 +99,7 @@ struct Tux64ArgumentsParsePayloadParameterUnexpected {
 struct Tux64ArgumentsParsePayloadParameterInvalid {
    const char * identifier;
    const char * parameter;
+   const char * reason;
 };
 
 struct Tux64ArgumentsParsePayloadRequiredMissing {
@@ -118,7 +119,20 @@ struct Tux64ArgumentsParseResult {
    union Tux64ArgumentsParsePayload payload;
 };
 
-typedef enum Tux64ArgumentsParseStatus (*Tux64ArgumentsParseFunction)(
+struct Tux64ArgumentsParseOptionPayloadParameterInvalid {
+   const char * reason;
+};
+
+union Tux64ArgumentsParseOptionPayload {
+   struct Tux64ArgumentsParseOptionPayloadParameterInvalid parameter_invalid;
+};
+
+struct Tux64ArgumentsParseOptionResult {
+   enum Tux64ArgumentsParseStatus status;
+   union Tux64ArgumentsParseOptionPayload payload;
+};
+
+typedef struct Tux64ArgumentsParseOptionResult (*Tux64ArgumentsParseFunction)(
    const char * parameter,
    Tux64UInt32 parameter_characters,
    void * context

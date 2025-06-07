@@ -90,6 +90,7 @@ tux64_arguments_parse(
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
    result.payload.parameter_invalid.identifier = "--fuck-rust";
    result.payload.parameter_invalid.parameter = "true";
+   result.payload.parameter_invalid.reason = "assignment to tautology is redundant";
    return result;
 }
 
