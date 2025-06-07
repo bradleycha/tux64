@@ -7,7 +7,7 @@
 
 m4_include([m4/ax_prefix_config_h.m4])
 
-AC_INIT([tux64-mkrom], 0.1.+setup, [bradleycha@proton.me])
+AC_INIT([tux64-mkrom], 0.1.0+setup, [bradleycha@proton.me])
 
 AC_CONFIG_SRCDIR([src/tux64-mkrom/tux64-mkrom.h])
 AC_CONFIG_AUX_DIR([configdir])
