@@ -13,7 +13,7 @@
 #include <tux64/arguments.h>
 
 struct Tux64MkromArguments {
-   const char * path_configuration;
+   const char * path_config;
    const char * path_output;
    const char * path_prefix;
 };

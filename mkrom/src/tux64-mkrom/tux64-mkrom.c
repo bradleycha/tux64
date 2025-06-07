@@ -62,22 +62,22 @@ tux64_mkrom_exit_result_display_arguments_parse_error(
          TUX64_UNREACHABLE;
       case TUX64_ARGUMENTS_PARSE_STATUS_EXIT:
          TUX64_UNREACHABLE;
-      case TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_NAME:
+      case TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER:
          TUX64_LOG_ERROR_FMT(
-            "unknown argument name \'%s\'",
-            self->result.payload.unknown_name.name
+            "unknown argument \'%s\'",
+            self->result.payload.unknown_identifier.identifier
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING:
          TUX64_LOG_ERROR_FMT(
             "argument \'%s\' expects a parameter, but none was given",
-            self->result.payload.parameter_missing.name
+            self->result.payload.parameter_missing.identifier
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED:
          TUX64_LOG_ERROR_FMT(
             "argument \'%s\' doesn't expect parameter \'%s\'",
-            self->result.payload.parameter_unexpected.name,
+            self->result.payload.parameter_unexpected.identifier,
             self->result.payload.parameter_unexpected.parameter
          );
          break;
@@ -85,13 +85,13 @@ tux64_mkrom_exit_result_display_arguments_parse_error(
          TUX64_LOG_ERROR_FMT(
             "parameter \'%s\' is invalid for argument \'%s\'",
             self->result.payload.parameter_invalid.parameter,
-            self->result.payload.parameter_invalid.name
+            self->result.payload.parameter_invalid.identifier
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING:
          TUX64_LOG_ERROR_FMT(
             "missing required argument \'%s\'",
-            self->result.payload.required_missing.name
+            self->result.payload.required_missing.identifier
          );
          break;
       default:

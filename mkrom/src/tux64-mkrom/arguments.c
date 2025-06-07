@@ -25,7 +25,7 @@ tux64_mkrom_arguments_parser_path(
 }
 
 static enum Tux64ArgumentsParseStatus
-tux64_mkrom_arguments_parser_configuration(
+tux64_mkrom_arguments_parser_config(
    const char * parameter,
    void * context
 ) {
@@ -35,7 +35,7 @@ tux64_mkrom_arguments_parser_configuration(
 
    return tux64_mkrom_arguments_parser_path(
       parameter,
-      &arguments->path_configuration
+      &arguments->path_config
    );
 }
 
@@ -51,6 +51,21 @@ tux64_mkrom_arguments_parser_output(
    return tux64_mkrom_arguments_parser_path(
       parameter,
       &arguments->path_output
+   );
+}
+
+static enum Tux64ArgumentsParseStatus
+tux64_mkrom_arguments_parser_prefix(
+   const char * parameter,
+   void * context
+) {
+   struct Tux64MkromArguments * arguments;
+
+   arguments = (struct Tux64MkromArguments *)context;
+
+   return tux64_mkrom_arguments_parser_path(
+      parameter,
+      &arguments->path_prefix
    );
 }
 
@@ -92,46 +107,111 @@ tux64_mkrom_arguments_parser_version(
    return TUX64_ARGUMENTS_PARSE_STATUS_EXIT;
 }
 
-static enum Tux64ArgumentsParseStatus
-tux64_mkrom_arguments_parser_prefix(
-   const char * parameter,
-   void * context
-) {
-   struct Tux64MkromArguments * arguments;
+static const char *
+tux64_mkrom_arguments_option_config_identifiers_long [] = {
+   "config"
+};
+static const char
+tux64_mkrom_arguments_option_config_identifiers_short [] = {
+   'c'
+};
+static const char *
+tux64_mkrom_arguments_option_output_identifiers_long [] = {
+   "output"
+};
+static const char
+tux64_mkrom_arguments_option_output_identifiers_short [] = {
+   'o'
+};
+static const char *
+tux64_mkrom_arguments_option_prefix_identifiers_long [] = {
+   "prefix"
+};
+static const char
+tux64_mkrom_arguments_option_prefix_identifiers_short [] = {
+   'p'
+};
+static const char *
+tux64_mkrom_arguments_option_help_identifiers_long [] = {
+   "help"
+};
+static const char
+tux64_mkrom_arguments_option_help_identifiers_short [] = {
+   'h', '?'
+};
+static const char *
+tux64_mkrom_arguments_option_version_identifiers_long [] = {
+   "version"
+};
+static const char
+tux64_mkrom_arguments_option_version_identifiers_short [] = {
+   'v'
+};
 
-   arguments = (struct Tux64MkromArguments *)context;
+#define TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIERS_LONG_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_config_identifiers_long)
+#define TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIERS_SHORT_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_config_identifiers_short)
+#define TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIERS_LONG_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_output_identifiers_long)
+#define TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIERS_SHORT_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_output_identifiers_short)
+#define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIERS_LONG_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_prefix_identifiers_long)
+#define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIERS_SHORT_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_prefix_identifiers_short)
+#define TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIERS_LONG_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_help_identifiers_long)
+#define TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIERS_SHORT_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_help_identifiers_short)
+#define TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIERS_LONG_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_version_identifiers_long)
+#define TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIERS_SHORT_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_option_version_identifiers_short)
 
-   return tux64_mkrom_arguments_parser_path(
-      parameter,
-      &arguments->path_prefix
-   );
-}
+#define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE\
+   ""
 
 static const struct Tux64ArgumentsOption
 tux64_mkrom_arguments_options_required [] = {
    {
-      .name    = "--config",
-      .parser  = tux64_mkrom_arguments_parser_configuration,
+      .identifiers_long          = tux64_mkrom_arguments_option_config_identifiers_long,
+      .identifiers_short         = tux64_mkrom_arguments_option_config_identifiers_short,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIERS_LONG_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIERS_SHORT_COUNT),
+      .parser                    = tux64_mkrom_arguments_parser_config
    },
    {
-      .name    = "--output",
-      .parser  = tux64_mkrom_arguments_parser_output,
+      .identifiers_long          = tux64_mkrom_arguments_option_output_identifiers_long,
+      .identifiers_short         = tux64_mkrom_arguments_option_output_identifiers_short,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIERS_LONG_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIERS_SHORT_COUNT),
+      .parser                    = tux64_mkrom_arguments_parser_output
    },
 };
 
 static const struct Tux64ArgumentsOption
 tux64_mkrom_arguments_options_optional [] = {
    {
-      .name    = "--help",
-      .parser  = tux64_mkrom_arguments_parser_help,
+      .identifiers_long          = tux64_mkrom_arguments_option_prefix_identifiers_long,
+      .identifiers_short         = tux64_mkrom_arguments_option_prefix_identifiers_short,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIERS_LONG_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIERS_SHORT_COUNT),
+      .parser                    = tux64_mkrom_arguments_parser_prefix
    },
    {
-      .name    = "--version",
-      .parser  = tux64_mkrom_arguments_parser_version,
+      .identifiers_long          = tux64_mkrom_arguments_option_help_identifiers_long,
+      .identifiers_short         = tux64_mkrom_arguments_option_help_identifiers_short,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIERS_LONG_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIERS_SHORT_COUNT),
+      .parser                    = tux64_mkrom_arguments_parser_help
    },
    {
-      .name    = "--prefix",
-      .parser  = tux64_mkrom_arguments_parser_prefix,
+      .identifiers_long          = tux64_mkrom_arguments_option_version_identifiers_long,
+      .identifiers_short         = tux64_mkrom_arguments_option_version_identifiers_short,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIERS_LONG_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIERS_SHORT_COUNT),
+      .parser                    = tux64_mkrom_arguments_parser_version
    }
 };
 
@@ -142,19 +222,33 @@ tux64_mkrom_arguments_options_optional [] = {
 #define TUX64_MKROM_ARGUMENTS_LIST_REQUIRED_STORAGE_BYTES\
    ((TUX64_MKROM_ARGUMENTS_LIST_REQUIRED_COUNT + 8u) / 8u)
 
+#define TUX64_MKROM_ARGUMENTS_PREFIX_LONG\
+   "--"
+#define TUX64_MKROM_ARGUMENTS_PREFIX_SHORT\
+   "-"
+
+#define TUX64_MKROM_ARGUMENTS_PREFIX_LONG_CHARACTERS\
+   TUX64_ARRAY_ELEMENTS(TUX64_MKROM_ARGUMENTS_PREFIX_LONG)
+#define TUX64_MKROM_ARGUMENTS_PREFIX_SHORT_CHARACTERS\
+   TUX64_ARRAY_ELEMENTS(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT)
+
 static const struct Tux64ArgumentsList
 tux64_mkrom_arguments_list = {
-   .options_required       = tux64_mkrom_arguments_options_required,
-   .options_optional       = tux64_mkrom_arguments_options_optional,
-   .options_required_count = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_REQUIRED_COUNT),
-   .options_optional_count = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_OPTIONAL_COUNT),
+   .options_required          = tux64_mkrom_arguments_options_required,
+   .options_optional          = tux64_mkrom_arguments_options_optional,
+   .options_required_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_REQUIRED_COUNT),
+   .options_optional_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_OPTIONAL_COUNT),
+   .prefix_long               = TUX64_MKROM_ARGUMENTS_PREFIX_LONG,
+   .prefix_short              = TUX64_MKROM_ARGUMENTS_PREFIX_SHORT,
+   .prefix_long_characters    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_LONG_CHARACTERS),
+   .prefix_short_characters   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT_CHARACTERS),
 };
 
 static void
 tux64_mkrom_arguments_initialize_optional(
    struct Tux64MkromArguments * output
 ) {
-   output->path_prefix = "";
+   output->path_prefix = TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE;
    return;
 }
 
@@ -180,24 +274,24 @@ tux64_mkrom_arguments_parse(
    "\n"\
    "COMMAND-LINE OPTIONS:\n"\
    "\n"\
-   "   --config=[path]\n"\
+   "   " TUX64_MKROM_ARGUMENTS_PREFIX_SHORT "c, " TUX64_MKROM_ARGUMENTS_PREFIX_LONG "config=[path]\n"\
    "\n"\
    "      The path to read the boot configuration file from.\n"\
    "\n"\
-   "   --output=[path]\n"\
+   "   " TUX64_MKROM_ARGUMENTS_PREFIX_SHORT "o, " TUX64_MKROM_ARGUMENTS_PREFIX_LONG "output=[path]\n"\
    "\n"\
    "      The path to write the Nintendo 64 ROM image to.\n"\
    "\n"\
-   "   --prefix=[path], default=\"\"\n"\
+   "   " TUX64_MKROM_ARGUMENTS_PREFIX_SHORT "p, " TUX64_MKROM_ARGUMENTS_PREFIX_LONG "prefix=[path], default=\"" TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE "\"\n"\
    "\n"\
    "      The path to prepend to all file paths, both on the command-line and in the\n"\
    "      configuration file.\n"\
    "\n"\
-   "   --help\n"\
+   "   " TUX64_MKROM_ARGUMENTS_PREFIX_SHORT "h, " TUX64_MKROM_ARGUMENTS_PREFIX_SHORT "?, " TUX64_MKROM_ARGUMENTS_PREFIX_LONG "help\n"\
    "\n"\
    "      Prints the program's help menu and usage information.\n"\
    "\n"\
-   "   --version\n"\
+   "   " TUX64_MKROM_ARGUMENTS_PREFIX_SHORT "v, " TUX64_MKROM_ARGUMENTS_PREFIX_LONG "version\n"\
    "\n"\
    "      Prints the program's name and version.\n"\
    "\n"\
@@ -249,7 +343,7 @@ tux64_mkrom_arguments_parse(
    "\n"\
    "EXAMPLE USAGE:\n"\
    "\n"\
-   "   " TUX64_MKROM_PACKAGE_NAME " --config=tux64-mkrom.cfg --output=tux64.n64\n"\
+   "   " TUX64_MKROM_PACKAGE_NAME " " TUX64_MKROM_ARGUMENTS_PREFIX_LONG "config=tux64-mkrom.cfg " TUX64_MKROM_ARGUMENTS_PREFIX_LONG "output=tux64.n64\n"\
    "\n"
 
 #define TUX64_MKROM_ARGUMENTS_MENU_VERSION\
