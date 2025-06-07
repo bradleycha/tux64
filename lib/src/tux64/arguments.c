@@ -88,8 +88,8 @@ tux64_arguments_parse(
    (void)context;
    (void)required_storage;
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   result.payload.parameter_invalid.name = "fuck-downstream";
-   result.payload.parameter_invalid.parameter = "enable";
+   result.payload.parameter_invalid.identifier = "--fuck-rust";
+   result.payload.parameter_invalid.parameter = "true";
    return result;
 }
 

@@ -74,7 +74,7 @@ enum Tux64ArgumentsParseStatus {
 
    TUX64_ARGUMENTS_PARSE_STATUS_OK,
    TUX64_ARGUMENTS_PARSE_STATUS_EXIT,
-   TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_NAME,
+   TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER,
    TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING,
    TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED,
    TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID,
@@ -83,30 +83,30 @@ enum Tux64ArgumentsParseStatus {
    _TUX64_ARGUMENTS_PARSE_STATUS_END_OFFSET
 };
 
-struct Tux64ArgumentsParsePayloadUnknownName {
-   const char * name;
+struct Tux64ArgumentsParsePayloadUnknownIdentifier {
+   const char * identifier;
 };
 
 struct Tux64ArgumentsParsePayloadParameterMissing {
-   const char * name;
+   const char * identifier;
 };
 
 struct Tux64ArgumentsParsePayloadParameterUnexpected {
-   const char * name;
+   const char * identifier;
    const char * parameter;
 };
 
 struct Tux64ArgumentsParsePayloadParameterInvalid {
-   const char * name;
+   const char * identifier;
    const char * parameter;
 };
 
 struct Tux64ArgumentsParsePayloadRequiredMissing {
-   const char * name;
+   const char * identifier;
 };
 
 union Tux64ArgumentsParsePayload {
-   struct Tux64ArgumentsParsePayloadUnknownName unknown_name;
+   struct Tux64ArgumentsParsePayloadUnknownIdentifier unknown_identifier;
    struct Tux64ArgumentsParsePayloadParameterMissing parameter_missing;
    struct Tux64ArgumentsParsePayloadParameterUnexpected parameter_unexpected;
    struct Tux64ArgumentsParsePayloadParameterInvalid parameter_invalid;
@@ -125,7 +125,10 @@ typedef enum Tux64ArgumentsParseStatus (*Tux64ArgumentsParseFunction)(
 
 /* defines a single option */
 struct Tux64ArgumentsOption {
-   const char * name;
+   const char * const * identifiers_long;
+   const char * identifiers_short;
+   Tux64UInt32 identifiers_long_count;
+   Tux64UInt32 identifiers_short_count;
    Tux64ArgumentsParseFunction parser;
 };
 
@@ -135,6 +138,9 @@ struct Tux64ArgumentsList {
    const struct Tux64ArgumentsOption * options_optional;
    Tux64UInt32 options_required_count;
    Tux64UInt32 options_optional_count;
+   const char * prefix_long;
+   const char * prefix_short;
+   char token_split_identifier_parameter;
 };
 
 /*----------------------------------------------------------------------------*/
