@@ -83,9 +83,10 @@ tux64_mkrom_exit_result_display_arguments_parse_error(
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID:
          TUX64_LOG_ERROR_FMT(
-            "parameter \'%s\' is invalid for argument \'%s\'",
+            "invalid parameter \'%s\' for argument \'%s\': %s",
             self->result.payload.parameter_invalid.parameter,
-            self->result.payload.parameter_invalid.identifier
+            self->result.payload.parameter_invalid.identifier,
+            self->result.payload.parameter_invalid.reason
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING:

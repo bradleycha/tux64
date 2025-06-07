@@ -11,23 +11,28 @@
 #include <tux64/arguments.h>
 #include <stdio.h>
 
-static enum Tux64ArgumentsParseStatus
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_path(
    const char * parameter,
    Tux64UInt32 parameter_characters,
    const char * * arguments_entry,
    Tux64UInt32 * arguments_entry_characters
 ) {
+   struct Tux64ArgumentsParseOptionResult result;
+
    if (parameter_characters == TUX64_LITERAL_UINT32(0u)) {
-      return TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
+      return result;
    }
 
    *arguments_entry = parameter;
    *arguments_entry_characters = parameter_characters;
-   return TUX64_ARGUMENTS_PARSE_STATUS_OK;
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
+   return result;
 }
 
-static enum Tux64ArgumentsParseStatus
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_config(
    const char * parameter,
    Tux64UInt32 parameter_characters,
@@ -45,7 +50,7 @@ tux64_mkrom_arguments_parser_config(
    );
 }
 
-static enum Tux64ArgumentsParseStatus
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_output(
    const char * parameter,
    Tux64UInt32 parameter_characters,
@@ -63,7 +68,7 @@ tux64_mkrom_arguments_parser_output(
    );
 }
 
-static enum Tux64ArgumentsParseStatus
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_prefix(
    const char * parameter,
    Tux64UInt32 parameter_characters,
@@ -81,44 +86,52 @@ tux64_mkrom_arguments_parser_prefix(
    );
 }
 
-static enum Tux64ArgumentsParseStatus
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_help(
    const char * parameter,
    Tux64UInt32 parameter_characters,
    void * context
 ) {
+   struct Tux64ArgumentsParseOptionResult result;
    struct Tux64MkromArguments * arguments;
 
    arguments = (struct Tux64MkromArguments *)context;
 
    if (parameter_characters != TUX64_LITERAL_UINT32(0u)) {
-      return TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
+      return result;
    }
 
    (void)arguments;
    (void)parameter;
    tux64_mkrom_arguments_print_menu_help();
-   return TUX64_ARGUMENTS_PARSE_STATUS_EXIT;
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_EXIT;
+   return result;
 }
 
-static enum Tux64ArgumentsParseStatus
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_version(
    const char * parameter,
    Tux64UInt32 parameter_characters,
    void * context
 ) {
+   struct Tux64ArgumentsParseOptionResult result;
    struct Tux64MkromArguments * arguments;
 
    arguments = (struct Tux64MkromArguments *)context;
 
    if (parameter_characters != TUX64_LITERAL_UINT32(0u)) {
-      return TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
+      return result;
    }
 
    (void)arguments;
    (void)parameter;
    tux64_mkrom_arguments_print_menu_version();
-   return TUX64_ARGUMENTS_PARSE_STATUS_EXIT;
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_EXIT;
+   return result;
 }
 
 static const char *
