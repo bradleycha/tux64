@@ -149,6 +149,7 @@ struct Tux64ArgumentsList {
    Tux64UInt32 options_optional_count;
    struct Tux64String prefix_long;
    struct Tux64String prefix_short;
+   char identifier_parameter_split_token;
 };
 
 /*----------------------------------------------------------------------------*/
