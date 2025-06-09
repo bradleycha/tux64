@@ -238,6 +238,55 @@ tux64_arguments_parse_argument_tokenize(
 }
 
 static struct Tux64ArgumentsParseResult
+tux64_arguments_parse_argument_execute(
+   const struct Tux64String * identifier,
+   const struct Tux64String * parameter,
+   const struct Tux64ArgumentsOption * option,
+   void * context
+) {
+   struct Tux64ArgumentsParseResult result;
+   struct Tux64ArgumentsParseOptionResult parse_result;
+
+   parse_result = option->parser(parameter, context);
+   switch (parse_result.status) {
+      case TUX64_ARGUMENTS_PARSE_STATUS_OK:
+         break;
+
+      case TUX64_ARGUMENTS_PARSE_STATUS_EXIT:
+         break;
+
+      case TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER:
+         /* don't return this, otherwise we're all dead! */
+         TUX64_UNREACHABLE;
+
+      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING:
+         result.payload.parameter_missing.identifier = *identifier;
+         break;
+
+      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED:
+         result.payload.parameter_unexpected.identifier = *identifier;
+         result.payload.parameter_unexpected.parameter = *parameter;
+         break;
+
+      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID:
+         result.payload.parameter_invalid.identifier = *identifier;
+         result.payload.parameter_invalid.parameter = *parameter;
+         result.payload.parameter_invalid.reason = parse_result.payload.parameter_invalid.reason;
+         break;
+
+      case TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING:
+         result.payload.required_missing.identifier = *identifier;
+         break;
+
+      default:
+         TUX64_UNREACHABLE;
+   }
+   
+   result.status = parse_result.status;
+   return result;
+}
+
+static struct Tux64ArgumentsParseResult
 tux64_arguments_parse_argument_digest(
    struct Tux64ArgumentsIterator * iterator,
    const struct Tux64ArgumentsParseTokens * tokens,
@@ -245,14 +294,31 @@ tux64_arguments_parse_argument_digest(
    void * context
 ) {
    struct Tux64ArgumentsParseResult result;
+   struct Tux64ArgumentsIteratorNextResult next_argument;
 
-   /* TODO: implement */
-   (void)iterator;
-   (void)tokens;
-   (void)option;
-   (void)context;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
-   return result;
+   result = tux64_arguments_parse_argument_execute(
+      &tokens->identifier,
+      &tokens->parameter,
+      option,
+      context
+   );
+
+   /* if we are missing the parameter, try one more time with the next argument */
+   if (result.status != TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING) {
+      return result;
+   }
+
+   next_argument = tux64_arguments_iterator_next(iterator);
+   if (next_argument.status != TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_OK) {
+      return result;
+   }
+
+   return tux64_arguments_parse_argument_execute(
+      &tokens->identifier,
+      &next_argument.payload.ok,
+      option,
+      context
+   );
 }
 
 static void
