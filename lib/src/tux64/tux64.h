@@ -35,6 +35,8 @@
 
 #define TUX64_ARRAY_ELEMENTS(array)\
    (sizeof(array) / sizeof(array[0]))
+#define TUX64_STRING_CHARACTERS(string)\
+   (TUX64_ARRAY_ELEMENTS(string) - 1u)
 
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
