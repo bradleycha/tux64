@@ -64,35 +64,43 @@ tux64_mkrom_exit_result_display_arguments_parse_error(
          TUX64_UNREACHABLE;
       case TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER:
          TUX64_LOG_ERROR_FMT(
-            "unknown argument \'%s\'",
-            self->result.payload.unknown_identifier.identifier
+            "unknown argument \'%.*s\'",
+            self->result.payload.unknown_identifier.identifier.characters,
+            self->result.payload.unknown_identifier.identifier.ptr
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING:
          TUX64_LOG_ERROR_FMT(
-            "argument \'%s\' expects a parameter, but none was given",
+            "argument \'%.*s\' expects a parameter, but none was given",
+            self->result.payload.parameter_missing.identifier.characters,
             self->result.payload.parameter_missing.identifier
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED:
          TUX64_LOG_ERROR_FMT(
-            "argument \'%s\' doesn't expect parameter \'%s\'",
-            self->result.payload.parameter_unexpected.identifier,
-            self->result.payload.parameter_unexpected.parameter
+            "argument \'%.*s\' doesn't expect parameter \'%.*s\'",
+            self->result.payload.parameter_unexpected.identifier.characters,
+            self->result.payload.parameter_unexpected.identifier.ptr,
+            self->result.payload.parameter_unexpected.parameter.characters,
+            self->result.payload.parameter_unexpected.parameter.ptr
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID:
          TUX64_LOG_ERROR_FMT(
-            "invalid parameter \'%s\' for argument \'%s\': %s",
-            self->result.payload.parameter_invalid.parameter,
-            self->result.payload.parameter_invalid.identifier,
-            self->result.payload.parameter_invalid.reason
+            "invalid parameter \'%.*s\' for argument \'%.*s\': %.*s",
+            self->result.payload.parameter_invalid.parameter.characters,
+            self->result.payload.parameter_invalid.parameter.ptr,
+            self->result.payload.parameter_invalid.identifier.characters,
+            self->result.payload.parameter_invalid.identifier.ptr,
+            self->result.payload.parameter_invalid.reason.characters,
+            self->result.payload.parameter_invalid.reason.ptr
          );
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING:
          TUX64_LOG_ERROR_FMT(
-            "missing required argument \'%s\'",
-            self->result.payload.required_missing.identifier
+            "missing required argument \'%.*s\'",
+            self->result.payload.required_missing.identifier.characters,
+            self->result.payload.required_missing.identifier.ptr
          );
          break;
       default:

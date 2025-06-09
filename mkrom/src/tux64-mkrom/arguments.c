@@ -13,20 +13,17 @@
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_path(
-   const char * parameter,
-   Tux64UInt32 parameter_characters,
-   const char * * arguments_entry,
-   Tux64UInt32 * arguments_entry_characters
+   const struct Tux64String * parameter,
+   struct Tux64String * entry
 ) {
    struct Tux64ArgumentsParseOptionResult result;
 
-   if (parameter_characters == TUX64_LITERAL_UINT32(0u)) {
+   if (parameter->characters == TUX64_LITERAL_UINT32(0u)) {
       result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
       return result;
    }
 
-   *arguments_entry = parameter;
-   *arguments_entry_characters = parameter_characters;
+   *entry = *parameter;
 
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
    return result;
@@ -34,8 +31,7 @@ tux64_mkrom_arguments_parser_path(
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_config(
-   const char * parameter,
-   Tux64UInt32 parameter_characters,
+   const struct Tux64String * parameter,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
@@ -44,16 +40,13 @@ tux64_mkrom_arguments_parser_config(
 
    return tux64_mkrom_arguments_parser_path(
       parameter,
-      parameter_characters,
-      &arguments->path_config,
-      &arguments->path_config_characters
+      &arguments->path_config
    );
 }
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_output(
-   const char * parameter,
-   Tux64UInt32 parameter_characters,
+   const struct Tux64String * parameter,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
@@ -62,16 +55,13 @@ tux64_mkrom_arguments_parser_output(
 
    return tux64_mkrom_arguments_parser_path(
       parameter,
-      parameter_characters,
-      &arguments->path_output,
-      &arguments->path_output_characters
+      &arguments->path_output
    );
 }
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_prefix(
-   const char * parameter,
-   Tux64UInt32 parameter_characters,
+   const struct Tux64String * parameter,
    void * context
 ) {
    struct Tux64MkromArguments * arguments;
@@ -80,30 +70,23 @@ tux64_mkrom_arguments_parser_prefix(
 
    return tux64_mkrom_arguments_parser_path(
       parameter,
-      parameter_characters,
-      &arguments->path_prefix,
-      &arguments->path_prefix_characters
+      &arguments->path_prefix
    );
 }
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_help(
-   const char * parameter,
-   Tux64UInt32 parameter_characters,
+   const struct Tux64String * parameter,
    void * context
 ) {
    struct Tux64ArgumentsParseOptionResult result;
-   struct Tux64MkromArguments * arguments;
 
-   arguments = (struct Tux64MkromArguments *)context;
-
-   if (parameter_characters != TUX64_LITERAL_UINT32(0u)) {
+   if (parameter->characters != TUX64_LITERAL_UINT32(0u)) {
       result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
       return result;
    }
 
-   (void)arguments;
-   (void)parameter;
+   (void)context;
    tux64_mkrom_arguments_print_menu_help();
 
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_EXIT;
@@ -112,67 +95,112 @@ tux64_mkrom_arguments_parser_help(
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_parser_version(
-   const char * parameter,
-   Tux64UInt32 parameter_characters,
+   const struct Tux64String * parameter,
    void * context
 ) {
    struct Tux64ArgumentsParseOptionResult result;
-   struct Tux64MkromArguments * arguments;
 
-   arguments = (struct Tux64MkromArguments *)context;
-
-   if (parameter_characters != TUX64_LITERAL_UINT32(0u)) {
+   if (parameter->characters != TUX64_LITERAL_UINT32(0u)) {
       result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
       return result;
    }
 
-   (void)arguments;
-   (void)parameter;
+   (void)context;
    tux64_mkrom_arguments_print_menu_version();
 
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_EXIT;
    return result;
 }
 
-static const char *
-tux64_mkrom_arguments_option_config_identifiers_long [] = {
+#define TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIER_LONG\
    "config"
+#define TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIER_SHORT\
+   'c'
+#define TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIER_LONG\
+   "output"
+#define TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIER_SHORT\
+   'o'
+#define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIER_LONG\
+   "prefix"
+#define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIER_SHORT\
+   'p'
+#define TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_LONG\
+   "help"
+#define TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_SHORT_A\
+   'h'
+#define TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_SHORT_B\
+   '?'
+#define TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIER_LONG\
+   "version"
+#define TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIER_SHORT\
+   'v'
+
+#define TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIER_LONG_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIER_LONG)
+#define TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIER_LONG_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIER_LONG)
+#define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIER_LONG_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIER_LONG)
+#define TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_LONG_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_LONG)
+#define TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIER_LONG_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIER_LONG)
+
+static const struct Tux64String
+tux64_mkrom_arguments_option_config_identifiers_long [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIER_LONG,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIER_LONG_CHARACTERS) 
+   }
 };
 static const char
 tux64_mkrom_arguments_option_config_identifiers_short [] = {
-   'c'
+   TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIER_SHORT
 };
-static const char *
+static const struct Tux64String
 tux64_mkrom_arguments_option_output_identifiers_long [] = {
-   "output"
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIER_LONG,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIER_LONG_CHARACTERS)
+   }
 };
 static const char
 tux64_mkrom_arguments_option_output_identifiers_short [] = {
-   'o'
+   TUX64_MKROM_ARGUMENTS_OPTION_OUTPUT_IDENTIFIER_SHORT
 };
-static const char *
+static const struct Tux64String
 tux64_mkrom_arguments_option_prefix_identifiers_long [] = {
-   "prefix"
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIER_LONG,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIER_LONG_CHARACTERS)
+   }
 };
 static const char
 tux64_mkrom_arguments_option_prefix_identifiers_short [] = {
-   'p'
+   TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_IDENTIFIER_SHORT
 };
-static const char *
+static const struct Tux64String
 tux64_mkrom_arguments_option_help_identifiers_long [] = {
-   "help"
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_LONG,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_LONG_CHARACTERS)
+   }
 };
 static const char
 tux64_mkrom_arguments_option_help_identifiers_short [] = {
-   'h', '?'
+   TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_SHORT_A,
+   TUX64_MKROM_ARGUMENTS_OPTION_HELP_IDENTIFIER_SHORT_B
 };
-static const char *
+static const struct Tux64String
 tux64_mkrom_arguments_option_version_identifiers_long [] = {
-   "version"
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIER_LONG,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIER_LONG_CHARACTERS)
+   }
 };
 static const char
 tux64_mkrom_arguments_option_version_identifiers_short [] = {
-   'v'
+   TUX64_MKROM_ARGUMENTS_OPTION_VERSION_IDENTIFIER_SHORT
 };
 
 #define TUX64_MKROM_ARGUMENTS_OPTION_CONFIG_IDENTIFIERS_LONG_COUNT\
@@ -198,6 +226,8 @@ tux64_mkrom_arguments_option_version_identifiers_short [] = {
 
 #define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE\
    ""
+#define TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE)
 
 static const struct Tux64ArgumentsOption
 tux64_mkrom_arguments_options_required [] = {
@@ -255,9 +285,9 @@ tux64_mkrom_arguments_options_optional [] = {
    "-"
 
 #define TUX64_MKROM_ARGUMENTS_PREFIX_LONG_CHARACTERS\
-   (TUX64_ARRAY_ELEMENTS(TUX64_MKROM_ARGUMENTS_PREFIX_LONG) - 1u)
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_PREFIX_LONG)
 #define TUX64_MKROM_ARGUMENTS_PREFIX_SHORT_CHARACTERS\
-   (TUX64_ARRAY_ELEMENTS(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT) - 1u)
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT)
 
 static const struct Tux64ArgumentsList
 tux64_mkrom_arguments_list = {
@@ -265,17 +295,22 @@ tux64_mkrom_arguments_list = {
    .options_optional          = tux64_mkrom_arguments_options_optional,
    .options_required_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_REQUIRED_COUNT),
    .options_optional_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_OPTIONAL_COUNT),
-   .prefix_long               = TUX64_MKROM_ARGUMENTS_PREFIX_LONG,
-   .prefix_short              = TUX64_MKROM_ARGUMENTS_PREFIX_SHORT,
-   .prefix_long_characters    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_LONG_CHARACTERS),
-   .prefix_short_characters   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT_CHARACTERS),
+   .prefix_long               = {
+      .ptr        = TUX64_MKROM_ARGUMENTS_PREFIX_LONG,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_LONG_CHARACTERS)
+   },
+   .prefix_short              = {
+      .ptr        = TUX64_MKROM_ARGUMENTS_PREFIX_SHORT,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT_CHARACTERS)
+   }
 };
 
 static void
 tux64_mkrom_arguments_initialize_optional(
    struct Tux64MkromArguments * output
 ) {
-   output->path_prefix = TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE;
+   output->path_prefix.ptr          = TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE;
+   output->path_prefix.characters   = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_OPTION_PREFIX_DEFAULT_VALUE_CHARACTERS);
    return;
 }
 

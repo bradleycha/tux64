@@ -13,12 +13,9 @@
 #include <tux64/arguments.h>
 
 struct Tux64MkromArguments {
-   const char * path_config;
-   const char * path_output;
-   const char * path_prefix;
-   Tux64UInt32 path_config_characters;
-   Tux64UInt32 path_output_characters;
-   Tux64UInt32 path_prefix_characters;
+   struct Tux64String path_config;
+   struct Tux64String path_output;
+   struct Tux64String path_prefix;
 };
 
 struct Tux64ArgumentsParseResult
