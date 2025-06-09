@@ -289,20 +289,24 @@ tux64_mkrom_arguments_options_optional [] = {
 #define TUX64_MKROM_ARGUMENTS_PREFIX_SHORT_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT)
 
+#define TUX64_MKROM_ARGUMENTS_IDENTIFIER_PARAMETER_SPLIT_TOKEN\
+   '='
+
 static const struct Tux64ArgumentsList
 tux64_mkrom_arguments_list = {
-   .options_required          = tux64_mkrom_arguments_options_required,
-   .options_optional          = tux64_mkrom_arguments_options_optional,
-   .options_required_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_REQUIRED_COUNT),
-   .options_optional_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_OPTIONAL_COUNT),
-   .prefix_long               = {
+   .options_required                   = tux64_mkrom_arguments_options_required,
+   .options_optional                   = tux64_mkrom_arguments_options_optional,
+   .options_required_count             = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_REQUIRED_COUNT),
+   .options_optional_count             = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_LIST_OPTIONAL_COUNT),
+   .prefix_long                        = {
       .ptr        = TUX64_MKROM_ARGUMENTS_PREFIX_LONG,
       .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_LONG_CHARACTERS)
    },
-   .prefix_short              = {
+   .prefix_short                       = {
       .ptr        = TUX64_MKROM_ARGUMENTS_PREFIX_SHORT,
       .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PREFIX_SHORT_CHARACTERS)
-   }
+   },
+   .identifier_parameter_split_token   = TUX64_MKROM_ARGUMENTS_IDENTIFIER_PARAMETER_SPLIT_TOKEN
 };
 
 static void
