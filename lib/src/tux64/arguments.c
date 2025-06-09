@@ -166,6 +166,37 @@ tux64_arguments_parse_check_required(
    return result;
 }
 
+enum Tux64ArgumentsParsePrefixType {
+   TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE,
+   TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_LONG,
+   TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_SHORT
+};
+
+static enum Tux64ArgumentsParsePrefixType
+tux64_arguments_parse_prefix(
+   const struct Tux64ArgumentsList * list,
+   const struct Tux64ArgumentsIteratorNextPayloadOk * argument
+) {
+   if (tux64_memory_compare_start(
+      argument->ptr,
+      list->prefix_long,
+      argument->characters * TUX64_LITERAL_UINT32(sizeof(char)),
+      list->prefix_long_characters * TUX64_LITERAL_UINT32(sizeof(char))
+   ) == TUX64_BOOLEAN_TRUE) {
+      return TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_LONG;
+   }
+   if (tux64_memory_compare_start(
+      argument->ptr,
+      list->prefix_short,
+      argument->characters * TUX64_LITERAL_UINT32(sizeof(char)),
+      list->prefix_short_characters * TUX64_LITERAL_UINT32(sizeof(char))
+   ) == TUX64_BOOLEAN_TRUE) {
+      return TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_SHORT;
+   }
+
+   return TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE;
+}
+
 static struct Tux64ArgumentsParseResult
 tux64_arguments_parse_argument(
    const struct Tux64ArgumentsList * list,
@@ -176,12 +207,25 @@ tux64_arguments_parse_argument(
 ) {
    struct Tux64ArgumentsParseResult result;
 
+   switch (tux64_arguments_parse_prefix(list, argument)) {
+      case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_LONG:
+         /* TODO: implement */
+         break;
+
+      case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_SHORT:
+         /* TODO: implement */
+         break;
+
+      case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE:
+         result.status = TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER;
+         result.payload.unknown_identifier.identifier = argument->ptr;
+         return result;
+   }
+
    /* TODO: implement */
-   (void)list;
    (void)iterator;
    (void)context;
    (void)required_storage;
-   (void)argument;
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
    return result;
 }
