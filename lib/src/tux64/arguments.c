@@ -175,21 +175,21 @@ enum Tux64ArgumentsParsePrefixType {
 static enum Tux64ArgumentsParsePrefixType
 tux64_arguments_parse_prefix(
    const struct Tux64ArgumentsList * list,
-   const struct Tux64ArgumentsIteratorNextPayloadOk * argument
+   const struct Tux64String * argument
 ) {
    if (tux64_memory_compare_start(
       argument->ptr,
-      list->prefix_long,
+      list->prefix_long.ptr,
       argument->characters * TUX64_LITERAL_UINT32(sizeof(char)),
-      list->prefix_long_characters * TUX64_LITERAL_UINT32(sizeof(char))
+      list->prefix_long.characters * TUX64_LITERAL_UINT32(sizeof(char))
    ) == TUX64_BOOLEAN_TRUE) {
       return TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_LONG;
    }
    if (tux64_memory_compare_start(
       argument->ptr,
-      list->prefix_short,
+      list->prefix_short.ptr,
       argument->characters * TUX64_LITERAL_UINT32(sizeof(char)),
-      list->prefix_short_characters * TUX64_LITERAL_UINT32(sizeof(char))
+      list->prefix_short.characters * TUX64_LITERAL_UINT32(sizeof(char))
    ) == TUX64_BOOLEAN_TRUE) {
       return TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_SHORT;
    }
@@ -203,7 +203,7 @@ tux64_arguments_parse_argument(
    struct Tux64ArgumentsIterator * iterator,
    void * context,
    Tux64UInt8 * required_storage,
-   const struct Tux64ArgumentsIteratorNextPayloadOk * argument
+   const struct Tux64String * argument
 ) {
    struct Tux64ArgumentsParseResult result;
 
@@ -218,7 +218,7 @@ tux64_arguments_parse_argument(
 
       case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE:
          result.status = TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER;
-         result.payload.unknown_identifier.identifier = argument->ptr;
+         result.payload.unknown_identifier.identifier = *argument;
          return result;
    }
 

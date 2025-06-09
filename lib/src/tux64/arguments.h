@@ -47,13 +47,8 @@ enum Tux64ArgumentsIteratorNextStatus {
    TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_END_OF_STREAM
 };
 
-struct Tux64ArgumentsIteratorNextPayloadOk {
-   const char * ptr;
-   Tux64UInt32 characters;
-};
-
 union Tux64ArgumentsIteratorNextPayload {
-   struct Tux64ArgumentsIteratorNextPayloadOk ok;
+   struct Tux64String ok;
 };
 
 struct Tux64ArgumentsIteratorNextResult {
@@ -84,26 +79,26 @@ enum Tux64ArgumentsParseStatus {
 };
 
 struct Tux64ArgumentsParsePayloadUnknownIdentifier {
-   const char * identifier;
+   struct Tux64String identifier;
 };
 
 struct Tux64ArgumentsParsePayloadParameterMissing {
-   const char * identifier;
+   struct Tux64String identifier;
 };
 
 struct Tux64ArgumentsParsePayloadParameterUnexpected {
-   const char * identifier;
-   const char * parameter;
+   struct Tux64String identifier;
+   struct Tux64String parameter;
 };
 
 struct Tux64ArgumentsParsePayloadParameterInvalid {
-   const char * identifier;
-   const char * parameter;
-   const char * reason;
+   struct Tux64String identifier;
+   struct Tux64String parameter;
+   struct Tux64String reason;
 };
 
 struct Tux64ArgumentsParsePayloadRequiredMissing {
-   const char * identifier;
+   struct Tux64String identifier;
 };
 
 union Tux64ArgumentsParsePayload {
@@ -120,7 +115,7 @@ struct Tux64ArgumentsParseResult {
 };
 
 struct Tux64ArgumentsParseOptionPayloadParameterInvalid {
-   const char * reason;
+   struct Tux64String reason;
 };
 
 union Tux64ArgumentsParseOptionPayload {
@@ -133,14 +128,13 @@ struct Tux64ArgumentsParseOptionResult {
 };
 
 typedef struct Tux64ArgumentsParseOptionResult (*Tux64ArgumentsParseFunction)(
-   const char * parameter,
-   Tux64UInt32 parameter_characters,
+   const struct Tux64String * parameter,
    void * context
 );
 
 /* defines a single option */
 struct Tux64ArgumentsOption {
-   const char * const * identifiers_long;
+   const struct Tux64String * identifiers_long;
    const char * identifiers_short;
    Tux64UInt32 identifiers_long_count;
    Tux64UInt32 identifiers_short_count;
@@ -153,10 +147,8 @@ struct Tux64ArgumentsList {
    const struct Tux64ArgumentsOption * options_optional;
    Tux64UInt32 options_required_count;
    Tux64UInt32 options_optional_count;
-   const char * prefix_long;
-   const char * prefix_short;
-   Tux64UInt32 prefix_long_characters;
-   Tux64UInt32 prefix_short_characters;
+   struct Tux64String prefix_long;
+   struct Tux64String prefix_short;
 };
 
 /*----------------------------------------------------------------------------*/
