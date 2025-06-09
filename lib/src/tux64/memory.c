@@ -262,6 +262,20 @@ tux64_memory_compare_with_equal_lengths(
    return retn;
 }
 
+Tux64Boolean
+tux64_memory_compare_start(
+   const void * restrict data,
+   const void * restrict prefix,
+   Tux64UInt32 bytes_data,
+   Tux64UInt32 bytes_prefix
+) {
+   if (bytes_data < bytes_prefix) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   return tux64_memory_compare_with_equal_lengths(data, prefix, bytes_prefix);
+}
+
 struct Tux64MemoryFindResult
 tux64_memory_find(
    const void * restrict data,

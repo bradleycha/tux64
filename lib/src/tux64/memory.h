@@ -56,6 +56,17 @@ tux64_memory_compare_with_equal_lengths(
    Tux64UInt32 bytes
 );
 
+/*----------------------------------------------------------------------------*/
+/* Checks if a block of data starts with another block of data.               */
+/*----------------------------------------------------------------------------*/
+Tux64Boolean
+tux64_memory_compare_start(
+   const void * restrict data,
+   const void * restrict prefix,
+   Tux64UInt32 bytes_data,
+   Tux64UInt32 bytes_prefix 
+);
+
 enum Tux64MemoryFindStatus {
    TUX64_MEMORY_FIND_STATUS_FOUND,
    TUX64_MEMORY_FIND_STATUS_MISSING
