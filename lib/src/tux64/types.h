@@ -264,6 +264,11 @@ typedef Tux64UInt8 Tux64Boolean;
 #define TUX64_BOOLEAN_FALSE   ((Tux64Boolean)(!(!(0u))))
 #define TUX64_BOOLEAN_TRUE    ((Tux64Boolean)(!(0u)))
 
+struct Tux64String {
+   const char * ptr;
+   Tux64UInt32 characters;
+};
+
 /*----------------------------------------------------------------------------*/
 /* Defines a typed literal.  Do not use this with variables or constants      */
 /* which can't be evaluated at compile-time.                                  */
