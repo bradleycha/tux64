@@ -176,5 +176,25 @@ tux64_bitwise_flags_check_all_uint64(
 );
 
 /*----------------------------------------------------------------------------*/
+/* Creates a bitmask where all the lowest 'bits' number of bits are set.      */
+/*----------------------------------------------------------------------------*/
+Tux64UInt8
+tux64_bitwise_mask_set_all_low_uint8(
+   Tux64UInt8 bits
+);
+Tux64UInt16
+tux64_bitwise_mask_set_all_low_uint16(
+   Tux64UInt8 bits
+);
+Tux64UInt32
+tux64_bitwise_mask_set_all_low_uint32(
+   Tux64UInt8 bits
+);
+Tux64UInt64
+tux64_bitwise_mask_set_all_low_uint64(
+   Tux64UInt8 bits
+);
+
+/*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BITWISE_H */
 

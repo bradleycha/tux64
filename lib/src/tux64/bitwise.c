@@ -252,3 +252,34 @@ tux64_bitwise_flags_check_all_uint64(
    return TUX64_BITWISE_FLAGS_CHECK_ALL(value, bit_flags);
 }
 
+#define TUX64_BITWISE_MASK_SET_ALL_LOW(bits, one_sentinel)\
+   (((one_sentinel) << (bits)) - (one_sentinel))
+
+Tux64UInt8
+tux64_bitwise_mask_set_all_low_uint8(
+   Tux64UInt8 bits
+) {
+   return TUX64_BITWISE_MASK_SET_ALL_LOW(bits, TUX64_LITERAL_UINT8(1u));
+}
+
+Tux64UInt16
+tux64_bitwise_mask_set_all_low_uint16(
+   Tux64UInt8 bits
+) {
+   return TUX64_BITWISE_MASK_SET_ALL_LOW(bits, TUX64_LITERAL_UINT16(1u));
+}
+
+Tux64UInt32
+tux64_bitwise_mask_set_all_low_uint32(
+   Tux64UInt8 bits
+) {
+   return TUX64_BITWISE_MASK_SET_ALL_LOW(bits, TUX64_LITERAL_UINT32(1u));
+}
+
+Tux64UInt64
+tux64_bitwise_mask_set_all_low_uint64(
+   Tux64UInt8 bits
+) {
+   return TUX64_BITWISE_MASK_SET_ALL_LOW(bits, TUX64_LITERAL_UINT64(1u));
+}
+
