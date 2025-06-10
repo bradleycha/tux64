@@ -421,7 +421,7 @@ tux64_mkrom_arguments_print_menu(
    const char * text,
    Tux64UInt32 bytes
 ) {
-   (void)fwrite(text, (size_t)bytes, (size_t)1u, stderr);
+   (void)fwrite(text, (size_t)bytes, (size_t)1u, stdout);
    return;
 }
 
