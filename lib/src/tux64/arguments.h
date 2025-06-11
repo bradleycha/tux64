@@ -69,6 +69,7 @@ enum Tux64ArgumentsParseStatus {
 
    TUX64_ARGUMENTS_PARSE_STATUS_OK,
    TUX64_ARGUMENTS_PARSE_STATUS_EXIT,
+   TUX64_ARGUMENTS_PARSE_STATUS_NOT_AN_ARGUMENT,
    TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER,
    TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING,
    TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED,
@@ -76,6 +77,10 @@ enum Tux64ArgumentsParseStatus {
    TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING,
 
    _TUX64_ARGUMENTS_PARSE_STATUS_END_OFFSET
+};
+
+struct Tux64ArgumentsParsePayloadNotAnArgument {
+   struct Tux64String argument;
 };
 
 struct Tux64ArgumentsParsePayloadUnknownIdentifier {
@@ -102,6 +107,7 @@ struct Tux64ArgumentsParsePayloadRequiredMissing {
 };
 
 union Tux64ArgumentsParsePayload {
+   struct Tux64ArgumentsParsePayloadNotAnArgument not_an_argument;
    struct Tux64ArgumentsParsePayloadUnknownIdentifier unknown_identifier;
    struct Tux64ArgumentsParsePayloadParameterMissing parameter_missing;
    struct Tux64ArgumentsParsePayloadParameterUnexpected parameter_unexpected;

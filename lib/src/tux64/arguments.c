@@ -198,8 +198,10 @@ tux64_arguments_parse_prefix(
 }
 
 struct Tux64ArgumentsParseTokens {
+   struct Tux64String prefix_identifier;
    struct Tux64String identifier;
    struct Tux64String parameter;
+   enum Tux64ArgumentsParsePrefixType prefix_type;
 };
 
 static struct Tux64ArgumentsParseTokens
@@ -210,36 +212,72 @@ tux64_arguments_parse_argument_tokenize(
    struct Tux64ArgumentsParseTokens tokens;
    struct Tux64MemoryFindResult token_find_result;
 
+   /* initialize prefix identifier to zero-length string slice of argument */
+   tokens.prefix_identifier.ptr = argument->ptr;
+   tokens.prefix_identifier.characters = TUX64_LITERAL_UINT32(0u);
+
+   /* decide on the prefix type and count its characters */
+   tokens.prefix_type = tux64_arguments_parse_prefix(list, argument);
+   switch (tokens.prefix_type) {
+      case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_LONG:
+         tokens.prefix_identifier.characters += list->prefix_long.characters;
+         break;
+      case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_SHORT:
+         tokens.prefix_identifier.characters += list->prefix_short.characters;
+         break;
+      case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE:
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   /* isolate the identifier's ptr */
+   tokens.identifier.ptr =
+      tokens.prefix_identifier.ptr +
+      tokens.prefix_identifier.characters;
+
+   /* attempt to split the remaining argument, skipping the prefix */
    token_find_result = tux64_memory_find(
-      argument->ptr,
+      &argument->ptr[tokens.prefix_identifier.characters],
       &list->identifier_parameter_split_token,
-      argument->characters,
+      argument->characters - tokens.prefix_identifier.characters,
       TUX64_LITERAL_UINT32(sizeof(list->identifier_parameter_split_token))
    );
    if (token_find_result.status != TUX64_MEMORY_FIND_STATUS_FOUND) {
-      tokens.identifier = *argument;
+      /* isolate the identifier */
+      tokens.identifier.characters =
+         argument->characters -
+         tokens.prefix_identifier.characters;
+
+      /* include the identifier in the prefix identifier */
+      tokens.prefix_identifier.characters += tokens.identifier.characters;
+
+      /* write empty string to parameter and get out! */
       tokens.parameter.characters = TUX64_LITERAL_UINT32(0u);
       return tokens;
    }
 
-   tokens.identifier.ptr = argument->ptr;
+   /* store the final string lengths for the identifier and its prefix variant */
    tokens.identifier.characters = token_find_result.payload.found.position;
+   tokens.prefix_identifier.characters += tokens.identifier.characters;
 
+   /* calculate the string slice for the parameter */
    tokens.parameter.ptr =
       tokens.identifier.ptr +
       tokens.identifier.characters +
       TUX64_LITERAL_UINT32(1u);
    tokens.parameter.characters =
       argument->characters -
-      tokens.identifier.characters -
+      tokens.prefix_identifier.characters -
       TUX64_LITERAL_UINT32(1u);
 
+   /* done! */
    return tokens;
 }
 
 static struct Tux64ArgumentsParseResult
 tux64_arguments_parse_argument_execute(
-   const struct Tux64String * identifier,
+   const struct Tux64String * prefix_identifier,
    const struct Tux64String * parameter,
    const struct Tux64ArgumentsOption * option,
    void * context
@@ -260,22 +298,22 @@ tux64_arguments_parse_argument_execute(
          TUX64_UNREACHABLE;
 
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING:
-         result.payload.parameter_missing.identifier = *identifier;
+         result.payload.parameter_missing.identifier = *prefix_identifier;
          break;
 
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED:
-         result.payload.parameter_unexpected.identifier = *identifier;
+         result.payload.parameter_unexpected.identifier = *prefix_identifier;
          result.payload.parameter_unexpected.parameter = *parameter;
          break;
 
       case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID:
-         result.payload.parameter_invalid.identifier = *identifier;
+         result.payload.parameter_invalid.identifier = *prefix_identifier;
          result.payload.parameter_invalid.parameter = *parameter;
          result.payload.parameter_invalid.reason = parse_result.payload.parameter_invalid.reason;
          break;
 
       case TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING:
-         result.payload.required_missing.identifier = *identifier;
+         result.payload.required_missing.identifier = *prefix_identifier;
          break;
 
       default:
@@ -297,7 +335,7 @@ tux64_arguments_parse_argument_digest(
    struct Tux64ArgumentsIteratorNextResult next_argument;
 
    result = tux64_arguments_parse_argument_execute(
-      &tokens->identifier,
+      &tokens->prefix_identifier,
       &tokens->parameter,
       option,
       context
@@ -314,7 +352,7 @@ tux64_arguments_parse_argument_digest(
    }
 
    return tux64_arguments_parse_argument_execute(
-      &tokens->identifier,
+      &tokens->prefix_identifier,
       &next_argument.payload.ok,
       option,
       context
@@ -372,27 +410,23 @@ tux64_arguments_parse_argument_long(
    struct Tux64ArgumentsIterator * iterator,
    void * context,
    Tux64UInt8 * required_storage,
-   const struct Tux64String * argument,
-   const struct Tux64String * argument_noprefix
+   const struct Tux64ArgumentsParseTokens * tokens
 ) {
    struct Tux64ArgumentsParseResult result;
-   struct Tux64ArgumentsParseTokens tokens;
    const struct Tux64ArgumentsOption * iter_option;
    Tux64UInt32 index_option;
-
-   tokens = tux64_arguments_parse_argument_tokenize(list, argument_noprefix);
 
    index_option = TUX64_LITERAL_UINT32(0u);
    iter_option = list->options_required;
    do {
       if (tux64_arguments_parse_argument_long_is_match(
          iter_option,
-         &tokens.identifier
+         &tokens->identifier
       ) == TUX64_BOOLEAN_TRUE) {
          tux64_arguments_parse_argument_set_required(index_option, required_storage);
          return tux64_arguments_parse_argument_digest(
             iterator,
-            &tokens,
+            tokens,
             iter_option,
             context
          );
@@ -407,11 +441,11 @@ tux64_arguments_parse_argument_long(
    do {
       if (tux64_arguments_parse_argument_long_is_match(
          &list->options_optional[index_option],
-         &tokens.identifier
+         &tokens->identifier
       ) == TUX64_BOOLEAN_TRUE) {
          return tux64_arguments_parse_argument_digest(
             iterator,
-            &tokens,
+            tokens,
             iter_option,
             context
          );
@@ -422,7 +456,7 @@ tux64_arguments_parse_argument_long(
    } while (index_option != list->options_optional_count);
 
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER;
-   result.payload.unknown_identifier.identifier = *argument;
+   result.payload.unknown_identifier.identifier = tokens->prefix_identifier;
    return result;
 }
 
@@ -449,24 +483,20 @@ tux64_arguments_parse_argument_short(
    struct Tux64ArgumentsIterator * iterator,
    void * context,
    Tux64UInt8 * required_storage,
-   const struct Tux64String * argument,
-   const struct Tux64String * argument_noprefix
+   const struct Tux64ArgumentsParseTokens * tokens
 ) {
    struct Tux64ArgumentsParseResult result;
-   struct Tux64ArgumentsParseTokens tokens;
    char identifier;
    const struct Tux64ArgumentsOption * iter_option;
    Tux64UInt32 index_option;
 
-   tokens = tux64_arguments_parse_argument_tokenize(list, argument_noprefix);
-
-   if (tokens.identifier.characters != TUX64_LITERAL_UINT32(1u)) {
+   if (tokens->identifier.characters != TUX64_LITERAL_UINT32(1u)) {
       result.status = TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER;
-      result.payload.unknown_identifier.identifier = *argument;
+      result.payload.unknown_identifier.identifier = tokens->prefix_identifier;
       return result;
    }
 
-   identifier = tokens.identifier.ptr[0];
+   identifier = tokens->identifier.ptr[0];
 
    index_option = TUX64_LITERAL_UINT32(0u);
    iter_option = list->options_required;
@@ -478,7 +508,7 @@ tux64_arguments_parse_argument_short(
          tux64_arguments_parse_argument_set_required(index_option, required_storage);
          return tux64_arguments_parse_argument_digest(
             iterator,
-            &tokens,
+            tokens,
             iter_option,
             context
          );
@@ -497,7 +527,7 @@ tux64_arguments_parse_argument_short(
       ) == TUX64_BOOLEAN_TRUE) {
          return tux64_arguments_parse_argument_digest(
             iterator,
-            &tokens,
+            tokens,
             iter_option,
             context
          );
@@ -508,7 +538,7 @@ tux64_arguments_parse_argument_short(
    } while (index_option != list->options_optional_count);
 
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER;
-   result.payload.unknown_identifier.identifier = *argument;
+   result.payload.unknown_identifier.identifier = tokens->prefix_identifier;
    return result;
 }
 
@@ -521,36 +551,32 @@ tux64_arguments_parse_argument(
    const struct Tux64String * argument
 ) {
    struct Tux64ArgumentsParseResult result;
-   struct Tux64String argument_noprefix;
+   struct Tux64ArgumentsParseTokens tokens;
 
-   switch (tux64_arguments_parse_prefix(list, argument)) {
+   tokens = tux64_arguments_parse_argument_tokenize(list, argument);
+
+   switch (tokens.prefix_type) {
       case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_LONG:
-         argument_noprefix.ptr         = argument->ptr + list->prefix_long.characters;
-         argument_noprefix.characters  = argument->characters - list->prefix_long.characters;
          return tux64_arguments_parse_argument_long(
             list,
             iterator,
             context,
             required_storage,
-            argument,
-            &argument_noprefix
+            &tokens
          );
 
       case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_SHORT:
-         argument_noprefix.ptr         = argument->ptr + list->prefix_short.characters;
-         argument_noprefix.characters  = argument->characters - list->prefix_short.characters;
          return tux64_arguments_parse_argument_short(
             list,
             iterator,
             context,
             required_storage,
-            argument,
-            &argument_noprefix
+            &tokens
          );
 
       case TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE:
-         result.status = TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER;
-         result.payload.unknown_identifier.identifier = *argument;
+         result.status = TUX64_ARGUMENTS_PARSE_STATUS_NOT_AN_ARGUMENT;
+         result.payload.not_an_argument.argument = *argument;
          return result;
 
       default:
