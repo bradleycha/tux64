@@ -9,8 +9,8 @@
 #include "tux64/tux64.h"
 #include "tux64/arguments.h"
 
-#include <tux64/memory.h>
-#include <tux64/bitwise.h>
+#include "tux64/memory.h"
+#include "tux64/bitwise.h"
 
 void
 tux64_arguments_iterator_initialize_command_line(
