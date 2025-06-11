@@ -94,12 +94,22 @@ _tux64_log_plain(
 #else /* _TUX64_LOG_ENABLE */
 /*----------------------------------------------------------------------------*/
 
-#define TUX64_LOG_INFO(...)
-#define TUX64_LOG_WARNING(...)
-#define TUX64_LOG_ERROR(...)
-#define TUX64_LOG_INFO_FMT(...)
-#define TUX64_LOG_WARNING_FMT(...)
-#define TUX64_LOG_ERROR_FMT(...)
+void
+_tux64_log_stub(const char * message);
+void
+_tux64_log_stub_fmt(const char * fmt, ...);
+
+#define _TUX64_LOG_STUB(message)\
+   _tux64_log_stub(message)
+#define _TUX64_LOG_STUB_FMT(fmt, ...)\
+   _tux64_log_stub_fmt(fmt, __VA_ARGS__)
+
+#define TUX64_LOG_INFO(message)           _TUX64_LOG_STUB(message)
+#define TUX64_LOG_WARNING(message)        _TUX64_LOG_STUB(message)
+#define TUX64_LOG_ERROR(message)          _TUX64_LOG_STUB(message)
+#define TUX64_LOG_INFO_FMT(fmt, ...)      _TUX64_LOG_STUB_FMT(fmt, __VA_ARGS__)
+#define TUX64_LOG_WARNING_FMT(fmt, ...)   _TUX64_LOG_STUB_FMT(fmt, __VA_ARGS__)
+#define TUX64_LOG_ERROR_FMT(fmt, ...)     _TUX64_LOG_STUB_FMT(fmt, __VA_ARGS__)
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_LOG_ENABLE */

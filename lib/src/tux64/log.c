@@ -193,5 +193,25 @@ _tux64_log_plain(
 #endif /* TUX64_CONFIG_LOG_ORIGIN */
 
 /*----------------------------------------------------------------------------*/
+#else /* _TUX64_LOG_ENABLE */
+/*----------------------------------------------------------------------------*/
+
+/* these need to be defined so we can properly dispose of inputs.  without */
+/* these, it's possible to get warnings (and errors under -Werror) about */
+/* unused variables. */
+
+void
+_tux64_log_stub(const char * fmt) {
+   (void)fmt;
+   return;
+}
+
+void
+_tux64_log_stub_fmt(const char * fmt, ...) {
+   (void)fmt;
+   return;
+}
+
+/*----------------------------------------------------------------------------*/
 #endif /* _TUX64_LOG_ENABLE */
 
