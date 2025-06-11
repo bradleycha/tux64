@@ -62,6 +62,13 @@ tux64_mkrom_exit_result_display_arguments_parse_error(
          TUX64_UNREACHABLE;
       case TUX64_ARGUMENTS_PARSE_STATUS_EXIT:
          TUX64_UNREACHABLE;
+      case TUX64_ARGUMENTS_PARSE_STATUS_NOT_AN_ARGUMENT:
+         TUX64_LOG_ERROR_FMT(
+            "\'%.*s\' is not an argument",
+            self->result.payload.not_an_argument.argument.characters,
+            self->result.payload.not_an_argument.argument.ptr
+         );
+         break;
       case TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER:
          TUX64_LOG_ERROR_FMT(
             "unknown argument \'%.*s\'",
