@@ -33,7 +33,7 @@ AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([void *])
 
-AC_CHECK_HEADERS([stdint.h, string.h, stdio.h, stdarg.h])
+AC_CHECK_HEADERS([stdint.h stdarg.h stdlib.h string.h stdio.h errno.h])
 
 tux64_config_platform_cpu_signed_integer_format_sign_magnitude=0
 tux64_config_platform_cpu_signed_integer_format_ones_complement=0
