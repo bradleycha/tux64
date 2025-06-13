@@ -9,15 +9,20 @@
 #include "tux64-mkrom/tux64-mkrom.h"
 
 #include <tux64/log.h>
+#include <tux64/memory.h>
+#include <tux64/fs.h>
 #include <tux64/arguments.h>
 #include "tux64-mkrom/arguments.h"
 
+#include <stdlib.h>
 #include <inttypes.h>
 
 #define TUX64_MKROM_ARGC_MAX TUX64_UINT8_MAX
 
 enum Tux64MkromExitStatus {
    TUX64_MKROM_EXIT_STATUS_OK = 0u,
+   TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY,
+   TUX64_MKROM_EXIT_STATUS_FS_ERROR,
    TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS,
    TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR
 };
@@ -27,12 +32,17 @@ struct Tux64MkromExitPayloadTooManyArguments {
    Tux64UInt8 argc_max;
 };
 
+struct Tux64MkromExitPayloadFsError {
+   struct Tux64FsResult reason;
+};
+
 struct Tux64MkromExitPayloadArgumentsParseError {
    struct Tux64ArgumentsParseResult result;
 };
 
 union Tux64MkromExitPayload {
    struct Tux64MkromExitPayloadTooManyArguments too_many_arguments;
+   struct Tux64MkromExitPayloadFsError fs_error;
    struct Tux64MkromExitPayloadArgumentsParseError arguments_parse_error;
 };
 
@@ -50,6 +60,38 @@ tux64_mkrom_exit_result_display_too_many_arguments(
       self->argc_given,
       self->argc_max
    );
+   return;
+}
+
+static void
+tux64_mkrom_exit_result_display_fs_error(
+   const struct Tux64MkromExitPayloadFsError * self
+) {
+   switch (self->reason.status) {
+      case TUX64_FS_STATUS_OK:
+         TUX64_UNREACHABLE;
+      case TUX64_FS_STATUS_NOT_FOUND:
+         TUX64_LOG_ERROR("file not found");
+         break;
+      case TUX64_FS_STATUS_PERMISSION_DENIED:
+         TUX64_LOG_ERROR("permission denied");
+         break;
+      case TUX64_FS_STATUS_NOT_A_FILE:
+         TUX64_LOG_ERROR("expected a file, encountered a directory or other non-file object");
+         break;
+      case TUX64_FS_STATUS_OUT_OF_MEMORY:
+         TUX64_UNREACHABLE;
+         break;
+      case TUX64_FS_STATUS_UNKNOWN_ERROR:
+         TUX64_LOG_ERROR_FMT(
+            "unknown I/O error (%d)",
+            self->reason.payload.unknown_error
+         );
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
    return;
 }
 
@@ -127,6 +169,12 @@ tux64_mkrom_exit_result_display(
       case TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS:
          tux64_mkrom_exit_result_display_too_many_arguments(&self->payload.too_many_arguments);
          break;
+      case TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY:
+         TUX64_LOG_ERROR("out of memory");
+         break;
+      case TUX64_MKROM_EXIT_STATUS_FS_ERROR:
+         tux64_mkrom_exit_result_display_fs_error(&self->payload.fs_error);
+         break;
       case TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR:
          tux64_mkrom_exit_result_display_arguments_parse_error(&self->payload.arguments_parse_error);
          break;
@@ -135,6 +183,82 @@ tux64_mkrom_exit_result_display(
    }
 
    return;
+}
+
+/* converts a prefix/path string pair into a C-string which can be used with */
+/* file operations.  return TUX64_NULLPTR when memory allocation fails. this */
+/* must be freed manually by the caller. */
+static char *
+tux64_mkrom_canonicalize_path(
+   const struct Tux64String * prefix,
+   const struct Tux64String * path
+) {
+   Tux64UInt32 characters;
+   char * ptr;
+
+   /* includes space for the null-terminator */
+   characters = prefix->characters + path->characters + TUX64_LITERAL_UINT32(1u);
+   ptr = malloc(characters * sizeof(char));
+   if (ptr == NULL) {
+      return TUX64_NULLPTR;
+   }
+
+   tux64_memory_copy(ptr, prefix->ptr, prefix->characters);
+   tux64_memory_copy(ptr + prefix->characters, path->ptr, path->characters);
+   ptr[characters - TUX64_LITERAL_UINT32(1u)] = '\0';
+
+   return ptr;
+}
+
+static struct Tux64MkromExitResult
+tux64_mkrom_run_loaded_config(
+   const struct Tux64String * path_prefix,
+   const struct Tux64FsLoadedFile * file_config,
+   const char * path_canonical_output
+) {
+   struct Tux64MkromExitResult result;
+
+   /* TODO: implement */
+   TUX64_LOG_INFO("made it to the loaded config!");
+   (void)path_prefix;
+   (void)file_config;
+   (void)path_canonical_output;
+   result.status = TUX64_MKROM_EXIT_STATUS_OK;
+   return result;
+}
+
+static struct Tux64MkromExitResult
+tux64_mkrom_run_args(
+   const struct Tux64String * path_prefix,
+   const char * path_canonical_config,
+   const char * path_canonical_output
+) {
+   struct Tux64MkromExitResult result;
+   struct Tux64FsFileLoadResult config_file_load_result;
+
+   /* attempt to load the config file into memory */
+   TUX64_LOG_INFO_FMT("loading config file from %s", path_canonical_config);
+   config_file_load_result = tux64_fs_file_load(path_canonical_config);
+   switch (config_file_load_result.status) {
+      case TUX64_FS_STATUS_OK:
+         break;
+      case TUX64_FS_STATUS_OUT_OF_MEMORY:
+         result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+         return result;
+      default:
+         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
+         result.payload.fs_error.reason.status = config_file_load_result.status;
+         result.payload.fs_error.reason.payload = config_file_load_result.payload.err;
+         return result;
+   }
+
+   result = tux64_mkrom_run_loaded_config(
+      path_prefix,
+      &config_file_load_result.payload.ok,
+      path_canonical_output
+   );
+   tux64_fs_file_unload(&config_file_load_result.payload.ok);
+   return result;
 }
 
 static struct Tux64MkromExitResult
@@ -146,6 +270,8 @@ tux64_mkrom_main(
    struct Tux64ArgumentsIterator args_iterator;
    struct Tux64ArgumentsParseResult args_parse_result;
    struct Tux64MkromArguments args;
+   char * path_config;
+   char * path_output;
 
    /* if the user is completely clueless, show them the help menu when no */
    /* arguments are present */
@@ -162,6 +288,7 @@ tux64_mkrom_main(
       &argv[1]
    );
 
+   /* parse command-line arguments */
    args_parse_result = tux64_mkrom_arguments_parse(
       &args_iterator,
       &args
@@ -178,10 +305,29 @@ tux64_mkrom_main(
          return result;
    }
 
-   /* TODO: implement */
-   (void)args;
-   TUX64_LOG_INFO("hello from tux64_mkrom_main()!");
-   result.status = TUX64_MKROM_EXIT_STATUS_OK;
+   /* canonicalize the config path and output path */
+   path_config = tux64_mkrom_canonicalize_path(
+      &args.path_prefix,
+      &args.path_config
+   );
+   if (path_config == TUX64_NULLPTR) {
+      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+      goto exit0;
+   }
+   path_output = tux64_mkrom_canonicalize_path(
+      &args.path_prefix,
+      &args.path_output
+   );
+   if (path_output == TUX64_NULLPTR) {
+      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+      goto exit1;
+   }
+
+   result = tux64_mkrom_run_args(&args.path_prefix, path_config, path_output);
+   free(path_output);
+exit1:
+   free(path_config);
+exit0:
    return result;
 }
 
