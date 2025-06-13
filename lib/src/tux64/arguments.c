@@ -74,98 +74,6 @@ tux64_arguments_iterator_next(
    return tux64_arguments_iterator_next_functions[(Tux64UInt8)self->type](self);
 }
 
-static void
-tux64_arguments_parse_required_storage_initialize(
-   const struct Tux64ArgumentsList * list,
-   Tux64UInt8 * required_storage
-) {
-   Tux64UInt32 bytes;
-   Tux64UInt8 sentinel;
-
-   /* have to do a ceil-divide instead of floor-divide */
-   bytes = (list->options_required_count + TUX64_LITERAL_UINT32(8u)) / TUX64_LITERAL_UINT32(8u);
-   sentinel = 0x00;
-
-   tux64_memory_fill(
-      required_storage,
-      &sentinel,
-      bytes,
-      TUX64_LITERAL_UINT32(sizeof(sentinel))
-   );
-
-   return;
-}
-
-static struct Tux64ArgumentsParseResult
-tux64_arguments_parse_check_required_error_missing(
-   const struct Tux64ArgumentsList * list,
-   Tux64UInt32 argument_index,
-   Tux64UInt32 flags
-) {
-   struct Tux64ArgumentsParseResult result;
-   const struct Tux64ArgumentsOption * option;
-
-   /* find the true argument index for the lowest set bit */
-   while ((flags & TUX64_LITERAL_UINT32(1u)) == TUX64_LITERAL_UINT32(1u)) {
-      argument_index++;
-      flags >>= TUX64_LITERAL_UINT8(1u);
-   }
-
-   /* get the relevant option */
-   option = &list->options_required[argument_index];
-
-   /* choose the first available identifier and return */
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING;
-   result.payload.required_missing.identifier = option->identifiers_long[0u];
-   return result;
-}
-
-static struct Tux64ArgumentsParseResult
-tux64_arguments_parse_check_required(
-   const struct Tux64ArgumentsList * list,
-   const Tux64UInt8 * required_storage
-) {
-   struct Tux64ArgumentsParseResult result;
-   Tux64UInt32 full_bytes;
-   Tux64UInt32 remaining_bits;
-   Tux64UInt32 argument_index;
-   Tux64UInt8 flags;
-   Tux64UInt8 mask;
-   const Tux64UInt8 * iter_required_storage;
-
-   full_bytes              = list->options_required_count / TUX64_LITERAL_UINT32(8u);
-   remaining_bits          = list->options_required_count % TUX64_LITERAL_UINT32(8u);
-   iter_required_storage   = required_storage;
-   argument_index          = TUX64_LITERAL_UINT32(0u);
-
-   /* check full bytes at once*/
-   while (full_bytes != TUX64_LITERAL_UINT32(0u)) {
-      flags = *iter_required_storage;
-
-      if (flags != TUX64_LITERAL_UINT8(0xff)) {
-         return tux64_arguments_parse_check_required_error_missing(list, argument_index, flags);
-      }
-
-      argument_index += TUX64_LITERAL_UINT32(8u);
-      iter_required_storage++;
-      full_bytes--;
-   }
-
-   /* check any remaining bits */
-   if (remaining_bits != TUX64_LITERAL_UINT32(0u)) {
-      flags = *iter_required_storage;
-
-      mask = tux64_bitwise_mask_set_all_low_uint8(remaining_bits);
-
-      if (tux64_bitwise_flags_check_all_uint8(mask, flags) == TUX64_BOOLEAN_FALSE) {
-         return tux64_arguments_parse_check_required_error_missing(list, argument_index, flags);
-      }
-   }
-
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
-   return result;
-}
-
 enum Tux64ArgumentsParsePrefixType {
    TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE,
    TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_LONG,
@@ -275,6 +183,98 @@ tux64_arguments_parse_argument_tokenize(
    return tokens;
 }
 
+static void
+tux64_arguments_parse_required_storage_initialize(
+   const struct Tux64ArgumentsList * list,
+   Tux64UInt8 * required_storage
+) {
+   Tux64UInt32 bytes;
+   Tux64UInt8 sentinel;
+
+   /* have to do a ceil-divide instead of floor-divide */
+   bytes = (list->options_required_count + TUX64_LITERAL_UINT32(8u)) / TUX64_LITERAL_UINT32(8u);
+   sentinel = 0x00;
+
+   tux64_memory_fill(
+      required_storage,
+      &sentinel,
+      bytes,
+      TUX64_LITERAL_UINT32(sizeof(sentinel))
+   );
+
+   return;
+}
+
+static struct Tux64ArgumentsParseResult
+tux64_arguments_parse_check_required_error_missing(
+   const struct Tux64ArgumentsList * list,
+   Tux64UInt32 argument_index,
+   Tux64UInt32 flags
+) {
+   struct Tux64ArgumentsParseResult result;
+   const struct Tux64ArgumentsOption * option;
+
+   /* find the true argument index for the lowest set bit */
+   while ((flags & TUX64_LITERAL_UINT32(1u)) == TUX64_LITERAL_UINT32(1u)) {
+      argument_index++;
+      flags >>= TUX64_LITERAL_UINT8(1u);
+   }
+
+   /* get the relevant option */
+   option = &list->options_required[argument_index];
+
+   /* choose the first available identifier and return */
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING;
+   result.payload.required_missing.identifier = option->identifiers_long[0u];
+   return result;
+}
+
+static struct Tux64ArgumentsParseResult
+tux64_arguments_parse_check_required(
+   const struct Tux64ArgumentsList * list,
+   const Tux64UInt8 * required_storage
+) {
+   struct Tux64ArgumentsParseResult result;
+   Tux64UInt32 full_bytes;
+   Tux64UInt32 remaining_bits;
+   Tux64UInt32 argument_index;
+   Tux64UInt8 flags;
+   Tux64UInt8 mask;
+   const Tux64UInt8 * iter_required_storage;
+
+   full_bytes              = list->options_required_count / TUX64_LITERAL_UINT32(8u);
+   remaining_bits          = list->options_required_count % TUX64_LITERAL_UINT32(8u);
+   iter_required_storage   = required_storage;
+   argument_index          = TUX64_LITERAL_UINT32(0u);
+
+   /* check full bytes at once*/
+   while (full_bytes != TUX64_LITERAL_UINT32(0u)) {
+      flags = *iter_required_storage;
+
+      if (flags != TUX64_LITERAL_UINT8(0xff)) {
+         return tux64_arguments_parse_check_required_error_missing(list, argument_index, flags);
+      }
+
+      argument_index += TUX64_LITERAL_UINT32(8u);
+      iter_required_storage++;
+      full_bytes--;
+   }
+
+   /* check any remaining bits */
+   if (remaining_bits != TUX64_LITERAL_UINT32(0u)) {
+      flags = *iter_required_storage;
+
+      mask = tux64_bitwise_mask_set_all_low_uint8(remaining_bits);
+
+      if (tux64_bitwise_flags_check_all_uint8(mask, flags) == TUX64_BOOLEAN_FALSE) {
+         return tux64_arguments_parse_check_required_error_missing(list, argument_index, flags);
+      }
+   }
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
+   return result;
+}
+
 static struct Tux64ArgumentsParseResult
 tux64_arguments_parse_argument_execute(
    const struct Tux64String * prefix_identifier,
@@ -326,6 +326,7 @@ tux64_arguments_parse_argument_execute(
 
 static struct Tux64ArgumentsParseResult
 tux64_arguments_parse_argument_digest(
+   const struct Tux64ArgumentsList * list,
    struct Tux64ArgumentsIterator * iterator,
    const struct Tux64ArgumentsParseTokens * tokens,
    const struct Tux64ArgumentsOption * option,
@@ -333,6 +334,7 @@ tux64_arguments_parse_argument_digest(
 ) {
    struct Tux64ArgumentsParseResult result;
    struct Tux64ArgumentsIteratorNextResult next_argument;
+   enum Tux64ArgumentsParsePrefixType next_argument_prefix;
 
    result = tux64_arguments_parse_argument_execute(
       &tokens->prefix_identifier,
@@ -348,6 +350,15 @@ tux64_arguments_parse_argument_digest(
 
    next_argument = tux64_arguments_iterator_next(iterator);
    if (next_argument.status != TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_OK) {
+      return result;
+   }
+
+   /* make sure the next argument isn't an identifier */
+   next_argument_prefix = tux64_arguments_parse_prefix(
+      list,
+      &next_argument.payload.ok
+   );
+   if (next_argument_prefix != TUX64_ARGUMENTS_PARSE_PREFIX_TYPE_NONE) {
       return result;
    }
 
@@ -425,6 +436,7 @@ tux64_arguments_parse_argument_long(
       ) == TUX64_BOOLEAN_TRUE) {
          tux64_arguments_parse_argument_set_required(index_option, required_storage);
          return tux64_arguments_parse_argument_digest(
+            list,
             iterator,
             tokens,
             iter_option,
@@ -444,6 +456,7 @@ tux64_arguments_parse_argument_long(
          &tokens->identifier
       ) == TUX64_BOOLEAN_TRUE) {
          return tux64_arguments_parse_argument_digest(
+            list,
             iterator,
             tokens,
             iter_option,
@@ -507,6 +520,7 @@ tux64_arguments_parse_argument_short(
       ) == TUX64_BOOLEAN_TRUE) {
          tux64_arguments_parse_argument_set_required(index_option, required_storage);
          return tux64_arguments_parse_argument_digest(
+            list,
             iterator,
             tokens,
             iter_option,
@@ -526,6 +540,7 @@ tux64_arguments_parse_argument_short(
          identifier
       ) == TUX64_BOOLEAN_TRUE) {
          return tux64_arguments_parse_argument_digest(
+            list,
             iterator,
             tokens,
             iter_option,
