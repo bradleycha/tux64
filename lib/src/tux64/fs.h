@@ -26,6 +26,19 @@ enum Tux64FsStatus {
    TUX64_FS_STATUS_UNKNOWN_ERROR
 };
 
+struct Tux64FsPayloadUnknownError {
+   int code;
+};
+
+union Tux64FsPayload {
+   struct Tux64FsPayloadUnknownError unknown_error;
+};
+
+struct Tux64FsResult {
+   enum Tux64FsStatus status;
+   union Tux64FsPayload payload;
+};
+
 struct Tux64FsLoadedFile {
    Tux64UInt8 * data;
    Tux64UInt32 bytes;
@@ -33,6 +46,7 @@ struct Tux64FsLoadedFile {
 
 union Tux64FsFileLoadPayload {
    struct Tux64FsLoadedFile ok;
+   union Tux64FsPayload err;
 };
 
 struct Tux64FsFileLoadResult {
@@ -52,7 +66,7 @@ tux64_fs_file_load(
 /*----------------------------------------------------------------------------*/
 /* Attempts to write a loaded file to the given path.                         */
 /*----------------------------------------------------------------------------*/
-enum Tux64FsStatus
+struct Tux64FsResult
 tux64_fs_file_save(
    const char * path,
    const struct Tux64FsLoadedFile * file

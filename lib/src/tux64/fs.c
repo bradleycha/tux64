@@ -15,11 +15,11 @@
 #include <stdio.h>
 #include <errno.h>
 
-static enum Tux64FsStatus
-tux64_fs_errno_to_fs_status(
+static struct Tux64FsResult
+tux64_fs_errno_to_fs_result(
    int err
 ) {
-   enum Tux64FsStatus status;
+   struct Tux64FsResult result;
 
    /* "errno" - i can't believe it's not local! */
    /* ... */
@@ -37,43 +37,59 @@ tux64_fs_errno_to_fs_status(
          TUX64_UNREACHABLE;
 
       case ENOENT:
-         status = TUX64_FS_STATUS_NOT_FOUND;
+         result.status = TUX64_FS_STATUS_NOT_FOUND;
          break;
 
       case EACCES:
          /* these people are so stupid, they can't even spell their OWN */
          /* damn shiterface correctly! */
-         status = TUX64_FS_STATUS_PERMISSION_DENIED;
+         result.status = TUX64_FS_STATUS_PERMISSION_DENIED;
          break;
 
       case EISDIR:
-         status = TUX64_FS_STATUS_NOT_A_FILE;
+         result.status = TUX64_FS_STATUS_NOT_A_FILE;
          break;
 
       case ENOMEM:
          /* hurr-durr, i'm a fuckwit who eats sand and drinks piss.  i also */
          /* use fallible memory allocators for I/O operations which have NO */
          /* reason to allocate memory. */
-         status = TUX64_FS_STATUS_OUT_OF_MEMORY;
+         result.status = TUX64_FS_STATUS_OUT_OF_MEMORY;
          break;
 
       case EROFS:
-         status = TUX64_FS_STATUS_PERMISSION_DENIED;
+         result.status = TUX64_FS_STATUS_PERMISSION_DENIED;
          break;
 
       case ENOSPC:
-         status = TUX64_FS_STATUS_OUT_OF_MEMORY;
+         result.status = TUX64_FS_STATUS_OUT_OF_MEMORY;
          break;
 
       default:
          /* do we document what can be returned? do we use an enum? NO! libc */
          /* just returns some random shit and says "best of luck, fucker! */
          /* good luck parsing this crap!" */
-         status = TUX64_FS_STATUS_UNKNOWN_ERROR;
+         result.status = TUX64_FS_STATUS_UNKNOWN_ERROR;
+         result.payload.unknown_error.code = err;
          break;
    }
 
-   return status;
+   return result;
+}
+
+static struct Tux64FsFileLoadResult
+tux64_fs_errno_to_fs_file_load_result(
+   int err
+) {
+   struct Tux64FsFileLoadResult result;
+   struct Tux64FsResult fs_result;
+
+   fs_result = tux64_fs_errno_to_fs_result(err);
+
+   result.status = fs_result.status;
+   result.payload.err = fs_result.payload;
+
+   return result;
 }
 
 static struct Tux64FsFileLoadResult
@@ -98,7 +114,7 @@ tux64_fs_file_load_allocated(
          file
       );
       if (ferror(file) != 0) {
-         result.status = tux64_fs_errno_to_fs_status(errno);
+         result = tux64_fs_errno_to_fs_file_load_result(errno);
          return result;
       }
 
@@ -123,12 +139,12 @@ tux64_fs_file_load_open(
    /* this ridiculous code is required just to get the number of bytes in a */
    /* file. */
    if (fseek(file, 0, SEEK_END) != 0) {
-      result.status = tux64_fs_errno_to_fs_status(errno);
+      result = tux64_fs_errno_to_fs_file_load_result(errno);
       return result;
    }
    read_bytes = ftell(file);
    if (read_bytes < 0) {
-      result.status = tux64_fs_errno_to_fs_status(errno);
+      result = tux64_fs_errno_to_fs_file_load_result(errno);
       return result;
    }
    rewind(file);
@@ -177,7 +193,7 @@ tux64_fs_file_load(
 
    f = fopen(path, "r");
    if (f == NULL) {
-      result.status = tux64_fs_errno_to_fs_status(errno);
+      result = tux64_fs_errno_to_fs_file_load_result(errno);
       return result;
    }
 
@@ -186,11 +202,12 @@ tux64_fs_file_load(
    return result;
 }
 
-static enum Tux64FsStatus
+static struct Tux64FsResult
 tux64_fs_file_save_open(
    FILE * file_dest,
    const struct Tux64FsLoadedFile * file_src
 ) {
+   struct Tux64FsResult result;
    const Tux64UInt8 * iter_write_buffer;
    Tux64UInt32 write_bytes_remaining;
    Tux64UInt32 written_bytes;
@@ -206,32 +223,35 @@ tux64_fs_file_save_open(
          file_dest
       );
       if (ferror(file_dest) != 0) {
-         return tux64_fs_errno_to_fs_status(errno);
+         result = tux64_fs_errno_to_fs_result(errno);
+         return result;
       }
 
       iter_write_buffer += written_bytes;
       write_bytes_remaining -= written_bytes;
    }
 
-   return TUX64_FS_STATUS_OK;
+   result.status = TUX64_FS_STATUS_OK;
+   return result;
 }
 
-enum Tux64FsStatus
+struct Tux64FsResult
 tux64_fs_file_save(
    const char * path,
    const struct Tux64FsLoadedFile * file
 ) {
-   enum Tux64FsStatus status;
+   struct Tux64FsResult result;
    FILE * file_dest;
 
    file_dest = fopen(path, "w");
    if (file_dest != NULL) {
-      status = tux64_fs_file_save_open(file_dest, file);
+      result = tux64_fs_file_save_open(file_dest, file);
       (void)fclose(file_dest);
-      return status;
+      return result;
    }
 
-   return tux64_fs_errno_to_fs_status(errno);
+   result = tux64_fs_errno_to_fs_result(errno);
+   return result;
 }
 
 void
