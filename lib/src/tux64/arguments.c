@@ -10,6 +10,7 @@
 #include "tux64/arguments.h"
 
 #include "tux64/memory.h"
+#include "tux64/string.h"
 #include "tux64/bitwise.h"
 
 void
@@ -25,6 +26,18 @@ tux64_arguments_iterator_initialize_command_line(
    return;
 }
 
+void
+tux64_arguments_iterator_initialize_config_file(
+   struct Tux64ArgumentsIterator * self,
+   const struct Tux64ArgumentsIteratorOptionsConfigFile * options,
+   const struct Tux64String * data
+) {
+   self->type = TUX64_ARGUMENTS_ITERATOR_TYPE_CONFIG_FILE;
+   self->implementation.config_file.options = options;
+   self->implementation.config_file.slice = *data;
+   return;
+}
+
 typedef struct Tux64ArgumentsIteratorNextResult (*Tux64ArgumentsIteratorNextFunction)(
    struct Tux64ArgumentsIterator * self
 );
@@ -35,8 +48,6 @@ tux64_arguments_iterator_next_command_line(
 ) {
    struct Tux64ArgumentsIteratorImplementationCommandLine * command_line;
    struct Tux64ArgumentsIteratorNextResult result;
-   struct Tux64MemoryFindResult result_string_length;
-   char terminator;
 
    command_line = &self->implementation.command_line;
 
@@ -47,24 +58,96 @@ tux64_arguments_iterator_next_command_line(
 
    result.status = TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_OK;
    result.payload.ok.ptr = command_line->argv[command_line->index++];
-
-   /* implements strlen() by finding the null terminator.  assumes the null */
-   /* terminator is always present. */
-   terminator = '\0';
-   result_string_length = tux64_memory_find(
-      result.payload.ok.ptr,
-      &terminator,
-      TUX64_UINT32_MAX,
-      TUX64_LITERAL_UINT32(sizeof(terminator))
-   );
-
-   result.payload.ok.characters = result_string_length.payload.found.position;
+   result.payload.ok.characters = tux64_string_length_null_terminated(result.payload.ok.ptr);
    return result;
+}
+
+static struct Tux64ArgumentsIteratorNextResult
+tux64_arguments_iterator_next_config_file_line(
+   struct Tux64ArgumentsIteratorImplementationConfigFile * config_file
+) {
+   struct Tux64ArgumentsIteratorNextResult result;
+   char sentinel_newline;
+   struct Tux64MemoryFindResult newline_find_result;
+   struct Tux64String line;
+
+   if (config_file->slice.characters == TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_END_OF_STREAM;
+      return result;
+   }
+
+   sentinel_newline = '\n';
+
+   newline_find_result = tux64_memory_find(
+      config_file->slice.ptr,
+      &sentinel_newline,
+      config_file->slice.characters,
+      TUX64_LITERAL_UINT32(sizeof(sentinel_newline))
+   );
+   if (newline_find_result.status == TUX64_MEMORY_FIND_STATUS_MISSING) {
+      result.status = TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_OK;
+      result.payload.ok = config_file->slice;
+
+      config_file->slice.characters = TUX64_LITERAL_UINT32(0u);
+
+      return result;
+   }
+
+   line.ptr = config_file->slice.ptr;
+   line.characters = newline_find_result.payload.found.position;
+
+   /* make sure to also skip over the newline character at the end */
+   config_file->slice.ptr += line.characters + TUX64_LITERAL_UINT32(1u);
+   config_file->slice.characters -= line.characters + TUX64_LITERAL_UINT32(1u);
+
+   result.status = TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_OK;
+   result.payload.ok = line;
+   return result;
+}
+
+static struct Tux64ArgumentsIteratorNextResult
+tux64_arguments_iterator_next_config_file(
+   struct Tux64ArgumentsIterator * self
+) {
+   struct Tux64ArgumentsIteratorImplementationConfigFile * config_file;
+   struct Tux64ArgumentsIteratorNextResult result;
+   struct Tux64String argument;
+
+   config_file = &self->implementation.config_file;
+
+   /* we filter out lines we don't want to parse in a loop */
+   while (TUX64_BOOLEAN_TRUE) {
+      result = tux64_arguments_iterator_next_config_file_line(config_file);
+
+      /* if we've run out of text, give up */
+      if (result.status == TUX64_ARGUMENTS_ITERATOR_NEXT_STATUS_END_OF_STREAM) {
+         return result;
+      }
+
+      /* trim whitespace so we can allow tabs and other fun stuff */
+      argument = tux64_string_trim_whitespace(&result.payload.ok);
+
+      /* discard empty lines and comments */
+      if (argument.characters == TUX64_LITERAL_UINT32(0u)) {
+         continue;
+      }
+      if (argument.ptr[0u] == config_file->options->comment_prefix) {
+         continue;
+      }
+
+      /* we should now have a filtered config argument!  note that 'status' */
+      /* is already set above */
+      result.payload.ok = argument;
+      return result;
+   }
+   
+   TUX64_UNREACHABLE;
 }
 
 static const Tux64ArgumentsIteratorNextFunction
 tux64_arguments_iterator_next_functions [TUX64_ARGUMENTS_ITERATOR_TYPE_COUNT] = {
-   tux64_arguments_iterator_next_command_line
+   tux64_arguments_iterator_next_command_line,
+   tux64_arguments_iterator_next_config_file
 };
 
 struct Tux64ArgumentsIteratorNextResult

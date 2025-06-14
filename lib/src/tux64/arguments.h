@@ -11,9 +11,10 @@
 
 #include "tux64/tux64.h"
 
-#define TUX64_ARGUMENTS_ITERATOR_TYPE_COUNT 1u
+#define TUX64_ARGUMENTS_ITERATOR_TYPE_COUNT 2u
 enum Tux64ArgumentsIteratorType {
-   TUX64_ARGUMENTS_ITERATOR_TYPE_COMMAND_LINE = 0u
+   TUX64_ARGUMENTS_ITERATOR_TYPE_COMMAND_LINE = 0u,
+   TUX64_ARGUMENTS_ITERATOR_TYPE_CONFIG_FILE
 };
 
 struct Tux64ArgumentsIteratorImplementationCommandLine {
@@ -22,8 +23,19 @@ struct Tux64ArgumentsIteratorImplementationCommandLine {
    Tux64UInt8 index;
 };
 
+struct Tux64ArgumentsIteratorOptionsConfigFile {
+   /* the prefix character to denote a comment line */
+   char comment_prefix;
+};
+
+struct Tux64ArgumentsIteratorImplementationConfigFile {
+   const struct Tux64ArgumentsIteratorOptionsConfigFile * options;
+   struct Tux64String slice;
+};
+
 union Tux64ArgumentsIteratorImplementation {
    struct Tux64ArgumentsIteratorImplementationCommandLine command_line;
+   struct Tux64ArgumentsIteratorImplementationConfigFile config_file;
 };
 
 struct Tux64ArgumentsIterator {
@@ -40,6 +52,13 @@ tux64_arguments_iterator_initialize_command_line(
    struct Tux64ArgumentsIterator * self,
    Tux64UInt8 argc,
    const char * const * argv
+);
+
+void
+tux64_arguments_iterator_initialize_config_file(
+   struct Tux64ArgumentsIterator * self,
+   const struct Tux64ArgumentsIteratorOptionsConfigFile * options,
+   const struct Tux64String * data
 );
 
 enum Tux64ArgumentsIteratorNextStatus {
