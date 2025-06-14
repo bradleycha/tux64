@@ -369,6 +369,9 @@ tux64_mkrom_arguments_command_line_parse(
    "\n"\
    "      [key]=[value]\n"\
    "\n"\
+   "   Whitespace around each key-value pair is ignored.  In addition, a comment\n"\
+   "   may be specified with a '#' character. \n"\
+   "\n"\
    "   The following are recognized configuration items:\n"\
    "\n"\
    "      bootloader-stage0=[path]\n"\
