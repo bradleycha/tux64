@@ -185,6 +185,116 @@ tux64_mkrom_exit_result_display(
    return;
 }
 
+/* when we want to report errors, we run into a lifetime issue - what if the */
+/* string slice comes from data loaded from a file into memory, but then we */
+/* need to free that memory?  when do we do that?  i've decided to use a */
+/* stack which stores a list of items to clean up after printing error */
+/* information. */
+
+#define TUX64_MKROM_EXIT_CLEAN_LIST_ENTRY_TYPE_COUNT 1u
+enum Tux64MkromExitCleanListEntryType {
+   TUX64_MKROM_EXIT_CLEAN_LIST_ENTRY_TYPE_LOADED_FILE = 0u
+};
+
+union Tux64MkromExitCleanListEntryData {
+   struct Tux64FsLoadedFile loaded_file;
+};
+
+struct Tux64MkromExitCleanListEntry {
+   enum Tux64MkromExitCleanListEntryType type;
+   union Tux64MkromExitCleanListEntryData data;
+};
+
+#define TUX64_MKROM_EXIT_CLEAN_LIST_MAX_ENTRIES\
+   1u
+
+struct Tux64MkromExitCleanListEntry
+tux64_mkrom_exit_clean_list_table [TUX64_MKROM_EXIT_CLEAN_LIST_MAX_ENTRIES];
+
+Tux64UInt8
+tux64_mkrom_exit_clean_list_entries;
+
+static void
+tux64_mkrom_exit_clean_list_initialize(void) {
+   tux64_mkrom_exit_clean_list_entries = TUX64_LITERAL_UINT8(0u);
+   return;
+}
+
+typedef void (*Tux64MkromExitCleanListFreeEntryFunction)(
+   struct Tux64MkromExitCleanListEntry * entry
+);
+
+static void
+tux64_mkrom_exit_clean_list_free_entry_loaded_file(
+   struct Tux64MkromExitCleanListEntry * entry
+) {
+   struct Tux64FsLoadedFile * loaded_file;
+   
+   loaded_file = &entry->data.loaded_file;
+
+   tux64_fs_file_unload(loaded_file);
+
+   return;
+}
+
+static const Tux64MkromExitCleanListFreeEntryFunction
+tux64_mkrom_exit_clean_list_free_entry_functions [] = {
+   tux64_mkrom_exit_clean_list_free_entry_loaded_file
+};
+
+static void
+tux64_mkrom_exit_clean_list_free_entry(
+   struct Tux64MkromExitCleanListEntry * entry
+) {
+   tux64_mkrom_exit_clean_list_free_entry_functions[(Tux64UInt8)entry->type](entry);
+   return;
+}
+
+static void
+tux64_mkrom_exit_clean_list_free(void) {
+   struct Tux64MkromExitCleanListEntry * iter_entry;
+   Tux64UInt8 entries_remaining;
+
+   if (tux64_mkrom_exit_clean_list_entries == TUX64_LITERAL_UINT8(0u)) {
+      return;
+   }
+
+   /* make sure to iterate from top to bottom */
+   iter_entry = &tux64_mkrom_exit_clean_list_table[tux64_mkrom_exit_clean_list_entries - TUX64_LITERAL_UINT8(1u)];
+   entries_remaining = tux64_mkrom_exit_clean_list_entries;
+
+   do {
+      tux64_mkrom_exit_clean_list_free_entry(iter_entry);
+
+      iter_entry--;
+      entries_remaining--;
+   } while (entries_remaining != TUX64_LITERAL_UINT8(0u));
+
+   return;
+}
+
+static void
+tux64_mkrom_exit_clean_list_push(
+   const struct Tux64MkromExitCleanListEntry * entry
+) {
+   tux64_mkrom_exit_clean_list_table[tux64_mkrom_exit_clean_list_entries] = *entry;
+   tux64_mkrom_exit_clean_list_entries++;
+   return;
+}
+
+static void
+tux64_mkrom_exit_clean_list_push_loaded_file(
+   const struct Tux64FsLoadedFile * file
+) {
+   struct Tux64MkromExitCleanListEntry entry;
+
+   entry.type = TUX64_MKROM_EXIT_CLEAN_LIST_ENTRY_TYPE_LOADED_FILE;
+   entry.data.loaded_file = *file;
+
+   tux64_mkrom_exit_clean_list_push(&entry);
+   return;
+}
+
 /* converts a prefix/path string pair into a C-string which can be used with */
 /* file operations.  return TUX64_NULLPTR when memory allocation fails. this */
 /* must be freed manually by the caller. */
@@ -211,30 +321,17 @@ tux64_mkrom_canonicalize_path(
 }
 
 static struct Tux64MkromExitResult
-tux64_mkrom_run_loaded_config(
-   const struct Tux64String * path_prefix,
-   const struct Tux64FsLoadedFile * file_config,
-   const char * path_canonical_output
-) {
-   struct Tux64MkromExitResult result;
-
-   /* TODO: implement */
-   TUX64_LOG_INFO("made it to the loaded config!");
-   (void)path_prefix;
-   (void)file_config;
-   (void)path_canonical_output;
-   result.status = TUX64_MKROM_EXIT_STATUS_OK;
-   return result;
-}
-
-static struct Tux64MkromExitResult
-tux64_mkrom_run_args(
+tux64_mkrom_run_parsed_cmdline(
    const struct Tux64String * path_prefix,
    const char * path_canonical_config,
    const char * path_canonical_output
 ) {
    struct Tux64MkromExitResult result;
    struct Tux64FsFileLoadResult config_file_load_result;
+   struct Tux64String config_file_string;
+   struct Tux64ArgumentsIterator config_file_arguments_iterator;
+   struct Tux64ArgumentsParseResult config_file_parse_result;
+   struct Tux64MkromArgumentsConfigFile config_file_parsed;
 
    /* attempt to load the config file into memory */
    TUX64_LOG_INFO_FMT("loading config file from %s", path_canonical_config);
@@ -252,12 +349,49 @@ tux64_mkrom_run_args(
          return result;
    }
 
-   result = tux64_mkrom_run_loaded_config(
-      path_prefix,
-      &config_file_load_result.payload.ok,
-      path_canonical_output
+   /* convert the raw data into a string */
+   config_file_string.ptr = (const char *)config_file_load_result.payload.ok.data;
+   config_file_string.characters =
+      config_file_load_result.payload.ok.bytes /
+      TUX64_LITERAL_UINT32(sizeof(char));
+
+   /* set up the arguments iterator for the config file */
+   tux64_arguments_iterator_initialize_config_file(
+      &config_file_arguments_iterator,
+      &tux64_mkrom_arguments_config_file_iterator_options,
+      &config_file_string
    );
+
+   /* attempt to parse the config file */
+   config_file_parse_result = tux64_mkrom_arguments_config_file_parse(
+      &config_file_arguments_iterator,
+      &config_file_parsed
+   );
+   switch (config_file_parse_result.status) {
+      case TUX64_ARGUMENTS_PARSE_STATUS_OK:
+         break;
+      case TUX64_ARGUMENTS_PARSE_STATUS_EXIT:
+         TUX64_UNREACHABLE;
+      default:
+         /* save freeing until the end of the program due to lifetimes */
+         tux64_mkrom_exit_clean_list_push_loaded_file(&config_file_load_result.payload.ok);
+         result.status = TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR;
+         result.payload.arguments_parse_error.result = config_file_parse_result;
+         return result;
+   }
+
+   /* TODO: this is what we have to do now: */
+   /* 1. canonicalize all paths in the config file */
+   /* 2. make owned copies of all other borrowed data in the config file */
+   /* 3. free the config file string from memory */
+   /* 4. combine the command-line arguments and config arguments into a unified */
+   /*    'options' struct */
+   /* 5. implement the actual program :) */
+   TUX64_LOG_INFO("parsed the configuration file!");
+   (void)path_prefix;
+   (void)path_canonical_output;
    tux64_fs_file_unload(&config_file_load_result.payload.ok);
+   result.status = TUX64_MKROM_EXIT_STATUS_OK;
    return result;
 }
 
@@ -323,7 +457,11 @@ tux64_mkrom_main(
       goto exit1;
    }
 
-   result = tux64_mkrom_run_args(&args_cmdline.path_prefix, path_config, path_output);
+   result = tux64_mkrom_run_parsed_cmdline(
+      &args_cmdline.path_prefix,
+      path_config,
+      path_output
+   );
    free(path_output);
 exit1:
    free(path_config);
@@ -333,6 +471,8 @@ exit0:
 
 int main(int argc, char ** argv) {
    struct Tux64MkromExitResult exit_result;
+
+   tux64_mkrom_exit_clean_list_initialize();
 
    if (argc > TUX64_LITERAL_UINT8(TUX64_MKROM_ARGC_MAX)) {
       exit_result.status = TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS;
@@ -348,6 +488,7 @@ int main(int argc, char ** argv) {
 
 exit:
    tux64_mkrom_exit_result_display(&exit_result);
+   tux64_mkrom_exit_clean_list_free();
    return (int)exit_result.status;
 }
 

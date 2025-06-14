@@ -30,6 +30,27 @@ tux64_mkrom_arguments_command_line_print_menu_help(void);
 void
 tux64_mkrom_arguments_command_line_print_menu_version(void);
 
+struct Tux64MkromArgumentsConfigFile {
+   struct Tux64String path_bootloader_stage0;
+   struct Tux64String path_bootloader_stage0_cic;
+   struct Tux64String path_bootloader_stage1;
+   struct Tux64String path_bootloader_stage2;
+   struct Tux64String path_bootloader_stage2_bss;
+   struct Tux64String path_bootloader_stage3;
+   struct Tux64String path_kernel;
+   struct Tux64String path_initramfs;
+   struct Tux64String command_line;
+};
+
+extern const struct Tux64ArgumentsIteratorOptionsConfigFile
+tux64_mkrom_arguments_config_file_iterator_options;
+
+struct Tux64ArgumentsParseResult
+tux64_mkrom_arguments_config_file_parse(
+   struct Tux64ArgumentsIterator * input,
+   struct Tux64MkromArgumentsConfigFile * output
+);
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_MKROM_ARGUMENTS_H */
 

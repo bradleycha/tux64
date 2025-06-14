@@ -443,3 +443,24 @@ tux64_mkrom_arguments_command_line_print_menu_version(void) {
    return;
 }
 
+const struct Tux64ArgumentsIteratorOptionsConfigFile
+tux64_mkrom_arguments_config_file_iterator_options = {
+   .comment_prefix = '#'
+};
+
+struct Tux64ArgumentsParseResult
+tux64_mkrom_arguments_config_file_parse(
+   struct Tux64ArgumentsIterator * input,
+   struct Tux64MkromArgumentsConfigFile * output
+) {
+   struct Tux64ArgumentsParseResult result;
+
+   /* TODO: implement */
+   (void)input;
+   (void)output;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING;
+   result.payload.required_missing.identifier.ptr = "implement me!";
+   result.payload.required_missing.identifier.characters = TUX64_STRING_CHARACTERS("implement me!");
+   return result;
+}
+
