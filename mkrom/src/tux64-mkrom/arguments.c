@@ -350,8 +350,8 @@ tux64_mkrom_arguments_command_line_parse(
    "\n"\
    "   " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_SHORT "p, " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_LONG "prefix=[path], default=\"" TUX64_MKROM_ARGUMENTS_COMMAND_LINE_OPTION_PREFIX_DEFAULT_VALUE "\"\n"\
    "\n"\
-   "      The path to prepend to all file paths, both on the command-line and in the\n"\
-   "      configuration file.\n"\
+   "      The path to prepend to all file paths in the configuration file.  File\n"\
+   "      paths from the command-line will not have the prefix applied.\n"\
    "\n"\
    "   " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_SHORT "h, " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_LONG "?, " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_LONG "help\n"\
    "\n"\

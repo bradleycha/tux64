@@ -295,11 +295,34 @@ tux64_mkrom_exit_clean_list_push_loaded_file(
    return;
 }
 
-/* converts a prefix/path string pair into a C-string which can be used with */
-/* file operations.  return TUX64_NULLPTR when memory allocation fails. this */
-/* must be freed manually by the caller. */
+/* canonicalizes a path from the command-line into a C-style path string. */
+/* the returned pointer must be freed manually, and this returns */
+/* TUX64_NULLPTR upon failure. */
 static char *
-tux64_mkrom_canonicalize_path(
+tux64_mkrom_canonicalize_path_command_line(
+   const struct Tux64String * path
+) {
+   Tux64UInt32 characters;
+   char * ptr;
+
+   /* includes space for the null-terminator */
+   characters = path->characters + TUX64_LITERAL_UINT32(1u);
+   ptr = malloc(characters * sizeof(char));
+   if (ptr == NULL) {
+      return TUX64_NULLPTR;
+   }
+
+   tux64_memory_copy(ptr, path->ptr, path->characters * TUX64_LITERAL_UINT32(sizeof(char)));
+   ptr[characters - TUX64_LITERAL_UINT32(1u)] = '\0';
+
+   return ptr;
+}
+
+/* canonicalizes a path from the config file into a C-style path string. */
+/* the returned pointer must be freed manually, and this returns */
+/* TUX64_NULLPTR upon failure. */
+static char *
+tux64_mkrom_canonicalize_path_config_file(
    const struct Tux64String * prefix,
    const struct Tux64String * path
 ) {
@@ -313,8 +336,15 @@ tux64_mkrom_canonicalize_path(
       return TUX64_NULLPTR;
    }
 
-   tux64_memory_copy(ptr, prefix->ptr, prefix->characters);
-   tux64_memory_copy(ptr + prefix->characters, path->ptr, path->characters);
+   tux64_memory_copy(
+      ptr,
+      prefix->ptr,
+      prefix->characters * TUX64_LITERAL_UINT32(sizeof(char))
+   );
+   tux64_memory_copy(
+      ptr + prefix->characters,
+      path->ptr, path->characters * TUX64_LITERAL_UINT32(sizeof(char))
+   );
    ptr[characters - TUX64_LITERAL_UINT32(1u)] = '\0';
 
    return ptr;
@@ -322,7 +352,7 @@ tux64_mkrom_canonicalize_path(
 
 static struct Tux64MkromExitResult
 tux64_mkrom_run_parsed_cmdline(
-   const struct Tux64String * path_prefix,
+   const struct Tux64MkromArgumentsCommandLine * cmdline,
    const char * path_canonical_config,
    const char * path_canonical_output
 ) {
@@ -388,8 +418,9 @@ tux64_mkrom_run_parsed_cmdline(
    /*    'options' struct */
    /* 5. implement the actual program :) */
    TUX64_LOG_INFO("parsed the configuration file!");
-   (void)path_prefix;
+   (void)cmdline;
    (void)path_canonical_output;
+   (void)tux64_mkrom_canonicalize_path_config_file;
    tux64_fs_file_unload(&config_file_load_result.payload.ok);
    result.status = TUX64_MKROM_EXIT_STATUS_OK;
    return result;
@@ -439,17 +470,15 @@ tux64_mkrom_main(
          return result;
    }
 
-   /* canonicalize the config path and output path */
-   path_config = tux64_mkrom_canonicalize_path(
-      &args_cmdline.path_prefix,
+   /* canonicalize the config path and output path to add the null terminator*/
+   path_config = tux64_mkrom_canonicalize_path_command_line(
       &args_cmdline.path_config
    );
    if (path_config == TUX64_NULLPTR) {
       result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
       goto exit0;
    }
-   path_output = tux64_mkrom_canonicalize_path(
-      &args_cmdline.path_prefix,
+   path_output = tux64_mkrom_canonicalize_path_command_line(
       &args_cmdline.path_output
    );
    if (path_output == TUX64_NULLPTR) {
@@ -458,7 +487,7 @@ tux64_mkrom_main(
    }
 
    result = tux64_mkrom_run_parsed_cmdline(
-      &args_cmdline.path_prefix,
+      &args_cmdline,
       path_config,
       path_output
    );
