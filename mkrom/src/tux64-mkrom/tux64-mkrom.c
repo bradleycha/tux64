@@ -269,14 +269,14 @@ tux64_mkrom_main(
    struct Tux64MkromExitResult result;
    struct Tux64ArgumentsIterator args_iterator;
    struct Tux64ArgumentsParseResult args_parse_result;
-   struct Tux64MkromArguments args;
+   struct Tux64MkromArgumentsCommandLine args_cmdline;
    char * path_config;
    char * path_output;
 
    /* if the user is completely clueless, show them the help menu when no */
    /* arguments are present */
    if (argc == TUX64_LITERAL_UINT8(1u)) {
-      tux64_mkrom_arguments_print_menu_help();
+      tux64_mkrom_arguments_command_line_print_menu_help();
       result.status = TUX64_MKROM_EXIT_STATUS_OK;
       return result;
    }
@@ -289,9 +289,9 @@ tux64_mkrom_main(
    );
 
    /* parse command-line arguments */
-   args_parse_result = tux64_mkrom_arguments_parse(
+   args_parse_result = tux64_mkrom_arguments_command_line_parse(
       &args_iterator,
-      &args
+      &args_cmdline
    );
    switch (args_parse_result.status) {
       case TUX64_ARGUMENTS_PARSE_STATUS_OK:
@@ -307,23 +307,23 @@ tux64_mkrom_main(
 
    /* canonicalize the config path and output path */
    path_config = tux64_mkrom_canonicalize_path(
-      &args.path_prefix,
-      &args.path_config
+      &args_cmdline.path_prefix,
+      &args_cmdline.path_config
    );
    if (path_config == TUX64_NULLPTR) {
       result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
       goto exit0;
    }
    path_output = tux64_mkrom_canonicalize_path(
-      &args.path_prefix,
-      &args.path_output
+      &args_cmdline.path_prefix,
+      &args_cmdline.path_output
    );
    if (path_output == TUX64_NULLPTR) {
       result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
       goto exit1;
    }
 
-   result = tux64_mkrom_run_args(&args.path_prefix, path_config, path_output);
+   result = tux64_mkrom_run_args(&args_cmdline.path_prefix, path_config, path_output);
    free(path_output);
 exit1:
    free(path_config);
