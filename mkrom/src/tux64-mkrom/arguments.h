@@ -11,6 +11,7 @@
 
 #include "tux64-mkrom/tux64-mkrom.h"
 #include <tux64/arguments.h>
+#include <tux64/platform-n64/rom.h>
 
 struct Tux64MkromArgumentsCommandLine {
    struct Tux64String path_config;
@@ -24,13 +25,8 @@ tux64_mkrom_arguments_command_line_parse(
    struct Tux64MkromArgumentsCommandLine * output
 );
 
-void
-tux64_mkrom_arguments_command_line_print_menu_help(void);
-
-void
-tux64_mkrom_arguments_command_line_print_menu_version(void);
-
 struct Tux64MkromArgumentsConfigFile {
+   struct Tux64PlatformN64RomHeader rom_header;
    struct Tux64String path_bootloader_stage0;
    struct Tux64String path_bootloader_stage0_cic;
    struct Tux64String path_bootloader_stage1;
@@ -50,6 +46,12 @@ tux64_mkrom_arguments_config_file_parse(
    struct Tux64ArgumentsIterator * input,
    struct Tux64MkromArgumentsConfigFile * output
 );
+
+void
+tux64_mkrom_arguments_command_line_print_menu_help(void);
+
+void
+tux64_mkrom_arguments_command_line_print_menu_version(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_MKROM_ARGUMENTS_H */

@@ -9,6 +9,9 @@
 #include "tux64-mkrom/arguments.h"
 
 #include <tux64/arguments.h>
+#include <tux64/memory.h>
+#include <tux64/endian.h>
+#include <tux64/platform-n64/rom.h>
 #include <stdio.h>
 
 static struct Tux64ArgumentsParseOptionResult
@@ -335,6 +338,717 @@ tux64_mkrom_arguments_command_line_parse(
    );
 }
 
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_bootloader_stage0(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_bootloader_stage0_cic(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_bootloader_stage1(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_bootloader_stage2(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_bootloader_stage2_bss(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_bootloader_stage3(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_kernel(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_initramfs(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_command_line(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_rom_header_clock_rate(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_rom_header_boot_address(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_rom_header_check_code(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_rom_header_game_title(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+   struct Tux64ArgumentsParseOptionResult result;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   /* TODO: implement */
+   (void)arguments;
+   (void)parameter;
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   return result;
+}
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_IDENTIFIER\
+   "bootloader-stage0"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIER\
+   "bootloader-stage0-cic"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER\
+   "bootloader-stage1"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER\
+   "bootloader-stage2"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER\
+   "bootloader-stage2-bss"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER\
+   "bootloader-stage3"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER\
+   "kernel"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER\
+   "initramfs"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER\
+   "command-line"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER\
+   "rom-header-clock-rate"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER\
+   "rom-header-boot-address"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_IDENTIFIER\
+   "rom-header-check-code"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_IDENTIFIER\
+   "rom-header-game-title"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIER\
+   "rom-header-game-code"
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIER)
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_bootloader_stage0_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_bootloader_stage0_cic_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_bootloader_stage1_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_bootloader_stage2_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_bootloader_stage2_bss_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_bootloader_stage3_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_kernel_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_initramfs_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_command_line_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_rom_header_boot_address_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_rom_header_check_code_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_rom_header_game_title_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIER_CHARACTERS)
+   }
+};
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage0_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage0_cic_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage1_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage2_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage2_bss_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage3_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_kernel_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_initramfs_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_command_line_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_boot_address_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_check_code_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_game_title_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers)
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE\
+   ""
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE\
+   0x80008135
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE_STRING\
+   "80008135"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_DEFAULT_VALUE\
+   0xcafebabe
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_DEFAULT_VALUE_STRING\
+   "cafebabe"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_DEFAULT_VALUE\
+   0xbaadf00dfee1deadllu
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_DEFAULT_VALUE_STRING\
+   "baadf00dfee1dead"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE\
+   "TUX64 - BOOT TIME!!!"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_DEFAULT_VALUE\
+   "NTXE"
+
+static const struct Tux64ArgumentsOption
+tux64_mkrom_arguments_config_file_options_required [] = {
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage0_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage0
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage0_cic_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage0_cic
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage1_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage1
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage2_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage2
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage2_bss_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage2_bss
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage3_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage3
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_kernel_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_kernel
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_initramfs_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_initramfs
+   }
+};
+
+static const struct Tux64ArgumentsOption
+tux64_mkrom_arguments_config_file_options_optional [] = {
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_command_line_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_command_line
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_rom_header_clock_rate
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_rom_header_boot_address_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_rom_header_boot_address
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_rom_header_check_code_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_rom_header_check_code
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_rom_header_game_title_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_rom_header_game_title
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_rom_header_game_code
+   }
+};
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_options_required)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_OPTIONAL_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_options_required)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_STORAGE_BYTES\
+   ((TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_COUNT + 8u) / 8u)
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_LONG\
+   "--"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_SHORT\
+   "-"
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_LONG_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_LONG)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_SHORT_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_SHORT)
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_IDENTIFIER_PARAMETER_SPLIT_TOKEN\
+   '='
+
+static const struct Tux64ArgumentsList
+tux64_mkrom_arguments_config_file_list = {
+   .options_required                   = tux64_mkrom_arguments_config_file_options_required,
+   .options_optional                   = tux64_mkrom_arguments_config_file_options_optional,
+   .options_required_count             = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_COUNT),
+   .options_optional_count             = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_OPTIONAL_COUNT),
+   .prefix_long = {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_LONG,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_LONG_CHARACTERS)
+   },
+   .prefix_short                       = {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_SHORT,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PREFIX_SHORT_CHARACTERS)
+   },
+   .identifier_parameter_split_token   = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_IDENTIFIER_PARAMETER_SPLIT_TOKEN
+};
+
+const struct Tux64ArgumentsIteratorOptionsConfigFile
+tux64_mkrom_arguments_config_file_iterator_options = {
+   .comment_prefix = '#'
+};
+
+static void
+tux64_mkrom_arguments_config_file_initialize_optional_rom_header(
+   struct Tux64PlatformN64RomHeader * header
+) {
+   Tux64UInt8 sentinel_fill;
+
+   /* this is designed to be written directly to disk/memory, so we store */
+   /* everything as big-endian */
+
+   header->pi_dom1_configuration.reserved_00 = TUX64_LITERAL_UINT8(0x80);
+   header->pi_dom1_configuration.flags[0]    = TUX64_LITERAL_UINT8(0x37);
+   header->pi_dom1_configuration.flags[1]    = TUX64_LITERAL_UINT8(0x12);
+   header->pi_dom1_configuration.flags[2]    = TUX64_LITERAL_UINT8(0x40);
+
+   header->clock_rate   = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE), TUX64_ENDIAN_FORMAT_BIG);
+   header->boot_address = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_DEFAULT_VALUE), TUX64_ENDIAN_FORMAT_BIG);
+
+   header->libultra_version[0] = '\0';
+   header->libultra_version[1] = '\0';
+   header->libultra_version[2] = 20;
+   header->libultra_version[3] = 'L';
+
+   header->check_code = tux64_endian_convert_uint64(TUX64_LITERAL_UINT64(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_DEFAULT_VALUE), TUX64_ENDIAN_FORMAT_BIG);
+
+   sentinel_fill = TUX64_LITERAL_UINT8(0x00);
+   tux64_memory_fill(
+      header->reserved_18,
+      &sentinel_fill,
+      TUX64_LITERAL_UINT32(TUX64_ARRAY_ELEMENTS(header->reserved_18)),
+      TUX64_LITERAL_UINT32(sizeof(sentinel_fill))
+   );
+
+   tux64_memory_copy(
+      header->game_title,
+      TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE,
+      TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS * sizeof(char))
+   );
+   sentinel_fill = TUX64_LITERAL_UINT8(' ');
+   tux64_memory_fill(
+      &header->game_title[TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS],
+      &sentinel_fill,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_TITLE_CHARACTERS - TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS),
+      TUX64_LITERAL_UINT32(sizeof(sentinel_fill))
+   );
+
+   sentinel_fill = TUX64_LITERAL_UINT8(TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_CONTROLLER_TYPE_UNSPECIFIED);
+   tux64_memory_fill(
+      header->homebrew_info.controller_type,
+      &sentinel_fill,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_CONTROLLER_TYPE_COUNT),
+      TUX64_LITERAL_UINT32(sizeof(sentinel_fill))
+   );
+
+   tux64_memory_copy(
+      header->homebrew_info.game_id,
+      TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_GAME_ID_MAGIC,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_GAME_ID_CHARACTERS * sizeof(char))
+   );
+
+   header->homebrew_info.save_type = TUX64_LITERAL_UINT8(
+      TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_SAVE_TYPE_NONE
+   );
+
+   tux64_memory_copy(
+      header->game_code,
+      TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_DEFAULT_VALUE,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_CODE_CHARACTERS * sizeof(char))
+   );
+
+   header->rom_version = TUX64_LITERAL_UINT8(0x00);
+
+   return;
+}
+
+static void
+tux64_mkrom_arguments_config_file_initialize_optional(
+   struct Tux64MkromArgumentsConfigFile * output
+) {
+   tux64_mkrom_arguments_config_file_initialize_optional_rom_header(&output->rom_header);
+
+   output->command_line.ptr = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE;
+   output->command_line.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE_CHARACTERS);
+
+   return;
+}
+
+struct Tux64ArgumentsParseResult
+tux64_mkrom_arguments_config_file_parse(
+   struct Tux64ArgumentsIterator * input,
+   struct Tux64MkromArgumentsConfigFile * output
+) {
+   Tux64UInt8 required_storage [TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_STORAGE_BYTES];
+
+   tux64_mkrom_arguments_config_file_initialize_optional(output);
+
+   return tux64_arguments_parse(
+      &tux64_mkrom_arguments_config_file_list,
+      input,
+      output,
+      required_storage
+   );
+}
+
 #define TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_HELP\
    TUX64_MKROM_PACKAGE_NAME " - creates a bootable Nintendo 64 ROM image for Tux64\n"\
    "\n"\
@@ -367,48 +1081,79 @@ tux64_mkrom_arguments_command_line_parse(
    "   simple configuration file in order to cut down on repetitiveness.\n"\
    "   Configuration items follow the following format for each line:\n"\
    "\n"\
-   "      [key]=[value]\n"\
+   "      --[key]=[value]\n"\
+   "\n"\
+   "   You may also specify with the following format:\n"\
+   "\n"\
+   "      --[key]\n"\
+   "      [value]\n"\
    "\n"\
    "   Whitespace around each key-value pair is ignored.  In addition, a comment\n"\
    "   may be specified with a '#' character. \n"\
    "\n"\
    "   The following are recognized configuration items:\n"\
    "\n"\
-   "      bootloader-stage0=[path]\n"\
+   "      --bootloader-stage0=[path]\n"\
    "\n"\
    "         The path to the stage-0 tux64-boot bootloader binary.\n"\
    "\n"\
-   "      bootloader-stage0-cic=[path]\n"\
+   "      --bootloader-stage0-cic=[path]\n"\
    "\n"\
    "         The path to the stage-0 tux64-boot bootloader CIC data.\n"\
    "\n"\
-   "      bootloader-stage1=[path]\n"\
+   "      --bootloader-stage1=[path]\n"\
    "\n"\
    "         The path to the stage-1 tux64-boot bootloader binary.\n"\
    "\n"\
-   "      bootloader-stage2=[path]\n"\
+   "      --bootloader-stage2=[path]\n"\
    "\n"\
    "         The path to the stage-2 tux64-boot bootloader binary.\n"\
    "\n"\
-   "      bootloader-stage2-bss=[path]\n"\
+   "      --bootloader-stage2-bss=[path]\n"\
    "\n"\
    "         The path to the stage-2 tux64-boot bootloader BSS data length file.\n"\
    "\n"\
-   "      bootloader-stage3=[path]\n"\
+   "      --bootloader-stage3=[path]\n"\
    "\n"\
    "         The path to the stage-3 tux64-boot bootloader binary.\n"\
    "\n"\
-   "      kernel=[path]\n"\
+   "      --kernel=[path]\n"\
    "\n"\
    "         The path to the kernel image.\n"\
    "\n"\
-   "      initramfs=[path]\n"\
+   "      --initramfs=[path]\n"\
    "\n"\
    "         The path to the kernel's initramfs.\n"\
    "\n"\
-   "      command-line=[text]\n"\
+   "      --command-line=[string], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE "\"\n"\
    "\n"\
    "         The kernel command-line to boot the kernel image with.\n"\
+   "\n"\
+   "      --rom-header-clock-rate=[value], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE_STRING "\"\n"\
+   "\n"\
+   "         The clock rate field stored in the ROM header.  This has no effect\n"\
+   "         on the actual clock speed of any of the hardware.  This should be a\n"\
+   "         32-bit hexadecimal string.\n"\
+   "\n"\
+   "      --rom-header-boot-address=[value], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_DEFAULT_VALUE_STRING "\"\n"\
+   "\n"\
+   "         The boot address field stored in the ROM header.  This has no effect\n"\
+   "         on the boot process.  This should be a 32-bit hexadecimal string.\n"\
+   "\n"\
+   "      --rom-header-check-code=[value], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CHECK_CODE_DEFAULT_VALUE_STRING "\"\n"\
+   "\n"\
+   "         The check code field stored in the ROM header.  This has no effect on\n"\
+   "         the boot process.  This should be a 64-bit hexadecimal string.\n"\
+   "\n"\
+   "      --rom-header-game-title=[string], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE "\"\n"\
+   "\n"\
+   "         The name of the ROM as stored in the ROM header.  This must be no\n"\
+   "         more than 20 characters. \n"\
+   "\n"\
+   "      --rom-header-game-code=[string], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE "\"\n"\
+   "\n"\
+   "         The game code field stored in the ROM header.  This must be a 4\n"\
+   "         character string. \n"\
    "\n"\
    "EXAMPLE USAGE:\n"\
    "\n"\
@@ -444,26 +1189,5 @@ tux64_mkrom_arguments_command_line_print_menu_version(void) {
       sizeof(TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_VERSION)
    );
    return;
-}
-
-const struct Tux64ArgumentsIteratorOptionsConfigFile
-tux64_mkrom_arguments_config_file_iterator_options = {
-   .comment_prefix = '#'
-};
-
-struct Tux64ArgumentsParseResult
-tux64_mkrom_arguments_config_file_parse(
-   struct Tux64ArgumentsIterator * input,
-   struct Tux64MkromArgumentsConfigFile * output
-) {
-   struct Tux64ArgumentsParseResult result;
-
-   /* TODO: implement */
-   (void)input;
-   (void)output;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING;
-   result.payload.required_missing.identifier.ptr = "implement me!";
-   result.payload.required_missing.identifier.characters = TUX64_STRING_CHARACTERS("implement me!");
-   return result;
 }
 
