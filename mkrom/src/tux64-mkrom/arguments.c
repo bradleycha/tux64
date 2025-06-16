@@ -11,11 +11,12 @@
 #include <tux64/arguments.h>
 #include <tux64/memory.h>
 #include <tux64/endian.h>
+#include <tux64/parse/string-integer.h>
 #include <tux64/platform-n64/rom.h>
 #include <stdio.h>
 
 static struct Tux64ArgumentsParseOptionResult
-tux64_mkrom_arguments_command_line_parser_path(
+tux64_mkrom_arguments_parser_string(
    const struct Tux64String * parameter,
    struct Tux64String * entry
 ) {
@@ -32,6 +33,83 @@ tux64_mkrom_arguments_command_line_parser_path(
    return result;
 }
 
+#define TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_INVALID_DIGIT\
+   "invalid digit"
+#define TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_OUT_OF_RANGE\
+   "out of range"
+
+#define TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_INVALID_DIGIT_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_INVALID_DIGIT)
+#define TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_OUT_OF_RANGE_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_OUT_OF_RANGE)
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_parser_string_integer_hex_format_result(
+   const struct Tux64ParseStringIntegerResult * result
+) {
+   struct Tux64ArgumentsParseOptionResult option_result;
+
+   switch (result->status) {
+      case TUX64_PARSE_STRING_INTEGER_STATUS_OK:
+         option_result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
+         return option_result;
+      case TUX64_PARSE_STRING_INTEGER_STATUS_INVALID_DIGIT:
+         option_result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+         option_result.payload.parameter_invalid.reason.ptr = TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_INVALID_DIGIT;
+         option_result.payload.parameter_invalid.reason.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_INVALID_DIGIT_CHARACTERS);
+         return option_result;
+      case TUX64_PARSE_STRING_INTEGER_STATUS_OUT_OF_RANGE:
+         option_result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+         option_result.payload.parameter_invalid.reason.ptr = TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_OUT_OF_RANGE;
+         option_result.payload.parameter_invalid.reason.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_PARSER_STRING_INTEGER_HEX_FORMAT_RESULT_OUT_OF_RANGE_CHARACTERS);
+         return option_result;
+      default:
+         TUX64_UNREACHABLE;
+   }
+   
+   TUX64_UNREACHABLE;
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_parser_string_integer_hex_uint32(
+   const struct Tux64String * parameter,
+   Tux64UInt32 * entry
+) {
+   struct Tux64ArgumentsParseOptionResult result;
+   struct Tux64ParseStringIntegerResult parse_result;
+
+   if (parameter->characters == TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
+      return result;
+   }
+
+   parse_result = tux64_parse_string_integer_hex_uint32(parameter, entry);
+
+   return tux64_mkrom_arguments_parser_string_integer_hex_format_result(
+      &parse_result
+   );
+}
+
+static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_parser_string_integer_hex_uint64(
+   const struct Tux64String * parameter,
+   Tux64UInt64 * entry
+) {
+   struct Tux64ArgumentsParseOptionResult result;
+   struct Tux64ParseStringIntegerResult parse_result;
+
+   if (parameter->characters == TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
+      return result;
+   }
+
+   parse_result = tux64_parse_string_integer_hex_uint64(parameter, entry);
+
+   return tux64_mkrom_arguments_parser_string_integer_hex_format_result(
+      &parse_result
+   );
+}
+
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_command_line_parser_config(
    const struct Tux64String * parameter,
@@ -41,7 +119,7 @@ tux64_mkrom_arguments_command_line_parser_config(
 
    arguments = (struct Tux64MkromArgumentsCommandLine *)context;
 
-   return tux64_mkrom_arguments_command_line_parser_path(
+   return tux64_mkrom_arguments_parser_string(
       parameter,
       &arguments->path_config
    );
@@ -56,7 +134,7 @@ tux64_mkrom_arguments_command_line_parser_output(
 
    arguments = (struct Tux64MkromArgumentsCommandLine *)context;
 
-   return tux64_mkrom_arguments_command_line_parser_path(
+   return tux64_mkrom_arguments_parser_string(
       parameter,
       &arguments->path_output
    );
@@ -71,7 +149,7 @@ tux64_mkrom_arguments_command_line_parser_prefix(
 
    arguments = (struct Tux64MkromArgumentsCommandLine *)context;
 
-   return tux64_mkrom_arguments_command_line_parser_path(
+   return tux64_mkrom_arguments_parser_string(
       parameter,
       &arguments->path_prefix
    );
@@ -344,15 +422,13 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage0(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_bootloader_stage0
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -361,15 +437,13 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage0_cic(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_bootloader_stage0_cic
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -378,15 +452,13 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage1(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_bootloader_stage1
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -395,15 +467,13 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage2(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_bootloader_stage2
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -412,15 +482,13 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage2_bss(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_bootloader_stage2_bss
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -429,15 +497,13 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage3(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_bootloader_stage3
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -446,15 +512,13 @@ tux64_mkrom_arguments_config_file_parser_kernel(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_kernel
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -463,15 +527,13 @@ tux64_mkrom_arguments_config_file_parser_initramfs(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_initramfs
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -480,15 +542,13 @@ tux64_mkrom_arguments_config_file_parser_command_line(
    void * context
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
-   struct Tux64ArgumentsParseOptionResult result;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
-   return result;
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->command_line
+   );
 }
 
 static struct Tux64ArgumentsParseOptionResult
@@ -501,10 +561,17 @@ tux64_mkrom_arguments_config_file_parser_rom_header_clock_rate(
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   result = tux64_mkrom_arguments_parser_string_integer_hex_uint32(
+      parameter,
+      &arguments->rom_header.clock_rate
+   );
+   if (result.status != TUX64_ARGUMENTS_PARSE_STATUS_OK) {
+      return result;
+   }
+   arguments->rom_header.clock_rate = tux64_endian_convert_uint32(
+      arguments->rom_header.clock_rate,
+      TUX64_ENDIAN_FORMAT_BIG
+   );
    return result;
 }
 
@@ -518,10 +585,17 @@ tux64_mkrom_arguments_config_file_parser_rom_header_boot_address(
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   result = tux64_mkrom_arguments_parser_string_integer_hex_uint32(
+      parameter,
+      &arguments->rom_header.boot_address
+   );
+   if (result.status != TUX64_ARGUMENTS_PARSE_STATUS_OK) {
+      return result;
+   }
+   arguments->rom_header.boot_address = tux64_endian_convert_uint32(
+      arguments->rom_header.boot_address,
+      TUX64_ENDIAN_FORMAT_BIG
+   );
    return result;
 }
 
@@ -535,12 +609,24 @@ tux64_mkrom_arguments_config_file_parser_rom_header_check_code(
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   result = tux64_mkrom_arguments_parser_string_integer_hex_uint64(
+      parameter,
+      &arguments->rom_header.check_code
+   );
+   if (result.status != TUX64_ARGUMENTS_PARSE_STATUS_OK) {
+      return result;
+   }
+   arguments->rom_header.check_code = tux64_endian_convert_uint64(
+      arguments->rom_header.check_code,
+      TUX64_ENDIAN_FORMAT_BIG
+   );
    return result;
 }
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_TITLE_ERROR_TOO_LONG\
+   "game title must be less than 20 characters"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_TITLE_ERROR_TOO_LONG_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_TITLE_ERROR_TOO_LONG)
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_config_file_parser_rom_header_game_title(
@@ -549,15 +635,44 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_title(
 ) {
    struct Tux64MkromArgumentsConfigFile * arguments;
    struct Tux64ArgumentsParseOptionResult result;
+   Tux64UInt8 sentinel_fill;
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   if (parameter->characters == TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
+      return result;
+   }
+
+   if (parameter->characters > TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_TITLE_CHARACTERS)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+      result.payload.parameter_invalid.reason.ptr = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_TITLE_ERROR_TOO_LONG;
+      result.payload.parameter_invalid.reason.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_TITLE_ERROR_TOO_LONG_CHARACTERS);
+      return result;
+   }
+
+   tux64_memory_copy(
+      arguments->rom_header.game_title,
+      parameter->ptr,
+      parameter->characters * TUX64_LITERAL_UINT32(sizeof(char))
+   );
+
+   sentinel_fill = ' ';
+   tux64_memory_fill(
+      &arguments->rom_header.game_title[parameter->characters],
+      &sentinel_fill,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_TITLE_CHARACTERS) - parameter->characters,
+      TUX64_LITERAL_UINT32(sizeof(sentinel_fill))
+   );
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
    return result;
 }
+
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_CODE_INVALID_LENGTH\
+   "game code must be exactly 4 characters"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_CODE_INVALID_LENGTH_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_CODE_INVALID_LENGTH)
 
 static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
@@ -569,10 +684,25 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
 
    arguments = (struct Tux64MkromArgumentsConfigFile *)context;
 
-   /* TODO: implement */
-   (void)arguments;
-   (void)parameter;
-   result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+   if (parameter->characters == TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING;
+      return result;
+   }
+
+   if (parameter->characters != TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_CODE_CHARACTERS)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
+      result.payload.parameter_invalid.reason.ptr = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_CODE_INVALID_LENGTH;
+      result.payload.parameter_invalid.reason.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_CODE_INVALID_LENGTH_CHARACTERS);
+      return result;
+   }
+
+   tux64_memory_copy(
+      arguments->rom_header.game_code,
+      parameter->ptr,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_CODE_CHARACTERS)
+   );
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
    return result;
 }
 
