@@ -185,7 +185,7 @@ tux64_bitwise_flags_flip_uint64(
 #define TUX64_BITWISE_FLAGS_CHECK_ONE(value, bit_flags)\
    (((value) & (bit_flags)) != 0u ? TUX64_BOOLEAN_TRUE : TUX64_BOOLEAN_FALSE)
 
-Tux64UInt8
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint8(
    Tux64UInt8 value,
    Tux64UInt8 bit_flags
@@ -193,7 +193,7 @@ tux64_bitwise_flags_check_one_uint8(
    return TUX64_BITWISE_FLAGS_CHECK_ONE(value, bit_flags);
 }
 
-Tux64UInt16
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint16(
    Tux64UInt16 value,
    Tux64UInt16 bit_flags
@@ -201,7 +201,7 @@ tux64_bitwise_flags_check_one_uint16(
    return TUX64_BITWISE_FLAGS_CHECK_ONE(value, bit_flags);
 }
 
-Tux64UInt32
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint32(
    Tux64UInt32 value,
    Tux64UInt32 bit_flags
@@ -209,7 +209,7 @@ tux64_bitwise_flags_check_one_uint32(
    return TUX64_BITWISE_FLAGS_CHECK_ONE(value, bit_flags);
 }
 
-Tux64UInt64
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint64(
    Tux64UInt64 value,
    Tux64UInt64 bit_flags
@@ -220,7 +220,7 @@ tux64_bitwise_flags_check_one_uint64(
 #define TUX64_BITWISE_FLAGS_CHECK_ALL(value, bit_flags)\
    (((value) & (bit_flags)) == (value) ? TUX64_BOOLEAN_TRUE : TUX64_BOOLEAN_FALSE)
 
-Tux64UInt8
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint8(
    Tux64UInt8 value,
    Tux64UInt8 bit_flags
@@ -228,7 +228,7 @@ tux64_bitwise_flags_check_all_uint8(
    return TUX64_BITWISE_FLAGS_CHECK_ALL(value, bit_flags);
 }
 
-Tux64UInt16
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint16(
    Tux64UInt16 value,
    Tux64UInt16 bit_flags
@@ -236,7 +236,7 @@ tux64_bitwise_flags_check_all_uint16(
    return TUX64_BITWISE_FLAGS_CHECK_ALL(value, bit_flags);
 }
 
-Tux64UInt32
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint32(
    Tux64UInt32 value,
    Tux64UInt32 bit_flags
@@ -244,7 +244,7 @@ tux64_bitwise_flags_check_all_uint32(
    return TUX64_BITWISE_FLAGS_CHECK_ALL(value, bit_flags);
 }
 
-Tux64UInt64
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint64(
    Tux64UInt64 value,
    Tux64UInt64 bit_flags

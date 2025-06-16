@@ -130,22 +130,22 @@ tux64_bitwise_flags_flip_uint64(
 /*----------------------------------------------------------------------------*/
 /* Checks if at least of the bit flags in 'bit_flags' is set in 'value'.      */
 /*----------------------------------------------------------------------------*/
-Tux64UInt8
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint8(
    Tux64UInt8 value,
    Tux64UInt8 bit_flags
 );
-Tux64UInt16
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint16(
    Tux64UInt16 value,
    Tux64UInt16 bit_flags
 );
-Tux64UInt32
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint32(
    Tux64UInt32 value,
    Tux64UInt32 bit_flags
 );
-Tux64UInt64
+Tux64Boolean
 tux64_bitwise_flags_check_one_uint64(
    Tux64UInt64 value,
    Tux64UInt64 bit_flags
@@ -154,22 +154,22 @@ tux64_bitwise_flags_check_one_uint64(
 /*----------------------------------------------------------------------------*/
 /* Checks if all of the bit flags in 'bit_flags' are set in 'value'.          */
 /*----------------------------------------------------------------------------*/
-Tux64UInt8
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint8(
    Tux64UInt8 value,
    Tux64UInt8 bit_flags
 );
-Tux64UInt16
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint16(
    Tux64UInt16 value,
    Tux64UInt16 bit_flags
 );
-Tux64UInt32
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint32(
    Tux64UInt32 value,
    Tux64UInt32 bit_flags
 );
-Tux64UInt64
+Tux64Boolean
 tux64_bitwise_flags_check_all_uint64(
    Tux64UInt64 value,
    Tux64UInt64 bit_flags
