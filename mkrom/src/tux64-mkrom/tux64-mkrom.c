@@ -12,6 +12,7 @@
 #include <tux64/memory.h>
 #include <tux64/fs.h>
 #include <tux64/arguments.h>
+#include <tux64/platform-n64/rom.h>
 #include "tux64-mkrom/arguments.h"
 
 #include <stdlib.h>
@@ -351,38 +352,149 @@ tux64_mkrom_canonicalize_path_config_file(
 }
 
 static struct Tux64MkromExitResult
-tux64_mkrom_run_parsed_cmdline(
-   const struct Tux64MkromArgumentsCommandLine * cmdline,
-   const char * path_canonical_config,
-   const char * path_canonical_output
+tux64_mkrom_load_file(
+   const char * path_canonical,
+   const char * name,
+   struct Tux64FsLoadedFile * output
+) {
+   struct Tux64FsFileLoadResult load_result;
+   struct Tux64MkromExitResult result;
+
+   TUX64_LOG_INFO_FMT("loading %s from %s", name, path_canonical);
+
+   load_result = tux64_fs_file_load(path_canonical);
+
+   switch (load_result.status) {
+      case TUX64_FS_STATUS_OK:
+         result.status = TUX64_MKROM_EXIT_STATUS_OK;
+         *output = load_result.payload.ok;
+         break;
+
+      case TUX64_FS_STATUS_NOT_FOUND:
+      case TUX64_FS_STATUS_PERMISSION_DENIED:
+      case TUX64_FS_STATUS_NOT_A_FILE:
+      case TUX64_FS_STATUS_UNKNOWN_ERROR:
+         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
+         result.payload.fs_error.reason.status = load_result.status;
+         result.payload.fs_error.reason.payload = load_result.payload.err;
+         break;
+
+      case TUX64_FS_STATUS_OUT_OF_MEMORY:
+         result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+         break;
+
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   return result;
+}
+
+static struct Tux64MkromExitResult
+tux64_mkrom_load_file_command_line(
+   const struct Tux64String * path,
+   const char * name,
+   struct Tux64FsLoadedFile * output
 ) {
    struct Tux64MkromExitResult result;
-   struct Tux64FsFileLoadResult config_file_load_result;
+   char * path_canonical;
+
+   path_canonical = tux64_mkrom_canonicalize_path_command_line(path);
+   if (path_canonical == TUX64_NULLPTR) {
+      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+      return result;
+   }
+
+   result = tux64_mkrom_load_file(path_canonical, name, output);
+   free(path_canonical);
+   return result;
+}
+
+static struct Tux64MkromExitResult
+tux64_mkrom_load_file_config_file(
+   const struct Tux64String * prefix,
+   const struct Tux64String * path,
+   const char * name,
+   struct Tux64FsLoadedFile * output
+) {
+   struct Tux64MkromExitResult result;
+   char * path_canonical;
+
+   path_canonical = tux64_mkrom_canonicalize_path_config_file(prefix, path);
+   if (path_canonical == TUX64_NULLPTR) {
+      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+      return result;
+   }
+
+   result = tux64_mkrom_load_file(path_canonical, name, output);
+   free(path_canonical);
+   return result;
+}
+
+struct Tux64MkromInputFilesBootloader {
+   struct Tux64FsLoadedFile stage0;
+   struct Tux64FsLoadedFile stage0_cic;
+   struct Tux64FsLoadedFile stage1;
+   struct Tux64FsLoadedFile stage2;
+   struct Tux64FsLoadedFile stage2_bss;
+   struct Tux64FsLoadedFile stage3;
+};
+
+struct Tux64MkromInputFiles {
+   struct Tux64MkromInputFilesBootloader bootloader;
+   struct Tux64FsLoadedFile kernel;
+   struct Tux64FsLoadedFile initramfs;
+};
+
+struct Tux64MkromInput {
+   struct Tux64MkromInputFiles files;
+   const struct Tux64PlatformN64RomHeader * rom_header;
+   struct Tux64String kernel_command_line;
+   struct Tux64String path_output;
+};
+
+static struct Tux64MkromExitResult
+tux64_mkrom_run_parsed_input(
+   const struct Tux64MkromInput * input
+) {
+   struct Tux64MkromExitResult result;
+
+   /* TODO: implement */
+   (void)input;
+   TUX64_LOG_INFO("all we need now is to calculate the output file length and start assembling the ROM!");
+   result.status = TUX64_MKROM_EXIT_STATUS_OK;
+   return result;
+}
+
+static struct Tux64MkromExitResult
+tux64_mkrom_run_parsed_cmdline(
+   const struct Tux64MkromArgumentsCommandLine * cmdline
+) {
+   struct Tux64MkromExitResult result;
+   struct Tux64FsLoadedFile config_file;
    struct Tux64String config_file_string;
    struct Tux64ArgumentsIterator config_file_arguments_iterator;
    struct Tux64ArgumentsParseResult config_file_parse_result;
    struct Tux64MkromArgumentsConfigFile config_file_parsed;
+   struct Tux64MkromInput input;
+   char * kernel_command_line_ptr;
+   Tux64Boolean config_file_loaded;
 
    /* attempt to load the config file into memory */
-   TUX64_LOG_INFO_FMT("loading config file from %s", path_canonical_config);
-   config_file_load_result = tux64_fs_file_load(path_canonical_config);
-   switch (config_file_load_result.status) {
-      case TUX64_FS_STATUS_OK:
-         break;
-      case TUX64_FS_STATUS_OUT_OF_MEMORY:
-         result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-         return result;
-      default:
-         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
-         result.payload.fs_error.reason.status = config_file_load_result.status;
-         result.payload.fs_error.reason.payload = config_file_load_result.payload.err;
-         return result;
+   result = tux64_mkrom_load_file_command_line(
+      &cmdline->path_config,
+      "config file",
+      &config_file
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      return result;
    }
+   config_file_loaded = TUX64_BOOLEAN_TRUE;
 
    /* convert the raw data into a string */
-   config_file_string.ptr = (const char *)config_file_load_result.payload.ok.data;
+   config_file_string.ptr = (const char *)config_file.data;
    config_file_string.characters =
-      config_file_load_result.payload.ok.bytes /
+      config_file.bytes /
       TUX64_LITERAL_UINT32(sizeof(char));
 
    /* set up the arguments iterator for the config file */
@@ -393,6 +505,8 @@ tux64_mkrom_run_parsed_cmdline(
    );
 
    /* attempt to parse the config file */
+   /* note that we must wait until the end of the function to unload, as */
+   /* we have borrowed data passed around from it, and copying sucks. */
    config_file_parse_result = tux64_mkrom_arguments_config_file_parse(
       &config_file_arguments_iterator,
       &config_file_parsed
@@ -404,25 +518,133 @@ tux64_mkrom_run_parsed_cmdline(
          TUX64_UNREACHABLE;
       default:
          /* save freeing until the end of the program due to lifetimes */
-         tux64_mkrom_exit_clean_list_push_loaded_file(&config_file_load_result.payload.ok);
+         tux64_mkrom_exit_clean_list_push_loaded_file(&config_file);
          result.status = TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR;
          result.payload.arguments_parse_error.result = config_file_parse_result;
          return result;
    }
 
-   /* TODO: this is what we have to do now: */
-   /* 1. canonicalize all paths in the config file */
-   /* 2. make owned copies of all other borrowed data in the config file */
-   /* 3. free the config file string from memory */
-   /* 4. combine the command-line arguments and config arguments into a unified */
-   /*    'options' struct */
-   /* 5. implement the actual program :) */
-   TUX64_LOG_INFO("parsed the configuration file!");
-   (void)cmdline;
-   (void)path_canonical_output;
-   (void)tux64_mkrom_canonicalize_path_config_file;
-   tux64_fs_file_unload(&config_file_load_result.payload.ok);
-   result.status = TUX64_MKROM_EXIT_STATUS_OK;
+   /* load all the files into memory */
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_bootloader_stage0,
+      "bootloader stage-0 code",
+      &input.files.bootloader.stage0
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit0;
+   }
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_bootloader_stage0_cic,
+      "bootloader stage-0 CIC data",
+      &input.files.bootloader.stage0_cic
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit1;
+   }
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_bootloader_stage1,
+      "bootloader stage-1 code",
+      &input.files.bootloader.stage1
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit2;
+   }
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_bootloader_stage2,
+      "bootloader stage-2 code",
+      &input.files.bootloader.stage2
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit3;
+   }
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_bootloader_stage2_bss,
+      "bootloader stage-2 BSS data",
+      &input.files.bootloader.stage2_bss
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit4;
+   }
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_bootloader_stage3,
+      "bootloader stage-3 code",
+      &input.files.bootloader.stage3
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit5;
+   }
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_kernel,
+      "kernel image",
+      &input.files.kernel
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit6;
+   }
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
+      &config_file_parsed.path_initramfs,
+      "initramfs image",
+      &input.files.initramfs
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit7;
+   }
+
+   /* create an owned copy of the kernel command-line */
+   kernel_command_line_ptr = malloc(config_file_parsed.command_line.characters * sizeof(char));
+   if (kernel_command_line_ptr == NULL) {
+      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+      goto load_err_exit8;
+   }
+   tux64_memory_copy(
+      kernel_command_line_ptr,
+      config_file_parsed.command_line.ptr,
+      config_file_parsed.command_line.characters * TUX64_LITERAL_UINT32(sizeof(char))
+   );
+
+   /* initialize the rest of the fields for the input */
+   input.rom_header = &config_file_parsed.rom_header;
+   input.kernel_command_line.ptr = kernel_command_line_ptr;
+   input.kernel_command_line.characters = config_file_parsed.command_line.characters;
+   input.path_output = cmdline->path_output;
+
+   /* we can now safely free the config file since all data is owned */
+   tux64_fs_file_unload(&config_file);
+   config_file_loaded = TUX64_BOOLEAN_FALSE;
+
+   /* and now we commence to the actual program, hoo-ray... */
+   result = tux64_mkrom_run_parsed_input(&input);
+
+   /* ...but don't forget to clean up after ourselves! */
+   free(kernel_command_line_ptr);
+load_err_exit8:
+   tux64_fs_file_unload(&input.files.initramfs);
+load_err_exit7:
+   tux64_fs_file_unload(&input.files.kernel);
+load_err_exit6:
+   tux64_fs_file_unload(&input.files.bootloader.stage3);
+load_err_exit5:
+   tux64_fs_file_unload(&input.files.bootloader.stage2_bss);
+load_err_exit4:
+   tux64_fs_file_unload(&input.files.bootloader.stage2);
+load_err_exit3:
+   tux64_fs_file_unload(&input.files.bootloader.stage1);
+load_err_exit2:
+   tux64_fs_file_unload(&input.files.bootloader.stage0_cic);
+load_err_exit1:
+   tux64_fs_file_unload(&input.files.bootloader.stage0);
+load_err_exit0:
+   if (config_file_loaded == TUX64_BOOLEAN_TRUE) {
+      tux64_fs_file_unload(&config_file);
+   }
    return result;
 }
 
@@ -435,8 +657,6 @@ tux64_mkrom_main(
    struct Tux64ArgumentsIterator args_iterator;
    struct Tux64ArgumentsParseResult args_parse_result;
    struct Tux64MkromArgumentsCommandLine args_cmdline;
-   char * path_config;
-   char * path_output;
 
    /* if the user is completely clueless, show them the help menu when no */
    /* arguments are present */
@@ -470,32 +690,7 @@ tux64_mkrom_main(
          return result;
    }
 
-   /* canonicalize the config path and output path to add the null terminator*/
-   path_config = tux64_mkrom_canonicalize_path_command_line(
-      &args_cmdline.path_config
-   );
-   if (path_config == TUX64_NULLPTR) {
-      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      goto exit0;
-   }
-   path_output = tux64_mkrom_canonicalize_path_command_line(
-      &args_cmdline.path_output
-   );
-   if (path_output == TUX64_NULLPTR) {
-      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      goto exit1;
-   }
-
-   result = tux64_mkrom_run_parsed_cmdline(
-      &args_cmdline,
-      path_config,
-      path_output
-   );
-   free(path_output);
-exit1:
-   free(path_config);
-exit0:
-   return result;
+   return tux64_mkrom_run_parsed_cmdline(&args_cmdline);
 }
 
 int main(int argc, char ** argv) {
