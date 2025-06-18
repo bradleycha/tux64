@@ -24,7 +24,7 @@
 /* . += 0x0040:                                                               */
 /*    Bootloader stage-0                                                      */
 /*                                                                            */
-/* . += input->files.bootloader.stage0.bytes:                                                               */
+/* 0x00001000 - input->files.bootloader.stage0.bytes:                         */
 /*    Bootloader stage-0 CIC data                                             */
 /*                                                                            */
 /* 0x00001000:                                                                */
@@ -328,7 +328,8 @@ tux64_mkrom_builder_construct(
       input->files.bootloader.stage0.data,
       input->files.bootloader.stage0.bytes
    );
-   pen += input->files.bootloader.stage0.bytes;
+
+   pen = output + 0x1000 - input->files.bootloader.stage0.bytes;
 
    /* stage-0 bootloader CIC data */
    tux64_memory_copy(
