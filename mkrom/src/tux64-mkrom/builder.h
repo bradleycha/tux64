@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-mkrom/tux64-mkrom.h"
+#include <tux64/platform-n64/boot.h>
 #include <tux64/platform-n64/rom.h>
 
 #define TUX64_MKROM_BUILDER_MEASURE_STATUS_FIELD_COUNT 10u
@@ -27,18 +28,12 @@ enum Tux64MkromBuilderMeasureStatus {
 };
 
 struct Tux64MkromBuilderMeasurePayloadOk {
+   struct Tux64PlatformN64BootHeader boot_header;
    Tux64UInt32 rom_bytes;
-};
-
-struct Tux64MkromBuilderMeasurePayloadBadLength {
-   Tux64UInt32 bytes_max;
-   Tux64UInt32 bytes_given_unaligned;
-   Tux64UInt32 bytes_given_aligned;
 };
 
 union Tux64MkromBuilderMeasurePayload {
    struct Tux64MkromBuilderMeasurePayloadOk ok;
-   struct Tux64MkromBuilderMeasurePayloadBadLength bad_length;
 };
 
 struct Tux64MkromBuilderMeasureResult {
@@ -90,6 +85,7 @@ tux64_mkrom_builder_measure_and_verify(
 void
 tux64_mkrom_builder_construct(
    const struct Tux64MkromBuilderInput * input,
+   const struct Tux64MkromBuilderMeasurePayloadOk * measure_info,
    Tux64UInt8 * output
 );
 

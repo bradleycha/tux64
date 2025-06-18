@@ -191,13 +191,7 @@ tux64_mkrom_exit_result_display_builder_error(
       (Tux64UInt8)TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE0
    ];
 
-   TUX64_LOG_ERROR_FMT(
-      "%s is too big (maximum of %" PRIu32 " bytes, given %" PRIu32 " bytes which was aligned to %" PRIu32 " bytes)",
-      label,
-      self->reason.payload.bad_length.bytes_max,
-      self->reason.payload.bad_length.bytes_given_unaligned,
-      self->reason.payload.bad_length.bytes_given_aligned
-   );
+   TUX64_LOG_ERROR_FMT("%s is too big", label);
 
    return;
 }
@@ -608,7 +602,11 @@ tux64_mkrom_run_parsed_input(
 
    TUX64_LOG_INFO("constructing ROM image");
 
-   tux64_mkrom_builder_construct(&builder_input, rom_file.data);
+   tux64_mkrom_builder_construct(
+      &builder_input,
+      &measure_result.payload.ok,
+      rom_file.data
+   );
 
    result = tux64_mkrom_save_file_command_line(
       &input->path_output,
