@@ -55,10 +55,10 @@ struct Tux64PlatformN64BootHeader {
 
    /* the size of the bootloader header, used for future extensions of the */
    /* boot header. */
-   Tux64UInt16 length_d4;
+   Tux64UInt16 length_d8;
 
    /* the lengths of the various boot items */
-   struct Tux64PlatformN64BootItemLengths item_lengths_d4;
+   struct Tux64PlatformN64BootItemLengths item_lengths_d8;
 };
 
 /*------------------------------------------------------------------------------*/
