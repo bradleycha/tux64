@@ -26,6 +26,7 @@ libtux64_la_SOURCES = \
 	src/tux64/arguments.c \
 	src/tux64/fs.c \
 	src/tux64/string.c \
+	src/tux64/math.c \
 	src/tux64/parse/string-integer.c
 
 libtux64_includedir = $(pkgincludedir)
@@ -43,7 +44,8 @@ libtux64_include_HEADERS = \
 	src/tux64/log.h \
 	src/tux64/arguments.h \
 	src/tux64/fs.h \
-	src/tux64/string.h
+	src/tux64/string.h \
+	src/tux64/math.h
 libtux64_parse_include_HEADERS = \
 	src/tux64/parse/string-integer.h
 libtux64_platform_n64_include_HEADERS = \
