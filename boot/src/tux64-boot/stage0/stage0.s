@@ -27,7 +27,7 @@ tux64_boot_stage0_start:
 
    .section .cic
 tux64_boot_stage0_cic:
-   # TODO: implement
-   .word 0xfee1dead
+   .word 0x00001431
+   .word 0xf0f44dff
 #tux64_boot_stage0_cic
 
