@@ -36,7 +36,7 @@ struct Tux64PlatformN64BootVersion {
    "TUX64LDR"
 
 /* the boot header stored in cartridge ROM directly after the stage-0 */
-/* bootloader. note that byte offsets and lengths are postfixed with "div4". */
+/* bootloader. note that byte offsets and lengths are postfixed with "d4". */
 /* this means that the number stored in the bytes are a quarter of their */
 /* actual value.  this is done because we align all boot items to a word */
 /* boundary to both make it compatible with RSP DMA, as well as make memcpy */
@@ -55,10 +55,10 @@ struct Tux64PlatformN64BootHeader {
 
    /* the size of the bootloader header, used for future extensions of the */
    /* boot header. */
-   Tux64UInt16 length_d8;
+   Tux64UInt16 length_d4;
 
    /* the lengths of the various boot items */
-   struct Tux64PlatformN64BootItemLengths item_lengths_d8;
+   struct Tux64PlatformN64BootItemLengths item_lengths_d4;
 };
 
 /*------------------------------------------------------------------------------*/
