@@ -51,14 +51,16 @@
 /* We also align all addresses to 8-byte boundaries.  RSP DMA requires        */
 /* alignment to 2-byte boundaries, but we also want to use simple             */
 /* implementations of memcpy in the stage-0 and stage-1 bootloaders which     */
-/* operate on whole 8-byte words without concern for residual junk.           */
+/* operate on whole 4-byte words without concern for residual junk.  Note     */
+/* that we can't load more than 4 bytes at once due to the MMU only allowing  */
+/* 4-byte word read/writes when outside of RDRAM.                             */
 /*                                                                            */
 /* Also note that all values must be big-endian, as that's the native         */
 /* endianess of the N64.                                                      */
 /*----------------------------------------------------------------------------*/
 
 #define TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY\
-   8u
+   4u
 #define TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE\
    TUX64_LITERAL_UINT32(\
       TUX64_UINT32_MAX - (TUX64_UINT32_MAX % TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY)\
@@ -163,14 +165,14 @@ static Tux64UInt16
 tux64_mkrom_builder_format_length_item_uint16(
    Tux64UInt16 value
 ) {
-   return tux64_mkrom_builder_store_item_uint16((value + TUX64_LITERAL_UINT16(8u)) / TUX64_LITERAL_UINT16(8u));
+   return tux64_mkrom_builder_store_item_uint16((value + TUX64_LITERAL_UINT16(4u)) / TUX64_LITERAL_UINT16(4u));
 }
 
 static Tux64UInt32
 tux64_mkrom_builder_format_length_item_uint32(
    Tux64UInt32 value
 ) {
-   return tux64_mkrom_builder_store_item_uint32((value + TUX64_LITERAL_UINT32(8u)) / TUX64_LITERAL_UINT32(8u));
+   return tux64_mkrom_builder_store_item_uint32((value + TUX64_LITERAL_UINT32(4u)) / TUX64_LITERAL_UINT32(4u));
 }
 
 static struct Tux64MkromBuilderMeasureResult
@@ -195,18 +197,18 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    boot_header->version.minor = TUX64_LITERAL_UINT8(0x00);
    boot_header->version.revision = tux64_mkrom_builder_store_item_uint16(0x0000);
 
-   boot_header->length_d8 = tux64_mkrom_builder_format_length_item_uint16(TUX64_LITERAL_UINT16(sizeof(*boot_header)));
+   boot_header->length_d4 = tux64_mkrom_builder_format_length_item_uint16(TUX64_LITERAL_UINT16(sizeof(*boot_header)));
 
-   boot_header->item_lengths_d8.kernel_data = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
-   boot_header->item_lengths_d8.initramfs = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
-   boot_header->item_lengths_d8.command_line = tux64_mkrom_builder_format_length_item_uint16((Tux64UInt16)cmdline_bytes);
-   boot_header->item_lengths_d8.bootloader_stage1 = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
-   boot_header->item_lengths_d8.bootloader_stage2_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
-   boot_header->item_lengths_d8.bootloader_stage3 = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage3.bytes);
+   boot_header->item_lengths_d4.kernel_data = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
+   boot_header->item_lengths_d4.initramfs = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
+   boot_header->item_lengths_d4.command_line = tux64_mkrom_builder_format_length_item_uint16((Tux64UInt16)cmdline_bytes);
+   boot_header->item_lengths_d4.bootloader_stage1 = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
+   boot_header->item_lengths_d4.bootloader_stage2_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
+   boot_header->item_lengths_d4.bootloader_stage3 = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage3.bytes);
 
    /* TODO: parse the kernel image and stage-2 BSS data file to populate those */
-   boot_header->item_lengths_d8.bootloader_stage2_bss = TUX64_LITERAL_UINT32(0u);
-   boot_header->item_lengths_d8.kernel_bss = TUX64_LITERAL_UINT32(0u);
+   boot_header->item_lengths_d4.bootloader_stage2_bss = TUX64_LITERAL_UINT32(0u);
+   boot_header->item_lengths_d4.kernel_bss = TUX64_LITERAL_UINT32(0u);
 
    result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_OK;
    return result;
