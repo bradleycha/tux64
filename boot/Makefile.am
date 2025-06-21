@@ -27,7 +27,9 @@ LDADD = \
 stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.s
 stage1_SOURCES = \
-	src/tux64-boot/stage1/stage1.c
+	src/tux64-boot/stage1/stage1.c \
+	src/tux64-boot/stage1/status.c \
+	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
 stage3_SOURCES = \

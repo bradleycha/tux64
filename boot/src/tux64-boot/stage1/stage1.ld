@@ -16,7 +16,8 @@ SECTIONS
    } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
 
    /* place the stage-1 uninitialized variables at the start of RSP DMEM */
-   .rsp_dmem.bss : {
+   .rsp_dmem : {
+      *(.status);
       *(.bss*);
    } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 }

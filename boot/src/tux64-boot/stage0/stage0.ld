@@ -15,8 +15,9 @@ SECTIONS
       *(.text* .rodata* .data*);
    } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 
-   /* store .bss items at the start of RSP IMEM */
+   /* store the status data and .bss items at the start of RSP IMEM */
    .rsp_imem : {
+      *(.status);
       *(.bss*);
    } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
 
