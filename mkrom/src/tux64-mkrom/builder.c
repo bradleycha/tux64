@@ -202,7 +202,7 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    boot_header->item_lengths_d4.kernel_data = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
    boot_header->item_lengths_d4.initramfs = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
    boot_header->item_lengths_d4.command_line = tux64_mkrom_builder_format_length_item_uint16((Tux64UInt16)cmdline_bytes);
-   boot_header->item_lengths_d4.bootloader_stage1 = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
+   boot_header->item_lengths_d4.bootloader_stage1 = tux64_mkrom_builder_format_length_item_uint16(input->files.bootloader.stage1.bytes);
    boot_header->item_lengths_d4.bootloader_stage2_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
    boot_header->item_lengths_d4.bootloader_stage3 = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage3.bytes);
 
