@@ -165,14 +165,20 @@ static Tux64UInt16
 tux64_mkrom_builder_format_length_item_uint16(
    Tux64UInt16 value
 ) {
-   return tux64_mkrom_builder_store_item_uint16((value + TUX64_LITERAL_UINT16(4u)) / TUX64_LITERAL_UINT16(4u));
+   return tux64_mkrom_builder_store_item_uint16(tux64_math_ceil_divide_uint16(
+      value,
+      TUX64_LITERAL_UINT16(TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY))
+   );
 }
 
 static Tux64UInt32
 tux64_mkrom_builder_format_length_item_uint32(
    Tux64UInt32 value
 ) {
-   return tux64_mkrom_builder_store_item_uint32((value + TUX64_LITERAL_UINT32(4u)) / TUX64_LITERAL_UINT32(4u));
+   return tux64_mkrom_builder_store_item_uint32(tux64_math_ceil_divide_uint32(
+      value,
+      TUX64_LITERAL_UINT32(TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY))
+   );
 }
 
 static struct Tux64MkromBuilderMeasureResult
