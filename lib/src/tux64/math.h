@@ -44,5 +44,29 @@ tux64_math_align_forward_uint64(
 );
 
 /*----------------------------------------------------------------------------*/
+/* Performs integer ceiling division.                                         */
+/*----------------------------------------------------------------------------*/
+Tux64UInt8
+tux64_math_ceil_divide_uint8(
+   Tux64UInt8 dividend,
+   Tux64UInt8 divisor
+);
+Tux64UInt16
+tux64_math_ceil_divide_uint16(
+   Tux64UInt16 dividend,
+   Tux64UInt16 divisor
+);
+Tux64UInt32
+tux64_math_ceil_divide_uint32(
+   Tux64UInt32 dividend,
+   Tux64UInt32 divisor
+);
+Tux64UInt64
+tux64_math_ceil_divide_uint64(
+   Tux64UInt64 dividend,
+   Tux64UInt64 divisor
+);
+
+/*----------------------------------------------------------------------------*/
 #endif /* _TUX64_MATH_H */
 
