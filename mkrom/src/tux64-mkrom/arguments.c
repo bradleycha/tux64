@@ -12,7 +12,7 @@
 #include <tux64/memory.h>
 #include <tux64/endian.h>
 #include <tux64/parse/string-integer.h>
-#include <tux64/platform-n64/rom.h>
+#include <tux64/platform/mips/n64/rom.h>
 #include <stdio.h>
 
 static struct Tux64ArgumentsParseOptionResult
@@ -644,7 +644,7 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_title(
       return result;
    }
 
-   if (parameter->characters > TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_TITLE_CHARACTERS)) {
+   if (parameter->characters > TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_GAME_TITLE_CHARACTERS)) {
       result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
       result.payload.parameter_invalid.reason.ptr = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_TITLE_ERROR_TOO_LONG;
       result.payload.parameter_invalid.reason.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_TITLE_ERROR_TOO_LONG_CHARACTERS);
@@ -661,7 +661,7 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_title(
    tux64_memory_fill(
       &arguments->rom_header.game_title[parameter->characters],
       &sentinel_fill,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_TITLE_CHARACTERS) - parameter->characters,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_GAME_TITLE_CHARACTERS) - parameter->characters,
       TUX64_LITERAL_UINT32(sizeof(sentinel_fill))
    );
 
@@ -689,7 +689,7 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
       return result;
    }
 
-   if (parameter->characters != TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_CODE_CHARACTERS)) {
+   if (parameter->characters != TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_GAME_CODE_CHARACTERS)) {
       result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID;
       result.payload.parameter_invalid.reason.ptr = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_CODE_INVALID_LENGTH;
       result.payload.parameter_invalid.reason.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_PARSER_ROM_HEADER_GAME_CODE_INVALID_LENGTH_CHARACTERS);
@@ -699,7 +699,7 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    tux64_memory_copy(
       arguments->rom_header.game_code,
       parameter->ptr,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_CODE_CHARACTERS)
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_GAME_CODE_CHARACTERS)
    );
 
    result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
@@ -1078,7 +1078,7 @@ tux64_mkrom_arguments_config_file_iterator_options = {
 
 static void
 tux64_mkrom_arguments_config_file_initialize_optional_rom_header(
-   struct Tux64PlatformN64RomHeader * header
+   struct Tux64PlatformMipsN64RomHeader * header
 ) {
    Tux64UInt8 sentinel_fill;
 
@@ -1117,32 +1117,32 @@ tux64_mkrom_arguments_config_file_initialize_optional_rom_header(
    tux64_memory_fill(
       &header->game_title[TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS],
       &sentinel_fill,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_TITLE_CHARACTERS - TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS),
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_GAME_TITLE_CHARACTERS - TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS),
       TUX64_LITERAL_UINT32(sizeof(sentinel_fill))
    );
 
-   sentinel_fill = TUX64_LITERAL_UINT8(TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_CONTROLLER_TYPE_UNSPECIFIED);
+   sentinel_fill = TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_HOMEBREW_INFO_CONTROLLER_TYPE_UNSPECIFIED);
    tux64_memory_fill(
       header->homebrew_info.controller_type,
       &sentinel_fill,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_CONTROLLER_TYPE_COUNT),
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_HOMEBREW_INFO_CONTROLLER_TYPE_COUNT),
       TUX64_LITERAL_UINT32(sizeof(sentinel_fill))
    );
 
    tux64_memory_copy(
       header->homebrew_info.game_id,
-      TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_GAME_ID_MAGIC,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_GAME_ID_CHARACTERS * sizeof(char))
+      TUX64_PLATFORM_MIPS_N64_ROM_HEADER_HOMEBREW_INFO_GAME_ID_MAGIC,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_HOMEBREW_INFO_GAME_ID_CHARACTERS * sizeof(char))
    );
 
    header->homebrew_info.save_type = TUX64_LITERAL_UINT8(
-      TUX64_PLATFORM_N64_ROM_HEADER_HOMEBREW_INFO_SAVE_TYPE_NONE
+      TUX64_PLATFORM_MIPS_N64_ROM_HEADER_HOMEBREW_INFO_SAVE_TYPE_NONE
    );
 
    tux64_memory_copy(
       header->game_code,
       TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_DEFAULT_VALUE,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_N64_ROM_HEADER_GAME_CODE_CHARACTERS * sizeof(char))
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_ROM_HEADER_GAME_CODE_CHARACTERS * sizeof(char))
    );
 
    header->rom_version = TUX64_LITERAL_UINT8(0x00);

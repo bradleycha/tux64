@@ -8,8 +8,8 @@
 #include "tux64-mkrom/tux64-mkrom.h"
 #include "tux64-mkrom/builder.h"
 
-#include <tux64/platform-n64/boot.h>
-#include <tux64/platform-n64/rom.h>
+#include <tux64/platform/mips/n64/boot.h>
+#include <tux64/platform/mips/n64/rom.h>
 #include <tux64/memory.h>
 #include <tux64/endian.h>
 #include <tux64/math.h>
@@ -30,7 +30,7 @@
 /* 0x00001000:                                                                */
 /*    Bootloader header                                                       */
 /*                                                                            */
-/* . += sizeof(struct Tux64PlatformN64BootHeader):                            */
+/* . += sizeof(struct Tux64PlatformMipsN64BootHeader):                        */
 /*    Bootloader stage-1                                                      */
 /*                                                                            */
 /* . += input->files.bootloader.stage1.bytes:                                 */
@@ -85,7 +85,7 @@ tux64_mkrom_builder_measure_and_verify_overflow(
    Tux64UInt32 marker;
    Tux64UInt32 cmdline_bytes;
 
-   marker = TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformN64RomHeader));
+   marker = TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader));
 
    if (marker > TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE - input->files.bootloader.stage0.bytes) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE0;
@@ -93,7 +93,7 @@ tux64_mkrom_builder_measure_and_verify_overflow(
    }
    marker = tux64_mkrom_builder_align_value(marker + input->files.bootloader.stage0.bytes);
 
-   marker = tux64_mkrom_builder_align_value(marker + TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformN64BootHeader)));
+   marker = tux64_mkrom_builder_align_value(marker + TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader)));
 
    if (marker > TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE - input->files.bootloader.stage0_cic.bytes) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE0_CIC;
@@ -184,7 +184,7 @@ tux64_mkrom_builder_format_length_item_uint32(
 static struct Tux64MkromBuilderMeasureResult
 tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    const struct Tux64MkromBuilderInput * input,
-   struct Tux64PlatformN64BootHeader * boot_header
+   struct Tux64PlatformMipsN64BootHeader * boot_header
 ) {
    struct Tux64MkromBuilderMeasureResult result;
    Tux64UInt32 cmdline_bytes;
@@ -193,8 +193,8 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
 
    tux64_memory_copy(
       boot_header->magic,
-      TUX64_BOOT_HEADER_MAGIC,
-      TUX64_LITERAL_UINT32(TUX64_STRING_CHARACTERS(TUX64_BOOT_HEADER_MAGIC))
+      TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC,
+      TUX64_LITERAL_UINT32(TUX64_STRING_CHARACTERS(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC))
    );
 
    boot_header->flags = tux64_mkrom_builder_store_item_uint16(0x0000);
@@ -221,7 +221,7 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
 }
 
 #define TUX64_MKROM_BUILDER_STAGE0_MAX_LENGTH\
-   (0x1000u - sizeof(struct Tux64PlatformN64RomHeader))
+   (0x1000u - sizeof(struct Tux64PlatformMipsN64RomHeader))
 #define TUX64_MKROM_BUILDER_MAX_ROM_BYTES\
    (1024u * 1024u * 64u) /* 64MiB */
 
@@ -230,7 +230,7 @@ tux64_mkrom_builder_measure_and_verify(
    const struct Tux64MkromBuilderInput * input
 ) {
    struct Tux64MkromBuilderMeasureResult result;
-   struct Tux64PlatformN64BootHeader boot_header;
+   struct Tux64PlatformMipsN64BootHeader boot_header;
    Tux64UInt32 marker;
    Tux64UInt32 cmdline_bytes;
 
@@ -258,7 +258,7 @@ tux64_mkrom_builder_measure_and_verify(
    /* begin measuring the size of the ROM.  we initialize to 0x1000 because */
    /* we always must have this due to the IPl2 expecting IPL3 in those bytes. */
    marker = TUX64_LITERAL_UINT32(0x00001000u);
-   marker += tux64_mkrom_builder_align_value(TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformN64BootHeader)));
+   marker += tux64_mkrom_builder_align_value(TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader)));
    
    marker += tux64_mkrom_builder_align_value(input->files.bootloader.stage1.bytes);
    if (marker > TUX64_MKROM_BUILDER_MAX_ROM_BYTES) {
@@ -326,9 +326,9 @@ tux64_mkrom_builder_construct(
    tux64_memory_copy(
       pen,
       &input->rom_header,
-      TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformN64RomHeader))
+      TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader))
    );
-   pen += sizeof(struct Tux64PlatformN64RomHeader);
+   pen += sizeof(struct Tux64PlatformMipsN64RomHeader);
 
    /* stage-0 bootloader */
    tux64_memory_copy(
@@ -352,9 +352,9 @@ tux64_mkrom_builder_construct(
    tux64_memory_copy(
       pen,
       &measure_info->boot_header,
-      TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformN64BootHeader))
+      TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader))
    );
-   pen += tux64_mkrom_builder_align_value(TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformN64BootHeader)));
+   pen += tux64_mkrom_builder_align_value(TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader)));
 
    /* stage-1 bootloader */
    tux64_memory_copy(

@@ -12,7 +12,7 @@
 #include <tux64/memory.h>
 #include <tux64/fs.h>
 #include <tux64/arguments.h>
-#include <tux64/platform-n64/rom.h>
+#include <tux64/platform/mips/n64/rom.h>
 #include "tux64-mkrom/arguments.h"
 #include "tux64-mkrom/builder.h"
 
@@ -544,7 +544,7 @@ struct Tux64MkromInputFiles {
 
 struct Tux64MkromInput {
    struct Tux64MkromInputFiles files;
-   const struct Tux64PlatformN64RomHeader * rom_header;
+   const struct Tux64PlatformMipsN64RomHeader * rom_header;
    struct Tux64String kernel_command_line;
    struct Tux64String path_output;
 };
@@ -577,7 +577,7 @@ tux64_mkrom_run_parsed_input(
    builder_input.files.kernel.bytes = input->files.kernel.bytes;
    builder_input.files.initramfs.data = input->files.initramfs.data;
    builder_input.files.initramfs.bytes = input->files.initramfs.bytes;
-   tux64_memory_copy(&builder_input.rom_header, input->rom_header, TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformN64RomHeader)));
+   tux64_memory_copy(&builder_input.rom_header, input->rom_header, TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader)));
    builder_input.kernel_command_line = input->kernel_command_line;
 
    TUX64_LOG_INFO("verifying input files and calculating ROM length");

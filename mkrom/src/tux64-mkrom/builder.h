@@ -10,8 +10,8 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-mkrom/tux64-mkrom.h"
-#include <tux64/platform-n64/boot.h>
-#include <tux64/platform-n64/rom.h>
+#include <tux64/platform/mips/n64/boot.h>
+#include <tux64/platform/mips/n64/rom.h>
 
 #define TUX64_MKROM_BUILDER_MEASURE_STATUS_FIELD_COUNT 10u
 enum Tux64MkromBuilderMeasureStatus {
@@ -28,7 +28,7 @@ enum Tux64MkromBuilderMeasureStatus {
 };
 
 struct Tux64MkromBuilderMeasurePayloadOk {
-   struct Tux64PlatformN64BootHeader boot_header;
+   struct Tux64PlatformMipsN64BootHeader boot_header;
    Tux64UInt32 rom_bytes;
 };
 
@@ -63,7 +63,7 @@ struct Tux64MkromBuilderInputFiles {
 
 struct Tux64MkromBuilderInput {
    struct Tux64MkromBuilderInputFiles files;
-   struct Tux64PlatformN64RomHeader rom_header;
+   struct Tux64PlatformMipsN64RomHeader rom_header;
    struct Tux64String kernel_command_line;
 };
 
