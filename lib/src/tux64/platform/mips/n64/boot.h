@@ -2,18 +2,18 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/tux64/platform-n64/boot.h - Common structs and types used by the   */
-/*    bootloader.                                                             */
+/* lib/src/tux64/platform/mips/n64/boot.h - Common structs and types used by  */
+/*    the bootloader.                                                         */
 /*----------------------------------------------------------------------------*/
 
-#ifndef _TUX64_PLATFORM_N64_BOOT_H
-#define _TUX64_PLATFORM_N64_BOOT_H
-/*------------------------------------------------------------------------------*/
+#ifndef _TUX64_PLATFORM_MIPS_N64_BOOT_H
+#define _TUX64_PLATFORM_MIPS_N64_BOOT_H
+/*----------------------------------------------------------------------------*/
 
 #include "tux64/tux64.h"
 
 /* stores the lengths of the various boot items */
-struct Tux64PlatformN64BootItemLengths {
+struct Tux64PlatformMipsN64BootItemLengths {
    Tux64UInt32 kernel_data;
    Tux64UInt32 kernel_bss;
    Tux64UInt32 initramfs;
@@ -24,15 +24,15 @@ struct Tux64PlatformN64BootItemLengths {
    Tux64UInt16 bootloader_stage3;
 };
 
-struct Tux64PlatformN64BootVersion {
+struct Tux64PlatformMipsN64BootVersion {
    Tux64UInt8 major;
    Tux64UInt8 minor;
    Tux64UInt16 revision;
 };
 
-#define TUX64_BOOT_HEADER_MAGIC_BYTES\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES\
    (8u)
-#define TUX64_BOOT_HEADER_MAGIC\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC\
    "TUX64LDR"
 
 /* the boot header stored in cartridge ROM directly after the stage-0 */
@@ -42,25 +42,25 @@ struct Tux64PlatformN64BootVersion {
 /* boundary to both make it compatible with RSP DMA, as well as make memcpy */
 /* more efficient.  this also makes it impossible to pass a misaligned offset */
 /* to the bootloader. */
-struct Tux64PlatformN64BootHeader {
+struct Tux64PlatformMipsN64BootHeader {
    /* this should always be TUX64_BOOT_HEADER_MAGIC */
-   Tux64UInt8 magic [TUX64_BOOT_HEADER_MAGIC_BYTES];
+   Tux64UInt8 magic [TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES];
 
    /* miscellaneous bitflags used to control the boot process */
    Tux64UInt16 flags;
 
    /* the bootloader header version, used to define extended bootloader */
    /* header versions */
-   struct Tux64PlatformN64BootVersion version;
+   struct Tux64PlatformMipsN64BootVersion version;
 
    /* the size of the bootloader header, used for future extensions of the */
    /* boot header. */
    Tux64UInt16 length_d4;
 
    /* the lengths of the various boot items */
-   struct Tux64PlatformN64BootItemLengths item_lengths_d4;
+   struct Tux64PlatformMipsN64BootItemLengths item_lengths_d4;
 };
 
-/*------------------------------------------------------------------------------*/
-#endif /* _TUX64_BOOT_H */
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_PLATFORM_MIPS_N64_BOOT_H */
 
