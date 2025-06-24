@@ -60,7 +60,7 @@
 /*----------------------------------------------------------------------------*/
 
 #define TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY\
-   4u
+   TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD
 #define TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE\
    TUX64_LITERAL_UINT32(\
       TUX64_UINT32_MAX - (TUX64_UINT32_MAX % TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY)\
@@ -161,16 +161,6 @@ tux64_mkrom_builder_store_item_uint32(
    return tux64_endian_convert_uint32(value, TUX64_ENDIAN_FORMAT_BIG);
 }
 
-static Tux64UInt16
-tux64_mkrom_builder_format_length_item_uint16(
-   Tux64UInt16 value
-) {
-   return tux64_mkrom_builder_store_item_uint16(tux64_math_ceil_divide_uint16(
-      value,
-      TUX64_LITERAL_UINT16(TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY))
-   );
-}
-
 static Tux64UInt32
 tux64_mkrom_builder_format_length_item_uint32(
    Tux64UInt32 value
@@ -194,27 +184,38 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    tux64_memory_copy(
       boot_header->magic,
       TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC,
-      TUX64_LITERAL_UINT32(TUX64_STRING_CHARACTERS(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC))
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES)
    );
 
-   boot_header->flags = tux64_mkrom_builder_store_item_uint16(0x0000);
+   /* TODO: implement and use checksum algorithm for all checksum fields, also calculate .bss section lengths */
+
+   boot_header->checksum = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
 
    boot_header->version.major = TUX64_LITERAL_UINT8(0x00);
    boot_header->version.minor = TUX64_LITERAL_UINT8(0x00);
-   boot_header->version.revision = tux64_mkrom_builder_store_item_uint16(0x0000);
+   boot_header->version.patch = tux64_mkrom_builder_store_item_uint16(0x0000);
 
-   boot_header->length_d4 = tux64_mkrom_builder_format_length_item_uint16(TUX64_LITERAL_UINT16(sizeof(*boot_header)));
+   boot_header->length_words = tux64_mkrom_builder_format_length_item_uint32(TUX64_LITERAL_UINT16(sizeof(*boot_header)));
 
-   boot_header->item_lengths_d4.kernel_data = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
-   boot_header->item_lengths_d4.initramfs = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
-   boot_header->item_lengths_d4.command_line = tux64_mkrom_builder_format_length_item_uint16((Tux64UInt16)cmdline_bytes);
-   boot_header->item_lengths_d4.bootloader_stage1 = tux64_mkrom_builder_format_length_item_uint16(input->files.bootloader.stage1.bytes);
-   boot_header->item_lengths_d4.bootloader_stage2_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
-   boot_header->item_lengths_d4.bootloader_stage3 = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage3.bytes);
+   boot_header->files.bootloader.stage1.checksum = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
+   boot_header->files.bootloader.stage1.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
 
-   /* TODO: parse the kernel image and stage-2 BSS data file to populate those */
-   boot_header->item_lengths_d4.bootloader_stage2_bss = TUX64_LITERAL_UINT32(0u);
-   boot_header->item_lengths_d4.kernel_bss = TUX64_LITERAL_UINT32(0u);
+   boot_header->files.bootloader.stage2.checksum = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
+   boot_header->files.bootloader.stage2.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
+   boot_header->files.bootloader.stage2.length_words_bss = tux64_mkrom_builder_format_length_item_uint32(TUX64_LITERAL_UINT32(0));
+
+   boot_header->files.bootloader.stage3.checksum = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
+   boot_header->files.bootloader.stage3.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage3.bytes);
+
+   boot_header->files.kernel.checksum = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
+   boot_header->files.kernel.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
+   boot_header->files.kernel.length_words_bss = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
+
+   boot_header->files.initramfs.checksum = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
+   boot_header->files.initramfs.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
+
+   boot_header->files.command_line.checksum = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
+   boot_header->files.command_line.length_words = tux64_mkrom_builder_format_length_item_uint32(cmdline_bytes);
 
    result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_OK;
    return result;
