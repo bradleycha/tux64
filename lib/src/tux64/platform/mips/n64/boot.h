@@ -12,53 +12,84 @@
 
 #include "tux64/tux64.h"
 
-/* stores the lengths of the various boot items */
-struct Tux64PlatformMipsN64BootItemLengths {
-   Tux64UInt32 kernel_data;
-   Tux64UInt32 kernel_bss;
-   Tux64UInt32 initramfs;
-   Tux64UInt16 command_line;
-   Tux64UInt16 bootloader_stage1;
-   Tux64UInt32 bootloader_stage2_data;
-   Tux64UInt32 bootloader_stage2_bss;
-   Tux64UInt16 bootloader_stage3;
-};
+/* the number of bytes per word */
+#define TUX64_PLATFORM_MIPS_BOOT_BYTES_PER_WORD\
+   4u
 
-struct Tux64PlatformMipsN64BootVersion {
+#define TUX64_PLATFORM_MIPS_BOOT_HEADER_MAGIC\
+   "TBHM" /* Tux64 Boot Header Magic */
+
+#define TUX64_PLATFORM_MIPS_BOOT_HEADER_MAGIC_BYTES\
+   sizeof(Tux64UInt32)
+
+struct Tux64PlatformMipsN64BootHeaderVersion {
    Tux64UInt8 major;
    Tux64UInt8 minor;
-   Tux64UInt16 revision;
+   Tux64UInt16 patch;
 };
 
-#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES\
-   (8u)
-#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC\
-   "TUX64LDR"
+struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage1 {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length_words_code_data;
+};
 
-/* the boot header stored in cartridge ROM directly after the stage-0 */
-/* bootloader. note that byte offsets and lengths are postfixed with "d4". */
-/* this means that the number stored in the bytes are a quarter of their */
-/* actual value.  this is done because we align all boot items to a word */
-/* boundary to both make it compatible with RSP DMA, as well as make memcpy */
-/* more efficient.  this also makes it impossible to pass a misaligned offset */
-/* to the bootloader. */
+struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage2 {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length_words_code_data;
+   Tux64UInt32 length_words_bss;
+};
+
+struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage3 {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length_words_code_data;
+};
+
+struct Tux64PlatformMipsN64BootHeaderFileKernel {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length_words_code_data;
+   Tux64UInt32 length_words_bss;
+};
+
+struct Tux64PlatformMipsN64BootHeaderFileInitramfs {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length_words;
+};
+
+struct Tux64PlatformMipsN64BootHeaderFileCommandLine {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length_words;
+};
+
+struct Tux64PlatformMipsN64BootHeaderFileBootloader {
+   struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage1 stage1;
+   struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage2 stage2;
+   struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage3 stage3;
+   struct Tux64PlatformMipsN64BootHeaderFileKernel kernel;
+   struct Tux64PlatformMipsN64BootHeaderFileInitramfs initramfs;
+   struct Tux64PlatformMipsN64BootHeaderFileCommandLine command_line;
+};
+
+struct Tux64PlatformMipsN64BootHeaderFiles {
+   struct Tux64PlatformMipsN64BootHeaderFileBootloader bootloader;
+};
+
+/* the boot header stored after IPL3/stage-0 in ROM. */
 struct Tux64PlatformMipsN64BootHeader {
-   /* this should always be TUX64_BOOT_HEADER_MAGIC */
-   Tux64UInt8 magic [TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES];
+   /* 4-byte magic value, used to quickly verify the boot header is present */
+   Tux64UInt8 magic [TUX64_PLATFORM_MIPS_BOOT_HEADER_MAGIC_BYTES];
 
-   /* miscellaneous bitflags used to control the boot process */
-   Tux64UInt16 flags;
+   /* checksum of the entire header, minus the magic value, used to verify */
+   /* the header isn't corrupted */
+   Tux64UInt32 checksum;
 
-   /* the bootloader header version, used to define extended bootloader */
-   /* header versions */
-   struct Tux64PlatformMipsN64BootVersion version;
+   /* the bootloader version associated with the header */
+   struct Tux64PlatformMipsN64BootHeaderVersion version;
 
-   /* the size of the bootloader header, used for future extensions of the */
-   /* boot header. */
-   Tux64UInt16 length_d4;
+   /* the length of the header, in words */
+   Tux64UInt32 length_words;
 
-   /* the lengths of the various boot items */
-   struct Tux64PlatformMipsN64BootItemLengths item_lengths_d4;
+   /* files used during the boot process */
+   struct Tux64PlatformMipsN64BootHeaderFiles files;
 };
 
 /*----------------------------------------------------------------------------*/
