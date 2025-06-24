@@ -13,13 +13,13 @@
 #include "tux64/tux64.h"
 
 /* the number of bytes per word */
-#define TUX64_PLATFORM_MIPS_BOOT_BYTES_PER_WORD\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD\
    4u
 
-#define TUX64_PLATFORM_MIPS_BOOT_HEADER_MAGIC\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC\
    "TBHM" /* Tux64 Boot Header Magic */
 
-#define TUX64_PLATFORM_MIPS_BOOT_HEADER_MAGIC_BYTES\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES\
    sizeof(Tux64UInt32)
 
 struct Tux64PlatformMipsN64BootHeaderVersion {
@@ -64,19 +64,19 @@ struct Tux64PlatformMipsN64BootHeaderFileBootloader {
    struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage1 stage1;
    struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage2 stage2;
    struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage3 stage3;
+};
+
+struct Tux64PlatformMipsN64BootHeaderFiles {
+   struct Tux64PlatformMipsN64BootHeaderFileBootloader bootloader;
    struct Tux64PlatformMipsN64BootHeaderFileKernel kernel;
    struct Tux64PlatformMipsN64BootHeaderFileInitramfs initramfs;
    struct Tux64PlatformMipsN64BootHeaderFileCommandLine command_line;
 };
 
-struct Tux64PlatformMipsN64BootHeaderFiles {
-   struct Tux64PlatformMipsN64BootHeaderFileBootloader bootloader;
-};
-
 /* the boot header stored after IPL3/stage-0 in ROM. */
 struct Tux64PlatformMipsN64BootHeader {
    /* 4-byte magic value, used to quickly verify the boot header is present */
-   Tux64UInt8 magic [TUX64_PLATFORM_MIPS_BOOT_HEADER_MAGIC_BYTES];
+   Tux64UInt8 magic [TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES];
 
    /* checksum of the entire header, minus the magic value, used to verify */
    /* the header isn't corrupted */
