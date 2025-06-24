@@ -7,19 +7,19 @@
 
 #include "tux64-boot/tux64-boot.h"
 
-#include <tux64/platform-n64/boot.h>
+#include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/stage3/payload.h"
 
 void
 tux64_boot_stage2_start(
-   const struct Tux64PlatformN64BootHeader *,
+   const struct Tux64PlatformMipsN64BootHeader *,
    Tux64UInt32
 )
 __attribute__((noreturn, section(".start")));
 
 void
 tux64_boot_stage2_start(
-   const struct Tux64PlatformN64BootHeader * boot_header,
+   const struct Tux64PlatformMipsN64BootHeader * boot_header,
    Tux64UInt32 total_memory
 ) {
    /* TODO: implement */

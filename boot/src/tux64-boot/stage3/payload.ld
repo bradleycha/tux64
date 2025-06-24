@@ -15,6 +15,6 @@ SECTIONS
       tux64_boot_stage3_payload = .;
       *(.stage3.payload);
       . += TUX64_BOOT_STAGE3_PAYLOAD_SIZE;
-   } >TUX64_PLATFORM_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 }
 
