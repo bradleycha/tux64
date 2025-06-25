@@ -17,8 +17,12 @@ SECTIONS
 
    /* place the stage-1 uninitialized variables at the start of RSP DMEM */
    .rsp_dmem : {
-      *(.status);
       *(.bss*);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+
+   /* place the status code at the end of RSP DMEM */
+   .rsp_dmem.status (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x1000 - 0x08) : {
+      *(.status);
+   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM = 0x00
 }
 

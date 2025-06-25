@@ -20,7 +20,7 @@ SECTIONS
       *(.status);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 
-   /* store the status .bss items at the start of RSP IMEM */
+   /* store the .bss items at the start of RSP IMEM */
    .rsp_imem : {
       *(.bss*);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
