@@ -28,6 +28,9 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
    Tux64UInt16 patch;
 };
 
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_CHECKSUM\
+   (1u << 0u)
+
 struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage1 {
    Tux64UInt32 checksum;
    Tux64UInt32 length_words_code_data;
@@ -87,6 +90,9 @@ struct Tux64PlatformMipsN64BootHeader {
 
    /* the length of the header, in words */
    Tux64UInt32 length_words;
+
+   /* bitflags used by various stages of the boot process */
+   Tux64UInt32 flags;
 
    /* files used during the boot process */
    struct Tux64PlatformMipsN64BootHeaderFiles files;
