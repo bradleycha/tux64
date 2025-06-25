@@ -13,7 +13,7 @@
 #include "tux64-boot/tux64-boot.h"
 
 /*----------------------------------------------------------------------------*/
-/* This code stores an 8-byte chunk of memory at the start of RSP DMEM which  */
+/* This code stores an 8-byte chunk of memory at the end of RSP DMEM which    */
 /* when viewed as ASCII text looks like "STAGE1:c", where 'c' is the current  */
 /* boot stage.  The point of this code is to provide information useful to    */
 /* debug early boot failures by viewing memory directly.                      */
