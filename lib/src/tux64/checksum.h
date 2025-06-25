@@ -58,8 +58,8 @@ extern const struct Tux64ChecksumFunction
 tux64_checksum_fletcher_64_32;
 
 struct _Tux64ChecksumContextAlgorithmFletcher6432 {
-   Tux64UInt32 sum_hi;
-   Tux64UInt32 sum_lo;
+   union Tux64Int32 sum_hi;
+   union Tux64Int32 sum_lo;
    Tux64UInt8 word_buffer [sizeof(Tux64UInt32)];
    Tux64UInt8 word_buffer_capacity;
 };
