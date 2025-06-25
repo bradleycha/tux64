@@ -214,6 +214,8 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
 
    boot_header->length_words = tux64_mkrom_builder_format_length_item_uint32(TUX64_LITERAL_UINT16(sizeof(*boot_header)));
 
+   boot_header->flags = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0x00000000u));
+
    boot_header->files.bootloader.stage1.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage1.data, input->files.bootloader.stage1.bytes);
    boot_header->files.bootloader.stage1.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
 
