@@ -51,10 +51,12 @@
 
 .equ TUX64_BOOT_STAGE0_PAYLOAD_MAX_WORDS_STAGE1,1024
 
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD0, 0x5354 /* ST */
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD1, 0x4147 /* AG */
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD2, 0x4530 /* E0 */
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD3, 0x3a00 /* :(null) */
+.equ TUX64_BOOT_STAGE0_STATUS_BYTES,8
+
+.equ TUX64_BOOT_STAGE0_STATUS_HWORD0,0x5354 /* ST */
+.equ TUX64_BOOT_STAGE0_STATUS_HWORD1,0x4147 /* AG */
+.equ TUX64_BOOT_STAGE0_STATUS_HWORD2,0x4530 /* E0 */
+.equ TUX64_BOOT_STAGE0_STATUS_HWORD3,0x3a00 /* :(null) */
 
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                         '0'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER_MAGIC,       '1'
@@ -69,7 +71,7 @@ tux64_boot_stage0_status:
    # boot status in memory to help debug early boot issues with memory
    # debuggers.  It will look like "STAGE0:c" when memory is displayed as ASCII
    # text, where 'c' is the current boot stage code.
-   .skip 8
+   .skip TUX64_BOOT_STAGE0_STATUS_BYTES
 #tux64_boot_stage0_status
 
    .section .text
@@ -177,7 +179,7 @@ tux64_boot_stage0_start:
    bne   $s6,$s4,tux64_boot_stage0_halt
    tux64_boot_stage0.skip_stage1_checksum:
 
-   # send the boot-termination command to the PIF, done last as to give as much
+   # send the boot-termination command to the PIF, done last to give as much
    # time as possible for any previous SI bus write operations from IPL2 to
    # finish.  This is because the SI bus does writes asynchronously, so we must
    # wait for it to finish before issuing another write.  We can do this either
@@ -191,7 +193,7 @@ tux64_boot_stage0_start:
 
    # execute the stage-1 bootloader, making room for the stage-1 code after the
    # stack pointer
-   addiu $sp,$s0,-8
+   addiu $sp,$s0,-TUX64_BOOT_STAGE0_STATUS_BYTES
    jr    $s0
 #tux64_boot_stage0_start
 
