@@ -36,8 +36,11 @@
 .equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_MAGIC,             TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x00
 .equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_CHECKSUM,          TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x04
 .equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_LENGTH,            TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x0c
-.equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_CHECKSUM,   TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x10
-.equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_WORDS,      TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x14
+.equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_FLAGS,             TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x10
+.equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_CHECKSUM,   TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x14
+.equ TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_WORDS,      TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x18
+
+.equ TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM,0x0001
 
 .equ TUX64_BOOT_STAGE0_PAYLOAD_MAX_WORDS_STAGE1,1024
 
@@ -103,7 +106,7 @@ tux64_boot_stage0_start:
 
    # verify the header length is reasonable (contains boot magic and checksum)
    slt   $t0,$s2,3
-   bne   $t0,$zero,tux64_boot_stage0_halt
+   bnez  $t0,tux64_boot_stage0_halt
 
    # calculte the boot header checksum
    addiu $t0,$s0,TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_BASE+0x08 /* skip over magic + checksum */
@@ -116,18 +119,21 @@ tux64_boot_stage0_start:
       addu  $t3,$t3,$t2
       addiu $t0,$t0,4
       addiu $t1,$t1,-1
-      bne   $t1,$zero,tux64_boot_stage0_start.header_checksum_calculate
+      bnez  $t1,tux64_boot_stage0_start.header_checksum_calculate
    #tux64_boot_stage0_start.header_checksum_calculate
    subu  $t0,$t3,$t2
 
    # verify the boot header checksum matches
    bne   $s1,$t0,tux64_boot_stage0_halt
 
-   # load the stage-1 checksum and length
-   li    $t0,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1_CODE_DATA
+   # load the boot flags
+   lw    $s3,TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_FLAGS($s0)
+
+   # load the boot flags, stage-1 checksum and length
+   li    $a0,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1_CODE_DATA
    jal   tux64_boot_stage0_status_code_write
-   lw    $s3,TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_CHECKSUM($s0)
-   lw    $s4,TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_WORDS($s0)
+   lw    $s4,TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_CHECKSUM($s0)
+   lw    $s5,TUX64_BOOT_STAGE0_ADDR_CART_ROM_OFFSET_BOOT_HEADER_STAGE1_WORDS($s0)
 
    # calculate pointers to the start of stage-1 data and RSP IMEM
    sll   $s2,$s2,2   /* convert word count to byte count */
@@ -148,18 +154,22 @@ tux64_boot_stage0_start:
       sw    $t4,0($t1)
       addiu $t0,$t0,4
       addiu $t1,$t1,4
-      addiu $s4,$s4,-1
-      bne   $s4,$zero,tux64_boot_stage0_start.stage1_load_checksum_calculate
+      addiu $s5,$s5,-1
+      bnez  $s5,tux64_boot_stage0_start.stage1_load_checksum_calculate
    #tux64_boot_stage0_start.stage1_load_checksum_calculate
-   subu  $s5,$t3,$t2
+   subu  $s6,$t3,$t2
 
-   # verify the stage-1 checksum matches
-   li    $t0,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1_CHECKSUM
+   # verify the stage-1 checksum matches if NO_CHECKSUM is set.
+   li    $a0,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1_CHECKSUM
    jal   tux64_boot_stage0_status_code_write
-   bne   $s5,$s3,tux64_boot_stage0_halt
+   andi  $t0,$s3,TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM
+   bnez  $t0,tux64_boot_stage0.skip_stage1_checksum
+   bne   $s6,$s4,tux64_boot_stage0_halt
+   tux64_boot_stage0.skip_stage1_checksum:
 
-   # execute the stage-1 bootloader
-   addiu $sp,$s0,0
+   # execute the stage-1 bootloader, making room for the stage-1 code after the
+   # stack pointer
+   addiu $sp,$s0,-8
    jr    $s0
 #tux64_boot_stage0_start
 
@@ -167,7 +177,7 @@ tux64_boot_stage0_start:
 tux64_boot_stage0_cic:
    # brute-forced using "ipl3hasher-new" by Polprzewodnikowy and rasky, as well
    # as my mighty AMD RX 6800 connected to my laptop via Thunderbolt 3 ;)
-   .word 0x00006673
-   .word 0x8d3a9b65
+   .word 0x0001ade4
+   .word 0x0e569fac
 #tux64_boot_stage0_cic
 
