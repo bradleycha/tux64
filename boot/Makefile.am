@@ -20,7 +20,7 @@ AM_CFLAGS = \
 	-Wpedantic \
 	-Werror
 LDADD = \
-	-L $(top_srcdir)/src/tux64-boot \
+	-L $(top_srcdir)/src \
 	-L $(datadir) \
 	$(libdir)/libtux64.a
 

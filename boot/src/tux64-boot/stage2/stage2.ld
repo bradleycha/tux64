@@ -6,7 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
-INCLUDE stage3/payload.ld
+INCLUDE tux64-boot/stage3/payload.ld
 
 SECTIONS
 {
