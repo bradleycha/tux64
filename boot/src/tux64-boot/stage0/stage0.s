@@ -67,7 +67,6 @@
 
 .equ TUX64_BOOT_STAGE0_STATUS_BYTES,8
 
-.equ TUX64_BOOT_STAGE0_STATUS_ADDRESS_HI,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI
 .equ TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO+0x0ff8
 
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD0,0x5354 /* ST */
@@ -99,31 +98,36 @@ tux64_boot_stage0_status:
 tux64_boot_stage0_status_code_write:
    lui   $t0,TUX64_BOOT_STAGE0_STATUS_HWORD2
    ori   $t0,$t0,TUX64_BOOT_STAGE0_STATUS_HWORD3
-   lui   $t1,TUX64_BOOT_STAGE0_STATUS_ADDRESS_HI
    or    $t0,$t0,$a0
    jr    $ra
-   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x04($t1)
+   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x04($gp)
 #tux64_boot_stage0_status_code_write
 
    .section .text
 tux64_boot_stage0_halt:
    b     tux64_boot_stage0_halt
+   nop
 #tux64_boot_stage0_halt
 
    .section .start
 tux64_boot_stage0_start:
+   # reserve $gp for the start of RSP DMEM, used everywhere to cut down on code
+   lui   $gp,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI
+
    # initialize status identifier and code
    lui   $t0,TUX64_BOOT_STAGE0_STATUS_HWORD0
    ori   $t0,$t0,TUX64_BOOT_STAGE0_STATUS_HWORD1
-   lui   $t1,TUX64_BOOT_STAGE0_STATUS_ADDRESS_HI
-   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO($t1)
+   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x00($gp)
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
 
    # TODO: implement
    b     tux64_boot_stage0_halt
+   nop
 #tux64_boot_stage0_start
 
+   # TODO: add multiple of these, one for each CIC revision.  only do this when
+   # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
    # brute-forced using "ipl3hasher-new" by Polprzewodnikowy and rasky, as well
