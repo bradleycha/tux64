@@ -34,15 +34,10 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
 struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage1 {
    Tux64UInt32 checksum;
    Tux64UInt32 length_words_code_data;
-};
-
-struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage2 {
-   Tux64UInt32 checksum;
-   Tux64UInt32 length_words_code_data;
    Tux64UInt32 length_words_bss;
 };
 
-struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage3 {
+struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage2 {
    Tux64UInt32 checksum;
    Tux64UInt32 length_words_code_data;
 };
@@ -66,7 +61,6 @@ struct Tux64PlatformMipsN64BootHeaderFileCommandLine {
 struct Tux64PlatformMipsN64BootHeaderFileBootloader {
    struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage1 stage1;
    struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage2 stage2;
-   struct Tux64PlatformMipsN64BootHeaderFileBootloaderStage3 stage3;
 };
 
 struct Tux64PlatformMipsN64BootHeaderFiles {
