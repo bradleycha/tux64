@@ -36,13 +36,27 @@
 # checksum bytes.  For the rest of the boot process, we have full control over
 # the system, so we can use C instead of assembly.
 # 
-# Note: due to the way the SysAD bus and PI+SI+RCP handles reads and writes to
-# their respective MMIO address spaces, we need to be careful when accessing
+# Note #1: due to the way the SysAD bus and PI+SI+RCP handles reads and writes
+# to their respective MMIO address spaces, we need to be careful when accessing
 # memory.  For RSP IMEM/DMEM, any size read is allowed, but only 32-bit writes
 # are valid.  For PI+SI-mapped data, only 32-bit reads are allowed, and only
 # 32-bit writes are allowed when the I/O busy/DMA busy bits aren't set in the
 # PI_STATUS/SI_STATUS registers.  Accesses of all sizes are allowed in RDRAM
 # once its initialized.
+# 
+# Note #2: we disable assembler reordering of instructions, use of $at, and
+# assembler macros. this is done so we have 100% consistent machine code,
+# ideally no matter what assembler or assembler flags are in use.  do remember,
+# though, that branch delay slots lead to 1 instruction after most branch
+# instructions to be executed.  This does make it even more difficult to
+# program, but just remember...no pain, no gain!
+
+.set noreorder
+.set noat
+.set nomacro
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI,0xa400
+.equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO,0x0000
 
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_LO,0x484d /* HM */
@@ -52,6 +66,9 @@
 .equ TUX64_BOOT_STAGE0_PAYLOAD_MAX_WORDS_STAGE1,1024
 
 .equ TUX64_BOOT_STAGE0_STATUS_BYTES,8
+
+.equ TUX64_BOOT_STAGE0_STATUS_ADDRESS_HI,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI
+.equ TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO+0x0ff8
 
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD0,0x5354 /* ST */
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD1,0x4147 /* AG */
@@ -82,9 +99,10 @@ tux64_boot_stage0_status:
 tux64_boot_stage0_status_code_write:
    lui   $t0,TUX64_BOOT_STAGE0_STATUS_HWORD2
    ori   $t0,$t0,TUX64_BOOT_STAGE0_STATUS_HWORD3
+   lui   $t1,TUX64_BOOT_STAGE0_STATUS_ADDRESS_HI
    or    $t0,$t0,$a0
-   sw    $t0,tux64_boot_stage0_status+0x04($zero)
    jr    $ra
+   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x04($t1)
 #tux64_boot_stage0_status_code_write
 
    .section .text
@@ -97,9 +115,10 @@ tux64_boot_stage0_start:
    # initialize status identifier and code
    lui   $t0,TUX64_BOOT_STAGE0_STATUS_HWORD0
    ori   $t0,$t0,TUX64_BOOT_STAGE0_STATUS_HWORD1
-   sw    $t0,tux64_boot_stage0_status+0x00($zero)
-   li    $a0,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
+   lui   $t1,TUX64_BOOT_STAGE0_STATUS_ADDRESS_HI
+   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO($t1)
    jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
 
    # TODO: implement
    b     tux64_boot_stage0_halt
