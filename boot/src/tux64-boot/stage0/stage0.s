@@ -122,9 +122,9 @@ tux64_boot_stage0_start:
    lui   $gp,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI
 
    # initialize status identifier and code
-   lui   $t0,TUX64_BOOT_STAGE0_STATUS_HWORD0
-   ori   $t0,$t0,TUX64_BOOT_STAGE0_STATUS_HWORD1
-   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x00($gp)
+   lui   $s0,TUX64_BOOT_STAGE0_STATUS_HWORD0
+   ori   $s0,$s0,TUX64_BOOT_STAGE0_STATUS_HWORD1
+   sw    $s0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x00($gp)
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
 
