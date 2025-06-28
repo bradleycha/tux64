@@ -61,9 +61,7 @@
 .equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI,0xbfc0
 .equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO,0x07c0
 
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT,$9
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE,$11
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE,$13
+.equ TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT,0x0008
 
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_LO,0x484d /* HM */
@@ -164,10 +162,14 @@ tux64_boot_stage0_start:
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1
    # TODO: implement
 
-   # send the PIF terminate boot process command
+   # send the PIF terminate boot process command.  we use a dummy load
+   # instruction to block the CPU until the SI bus isn't busy.
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
-   # TODO: implement
+   lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI
+   addiu $s1,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
+   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s0)
+   sw    $s1,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s0)
 
    # jump to stage-1 start address
    jal   tux64_boot_stage0_status_code_write
