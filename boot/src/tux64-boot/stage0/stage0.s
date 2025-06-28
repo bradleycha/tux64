@@ -132,7 +132,7 @@ tux64_boot_stage0_start:
 tux64_boot_stage0_cic:
    # brute-forced using "ipl3hasher-new" by Polprzewodnikowy and rasky, as well
    # as my mighty AMD RX 6800 connected to my laptop via Thunderbolt 3 ;)
-   .word 0x00000000
-   .word 0x00000000
+   .word 0x000125b5
+   .word 0x19df1e26
 #tux64_boot_stage0_cic
 
