@@ -58,6 +58,13 @@
 .equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI,0xa400
 .equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO,0x0000
 
+.equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI,0xbfc0
+.equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO,0x07c0
+
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT,$9
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE,$11
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE,$13
+
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_LO,0x484d /* HM */
 
@@ -121,6 +128,50 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
 
+   # initialize COP0 registers
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE
+   # TODO: implement
+
+   # begin initializing RDRAM
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
+   # TODO: implement
+
+   # initialize the CPU caches
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
+   # TODO: implement
+
+   # load the boot header into RDRAM
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER
+   # TODO: implement
+
+   # calculate the checksum of the boot header and verify it matches what's
+   # given by the header
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER
+   # TODO: implement
+
+   # load the stage-1 binary into memory
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
+   # TODO: implement
+
+   # calculate the checksum of the stage-1 binary and verify it's correct
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1
+   # TODO: implement
+
+   # send the PIF terminate boot process command
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
+   # TODO: implement
+
+   # jump to stage-1 start address
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1
    # TODO: implement
    b     tux64_boot_stage0_halt
    nop
@@ -130,9 +181,8 @@ tux64_boot_stage0_start:
    # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
-   # brute-forced using "ipl3hasher-new" by Polprzewodnikowy and rasky, as well
-   # as my mighty AMD RX 6800 connected to my laptop via Thunderbolt 3 ;)
-   .word 0x000125b5
-   .word 0x19df1e26
+   # TODO: recalculate these once we finish developing stage-0
+   .word 0x00000000
+   .word 0x00000000
 #tux64_boot_stage0_cic
 
