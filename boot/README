@@ -5,29 +5,27 @@ boot and run Linux.
 
 The following files are created:
 
-   * stage0.bin - The code to run in place of the IPL3.  It loads the bootloader
-                  header into memory, does some basic checks, and then loads the
-                  stage-1 bootloader into RSP IMEM.
+   * stage0.bin - The code to run in place of the IPL3.  It performs basic
+                  hardware initialization, verifies the checksum of the stage-1
+                  bootloader, then start the stage-1 bootloader.
 
    * stage0.bin.cic - Data placed at the end of RSP DMEM to force the CIC
                       checksum to match the CIC-6102's IPL3 checksum.  This is
                       required in order to boot on real hardware.
 
-   * stage1.bin - This initializes RDRAM and the CPU cache, then proceeds to
-                  load the stage-2 bootloader into cached RDRAM.
-
-   * stage2.bin - The main bootloader binary.  This is what most users will
+   * stage1.bin - The main bootloader binary.  This is what most users will
                   interact with and contains most of the bootloader code.
 
-   * stage2.bin.bss - A text file which contains a hexadecmal string storing the
+   * stage1.bin.bss - A text file which contains a hexadecmal string storing the
                       length of the .bss section for stage2.bin.  This is used
                       to store the amount of memory to allocate for the stage-2
                       bootloader.  If this is empty, that means there is no
                       memory to allocate.
 
-   * stage3.bin - The code used to free stage 2 from memory and load the kernel,
-                  initramfs, and command-line into main memory and start the
-                  kernel.
+   * stage2.bin - The code used to free the stage-1 bootloader from memory,
+                  allowing all of RDRAM to be allocated to the kernel,
+                  initramfs, and command-line.  This will be responsible for
+                  loading the above items into memory and starting the kernel.
 
 In order to build this, you will need a cross-compiler which can target
 mips64-elf.  To accomplish this, please refer to the installation instructions
@@ -68,55 +66,39 @@ power-on to kernel entry:
              RSP DMEM + 64, which is the start of the IPL3, or in this case, the
              stage-0 bootloader.
 
-   4: stage-0 bootloader - this reads the bootloader header from cartridge ROM
-                           into RSP IMEM in a temporary buffer, then checks the
-                           magic to make sure it matches.  If it matches, then
-                           the stage-1 bootloader is read into RSP IMEM and
-                           executed.
+   4: stage-0 bootloader - this first does basic hardware initialization, which
+                           includes initializing RDRAM, initializing the CPU
+                           caches, and initializing COP0 registers.  Once
+                           complete, the bootloader header is loaded into RDRAM.
+                           A checksum is computed on the bootloader header to
+                           protect against corruption.  Once complete, the
+                           stage-1 bootloader is loaded into RDRAM, where it
+                           has its checksum computed and verified.  At this
+                           point, we are ready to execute the stage-1
+                           bootloader.  We send the boot termination command to
+                           the PIF, initialize a new stack at the start of
+                           RDRAM, and jump to the stage-1 start address.  We
+                           want to move out of RSP DMEM as it's slower to
+                           execute compared to RDRAM since we can't use cached
+                           accesses for RSP memory.  We only initialize enough
+                           hardware to get a consistent state and load stage-1
+                           into RDRAM.
 
-   5: stage-1 bootloader - this primarily initializes RDRAM, initializes the CPU
-                           cache, and detects the amount of free memory.  the
-                           bootloader header will be read to determine if the
-                           stage-1 bootloader will fit into memory, as well as
-                           configure boot parameters and more.
+   5: stage-1 bootloader - this provides all of the interactive components of
+                           the bootloader.  on-screen logging is performed to
+                           display the boot process.  once ready to load the
+                           kernel, the stage-2 bootloader will be loaded into
+                           RSP IMEM, its checksum will be verified, the stack
+                           will be moved to the top of RSP DMEM, and execution
+                           will jump to the stage-2 start address.  Importantly,
+                           this will free all of RDRAM for use by Linux, so we
+                           can make stage-1 as fancy and big as we want without
+                           competing with Linux for work ram, although we still
+                           have to consider cartridge ROM.
 
-                           once all checks pass, we will prepare to run the
-                           stage-1 bootloader.  we start an RSP DMA transfer to
-                           load the stage-1 bootloader into RDRAM+0x1000.  next,
-                           we store the bootloader header after the allocated
-                           space for the bootloader.  this is so we can have
-                           future bootloader versions allow for extensions to
-                           the base bootloader header while remaining fully
-                           backwards-compatible.  we store the pointer to the
-                           bootloader header, initialize the stack pointer to
-                           RDRAM + 0x1000 to give us a 4kb stack, then move the
-                           program counter to RDRAM + 0x1000 to start the
-                           stage-1 bootloader.
-
-   6: stage-2 bootloader - this is the main bootloader.  at this point, we have
-                           all of the console's resources available, so we can
-                           initialize graphics, poll controller input, and do
-                           many other fancy things previously not possible.
-
-                           this will provide diagnostics information on-screen,
-                           allow tweaking boot options by the user, and also do
-                           checks on the rest of the boot items to make sure
-                           nothing was corrupted due to a dirty cartridge.
-
-                           once all checks pass and we are ready to load the
-                           kernel, initramfs, and kernel command-line, we will
-                           copy the stage-2 bootloader header into RSP DMEM,
-                           initialize the stack into RSP DMEM, and load the
-                           stage-2 bootloader into RSP IMEM.  this will allow us
-                           to free the stage-1 bootloader from memory so that no
-                           memory is wasted.  we then jump to RSP IMEM to
-                           execute the stage-2 bootloader.
-
-   7: stage-3 bootloader - this uses RSP DMA to load the kernel, initramfs, and
-                           kernel command-line into RDRAM and nothing else.  all
-                           sanity checks were done by the stage-1 bootloader, so
-                           we can make many assumptions here.
-
-                           once complete, we jump to the kernel start address
-                           and execute the kernel.
+   6: stage-2 bootloader - this loads the kernel into memory, decompresses it,
+                           performs relocations to support KASLR, decompresses
+                           and loads the initramfs, and loads the command-line.
+                           once complete, we initialize a new stack into RDRAM
+                           and jump to the kernel start address.
 
