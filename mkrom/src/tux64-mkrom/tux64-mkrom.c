@@ -531,9 +531,8 @@ struct Tux64MkromInputFilesBootloader {
    struct Tux64FsLoadedFile stage0;
    struct Tux64FsLoadedFile stage0_cic;
    struct Tux64FsLoadedFile stage1;
+   struct Tux64FsLoadedFile stage1_bss;
    struct Tux64FsLoadedFile stage2;
-   struct Tux64FsLoadedFile stage2_bss;
-   struct Tux64FsLoadedFile stage3;
 };
 
 struct Tux64MkromInputFiles {
@@ -567,12 +566,10 @@ tux64_mkrom_run_parsed_input(
    builder_input.files.bootloader.stage0_cic.bytes = input->files.bootloader.stage0_cic.bytes;
    builder_input.files.bootloader.stage1.data = input->files.bootloader.stage1.data;
    builder_input.files.bootloader.stage1.bytes = input->files.bootloader.stage1.bytes;
+   builder_input.files.bootloader.stage1_bss.data = input->files.bootloader.stage1_bss.data;
+   builder_input.files.bootloader.stage1_bss.bytes = input->files.bootloader.stage1_bss.bytes;
    builder_input.files.bootloader.stage2.data = input->files.bootloader.stage2.data;
    builder_input.files.bootloader.stage2.bytes = input->files.bootloader.stage2.bytes;
-   builder_input.files.bootloader.stage2_bss.data = input->files.bootloader.stage2_bss.data;
-   builder_input.files.bootloader.stage2_bss.bytes = input->files.bootloader.stage2_bss.bytes;
-   builder_input.files.bootloader.stage3.data = input->files.bootloader.stage3.data;
-   builder_input.files.bootloader.stage3.bytes = input->files.bootloader.stage3.bytes;
    builder_input.files.kernel.data = input->files.kernel.data;
    builder_input.files.kernel.bytes = input->files.kernel.bytes;
    builder_input.files.initramfs.data = input->files.initramfs.data;
@@ -705,30 +702,21 @@ tux64_mkrom_run_parsed_cmdline(
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage2,
-      "bootloader stage-2 code",
-      &input.files.bootloader.stage2
+      &config_file_parsed.path_bootloader_stage1_bss,
+      "bootloader stage-1 BSS data",
+      &input.files.bootloader.stage1_bss
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
       goto load_err_exit3;
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage2_bss,
-      "bootloader stage-2 BSS data",
-      &input.files.bootloader.stage2_bss
+      &config_file_parsed.path_bootloader_stage2,
+      "bootloader stage-2 code",
+      &input.files.bootloader.stage2
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
       goto load_err_exit4;
-   }
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage3,
-      "bootloader stage-3 code",
-      &input.files.bootloader.stage3
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit5;
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
@@ -737,7 +725,7 @@ tux64_mkrom_run_parsed_cmdline(
       &input.files.kernel
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit6;
+      goto load_err_exit5;
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
@@ -746,7 +734,7 @@ tux64_mkrom_run_parsed_cmdline(
       &input.files.initramfs
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit7;
+      goto load_err_exit6;
    }
 
    /* create an owned copy of the kernel command-line */
@@ -778,14 +766,12 @@ tux64_mkrom_run_parsed_cmdline(
    free(kernel_command_line_ptr);
 load_err_exit8:
    tux64_fs_file_unload(&input.files.initramfs);
-load_err_exit7:
-   tux64_fs_file_unload(&input.files.kernel);
 load_err_exit6:
-   tux64_fs_file_unload(&input.files.bootloader.stage3);
+   tux64_fs_file_unload(&input.files.kernel);
 load_err_exit5:
-   tux64_fs_file_unload(&input.files.bootloader.stage2_bss);
-load_err_exit4:
    tux64_fs_file_unload(&input.files.bootloader.stage2);
+load_err_exit4:
+   tux64_fs_file_unload(&input.files.bootloader.stage1_bss);
 load_err_exit3:
    tux64_fs_file_unload(&input.files.bootloader.stage1);
 load_err_exit2:

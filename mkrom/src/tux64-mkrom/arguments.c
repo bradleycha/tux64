@@ -462,6 +462,21 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage1(
 }
 
 static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_bootloader_stage1_bss(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_bootloader_stage1_bss
+   );
+}
+
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_config_file_parser_bootloader_stage2(
    const struct Tux64String * parameter,
    void * context
@@ -473,36 +488,6 @@ tux64_mkrom_arguments_config_file_parser_bootloader_stage2(
    return tux64_mkrom_arguments_parser_string(
       parameter,
       &arguments->path_bootloader_stage2
-   );
-}
-
-static struct Tux64ArgumentsParseOptionResult
-tux64_mkrom_arguments_config_file_parser_bootloader_stage2_bss(
-   const struct Tux64String * parameter,
-   void * context
-) {
-   struct Tux64MkromArgumentsConfigFile * arguments;
-
-   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
-
-   return tux64_mkrom_arguments_parser_string(
-      parameter,
-      &arguments->path_bootloader_stage2_bss
-   );
-}
-
-static struct Tux64ArgumentsParseOptionResult
-tux64_mkrom_arguments_config_file_parser_bootloader_stage3(
-   const struct Tux64String * parameter,
-   void * context
-) {
-   struct Tux64MkromArgumentsConfigFile * arguments;
-
-   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
-
-   return tux64_mkrom_arguments_parser_string(
-      parameter,
-      &arguments->path_bootloader_stage3
    );
 }
 
@@ -712,12 +697,10 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    "bootloader-stage0-cic"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER\
    "bootloader-stage1"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_BSS_IDENTIFIER\
+   "bootloader-stage1-bss"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER\
    "bootloader-stage2"
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER\
-   "bootloader-stage2-bss"
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER\
-   "bootloader-stage3"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER\
    "kernel"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER\
@@ -741,12 +724,10 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE0_CIC_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_BSS_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_BSS_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER)
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER_CHARACTERS\
-   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER)
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER_CHARACTERS\
-   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER_CHARACTERS\
@@ -789,26 +770,18 @@ tux64_mkrom_arguments_config_file_option_bootloader_stage1_identifiers [] = {
 };
 
 static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_bootloader_stage1_bss_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_BSS_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_BSS_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
 tux64_mkrom_arguments_config_file_option_bootloader_stage2_identifiers [] = {
    {
       .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER,
       .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIER_CHARACTERS)
-   }
-};
-
-static const struct Tux64String
-tux64_mkrom_arguments_config_file_option_bootloader_stage2_bss_identifiers [] = {
-   {
-      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER,
-      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIER_CHARACTERS)
-   }
-};
-
-static const struct Tux64String
-tux64_mkrom_arguments_config_file_option_bootloader_stage3_identifiers [] = {
-   {
-      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER,
-      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIER_CHARACTERS)
    }
 };
 
@@ -882,12 +855,10 @@ tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers [] = {
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage0_cic_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage1_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_BSS_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage1_bss_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage2_identifiers)
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIERS_COUNT\
-   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage2_bss_identifiers)
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIERS_COUNT\
-   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_bootloader_stage3_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_kernel_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIERS_COUNT\
@@ -952,25 +923,18 @@ tux64_mkrom_arguments_config_file_options_required [] = {
       .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage1
    },
    {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage1_bss_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE1_BSS_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage1_bss
+   },
+   {
       .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage2_identifiers,
       .identifiers_short         = TUX64_NULLPTR,
       .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_IDENTIFIERS_COUNT),
       .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
       .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage2
-   },
-   {
-      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage2_bss_identifiers,
-      .identifiers_short         = TUX64_NULLPTR,
-      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE2_BSS_IDENTIFIERS_COUNT),
-      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
-      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage2_bss
-   },
-   {
-      .identifiers_long          = tux64_mkrom_arguments_config_file_option_bootloader_stage3_identifiers,
-      .identifiers_short         = TUX64_NULLPTR,
-      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_BOOTLOADER_STAGE3_IDENTIFIERS_COUNT),
-      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
-      .parser                    = tux64_mkrom_arguments_config_file_parser_bootloader_stage3
    },
    {
       .identifiers_long          = tux64_mkrom_arguments_config_file_option_kernel_identifiers,

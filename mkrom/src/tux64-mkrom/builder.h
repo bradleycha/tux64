@@ -50,9 +50,8 @@ struct Tux64MkromBuilderInputFilesBootloader {
    struct Tux64MkromBuilderInputFile stage0;
    struct Tux64MkromBuilderInputFile stage0_cic;
    struct Tux64MkromBuilderInputFile stage1;
+   struct Tux64MkromBuilderInputFile stage1_bss;
    struct Tux64MkromBuilderInputFile stage2;
-   struct Tux64MkromBuilderInputFile stage2_bss;
-   struct Tux64MkromBuilderInputFile stage3;
 };
 
 struct Tux64MkromBuilderInputFiles {

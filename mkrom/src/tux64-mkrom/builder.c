@@ -38,9 +38,6 @@
 /*    Bootloader stage-2                                                      */
 /*                                                                            */
 /* . += input->files.bootloader.stage2.bytes:                                 */
-/*    Bootloader stage-3                                                      */
-/*                                                                            */
-/* . += input->files.bootloader.stage3.bytes:                                 */
 /*    Kernel image                                                            */
 /*                                                                            */
 /* . += input->files.kernel.bytes:                                            */
@@ -113,12 +110,6 @@ tux64_mkrom_builder_measure_and_verify_overflow(
       return result;
    }
    marker = tux64_mkrom_builder_align_value(marker + input->files.bootloader.stage2.bytes);
-
-   if (marker > TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE - input->files.bootloader.stage3.bytes) {
-      result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE3;
-      return result;
-   }
-   marker = tux64_mkrom_builder_align_value(marker + input->files.bootloader.stage3.bytes);
 
    if (marker > TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE - input->files.kernel.bytes) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_KERNEL;
@@ -218,13 +209,10 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
 
    boot_header->files.bootloader.stage1.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage1.data, input->files.bootloader.stage1.bytes);
    boot_header->files.bootloader.stage1.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
+   boot_header->files.bootloader.stage1.length_words_bss = tux64_mkrom_builder_format_length_item_uint32(TUX64_LITERAL_UINT32(0));
 
    boot_header->files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage2.data, input->files.bootloader.stage2.bytes);
    boot_header->files.bootloader.stage2.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
-   boot_header->files.bootloader.stage2.length_words_bss = tux64_mkrom_builder_format_length_item_uint32(TUX64_LITERAL_UINT32(0));
-
-   boot_header->files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage3.data, input->files.bootloader.stage3.bytes);
-   boot_header->files.bootloader.stage3.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage3.bytes);
 
    boot_header->files.kernel.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.data, input->files.kernel.bytes);
    boot_header->files.kernel.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
@@ -292,12 +280,6 @@ tux64_mkrom_builder_measure_and_verify(
    marker += tux64_mkrom_builder_align_value(input->files.bootloader.stage2.bytes);
    if (marker > TUX64_MKROM_BUILDER_MAX_ROM_BYTES) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE2;
-      return result;
-   }
-
-   marker += tux64_mkrom_builder_align_value(input->files.bootloader.stage3.bytes);
-   if (marker > TUX64_MKROM_BUILDER_MAX_ROM_BYTES) {
-      result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE3;
       return result;
    }
 
@@ -394,14 +376,6 @@ tux64_mkrom_builder_construct(
       input->files.bootloader.stage2.bytes
    );
    pen += tux64_mkrom_builder_align_value(input->files.bootloader.stage2.bytes);
-
-   /* stage-3 bootloader */
-   tux64_memory_copy(
-      pen,
-      input->files.bootloader.stage3.data,
-      input->files.bootloader.stage3.bytes
-   );
-   pen += tux64_mkrom_builder_align_value(input->files.bootloader.stage3.bytes);
    
    /* kernel image */
    tux64_memory_copy(
