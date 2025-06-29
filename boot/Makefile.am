@@ -58,8 +58,6 @@ stage0_BIN_CIC = \
 	$(top_builddir)/stage0.bin.cic
 stage1_BIN = \
 	$(top_builddir)/stage1.bin
-stage1_BIN_BSS = \
-	$(top_builddir)/stage1.bin.bss
 stage2_BIN = \
 	$(top_builddir)/stage2.bin
 
@@ -67,7 +65,6 @@ BIN_FILES = \
 	$(stage0_BIN) \
 	$(stage0_BIN_CIC) \
 	$(stage1_BIN) \
-	$(stage1_BIN_BSS) \
 	$(stage2_BIN)
 
 pkgdata_DATA = \
@@ -81,12 +78,6 @@ $(stage0_BIN_CIC) : $(stage0_ELF)
 
 $(stage1_BIN) : $(stage1_ELF)
 	$(OBJCOPY) $< --dump-section .rdram=$@ && chmod -x $@
-
-# This is ridiculous, but it's the easiest way I could figure out how to do
-# this, as in not requiring custom tools to be written.  If you know a better
-# way, *please* let me know.
-$(stage1_BIN_BSS) : $(stage1_ELF)
-	$(OBJDUMP) -h $< | grep -e "\.rdram\.bss" | grep -e "[0-9]\{8\}" -o | head -n1 > $@
 
 $(stage2_BIN) : $(stage2_ELF)
 	$(OBJCOPY) $< --dump-section .rsp_imem=$@ && chmod -x $@
