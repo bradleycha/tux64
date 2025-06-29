@@ -38,11 +38,11 @@
 # 
 # Note #1: due to the way the SysAD bus and PI+SI+RCP handles reads and writes
 # to their respective MMIO address spaces, we need to be careful when accessing
-# memory.  For RSP IMEM/DMEM, any size read is allowed, but only 32-bit writes
-# are valid.  For PI+SI-mapped data, only 32-bit reads are allowed, and only
-# 32-bit writes are allowed when the I/O busy/DMA busy bits aren't set in the
-# PI_STATUS/SI_STATUS registers.  Accesses of all sizes are allowed in RDRAM
-# once its initialized.
+# memory.  For RSP IMEM/DMEM, all read sizes except 64-bit are allowed, but only
+# 32-bit writes are valid.  For PI+SI-mapped data, only 32-bit reads are allowed,
+# allowed, and only 32-bit writes are allowed when the I/O busy/DMA busy bits
+# aren't set in the PI_STATUS/SI_STATUS registers.  Accesses of all sizes are
+# allowed in RDRAM once its initialized.
 # 
 # Note #2: we disable assembler reordering of instructions, use of $at, and
 # assembler macros. this is done so we have 100% consistent machine code,
