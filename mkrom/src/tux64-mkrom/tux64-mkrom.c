@@ -531,7 +531,6 @@ struct Tux64MkromInputFilesBootloader {
    struct Tux64FsLoadedFile stage0;
    struct Tux64FsLoadedFile stage0_cic;
    struct Tux64FsLoadedFile stage1;
-   struct Tux64FsLoadedFile stage1_bss;
    struct Tux64FsLoadedFile stage2;
 };
 
@@ -566,8 +565,6 @@ tux64_mkrom_run_parsed_input(
    builder_input.files.bootloader.stage0_cic.bytes = input->files.bootloader.stage0_cic.bytes;
    builder_input.files.bootloader.stage1.data = input->files.bootloader.stage1.data;
    builder_input.files.bootloader.stage1.bytes = input->files.bootloader.stage1.bytes;
-   builder_input.files.bootloader.stage1_bss.data = input->files.bootloader.stage1_bss.data;
-   builder_input.files.bootloader.stage1_bss.bytes = input->files.bootloader.stage1_bss.bytes;
    builder_input.files.bootloader.stage2.data = input->files.bootloader.stage2.data;
    builder_input.files.bootloader.stage2.bytes = input->files.bootloader.stage2.bytes;
    builder_input.files.kernel.data = input->files.kernel.data;
@@ -702,21 +699,12 @@ tux64_mkrom_run_parsed_cmdline(
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage1_bss,
-      "bootloader stage-1 BSS data",
-      &input.files.bootloader.stage1_bss
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit3;
-   }
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
       &config_file_parsed.path_bootloader_stage2,
       "bootloader stage-2 code",
       &input.files.bootloader.stage2
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit4;
+      goto load_err_exit3;
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
@@ -725,7 +713,7 @@ tux64_mkrom_run_parsed_cmdline(
       &input.files.kernel
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit5;
+      goto load_err_exit4;
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
@@ -734,14 +722,14 @@ tux64_mkrom_run_parsed_cmdline(
       &input.files.initramfs
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit6;
+      goto load_err_exit5;
    }
 
    /* create an owned copy of the kernel command-line */
    kernel_command_line_ptr = malloc(config_file_parsed.command_line.characters * sizeof(char));
    if (kernel_command_line_ptr == NULL) {
       result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      goto load_err_exit8;
+      goto load_err_exit6;
    }
    tux64_memory_copy(
       kernel_command_line_ptr,
@@ -764,14 +752,12 @@ tux64_mkrom_run_parsed_cmdline(
 
    /* ...but don't forget to clean up after ourselves! */
    free(kernel_command_line_ptr);
-load_err_exit8:
-   tux64_fs_file_unload(&input.files.initramfs);
 load_err_exit6:
-   tux64_fs_file_unload(&input.files.kernel);
+   tux64_fs_file_unload(&input.files.initramfs);
 load_err_exit5:
-   tux64_fs_file_unload(&input.files.bootloader.stage2);
+   tux64_fs_file_unload(&input.files.kernel);
 load_err_exit4:
-   tux64_fs_file_unload(&input.files.bootloader.stage1_bss);
+   tux64_fs_file_unload(&input.files.bootloader.stage2);
 load_err_exit3:
    tux64_fs_file_unload(&input.files.bootloader.stage1);
 load_err_exit2:
