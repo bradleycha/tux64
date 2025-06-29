@@ -54,7 +54,7 @@ struct Tux64PlatformMipsN64BootHeaderData {
 
    /* files used during the boot process */
    struct Tux64PlatformMipsN64BootHeaderFiles files;
-}
+};
 
 /* the boot header stored after IPL3/stage-0 in ROM. */
 struct Tux64PlatformMipsN64BootHeader {
