@@ -139,13 +139,6 @@ tux64_mkrom_builder_measure_and_verify_overflow(
    return result;
 }
 
-static Tux64UInt16
-tux64_mkrom_builder_store_item_uint16(
-   Tux64UInt16 value
-) {
-   return tux64_endian_convert_uint16(value, TUX64_ENDIAN_FORMAT_BIG);
-}
-
 static Tux64UInt32
 tux64_mkrom_builder_store_item_uint32(
    Tux64UInt32 value
@@ -197,35 +190,24 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
       TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES)
    );
 
-   /* TODO: calculate .bss section lengths */
+   boot_header->data.flags = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0x00000000u));
 
-   boot_header->version.major = TUX64_LITERAL_UINT8(0x00);
-   boot_header->version.minor = TUX64_LITERAL_UINT8(0x00);
-   boot_header->version.patch = tux64_mkrom_builder_store_item_uint16(0x0000);
+   boot_header->data.files.bootloader.stage1.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage1.data, input->files.bootloader.stage1.bytes);
+   boot_header->data.files.bootloader.stage1.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
 
-   boot_header->length_words = tux64_mkrom_builder_format_length_item_uint32(TUX64_LITERAL_UINT16(sizeof(*boot_header)));
+   boot_header->data.files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage2.data, input->files.bootloader.stage2.bytes);
+   boot_header->data.files.bootloader.stage2.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
 
-   boot_header->flags = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0x00000000u));
+   boot_header->data.files.kernel.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.data, input->files.kernel.bytes);
+   boot_header->data.files.kernel.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
 
-   boot_header->files.bootloader.stage1.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage1.data, input->files.bootloader.stage1.bytes);
-   boot_header->files.bootloader.stage1.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
-   boot_header->files.bootloader.stage1.length_words_bss = tux64_mkrom_builder_format_length_item_uint32(TUX64_LITERAL_UINT32(0));
+   boot_header->data.files.kernel.checksum = tux64_mkrom_builder_calculate_checksum(input->files.initramfs.data, input->files.initramfs.bytes);
+   boot_header->data.files.initramfs.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
 
-   boot_header->files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage2.data, input->files.bootloader.stage2.bytes);
-   boot_header->files.bootloader.stage2.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
+   boot_header->data.files.kernel.checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)input->kernel_command_line.ptr, input->kernel_command_line.characters * TUX64_LITERAL_UINT32(sizeof(char)));
+   boot_header->data.files.command_line.length_words = tux64_mkrom_builder_format_length_item_uint32(cmdline_bytes);
 
-   boot_header->files.kernel.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.data, input->files.kernel.bytes);
-   boot_header->files.kernel.length_words_code_data = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
-   boot_header->files.kernel.length_words_bss = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0));
-
-   boot_header->files.kernel.checksum = tux64_mkrom_builder_calculate_checksum(input->files.initramfs.data, input->files.initramfs.bytes);
-   boot_header->files.initramfs.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
-
-   boot_header->files.kernel.checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)input->kernel_command_line.ptr, input->kernel_command_line.characters * TUX64_LITERAL_UINT32(sizeof(char)));
-   boot_header->files.command_line.length_words = tux64_mkrom_builder_format_length_item_uint32(cmdline_bytes);
-
-   /* skip over the magic and header checksum */
-   boot_header->checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)boot_header + 8u, TUX64_LITERAL_UINT32(sizeof(*boot_header) - 8u));
+   boot_header->checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)&boot_header->data, TUX64_LITERAL_UINT32(sizeof(boot_header->data)));
 
    result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_OK;
    return result;
