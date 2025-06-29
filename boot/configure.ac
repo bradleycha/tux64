@@ -25,7 +25,6 @@ if [[ "$target_os" != "elf" ]]; then
 fi
 
 AC_CHECK_PROG([OBJCOPY], [objcopy])
-AC_CHECK_PROG([OBJDUMP], [objdump])
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])

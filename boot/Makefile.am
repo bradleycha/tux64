@@ -10,6 +10,28 @@ noinst_PROGRAMS = \
 	stage1 \
 	stage2
 
+stage0_ELF = \
+	$(top_builddir)/stage0
+stage1_ELF = \
+	$(top_builddir)/stage1
+stage2_ELF = \
+	$(top_builddir)/stage2
+
+stage0_BIN = \
+	$(top_builddir)/stage0.bin
+stage0_BIN_CIC = \
+	$(top_builddir)/stage0.bin.cic
+stage1_BIN = \
+	$(top_builddir)/stage1.bin
+stage2_BIN = \
+	$(top_builddir)/stage2.bin
+
+BIN_FILES = \
+	$(stage0_BIN) \
+	$(stage0_BIN_CIC) \
+	$(stage1_BIN) \
+	$(stage2_BIN)
+
 AM_CFLAGS = \
 	-I $(top_srcdir)/src \
 	-std=c99 \
@@ -44,28 +66,6 @@ stage1_LDFLAGS = \
 	-T $(top_srcdir)/src/tux64-boot/stage1/stage1.ld
 stage2_LDFLAGS = \
 	-T $(top_srcdir)/src/tux64-boot/stage2/stage2.ld
-
-stage0_ELF = \
-	$(top_builddir)/stage0
-stage1_ELF = \
-	$(top_builddir)/stage1
-stage2_ELF = \
-	$(top_builddir)/stage2
-
-stage0_BIN = \
-	$(top_builddir)/stage0.bin
-stage0_BIN_CIC = \
-	$(top_builddir)/stage0.bin.cic
-stage1_BIN = \
-	$(top_builddir)/stage1.bin
-stage2_BIN = \
-	$(top_builddir)/stage2.bin
-
-BIN_FILES = \
-	$(stage0_BIN) \
-	$(stage0_BIN_CIC) \
-	$(stage1_BIN) \
-	$(stage2_BIN)
 
 pkgdata_DATA = \
 	$(BIN_FILES)
