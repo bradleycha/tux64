@@ -13,19 +13,19 @@ The following files are created:
                       checksum to match the CIC-6102's IPL3 checksum.  This is
                       required in order to boot on real hardware.
 
-   * stage0.dbg - Debug symbols for the stage-0 bootloader.
+   * stage0.sym - Debug symbols for the stage-0 bootloader.
 
    * stage1.bin - The main bootloader binary.  This is what most users will
                   interact with and contains most of the bootloader code.
 
-   * stage1.dbg - Debug symbols for the stage-1 bootloader.
+   * stage1.sym - Debug symbols for the stage-1 bootloader.
 
    * stage2.bin - The code used to free the stage-1 bootloader from memory,
                   allowing all of RDRAM to be allocated to the kernel,
                   initramfs, and command-line.  This will be responsible for
                   loading the above items into memory and starting the kernel.
 
-   * stage2.dbg - Debug symbols for the stage-2 bootloader.
+   * stage2.sym - Debug symbols for the stage-2 bootloader.
 
 In order to build this, you will need a cross-compiler which can target
 mips64-elf.  To accomplish this, please refer to the installation instructions
