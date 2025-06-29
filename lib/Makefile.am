@@ -70,5 +70,6 @@ platform_mips_n64_ldscripts_pkgdatadir = $(ldscripts_pkgdatadir)/platform/mips/n
 dist_platform_mips_n64_ldscripts_pkgdata_DATA = \
 	src/tux64/platform/mips/n64/n64.ld \
 	src/tux64/platform/mips/n64/memory-map.ld \
-	src/tux64/platform/mips/n64/mmio.ld
+	src/tux64/platform/mips/n64/mmio.ld \
+	src/tux64/platform/mips/n64/boot.ld
 
