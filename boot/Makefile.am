@@ -40,6 +40,9 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic \
 	-Werror
+AM_LDFLAGS = \
+	-nostartfiles
+
 LDADD = \
 	-L $(top_srcdir)/src \
 	-L $(datadir) \
@@ -61,10 +64,13 @@ EXTRA_DIST = \
 	src/tux64-boot/stage2/stage2.ld
 
 stage0_LDFLAGS = \
+	$(AM_LDFLAGS) \
 	-T $(top_srcdir)/src/tux64-boot/stage0/stage0.ld
 stage1_LDFLAGS = \
+	$(AM_LDFLAGS) \
 	-T $(top_srcdir)/src/tux64-boot/stage1/stage1.ld
 stage2_LDFLAGS = \
+	$(AM_LDFLAGS) \
 	-T $(top_srcdir)/src/tux64-boot/stage2/stage2.ld
 
 pkgdata_DATA = \
