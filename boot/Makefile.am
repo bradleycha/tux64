@@ -26,11 +26,23 @@ stage1_BIN = \
 stage2_BIN = \
 	$(top_builddir)/stage2.bin
 
+stage0_DBG = \
+	$(top_builddir)/stage0.dbg
+stage1_DBG = \
+	$(top_builddir)/stage1.dbg
+stage2_DBG = \
+	$(top_builddir)/stage2.dbg
+
 BIN_FILES = \
 	$(stage0_BIN) \
 	$(stage0_BIN_CIC) \
 	$(stage1_BIN) \
 	$(stage2_BIN)
+
+DBG_FILES = \
+	$(stage0_DBG) \
+	$(stage1_DBG) \
+	$(stage2_DBG)
 
 AM_CFLAGS = \
 	-I $(top_srcdir)/src \
@@ -74,7 +86,7 @@ stage2_LDFLAGS = \
 	-T $(top_srcdir)/src/tux64-boot/stage2/stage2.ld
 
 pkgdata_DATA = \
-	$(BIN_FILES)
+	$(BIN_FILES) $(DBG_FILES)
 
 $(stage0_BIN) : $(stage0_ELF)
 	$(OBJCOPY) $< --dump-section .rsp_dmem=$@ && chmod -x $@
@@ -88,8 +100,17 @@ $(stage1_BIN) : $(stage1_ELF)
 $(stage2_BIN) : $(stage2_ELF)
 	$(OBJCOPY) $< --dump-section .rsp_imem=$@ && chmod -x $@
 
-all-local : $(BIN_FILES)
+$(stage0_DBG) : $(stage0_ELF)
+	$(OBJCOPY) --only-keep-debug $< $@ && chmod -x $@
+
+$(stage1_DBG) : $(stage1_ELF)
+	$(OBJCOPY) --only-keep-debug $< $@ && chmod -x $@
+
+$(stage2_DBG) : $(stage2_ELF)
+	$(OBJCOPY) --only-keep-debug $< $@ && chmod -x $@
+
+all-local : $(BIN_FILES) $(DBG_FILES)
 
 clean-local :
-	rm -f $(BIN_FILES)
+	rm -f $(BIN_FILES) $(DBG_FILES)
 
