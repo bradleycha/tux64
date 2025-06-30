@@ -15,8 +15,7 @@ libtux64_la_CFLAGS = \
 	-std=c99 \
 	-Wall \
 	-Wextra \
-	-Wpedantic \
-	-Werror
+	-Wpedantic
 
 libtux64_la_SOURCES = \
 	src/tux64/bitwise.c \

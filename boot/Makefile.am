@@ -50,8 +50,7 @@ AM_CFLAGS = \
 	-ffreestanding \
 	-Wall \
 	-Wextra \
-	-Wpedantic \
-	-Werror
+	-Wpedantic
 AM_LDFLAGS = \
 	-nostartfiles
 

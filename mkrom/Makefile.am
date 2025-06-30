@@ -13,8 +13,7 @@ AM_CFLAGS = \
 	-std=c99 \
 	-Wall \
 	-Wextra \
-	-Wpedantic \
-	-Werror
+	-Wpedantic
 LDADD = \
 	$(libdir)/libtux64.a
 
