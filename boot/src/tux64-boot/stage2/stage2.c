@@ -9,7 +9,7 @@
 
 void
 tux64_boot_stage2_start(void)
-__attribute__((noreturn, section(".start")));
+__attribute__((noreturn, section(".start"), externally_visible));
 
 void
 tux64_boot_stage2_start(void) {
