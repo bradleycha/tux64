@@ -1167,10 +1167,6 @@ tux64_mkrom_arguments_config_file_parse(
    "\n"\
    "         The path to the stage-2 tux64-boot bootloader binary.\n"\
    "\n"\
-   "      --bootloader-stage3=[path]\n"\
-   "\n"\
-   "         The path to the stage-3 tux64-boot bootloader binary.\n"\
-   "\n"\
    "      --kernel=[path]\n"\
    "\n"\
    "         The path to the kernel image.\n"\
