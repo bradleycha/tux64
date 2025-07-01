@@ -128,6 +128,7 @@ tux64_boot_stage0_halt:
 #tux64_boot_stage0_halt
 
    .section .start
+   .global tux64_boot_stage0_start
 tux64_boot_stage0_start:
    # reserve $gp for the start of RSP DMEM, used everywhere to cut down on code
    lui   $gp,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI
