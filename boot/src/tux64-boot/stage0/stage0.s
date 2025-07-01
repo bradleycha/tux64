@@ -250,10 +250,10 @@ tux64_boot_stage0_start:
    # instruction to block the CPU until the SI bus isn't busy.
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
-   lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI
-   addiu $s1,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
-   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s0)
-   sw    $s1,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s0)
+   lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI
+   addiu $s2,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
+   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s1)
+   sw    $s2,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s1)
 
    # jump to stage-1 start address
    jal   tux64_boot_stage0_status_code_write
