@@ -58,8 +58,21 @@
 .equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI,0xa400
 .equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO,0x0000
 
+.equ TUX64_BOOT_STAGE0_ADDRESS_MI_HI,0xa430
+.equ TUX64_BOOT_STAGE0_ADDRESS_MI_LO,0x0000
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO,TUX64_BOOT_STAGE0_ADDRESS_MI_LO+0x0004
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_RI_HI,0xa470
+.equ TUX64_BOOT_STAGE0_ADDRESS_RI_LO,0x0000
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x000c
+
 .equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI,0xbfc0
 .equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO,0x07c0
+
+.equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI,0x0202
+.equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO,0xb0b0
 
 .equ TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT,0x0008
 
@@ -89,7 +102,7 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,         '7'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,   '8'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,         '9'
-   
+
    .section .status
 tux64_boot_stage0_status:
    # This is a chunk of memory placed at the end of RSP DMEM to show the current
@@ -134,7 +147,31 @@ tux64_boot_stage0_start:
    # begin initializing RDRAM
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
-   # TODO: implement
+
+   # if we're on ique, there's no RDRAM to initialize, so we skip it
+   lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_MI_HI
+   lui   $s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI
+   lw    $s2,TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO($s0)
+   ori   $s1,$s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO
+   beq   $s1,$s2,tux64_boot_stage0_start.skip_rdram_initialization
+
+   # reserve $s3 for the RI base address until the end of RDRAM initialization,
+   # using the branch delay slot above
+   lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_RI_HI
+
+   # check if RDRAM has already been initialized
+   lw    $s4,TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO($s3)
+   andi  $s4,$s4,0x00ff # mask out undefined bits
+   bne   $s4,$zero,tux64_boot_stage0_start.skip_rdram_initialization
+
+   # TODO: implement actual initialization, it seems Ares doesn't emulate
+   # RDRAM properly as its initialized for us, so for now we can skip this, but
+   # to boot on real hardware we're going to have to revisit this.
+   nop
+   b     tux64_boot_stage0_halt
+   nop
+
+   tux64_boot_stage0_start.skip_rdram_initialization:
 
    # initialize the CPU caches
    jal   tux64_boot_stage0_status_code_write
