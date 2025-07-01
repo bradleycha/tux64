@@ -55,6 +55,8 @@
 .set noat
 .set nomacro
 
+.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI,0xa000
+
 .equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI,0xa400
 .equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO,0x0000
 
@@ -76,6 +78,8 @@
 
 .equ TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT,0x0008
 
+.equ TUX64_BOOT_STAGE0_1MIB_HI,0x0010
+
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_LO,0x484d /* HM */
 
@@ -95,13 +99,14 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                '0'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,      '1'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,     '2'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE, '3'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,     '4'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,    '5'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,          '6'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,         '7'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,   '8'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,         '9'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,  '3'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE, '4'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,     '5'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,    '6'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,          '7'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,         '8'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,   '9'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,         'a'
 
    .section .status
 tux64_boot_stage0_status:
@@ -173,6 +178,47 @@ tux64_boot_stage0_start:
    nop
 
    tux64_boot_stage0_start.skip_rdram_initialization:
+
+   # detect the total amount of available memory.  this is done by probing
+   # memory 1MiB at a time.  this number is chosen because the smallest size of
+   # RDRAM chips is 1MiB (despite never being used in the N64), so that's the
+   # smallest reasonable size to probe.  for the ique player, we always have
+   # 8MiB of available memory (technically 16MiB, but the RI only exposes 8MiB),
+   # so this code still works.  we cap the upper limit to 8MiB since that's the
+   # maximum amount of memory possible.
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY
+
+   addiu $s0,$zero,0
+   lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI
+   lui   $s2,TUX64_BOOT_STAGE0_1MIB_HI
+   lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI + (TUX64_BOOT_STAGE0_1MIB_HI * 8)
+   tux64_boot_stage0_start.detect_total_memory:
+      ld    $s4,0($s1)     # load current value
+      nor   $s5,$s4,$zero  # flips all bits
+      sd    $s5,0($s1)     # store the flipped bits
+      ld    $s6,0($s1)     # reload to see what was stored
+      sd    $s4,0($s1)     # restore the old value
+
+      # if the values differ, then either the memory chip is bad or we're at the
+      # end of available memory.  exit the loop.
+      bne   $s5,$s6,tux64_boot_stage0_start.detect_total_memory.exit
+
+      # advance the memory pointer using the branch delay slot
+      add   $s1,$s1,$s2
+
+      # the maximum amount of possible memory is 8MiB.  if we're not past 8MiB
+      # of memory, continue looping
+      bne   $s1,$s3,tux64_boot_stage0_start.detect_total_memory
+
+      # increment the total detected memory using the branch delay slot
+      add   $s0,$s0,$s2
+   #tux64_boot_stage0_start.detect_total_memory
+   tux64_boot_stage0_start.detect_total_memory.exit:
+
+   # from this point forward, $s0 is reserved for the total system memory, in
+   # bytes until stage-1 begins.  this will be passed as an argument to stage-1
+   # to avoid using memory unnecessarily.
 
    # initialize the CPU caches
    jal   tux64_boot_stage0_status_code_write
