@@ -7,6 +7,8 @@
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
+ENTRY(tux64_boot_stage2_start)
+
 SECTIONS
 {
    /* place the stage-2 code and data into RSP IMEM */

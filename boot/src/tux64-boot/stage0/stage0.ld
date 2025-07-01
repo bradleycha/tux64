@@ -7,6 +7,8 @@
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
+ENTRY(tux64_boot_stage0_start)
+
 TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA
  = TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x1000 - 0x08;
 

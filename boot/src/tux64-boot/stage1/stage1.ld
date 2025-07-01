@@ -7,6 +7,8 @@
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
+ENTRY(tux64_boot_stage1_start)
+
 SECTIONS
 {
    /* place the entire stage-1 bootloader at the start of RDRAM, making room */
