@@ -105,9 +105,14 @@
 
 .equ TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE,0x1000
 
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0040
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0034
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_HI,0x1000
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
+
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC,0x0000
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM,0x0004
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA,0x0008
 
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_LO,0x484d /* HM */
@@ -152,6 +157,12 @@ tux64_boot_stage0_boot_header:
 #tux64_boot_stage0_boot_header
 
    .section .text
+tux64_boot_stage0_halt:
+   b     tux64_boot_stage0_halt
+   nop
+#tux64_boot_stage0_halt
+
+   .section .text
 tux64_boot_stage0_status_code_write:
    lui   $t0,TUX64_BOOT_STAGE0_STATUS_HWORD2
    ori   $t0,$t0,TUX64_BOOT_STAGE0_STATUS_HWORD3
@@ -161,10 +172,31 @@ tux64_boot_stage0_status_code_write:
 #tux64_boot_stage0_status_code_write
 
    .section .text
-tux64_boot_stage0_halt:
-   b     tux64_boot_stage0_halt
+tux64_boot_stage0_checksum_calculate_and_verify:
+   # calculates a checksum and verifies it's correct, halting if it's not
+   # correct and returning if it is correct.  data must be word-aligned.
+   # 
+   # $a0 - data start ptr
+   # $a1 - data end ptr
+   # $a2 - expected checksum
+
+   addiu $t0,$zero,0 # sum_hi
+   addiu $t1,$zero,0 # sum_lo
+   tux64_boot_stage0_checksum_calculate_and_verify.digest_word:
+      lw    $t2,0($a0)
+      addu  $t0,$t0,$t2
+      addu  $t1,$t1,$t0
+      addiu $a0,$a0,4
+      bne   $a0,$a1,tux64_boot_stage0_checksum_calculate_and_verify.digest_word
+   #tux64_boot_stage0_checksum_calculate_and_verify.digest_word
+
+   subu  $t3,$t1,$t0 # executes in branch delay slot of loop above
+   bne   $t3,$a2,tux64_boot_stage0_halt
+
    nop
-#tux64_boot_stage0_halt
+   jr    $ra
+   nop
+#tux64_boot_stage0_checksum_calculate_and_verify
 
    .section .start
    .global tux64_boot_stage0_start
@@ -239,14 +271,14 @@ tux64_boot_stage0_start:
       bne   $s5,$s6,tux64_boot_stage0_start.detect_total_memory.exit
 
       # advance the memory pointer using the branch delay slot
-      add   $s1,$s1,$s2
+      addu  $s1,$s1,$s2
 
       # the maximum amount of possible memory is 8MiB.  if we're not past 8MiB
       # of memory, continue looping
       bne   $s1,$s3,tux64_boot_stage0_start.detect_total_memory
 
       # increment the total detected memory using the branch delay slot
-      add   $s0,$s0,$s2
+      addu  $s0,$s0,$s2
    #tux64_boot_stage0_start.detect_total_memory
    tux64_boot_stage0_start.detect_total_memory.exit:
 
@@ -268,7 +300,7 @@ tux64_boot_stage0_start:
    # as we're initializing it below anyways.
    lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_PI_HI
    lui   $s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_HI
-   addiu $s3,$zero,(TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE + TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES)
+   addiu $s3,$zero,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO
    addiu $s5,$zero,(TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES - 1)
    ori   $s4,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
    sw    $s3,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($s2)
@@ -306,7 +338,19 @@ tux64_boot_stage0_start:
    # another dummy read to make sure the boot header DMA completed
    lw    $zero,0($s1)
 
-   # TODO: calculate checksum and compare
+   # verify the boot header magic is present
+   lw    $s3,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($s2)
+   lui   $s4,TUX64_BOOT_STAGE0_HEADER_MAGIC_HI
+   ori   $s4,TUX64_BOOT_STAGE0_HEADER_MAGIC_LO
+   bne   $s3,$s4,tux64_boot_stage0_halt
+   
+   # calculate the header's checksum and verify it, this also gets the boot
+   # header into cache so that rambus goes vroom vroom, also the next
+   # instruction executes in the above branch delay slot
+   lw    $a2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s2)
+   addiu $a0,$s2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
+   jal   tux64_boot_stage0_checksum_calculate_and_verify
+   addiu $a1,$s2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
 
    # load the stage-1 binary into memory
    jal   tux64_boot_stage0_status_code_write
