@@ -55,6 +55,19 @@
 .set noat
 .set nomacro
 
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO,$28
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI,$29
+
+.equ TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE,32
+.equ TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE,16
+.equ TUX64_BOOT_STAGE0_ICACHE_LINE_COUNT,512
+.equ TUX64_BOOT_STAGE0_DCACHE_LINE_COUNT,512
+
+.equ TUX64_BOOT_STAGE0_CACHE_TYPE_ICACHE,0x0000
+.equ TUX64_BOOT_STAGE0_CACHE_TYPE_DCACHE,0x0001
+.equ TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG,0x0008
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI,0x8000
 .equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI,0xa000
 
 .equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI,0xa400
@@ -220,10 +233,26 @@ tux64_boot_stage0_start:
    # bytes until stage-1 begins.  this will be passed as an argument to stage-1
    # to avoid using memory unnecessarily.
 
-   # initialize the CPU caches
+   # initialize the CPU caches, setting each line to 'invalid'
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
-   # TODO: implement
+   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
+   lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
+   lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
+   mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO # write 'invalid' tag
+   mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI # must be zero, undefined on boot
+   addiu $s2,$s2,(TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_ICACHE_LINE_COUNT)
+   addiu $s3,$s3,(TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_DCACHE_LINE_COUNT)
+   tux64_boot_stage0_start.initialize_cache:
+      addiu $s2,$s2,-TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE
+      addiu $s3,$s3,-TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE
+      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_ICACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($s2)
+      bne   $s1,$s2,tux64_boot_stage0_start.initialize_cache
+      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_DCACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($s3)
+   #tux64_boot_stage0_start.initialize_cache
+
+   # we will now reserve $s1 for the cached RDRAM base address.  remember, we
+   # still have $s0 reserved for the total memory
 
    # load the boot header into RDRAM
    jal   tux64_boot_stage0_status_code_write
@@ -250,10 +279,10 @@ tux64_boot_stage0_start:
    # instruction to block the CPU until the SI bus isn't busy.
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
-   lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI
-   addiu $s2,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
-   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s1)
-   sw    $s2,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s1)
+   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI
+   addiu $s3,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
+   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s2)
+   sw    $s3,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s2)
 
    # jump to stage-1 start address
    jal   tux64_boot_stage0_status_code_write
