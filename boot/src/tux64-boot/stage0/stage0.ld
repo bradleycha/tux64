@@ -7,6 +7,9 @@
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
+INCLUDE tux64-boot/stage1/stack.ld
+INCLUDE tux64-boot/stage1/boot-header.ld
+
 ENTRY(tux64_boot_stage0_start)
 
 TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA

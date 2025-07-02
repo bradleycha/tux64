@@ -62,7 +62,8 @@ LDADD = \
 stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.s
 stage1_SOURCES = \
-	src/tux64-boot/stage1/stage1.c
+	src/tux64-boot/stage1/stage1.c \
+	src/tux64-boot/stage1/boot-header.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
 
@@ -72,6 +73,8 @@ noinst_HEADERS = \
 EXTRA_DIST = \
 	src/tux64-boot/stage0/stage0.ld \
 	src/tux64-boot/stage1/stage1.ld \
+	src/tux64-boot/stage1/stack.ld \
+	src/tux64-boot/stage1/boot-header.ld \
 	src/tux64-boot/stage2/stage2.ld
 
 stage0_LDFLAGS = \

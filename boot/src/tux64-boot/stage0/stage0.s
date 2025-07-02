@@ -78,10 +78,20 @@
 
 .equ TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO,TUX64_BOOT_STAGE0_ADDRESS_MI_LO+0x0004
 
+.equ TUX64_BOOT_STAGE0_ADDRESS_PI_HI,0xa460
+.equ TUX64_BOOT_STAGE0_ADDRESS_PI_LO,0x0000
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO,0x0000
+.equ TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO,0x0004
+.equ TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO,0x000c
+
 .equ TUX64_BOOT_STAGE0_ADDRESS_RI_HI,0xa470
 .equ TUX64_BOOT_STAGE0_ADDRESS_RI_LO,0x0000
 
 .equ TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x000c
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_CARTRIDGE_ROM_HI,0xb000
+.equ TUX64_BOOT_STAGE0_ADDRESS_CARTRIDGE_ROM_LO,0x0000
 
 .equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI,0xbfc0
 .equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO,0x07c0
@@ -92,6 +102,11 @@
 .equ TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT,0x0008
 
 .equ TUX64_BOOT_STAGE0_1MIB_HI,0x0010
+
+.equ TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE,0x1000
+
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0040
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_HEADER_MAGIC_LO,0x484d /* HM */
@@ -113,8 +128,8 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,      '1'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,     '2'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,  '3'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE, '4'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,     '5'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,     '4'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE, '5'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,    '6'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,          '7'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,         '8'
@@ -129,6 +144,11 @@ tux64_boot_stage0_status:
    # text, where 'c' is the current boot stage code.
    .skip TUX64_BOOT_STAGE0_STATUS_BYTES
 #tux64_boot_stage0_status
+
+   .section .boot_header
+tux64_boot_stage0_boot_header:
+   .skip TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
+#tux64_boot_stage0_boot_header
 
    .section .text
 tux64_boot_stage0_status_code_write:
@@ -233,7 +253,13 @@ tux64_boot_stage0_start:
    # bytes until stage-1 begins.  this will be passed as an argument to stage-1
    # to avoid using memory unnecessarily.
 
-   # initialize the CPU caches, setting each line to 'invalid'
+   # load the boot header into RDRAM via PI DMA
+   jal   tux64_boot_stage0_status_code_write
+   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER
+   # TODO: implement
+
+   # initialize the CPU caches, setting each line to 'invalid', continue
+   # loading the boot header in the background
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
    lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
@@ -253,11 +279,6 @@ tux64_boot_stage0_start:
 
    # we will now reserve $s1 for the cached RDRAM base address.  remember, we
    # still have $s0 reserved for the total memory
-
-   # load the boot header into RDRAM
-   jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER
-   # TODO: implement
 
    # calculate the checksum of the boot header and verify it matches what's
    # given by the header

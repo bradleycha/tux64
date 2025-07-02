@@ -7,13 +7,15 @@
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
+INCLUDE tux64-boot/stage1/stack.ld
+INCLUDE tux64-boot/stage1/boot-header.ld
+
 ENTRY(tux64_boot_stage1_start)
 
 SECTIONS
 {
-   /* place the entire stage-1 bootloader at the start of RDRAM, making room */
-   /* for a 4kb stack */
-   .rdram (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + 0x1000) : {
+   /* place the main stage-1 binary after the boot header */
+   .rdram (ADDR(.rdram.boot_header) + SIZEOF(.rdram.boot_header)) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
