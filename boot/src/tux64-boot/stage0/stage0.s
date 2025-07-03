@@ -383,6 +383,10 @@ tux64_boot_stage0_start:
    slt   $at,$t0,$s7
    bne   $at,$zero,tux64_boot_stage0_halt
 
+   # TODO: what about .bss items? we need to add a 'total_words' field to the
+   # header and reintroduce stage1.bin.bss and parse it.  once that's done, we
+   # can come back here and replace length_words with total_words or whatever.
+
    # convert the word count into byte count
    sll   $s7,$s7,2 # branch delay slot
 
@@ -412,7 +416,27 @@ tux64_boot_stage0_start:
    # unless the NO_CHECKSUM flag is set
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1
-   # TODO: implement
+
+   # check if the NO_CHECKSUM flag is set, freeing $s5 from this point forward
+   andi  $s5,$s5,TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM
+   bne   $s5,$zero,tux64_boot_stage0_start.skip_checksum_stage1
+
+   # wait for the PI DMA operation to complete, then verify the checksum
+   # branch delay slot.  we now free $s6 and $s7.
+   addiu $a0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   addu  $a2,$zero,$s6
+   addu  $a1,$a0,$s7
+   jal   tux64_boot_stage0_checksum_calculate_and_verify
+   lw    $zero,0($s1) # dummy read to wait for PI DMA to complete
+
+   tux64_boot_stage0_start.skip_checksum_stage1:
+
+   # this is now our current register allocation:
+   # $s0 - total memory
+   # $s1 - cartridge ROM base address (memory mapped uncached)
+   # $s2 - PI MMIO registers base address
+   # $s3 - cartridge ROM base address (physical address)
+   # $s4 - cached RDRAM base address
 
    # send the PIF terminate boot process command.  we use a dummy load
    # instruction to block the CPU until the SI bus isn't busy.
@@ -426,7 +450,12 @@ tux64_boot_stage0_start:
    # jump to stage-1 start address
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1
-   # TODO: implement
+   
+   # wait for PI DMA, as we could reach here if we skipped the stage-1 checksum
+   # without waiting on PI DMA to complete.
+   lw    $zero,0($s1)
+
+   # TODO: initialize stack and jump to the stage-1 start address
    b     tux64_boot_stage0_halt
    nop
 #tux64_boot_stage0_start
