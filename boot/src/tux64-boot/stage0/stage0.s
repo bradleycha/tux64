@@ -455,9 +455,11 @@ tux64_boot_stage0_start:
    # without waiting on PI DMA to complete.
    lw    $zero,0($s1)
 
-   # TODO: initialize stack and jump to the stage-1 start address
-   b     tux64_boot_stage0_halt
-   nop
+   # initialize the stack and start stage-1
+   addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO
+   addu  $a0,$zero,$s0
+   jr    $t0
+   addiu $sp,$s4,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 #tux64_boot_stage0_start
 
    # TODO: add multiple of these, one for each CIC revision.  only do this when
