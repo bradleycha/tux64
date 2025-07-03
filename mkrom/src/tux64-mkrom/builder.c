@@ -46,12 +46,9 @@
 /* . += input->files.initramfs.bytes:                                         */
 /*    Kernel command-line (null-terminated)                                   */
 /*----------------------------------------------------------------------------*/
-/* We also align all addresses to 8-byte boundaries.  RSP DMA requires        */
-/* alignment to 2-byte boundaries, but we also want to use simple             */
-/* implementations of memcpy in the stage-0 and stage-1 bootloaders which     */
-/* operate on whole 4-byte words without concern for residual junk.  Note     */
-/* that we can't load more than 4 bytes at once due to the MMU only allowing  */
-/* 4-byte word read/writes when outside of RDRAM.                             */
+/* We also align all addresses to 2-byte boundaries.  PI DMA requires         */
+/* all RDRAM addresses to be 8-byte aligned, all PI addresses to be 2-byte    */
+/* aligned, and all byte counts to be 2-byte aligned.                         */
 /*                                                                            */
 /* Also note that all values must be big-endian, as that's the native         */
 /* endianess of the N64.                                                      */

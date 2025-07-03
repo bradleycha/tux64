@@ -12,9 +12,10 @@
 
 #include "tux64/tux64.h"
 
-/* the number of bytes per word */
+/* the number of bytes per word. we choose this so all data will be 2-byte */
+/* aligned, which is the smallest required alignment to work with PI DMA. */
 #define TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD\
-   4u
+   2u
 
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC\
    "TBHM" /* Tux64 Boot Header Magic */

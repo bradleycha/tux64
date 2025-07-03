@@ -115,6 +115,9 @@
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT,1
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE,(2 << TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT)
+
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO,0x484d /* HM */
 
@@ -129,8 +132,6 @@
 .equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16
 
 .equ TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM,0x0001
-
-.equ TUX64_BOOT_STAGE0_PAYLOAD_MAX_WORDS_STAGE1,1024
 
 .equ TUX64_BOOT_STAGE0_STATUS_BYTES,8
 
@@ -384,8 +385,8 @@ tux64_boot_stage0_start:
 
    # check if we have enough memory to load the stage-1 binary, done in terms of
    # words to avoid potential overflow
-   srl   $t0,$s0,2
-   addiu $t0,$t0,-(TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES)/4
+   srl   $t0,$s0,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT
+   addiu $t0,$t0,-(TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES)/TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE
    slt   $at,$t0,$s7
    bne   $at,$zero,tux64_boot_stage0_halt
 
@@ -394,7 +395,7 @@ tux64_boot_stage0_start:
    # can come back here and replace length_words with total_words or whatever.
 
    # convert the word count into byte count
-   sll   $s7,$s7,2 # branch delay slot
+   sll   $s7,$s7,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT # branch delay slot
 
    # copy the stage-1 bootloader into memory via PI DMA, no need to invalidate
    # cache since we only have the header in data cache, and since a data cache
