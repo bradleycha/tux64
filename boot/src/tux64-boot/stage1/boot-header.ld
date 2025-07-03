@@ -10,6 +10,8 @@
 
 TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES =
    0x00000034;
+TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES_ALIGN8 =
+   TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES + 0x04;
 TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS =
    TUX64_BOOT_STAGE1_STACK_ADDRESS + TUX64_BOOT_STAGE1_STACK_BYTES;
 
@@ -19,8 +21,9 @@ SECTIONS
       tux64_boot_stage1_boot_header = .;
       *(.boot_header);
 
-      /* force the position to be correct if its not already */
-      . = TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES;
+      /* force the position to be correct if its not already. we align to an */
+      /* 8-byte boundary so we can use PI DMA into RDRAM. */
+      . = TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES_ALIGN8;
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
 

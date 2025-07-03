@@ -81,6 +81,8 @@
 .equ TUX64_BOOT_STAGE0_ADDRESS_PI_HI,0xa460
 .equ TUX64_BOOT_STAGE0_ADDRESS_PI_LO,0x0000
 
+.equ TUX64_BOOT_STAGE0_PI_DMA_CARTRIDGE_ROM_ADDRESS_HI,0x1000
+
 .equ TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO,0x0000
 .equ TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO,0x0004
 .equ TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO,0x000c
@@ -106,16 +108,22 @@
 .equ TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE,0x1000
 
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0034
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_HI,0x1000
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN8,TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES+0x04
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
+
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI,0x5442 /* TB */
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO,0x484d /* HM */
 
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC,0x0000
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM,0x0004
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA,0x0008
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS,0x0008
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM,0x000c
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS,0x0010
 
-.equ TUX64_BOOT_STAGE0_HEADER_MAGIC_HI,0x5442 /* TB */
-.equ TUX64_BOOT_STAGE0_HEADER_MAGIC_LO,0x484d /* HM */
+.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
+.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN8
 
 .equ TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM,0x0001
 
@@ -296,39 +304,46 @@ tux64_boot_stage0_start:
    # dummy read to wait for the PI to not be busy
    lw    $zero,0($s1)
 
+   # reserve $s2 for the PI base address and $s3 for the high-order cartridge
+   # ROM offset
+   lui   $s3,TUX64_BOOT_STAGE0_PI_DMA_CARTRIDGE_ROM_ADDRESS_HI
+   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_PI_HI
+
    # initiate the transfer in the background, we don't need to invalidate cache
    # as we're initializing it below anyways.
-   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_PI_HI
-   lui   $s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_HI
-   addiu $s3,$zero,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO
+   addiu $s4,$zero,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO
    addiu $s5,$zero,(TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES - 1)
-   ori   $s4,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
-   sw    $s3,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($s2)
-   sw    $s4,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($s2)
+   ori   $s6,$s3,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
+   sw    $s4,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($s2)
+   sw    $s6,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($s2)
    sw    $s5,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($s2)
 
    # initialize the CPU caches, setting each line to 'invalid', continue
    # loading the boot header in the background
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
-   lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
+   lui   $s5,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
+   lui   $s6,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
    lui   $s4,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
-   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO # write 'invalid' tag
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI # must be zero, undefined on boot
-   addiu $s3,$s3,(TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_ICACHE_LINE_COUNT)
-   addiu $s4,$s4,(TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_DCACHE_LINE_COUNT)
+   addiu $s5,$s5,(TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_ICACHE_LINE_COUNT)
+   addiu $s6,$s6,(TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_DCACHE_LINE_COUNT)
    tux64_boot_stage0_start.initialize_cache:
-      addiu $s3,$s3,-TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE
-      addiu $s4,$s4,-TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE
-      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_ICACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($s3)
-      bne   $s2,$s3,tux64_boot_stage0_start.initialize_cache
-      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_DCACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($s4)
+      addiu $s5,$s5,-TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE
+      addiu $s6,$s6,-TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE
+      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_ICACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($s5)
+      bne   $s4,$s5,tux64_boot_stage0_start.initialize_cache
+      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_DCACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($s6)
    #tux64_boot_stage0_start.initialize_cache
 
-   # we will now reserve $s2 for the cached RDRAM base address.  remember, we
-   # still have $s0 reserved for the total memory, and $s1 for the cartridge ROM
-   # base address
+   # we will now reserve $s4 for the cached RDRAM base address. here are the
+   # current reserved registers:
+   # $s0 - total memory
+   # $s1 - cartridge ROM base address (memory mapped uncached)
+   # $s2 - PI MMIO registers base address
+   # $s3 - cartridge ROM base address (physical address)
+   # $s4 - cached RDRAM base address
 
    # calculate the checksum of the boot header and verify it matches what's
    # given by the header
@@ -339,25 +354,58 @@ tux64_boot_stage0_start:
    lw    $zero,0($s1)
 
    # verify the boot header magic is present
-   lw    $s3,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($s2)
-   lui   $s4,TUX64_BOOT_STAGE0_HEADER_MAGIC_HI
-   ori   $s4,TUX64_BOOT_STAGE0_HEADER_MAGIC_LO
-   bne   $s3,$s4,tux64_boot_stage0_halt
+   lw    $s5,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($s4)
+   lui   $s6,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI
+   ori   $s6,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO
+   bne   $s5,$s6,tux64_boot_stage0_halt
    
    # calculate the header's checksum and verify it, this also gets the boot
    # header into cache so that rambus goes vroom vroom, also the next
    # instruction executes in the above branch delay slot
-   lw    $a2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s2)
-   addiu $a0,$s2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
+   lw    $a2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s4)
+   addiu $a0,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
    jal   tux64_boot_stage0_checksum_calculate_and_verify
-   addiu $a1,$s2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
+   addiu $a1,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
 
-   # load the stage-1 binary into memory
+   # begin loading the stage-1 binary into memory
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
-   # TODO: implement
+
+   # read the flags, stage-1 checksum, and stage-1 word count
+   lw    $s7,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($s4)
+   lw    $s6,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($s4)
+   lw    $s5,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($s4)
+
+   # check if we have enough memory to load the stage-1 binary, done in terms of
+   # words to avoid potential overflow
+   srl   $t0,$s0,2
+   addiu $t0,$t0,-(TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES)/4
+   slt   $at,$t0,$s7
+   bne   $at,$zero,tux64_boot_stage0_halt
+
+   # convert the word count into byte count
+   sll   $s7,$s7,2 # branch delay slot
+
+   # copy the stage-1 bootloader into memory via PI DMA
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO
+   ori   $t1,$s3,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
+   addiu $t2,$s7,-1
+   sw    $t0,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($s2)
+   sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($s2)
+   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($s2)
+
+   # as a reminder, here are the current registers we care about:
+   # $s0 - total memory
+   # $s1 - cartridge ROM base address (memory mapped uncached)
+   # $s2 - PI MMIO registers base address
+   # $s3 - cartridge ROM base address (physical address)
+   # $s4 - cached RDRAM base address
+   # $s5 - boot header flags
+   # $s6 - stage-1 expected checksum
+   # $s7 - stage-1 byte length
 
    # calculate the checksum of the stage-1 binary and verify it's correct
+   # unless the NO_CHECKSUM flag is set
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1
    # TODO: implement
@@ -366,10 +414,10 @@ tux64_boot_stage0_start:
    # instruction to block the CPU until the SI bus isn't busy.
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
-   lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI
-   addiu $s4,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
-   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s3)
-   sw    $s4,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s3)
+   lui   $at,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI
+   addiu $t7,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
+   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($at)
+   sw    $t7,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($at)
 
    # jump to stage-1 start address
    jal   tux64_boot_stage0_status_code_write
