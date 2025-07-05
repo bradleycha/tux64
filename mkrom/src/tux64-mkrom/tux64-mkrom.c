@@ -545,6 +545,7 @@ struct Tux64MkromInput {
    const struct Tux64PlatformMipsN64RomHeader * rom_header;
    struct Tux64String kernel_command_line;
    struct Tux64String path_output;
+   Tux64UInt32 boot_header_flags;
 };
 
 static struct Tux64MkromExitResult
@@ -573,6 +574,7 @@ tux64_mkrom_run_parsed_input(
    builder_input.files.initramfs.bytes = input->files.initramfs.bytes;
    tux64_memory_copy(&builder_input.rom_header, input->rom_header, TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader)));
    builder_input.kernel_command_line = input->kernel_command_line;
+   builder_input.boot_header_flags = input->boot_header_flags;
 
    TUX64_LOG_INFO("verifying input files and calculating ROM length");
 
@@ -742,6 +744,7 @@ tux64_mkrom_run_parsed_cmdline(
    input.kernel_command_line.ptr = kernel_command_line_ptr;
    input.kernel_command_line.characters = config_file_parsed.command_line.characters;
    input.path_output = cmdline->path_output;
+   input.boot_header_flags = config_file_parsed.boot_header_flags;
 
    /* we can now safely free the config file since all data is owned */
    tux64_fs_file_unload(&config_file);

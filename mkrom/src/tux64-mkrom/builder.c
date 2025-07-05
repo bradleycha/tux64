@@ -187,7 +187,7 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
       TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES)
    );
 
-   boot_header->data.flags = tux64_mkrom_builder_store_item_uint32(TUX64_LITERAL_UINT32(0x00000000u));
+   boot_header->data.flags = tux64_mkrom_builder_store_item_uint32(input->boot_header_flags);
 
    boot_header->data.files.bootloader.stage1.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage1.data, input->files.bootloader.stage1.bytes);
    boot_header->data.files.bootloader.stage1.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);

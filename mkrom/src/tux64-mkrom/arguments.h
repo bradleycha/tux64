@@ -34,6 +34,7 @@ struct Tux64MkromArgumentsConfigFile {
    struct Tux64String path_kernel;
    struct Tux64String path_initramfs;
    struct Tux64String command_line;
+   Tux64UInt32 boot_header_flags;
 };
 
 extern const struct Tux64ArgumentsIteratorOptionsConfigFile
