@@ -30,6 +30,7 @@ struct Tux64MkromArgumentsConfigFile {
    struct Tux64String path_bootloader_stage0;
    struct Tux64String path_bootloader_stage0_cic;
    struct Tux64String path_bootloader_stage1;
+   struct Tux64String path_bootloader_stage1_bss;
    struct Tux64String path_bootloader_stage2;
    struct Tux64String path_kernel;
    struct Tux64String path_initramfs;

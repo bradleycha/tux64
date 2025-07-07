@@ -62,6 +62,7 @@ struct Tux64MkromBuilderInput {
    struct Tux64PlatformMipsN64RomHeader rom_header;
    struct Tux64String kernel_command_line;
    Tux64UInt32 boot_header_flags;
+   Tux64UInt32 stage1_bss_length;
 };
 
 /*----------------------------------------------------------------------------*/

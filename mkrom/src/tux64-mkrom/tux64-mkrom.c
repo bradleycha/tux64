@@ -12,6 +12,7 @@
 #include <tux64/memory.h>
 #include <tux64/fs.h>
 #include <tux64/arguments.h>
+#include <tux64/parse/string-integer.h>
 #include <tux64/platform/mips/n64/rom.h>
 #include "tux64-mkrom/arguments.h"
 #include "tux64-mkrom/builder.h"
@@ -27,6 +28,7 @@ enum Tux64MkromExitStatus {
    TUX64_MKROM_EXIT_STATUS_FS_ERROR,
    TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS,
    TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR,
+   TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR,
    TUX64_MKROM_EXIT_STATUS_BUILDER_ERROR
 };
 
@@ -43,6 +45,10 @@ struct Tux64MkromExitPayloadArgumentsParseError {
    struct Tux64ArgumentsParseResult result;
 };
 
+struct Tux64MkromExitPayloadParseStringIntegerError {
+   struct Tux64ParseStringIntegerResult reason;
+};
+
 struct Tux64MkromExitPayloadBuilderError {
    struct Tux64MkromBuilderMeasureResult reason;
 };
@@ -51,6 +57,7 @@ union Tux64MkromExitPayload {
    struct Tux64MkromExitPayloadTooManyArguments too_many_arguments;
    struct Tux64MkromExitPayloadFsError fs_error;
    struct Tux64MkromExitPayloadArgumentsParseError arguments_parse_error;
+   struct Tux64MkromExitPayloadParseStringIntegerError parse_string_integer_error;
    struct Tux64MkromExitPayloadBuilderError builder_error;
 };
 
@@ -167,6 +174,30 @@ tux64_mkrom_exit_result_display_arguments_parse_error(
    return;
 }
 
+static void
+tux64_mkrom_exit_result_display_parse_string_integer_error(
+   const struct Tux64MkromExitPayloadParseStringIntegerError * self
+) {
+   switch (self->reason.status) {
+      case TUX64_PARSE_STRING_INTEGER_STATUS_OK:
+         TUX64_UNREACHABLE;
+      case TUX64_PARSE_STRING_INTEGER_STATUS_INVALID_DIGIT:
+         TUX64_LOG_INFO_FMT(
+            "invalid string integer digit \'%c\' (hex: 0x%02x)",
+            self->reason.payload.invalid_digit.character,
+            (Tux64UInt32)self->reason.payload.invalid_digit.character
+         );
+         break;
+      case TUX64_PARSE_STRING_INTEGER_STATUS_OUT_OF_RANGE:
+         TUX64_LOG_INFO("string integer out of range");
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   return;
+}
+
 static const char * const
 tux64_mkrom_exit_result_display_builder_error_string_table [TUX64_MKROM_BUILDER_MEASURE_STATUS_FIELD_COUNT - 1u] = {
    "bootloader stage-0 code",
@@ -214,6 +245,9 @@ tux64_mkrom_exit_result_display(
          break;
       case TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR:
          tux64_mkrom_exit_result_display_arguments_parse_error(&self->payload.arguments_parse_error);
+         break;
+      case TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR:
+         tux64_mkrom_exit_result_display_parse_string_integer_error(&self->payload.parse_string_integer_error);
          break;
       case TUX64_MKROM_EXIT_STATUS_BUILDER_ERROR:
          tux64_mkrom_exit_result_display_builder_error(&self->payload.builder_error);
@@ -546,6 +580,7 @@ struct Tux64MkromInput {
    struct Tux64String kernel_command_line;
    struct Tux64String path_output;
    Tux64UInt32 boot_header_flags;
+   Tux64UInt32 stage1_bss_length;
 };
 
 static struct Tux64MkromExitResult
@@ -575,6 +610,7 @@ tux64_mkrom_run_parsed_input(
    tux64_memory_copy(&builder_input.rom_header, input->rom_header, TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader)));
    builder_input.kernel_command_line = input->kernel_command_line;
    builder_input.boot_header_flags = input->boot_header_flags;
+   builder_input.stage1_bss_length = input->stage1_bss_length;
 
    TUX64_LOG_INFO("verifying input files and calculating ROM length");
 
@@ -624,8 +660,12 @@ tux64_mkrom_run_parsed_cmdline(
    struct Tux64ArgumentsParseResult config_file_parse_result;
    struct Tux64MkromArgumentsConfigFile config_file_parsed;
    struct Tux64MkromInput input;
+   struct Tux64FsLoadedFile stage1_bss_file;
+   struct Tux64String stage1_bss_string;
+   struct Tux64ParseStringIntegerResult stage1_bss_parse_result;
    char * kernel_command_line_ptr;
    Tux64Boolean config_file_loaded;
+   Tux64Boolean stage1_bss_file_loaded;
 
    /* attempt to load the config file into memory */
    result = tux64_mkrom_load_file_command_line(
@@ -701,12 +741,22 @@ tux64_mkrom_run_parsed_cmdline(
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
+      &config_file_parsed.path_bootloader_stage1_bss,
+      "bootloader stage-1 BSS length",
+      &stage1_bss_file
+   );
+   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
+      goto load_err_exit3;
+   }
+   stage1_bss_file_loaded = TUX64_BOOLEAN_TRUE;
+   result = tux64_mkrom_load_file_config_file(
+      &cmdline->path_prefix,
       &config_file_parsed.path_bootloader_stage2,
       "bootloader stage-2 code",
       &input.files.bootloader.stage2
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit3;
+      goto load_err_exit4;
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
@@ -715,7 +765,7 @@ tux64_mkrom_run_parsed_cmdline(
       &input.files.kernel
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit4;
+      goto load_err_exit5;
    }
    result = tux64_mkrom_load_file_config_file(
       &cmdline->path_prefix,
@@ -724,20 +774,39 @@ tux64_mkrom_run_parsed_cmdline(
       &input.files.initramfs
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit5;
+      goto load_err_exit6;
    }
 
    /* create an owned copy of the kernel command-line */
    kernel_command_line_ptr = malloc(config_file_parsed.command_line.characters * sizeof(char));
    if (kernel_command_line_ptr == NULL) {
       result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      goto load_err_exit6;
+      goto load_err_exit7;
    }
    tux64_memory_copy(
       kernel_command_line_ptr,
       config_file_parsed.command_line.ptr,
       config_file_parsed.command_line.characters * TUX64_LITERAL_UINT32(sizeof(char))
    );
+
+   /* attempt to parse the stage-1 BSS length file */
+   stage1_bss_string.ptr = (const char *)stage1_bss_file.data;
+   stage1_bss_string.characters = stage1_bss_file.bytes / TUX64_LITERAL_UINT32(sizeof(char));
+   stage1_bss_parse_result = tux64_parse_string_integer_hex_uint32(
+      &stage1_bss_string,
+      &input.stage1_bss_length
+   );
+
+   /* free the stage-1 BSS length file as we don't need it anymore */
+   tux64_fs_file_unload(&stage1_bss_file);
+   stage1_bss_file_loaded = TUX64_BOOLEAN_FALSE;
+
+   /* bail if parsing the length failed */
+   if (stage1_bss_parse_result.status != TUX64_PARSE_STRING_INTEGER_STATUS_OK) {
+      result.status = TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR;
+      result.payload.parse_string_integer_error.reason = stage1_bss_parse_result;
+      return result;
+   }
 
    /* initialize the rest of the fields for the input */
    input.rom_header = &config_file_parsed.rom_header;
@@ -755,12 +824,16 @@ tux64_mkrom_run_parsed_cmdline(
 
    /* ...but don't forget to clean up after ourselves! */
    free(kernel_command_line_ptr);
-load_err_exit6:
+load_err_exit7:
    tux64_fs_file_unload(&input.files.initramfs);
-load_err_exit5:
+load_err_exit6:
    tux64_fs_file_unload(&input.files.kernel);
-load_err_exit4:
+load_err_exit5:
    tux64_fs_file_unload(&input.files.bootloader.stage2);
+load_err_exit4:
+   if (stage1_bss_file_loaded == TUX64_BOOLEAN_TRUE) {
+      tux64_fs_file_unload(&stage1_bss_file);
+   }
 load_err_exit3:
    tux64_fs_file_unload(&input.files.bootloader.stage1);
 load_err_exit2:
