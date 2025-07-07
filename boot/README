@@ -18,6 +18,10 @@ The following files are created:
    * stage1.bin - The main bootloader binary.  This is what most users will
                   interact with and contains most of the bootloader code.
 
+   * stage1.bin.bss - A text file which contains the length of the stage-1's
+                      .bss section, in bytes.  If the file is empty, then there
+                      is no .bss data.
+
    * stage1.sym - Debug symbols for the stage-1 bootloader.
 
    * stage2.bin - The code used to free the stage-1 bootloader from memory,
