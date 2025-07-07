@@ -8,10 +8,8 @@
 
 /* this should be included after stack.ld */
 
-TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES =
-   0x00000038;
-TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES_ALIGN16 =
-   TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES + 0x08;
+INCLUDE tux64/ldscripts/platform/mips/n64/boot.ld
+
 TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS =
    TUX64_BOOT_STAGE1_STACK_ADDRESS + TUX64_BOOT_STAGE1_STACK_BYTES;
 
@@ -25,7 +23,7 @@ SECTIONS
       /* 16-byte boundary so we can use PI DMA into RDRAM, as well as ensure */
       /* we are on a different cache line than the boot header so we dont */
       /* have to worry about invalidating any parts of cache. */
-      . = TUX64_BOOT_STAGE1_BOOT_HEADER_BYTES_ALIGN16;
+      . = TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES_ALIGN16;
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
 
