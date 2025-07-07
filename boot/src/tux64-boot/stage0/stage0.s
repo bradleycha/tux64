@@ -379,7 +379,8 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
 
-   # read the flags, stage-1 checksum, and stage-1 word count
+   # read the flags, stage-1 checksum, stage-1 data word count, and stage-1 memory word count
+   lw    $s1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($s4)
    lw    $s7,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($s4)
    lw    $s6,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($s4)
    lw    $s5,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($s4)
@@ -388,14 +389,10 @@ tux64_boot_stage0_start:
    # words to avoid potential overflow
    srl   $t0,$s0,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT
    addiu $t0,$t0,-(TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES)/TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE
-   slt   $at,$t0,$s7
+   slt   $at,$t0,$s1
    bne   $at,$zero,tux64_boot_stage0_halt
 
-   # TODO: what about .bss items? we need to add a 'total_words' field to the
-   # header and reintroduce stage1.bin.bss and parse it.  once that's done, we
-   # can come back here and replace length_words with total_words or whatever.
-
-   # convert the word count into byte count
+   # convert the data word count into byte count
    sll   $s7,$s7,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT # branch delay slot
 
    # copy the stage-1 bootloader into memory via PI DMA, no need to invalidate
