@@ -32,13 +32,19 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
 #define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_CHECKSUM\
    (1u << 0u)
 
+struct Tux64PlatformMipsN64BootHeaderFileStage1 {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length_words;
+   Tux64UInt32 memory_words;
+};
+
 struct Tux64PlatformMipsN64BootHeaderFile {
    Tux64UInt32 checksum;
    Tux64UInt32 length_words;
 };
 
 struct Tux64PlatformMipsN64BootHeaderFileBootloader {
-   struct Tux64PlatformMipsN64BootHeaderFile stage1;
+   struct Tux64PlatformMipsN64BootHeaderFileStage1 stage1;
    struct Tux64PlatformMipsN64BootHeaderFile stage2;
 };
 

@@ -191,7 +191,7 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
 
    boot_header->data.files.bootloader.stage1.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage1.data, input->files.bootloader.stage1.bytes);
    boot_header->data.files.bootloader.stage1.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
-   /* TODO: include stage-1 total length (length_words + (stage1_bss_length / word length)) */
+   boot_header->data.files.bootloader.stage1.memory_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes + input->stage1_bss_length);
 
    boot_header->data.files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage2.data, input->files.bootloader.stage2.bytes);
    boot_header->data.files.bootloader.stage2.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
