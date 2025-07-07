@@ -55,6 +55,9 @@
 .set noat
 .set nomacro
 
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT,$9
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE,$11
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE,$13
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO,$28
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI,$29
 
@@ -224,10 +227,17 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
 
-   # initialize COP0 registers
+   # begin initializing COP0 registers
    jal   tux64_boot_stage0_status_code_write
    addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE
-   # TODO: implement
+
+   # i'm not entirely sure why everyone initializes these specific registers.
+   # it seems it's to clear exceptions and some timer thing from a reset?
+   # nobody anywhere explains why, so it looks like i'll be copying the person
+   # who copied the person who copied the person who wrote the official IPL3.
+   mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE
+   mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT
+   mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE
 
    # begin initializing RDRAM
    jal   tux64_boot_stage0_status_code_write
