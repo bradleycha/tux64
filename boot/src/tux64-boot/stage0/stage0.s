@@ -402,8 +402,9 @@ tux64_boot_stage0_start:
    slt   $at,$t0,$s1
    bne   $at,$zero,tux64_boot_stage0_halt
 
-   # convert the data word count into byte count
+   # convert the data word count and memory word count into byte counts
    sll   $s7,$s7,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT # branch delay slot
+   sll   $s1,$s1,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT
 
    # copy the stage-1 bootloader into memory via PI DMA, no need to invalidate
    # cache since we only have the header in data cache, and since a data cache
@@ -419,6 +420,7 @@ tux64_boot_stage0_start:
 
    # as a reminder, here are the current registers we care about:
    # $s0 - total memory
+   # $s1 - stage-1 memory usage byte length
    # $s2 - PI MMIO registers base address
    # $s3 - cartridge ROM base address (physical address)
    # $s4 - cached RDRAM base address
@@ -453,6 +455,7 @@ tux64_boot_stage0_start:
 
    # this is now our current register allocation:
    # $s0 - total memory
+   # $s1 - stage-1 memory usage byte length
    # $s2 - PI MMIO registers base address
    # $s3 - cartridge ROM base address (physical address)
    # $s4 - cached RDRAM base address
@@ -478,9 +481,11 @@ tux64_boot_stage0_start:
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
    #tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
 
-   # initialize the stack and start stage-1
-   addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   # calculate available memory, initialize the stack, and start stage-1
+   subu  $a1,$s0,$s1
    addu  $a0,$zero,$s0
+   addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   addiu $a1,$a1,-(TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE + TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16)
    jr    $t0
    addiu $sp,$s4,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 #tux64_boot_stage0_start

@@ -9,16 +9,19 @@
 
 void
 tux64_boot_stage1_start(
-   Tux64UInt32
+   Tux64UInt32 memory_total,
+   Tux64UInt32 memory_available
 )
 __attribute__((noreturn, section(".start"), externally_visible));
 
 void
 tux64_boot_stage1_start(
-   Tux64UInt32 total_memory
+   Tux64UInt32 memory_total,
+   Tux64UInt32 memory_available
 ) {
    /* TODO: implement */
-   (void)total_memory;
+   (void)memory_total;
+   (void)memory_available;
    TUX64_HALT;
 }
 
