@@ -6,6 +6,36 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
+#include "tux64-boot/stage1/video.h"
+
+struct Tux64BootStage1MainLoopContextMemory {
+   Tux64UInt32 total;
+   Tux64UInt32 available;
+};
+
+struct Tux64BootStage1MainLoopContext {
+   struct Tux64BootStage1MainLoopContextMemory memory;
+};
+
+static void
+tux64_boot_stage1_main_loop_context_initialize(
+   struct Tux64BootStage1MainLoopContext * context,
+   Tux64UInt32 memory_total,
+   Tux64UInt32 memory_available
+) {
+   context->memory.total = memory_total;
+   context->memory.available = memory_available;
+   return;
+}
+
+static void
+tux64_boot_stage1_main_loop_context_execute(
+   struct Tux64BootStage1MainLoopContext * context
+) {
+   /* TODO: implement */
+   (void)context;
+   return;
+}
 
 void
 tux64_boot_stage1_start(
@@ -19,9 +49,21 @@ tux64_boot_stage1_start(
    Tux64UInt32 memory_total,
    Tux64UInt32 memory_available
 ) {
-   /* TODO: implement */
-   (void)memory_total;
-   (void)memory_available;
-   TUX64_HALT;
+   struct Tux64BootStage1MainLoopContext main_loop_context;
+
+   tux64_boot_stage1_main_loop_context_initialize(
+      &main_loop_context,
+      memory_total,
+      memory_available
+   );
+
+   tux64_boot_stage1_video_initialize();
+
+   while (TUX64_BOOLEAN_TRUE) {
+      tux64_boot_stage1_main_loop_context_execute(&main_loop_context);
+      tux64_boot_stage1_video_swap_buffers();
+   }
+
+   TUX64_UNREACHABLE;
 }
 
