@@ -6,24 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-
-#define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X\
-   (320u)
-#define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_Y\
-   (240u)
-#define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL\
-   (\
-      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X *\
-      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_Y\
-   )
-#define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT\
-   (8u)
-
-struct Tux64BootStage1VideoFramebuffer {
-   /* use RGBA5553 pixel format to save memory */
-   Tux64UInt16 pixels [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
-   __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
-};
+#include "tux64-boot/stage1/video.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (3u) /* triple-buffered */
@@ -50,5 +33,11 @@ void
 tux64_boot_stage1_video_swap_buffers(void) {
    /* TODO: implement */
    return;
+}
+
+struct Tux64BootStage1VideoFramebuffer *
+tux64_boot_stage1_video_get_render_target(void) {
+   /* TODO: implement */
+   return TUX64_NULLPTR;
 }
 
