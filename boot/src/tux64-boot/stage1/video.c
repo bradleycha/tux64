@@ -13,19 +13,45 @@
 
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
-
-   /* bits 0-1: index of the framebuffer currently being presented on-screen */
-   /* bits 2-3: index of the framebuffer currently being rendered to */
-   Tux64UInt8 framebuffer_active_indices;
+   Tux64UInt8 framebuffer_index_displaying;
+   Tux64UInt8 framebuffer_index_rendering;
 };
 
 static struct Tux64BootStage1VideoContext
 tux64_boot_stage1_video_context;
 
+static Tux64UInt8
+tux64_boot_stage1_video_context_framebuffer_index_displaying(void) {
+   return tux64_boot_stage1_video_context.framebuffer_index_displaying;
+}
+
+static Tux64UInt8
+tux64_boot_stage1_video_context_framebuffer_index_rendering(void) {
+   return tux64_boot_stage1_video_context.framebuffer_index_rendering;
+}
+
+static Tux64UInt8
+tux64_boot_stage1_video_context_framebuffer_index_pending(void) {
+   Tux64UInt8 idx_displaying;
+   Tux64UInt8 idx_rendering;
+   Tux64UInt8 idx_pending;
+
+   idx_displaying = tux64_boot_stage1_video_context_framebuffer_index_displaying();
+   idx_rendering  = tux64_boot_stage1_video_context_framebuffer_index_rendering();
+
+   idx_pending = TUX64_LITERAL_UINT8(0u);
+   while (idx_pending == idx_displaying || idx_pending == idx_rendering) {
+      idx_pending++;
+   }
+
+   return idx_pending;
+}
+
 void
 tux64_boot_stage1_video_initialize(void) {
    /* TODO: implement */
    (void)tux64_boot_stage1_video_context;
+   (void)tux64_boot_stage1_video_context_framebuffer_index_pending;
    return;
 }
 
@@ -37,7 +63,10 @@ tux64_boot_stage1_video_swap_buffers(void) {
 
 struct Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_get_render_target(void) {
-   /* TODO: implement */
-   return TUX64_NULLPTR;
+   Tux64UInt8 idx_rendering;
+
+   idx_rendering = tux64_boot_stage1_video_context_framebuffer_index_rendering();
+
+   return &tux64_boot_stage1_video_context.framebuffers[idx_rendering];
 }
 
