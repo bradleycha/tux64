@@ -66,7 +66,9 @@ stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.s
 stage1_SOURCES = \
 	src/tux64-boot/stage1/stage1.c \
-	src/tux64-boot/stage1/boot-header.h
+	src/tux64-boot/stage1/boot-header.h \
+	src/tux64-boot/stage1/video.c \
+	src/tux64-boot/stage1/video.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
 
