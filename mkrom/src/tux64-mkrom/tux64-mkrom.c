@@ -12,6 +12,7 @@
 #include <tux64/memory.h>
 #include <tux64/fs.h>
 #include <tux64/arguments.h>
+#include <tux64/string.h>
 #include <tux64/parse/string-integer.h>
 #include <tux64/platform/mips/n64/rom.h>
 #include "tux64-mkrom/arguments.h"
@@ -792,6 +793,7 @@ tux64_mkrom_run_parsed_cmdline(
    /* attempt to parse the stage-1 BSS length file */
    stage1_bss_string.ptr = (const char *)stage1_bss_file.data;
    stage1_bss_string.characters = stage1_bss_file.bytes / TUX64_LITERAL_UINT32(sizeof(char));
+   stage1_bss_string = tux64_string_trim_whitespace(&stage1_bss_string);
    stage1_bss_parse_result = tux64_parse_string_integer_hex_uint32(
       &stage1_bss_string,
       &input.stage1_bss_length
