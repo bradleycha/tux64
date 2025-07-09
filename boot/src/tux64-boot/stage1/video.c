@@ -49,9 +49,17 @@ tux64_boot_stage1_video_context_framebuffer_index_pending(void) {
 
 void
 tux64_boot_stage1_video_initialize(void) {
-   /* TODO: implement */
-   (void)tux64_boot_stage1_video_context;
+   /* initialize VI registers, */
    (void)tux64_boot_stage1_video_context_framebuffer_index_pending;
+   return;
+}
+
+void
+tux64_boot_stage1_video_display_output(
+   Tux64Boolean state
+) {
+   /* TODO: implement */
+   (void)state;
    return;
 }
 

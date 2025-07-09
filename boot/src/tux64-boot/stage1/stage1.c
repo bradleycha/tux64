@@ -58,6 +58,7 @@ tux64_boot_stage1_start(
    );
 
    tux64_boot_stage1_video_initialize();
+   tux64_boot_stage1_video_display_output(TUX64_BOOLEAN_TRUE);
 
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_main_loop_context_execute(&main_loop_context);

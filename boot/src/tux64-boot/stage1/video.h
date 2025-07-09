@@ -34,10 +34,20 @@ struct Tux64BootStage1VideoFramebuffer {
 };
 
 /*----------------------------------------------------------------------------*/
-/* Initializes the framebuffer video interface.                               */
+/* Initializes the framebuffer video interface.  This must be called before   */
+/* using any other video functions.                                           */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_initialize(void);
+
+/*----------------------------------------------------------------------------*/
+/* Sets whether video output should be enabled or not.  Default is to         */
+/* disable.                                                                   */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_video_display_output(
+   Tux64Boolean state
+);
 
 /*----------------------------------------------------------------------------*/
 /* Swaps the current active video buffer to be displayed.                     */
