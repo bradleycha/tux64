@@ -57,9 +57,12 @@
 
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT,$9
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE,$11
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS,$12
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE,$13
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO,$28
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI,$29
+
+.equ TUX64_BOOT_STAGE0_COP0_STATUS_FLAGS_LOW_POWER,((1 << 27) >> 16)
 
 .equ TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE,32
 .equ TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE,16
@@ -176,7 +179,25 @@ tux64_boot_stage0_boot_header:
 
    .section .text
 tux64_boot_stage0_halt:
-   b     tux64_boot_stage0_halt
+   # set the processor into low-power mode so we don't waste power before
+   # entering the infinite spinlock.  we don't care about updating RDRAM refresh
+   # rate or anything since we don't do anything else from this point.  memory
+   # will be re-initialized on next startup, so memory decaying away isn't our
+   # problem.
+
+   # bogus read to to uncached memory to force SysAD to be inactive before
+   # enabling low-power mode, per the processor's documentation
+   lw    $zero,0($gp)
+
+   # set the RP bit in the COP0 Status register
+   lui   $t1,TUX64_BOOT_STAGE0_COP0_STATUS_FLAGS_LOW_POWER
+   mfc0  $t0,TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS
+   or    $t0,$t0,$t1
+   mtc0  $t0,TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS
+
+   # we are now met with a terrible fate.
+   tux64_boot_stage0_halt.spinlock:
+   b     tux64_boot_stage0_halt.spinlock
    nop
 #tux64_boot_stage0_halt
 
