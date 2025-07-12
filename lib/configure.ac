@@ -38,10 +38,17 @@ AC_CHECK_HEADERS([stdint.h stdarg.h stdlib.h string.h stdio.h errno.h])
 tux64_config_platform_cpu_signed_integer_format_sign_magnitude=0
 tux64_config_platform_cpu_signed_integer_format_ones_complement=0
 tux64_config_platform_cpu_signed_integer_format_twos_complement=1
+tux64_config_platform_cpu_isa_mips=0
 tux64_config_platform_mips_n64=0
 tux64_config_log=0
 tux64_config_log_origin=0
 tux64_config_log_ansi=0
+
+case $target_cpu in
+   "mips" | "mips64")
+      tux64_config_platform_cpu_isa_mips=1
+   ;;
+esac
 
 AC_ARG_ENABLE([platform-cpu-signed-integer-format-sign-magnitude],
    AS_HELP_STRING([--enable-platform-cpu-signed-integer-format-sign-magnitude], [Assume the platform CPU's signed integer format is sign-magnitude]),
@@ -90,6 +97,10 @@ AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_ONES_COMPLEMENT],
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_TWOS_COMPLEMENT],
    [$tux64_config_platform_cpu_signed_integer_format_twos_complement],
    [Assume the platform CPU's signed integer format is two's complement]
+)
+AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_ISA_MIPS],
+   [$tux64_config_platform_cpu_isa_mips],
+   [The target CPU instruction set architecture is MIPS]
 )
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_MIPS_N64],
    [$tux64_config_platform_mips_n64],
