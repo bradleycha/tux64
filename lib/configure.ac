@@ -38,7 +38,7 @@ AC_CHECK_HEADERS([stdint.h stdarg.h stdlib.h string.h stdio.h errno.h])
 tux64_config_platform_cpu_signed_integer_format_sign_magnitude=0
 tux64_config_platform_cpu_signed_integer_format_ones_complement=0
 tux64_config_platform_cpu_signed_integer_format_twos_complement=1
-tux64_config_platform_n64=0
+tux64_config_platform_mips_n64=0
 tux64_config_log=0
 tux64_config_log_origin=0
 tux64_config_log_ansi=0
@@ -58,10 +58,10 @@ AC_ARG_ENABLE([platform-cpu-signed-integer-format-twos-complement],
    [tux64_config_platform_cpu_signed_integer_format_twos_complement=1],
    [tux64_config_platform_cpu_signed_integer_format_twos_complement=0]
 )
-AC_ARG_ENABLE([platform-n64],
-   AS_HELP_STRING([--enable-platform-n64], [Enable N64-specific features]),
-   [tux64_config_platform_n64=1],
-   [tux64_config_platform_n64=0]
+AC_ARG_ENABLE([platform-mips-n64],
+   AS_HELP_STRING([--enable-platform-mips-n64], [Enable N64-specific features]),
+   [tux64_config_platform_mips_n64=1],
+   [tux64_config_platform_mips_n64=0]
 )
 AC_ARG_ENABLE([log],
    AS_HELP_STRING([--enable-log], [Enable logging functions, requires stdio.h and stdarg.h]),
@@ -91,8 +91,8 @@ AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_SIGNED_INTEGER_FORMAT_TWOS_COMPLEMENT],
    [$tux64_config_platform_cpu_signed_integer_format_twos_complement],
    [Assume the platform CPU's signed integer format is two's complement]
 )
-AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_N64],
-   [$tux64_config_platform_n64],
+AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_MIPS_N64],
+   [$tux64_config_platform_mips_n64],
    [Enable N64-specific features]
 )
 AC_DEFINE_UNQUOTED([CONFIG_LOG],

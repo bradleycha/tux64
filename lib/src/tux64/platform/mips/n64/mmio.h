@@ -11,7 +11,7 @@
 
 #include "tux64/tux64.h"
 
-#if TUX64_CONFIG_PLATFORM_N64
+#if TUX64_CONFIG_PLATFORM_MIPS_N64
 /*----------------------------------------------------------------------------*/
 
 #include "tux64/platform/mips/n64/pi.h"
@@ -131,7 +131,7 @@ tux64_platform_mips_n64_mmio_registers_si
 __attribute__((section(".tux64.platform.mips.n64.mmio.si")));
 
 /*----------------------------------------------------------------------------*/
-#endif /* TUX64_CONFIG_PLATFORM_N64 */
+#endif /* TUX64_CONFIG_PLATFORM_MIPS_N64 */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_MMIO_H */
