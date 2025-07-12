@@ -9,6 +9,15 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/interrupt.h"
 
+#include "tux64-boot/stage1/service.h"
+
+/* this must be public so it can be called from service.s */
+void
+tux64_boot_stage1_interrupt_handler(void) {
+   /* TODO: implement */
+   return;
+}
+
 void
 tux64_boot_stage1_interrupt_initialize(void) {
    /*-------------------------------------------------------------------------*/
