@@ -21,6 +21,7 @@
 .equ TUX64_BOOT_STAGE1_SERVICE_REGISTER_COUNT,20
 
    .section .text
+   .global tux64_boot_stage1_service_exception
 tux64_boot_stage1_service_exception:
    # make stack space for volatile general-purpose registers
    addiu $sp,$sp,-(TUX64_BOOT_STAGE1_SERVICE_REGISTER_COUNT*8)
