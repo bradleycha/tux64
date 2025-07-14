@@ -27,13 +27,15 @@ libtux64_la_SOURCES = \
 	src/tux64/string.c \
 	src/tux64/math.c \
 	src/tux64/checksum.c \
-	src/tux64/parse/string-integer.c
+	src/tux64/parse/string-integer.c \
+	src/tux64/platform/mips/vr4300/cop0.c
 
 libtux64_includedir = $(pkgincludedir)
 libtux64_parse_includedir = $(libtux64_includedir)/parse
 libtux64_platform_includedir = $(libtux64_includedir)/platform
 libtux64_platform_mips_includedir = $(libtux64_platform_includedir)/mips
 libtux64_platform_mips_n64_includedir = $(libtux64_platform_mips_includedir)/n64
+libtux64_platform_mips_vr4300_includedir = $(libtux64_platform_mips_includedir)/vr4300
 
 nodist_libtux64_include_HEADERS = \
 	$(top_builddir)/configdir/tux64/config.h
@@ -62,6 +64,9 @@ libtux64_platform_mips_n64_include_HEADERS = \
 	src/tux64/platform/mips/n64/si.h \
 	src/tux64/platform/mips/n64/rom.h \
 	src/tux64/platform/mips/n64/boot.h
+libtux64_platform_mips_vr4300_include_HEADERS = \
+	src/tux64/platform/mips/vr4300/vr4300.h \
+	src/tux64/platform/mips/vr4300/cop0.h
 
 ldscripts_pkgdatadir = $(pkgdatadir)/ldscripts
 platform_mips_n64_ldscripts_pkgdatadir = $(ldscripts_pkgdatadir)/platform/mips/n64
