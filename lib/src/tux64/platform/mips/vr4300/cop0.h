@@ -17,6 +17,61 @@
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
+/* String literals which define a co-processor register, for use with inline  */
+/* assembly template strings.                                                 */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_INDEX\
+   "0"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_RANDOM\
+   "1"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ENTRYLO0\
+   "2"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ENTRYLO1\
+   "3"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CONTEXT\
+   "4"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_PAGEMASK\
+   "5"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_WIRED\
+   "6"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_BADVADDR\
+   "8"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_COUNT\
+   "9"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ENTRYHI\
+   "10"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_COMPARE\
+   "11"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_STATUS\
+   "12"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CAUSE\
+   "13"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_EPC\
+   "14"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_PRID\
+   "15"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CONFIG\
+   "16"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_LLADDR\
+   "17"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_WATCHLO\
+   "18"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_WATCHHI\
+   "19"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_XCONTEXT\
+   "20"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_PARITY_ERROR\
+   "26"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CACHE_ERROR\
+   "27"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGLO\
+   "28"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGHI\
+   "29"
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ERROREPC\
+   "30"
+
+/*----------------------------------------------------------------------------*/
 /* Reads directly from or writes directly to various co-processor 0           */
 /* registers.                                                                 */
 /*----------------------------------------------------------------------------*/
