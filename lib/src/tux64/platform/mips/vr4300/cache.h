@@ -17,6 +17,22 @@
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
+/* The number of bytes per line of cache.                                     */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_BYTES_PER_LINE_INSTRUCTION\
+   (32u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_BYTES_PER_LINE_DATA\
+   (16u)
+
+/*----------------------------------------------------------------------------*/
+/* The total number of cache lines.                                           */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_LINE_COUNT_INSTRUCTION\
+   (512u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_LINE_COUNT_DATA\
+   (512u)
+
+/*----------------------------------------------------------------------------*/
 /* The raw cache instruction.  This should be avoided at all costs, using     */
 /* wrapper functions if possible.  'address' is the address to perform the    */
 /* cache instruction on, and 'operation' is the constant describing the cache */
