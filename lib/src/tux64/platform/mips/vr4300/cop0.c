@@ -625,6 +625,21 @@ tux64_platform_mips_vr4300_cop0_register_write_errorepc(
    return;
 }
 
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_CAUSE_MASK_EXC_CODE\
+   (0x0000007cu)
+
+enum Tux64PlatformMipsVr4300Cop0ExceptionCode
+tux64_platform_mips_vr4300_cop0_cause_exception_code(
+   Tux64UInt32 cause
+) {
+   Tux64UInt32 code;
+
+   code = cause;
+   code = code & TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_VR4300_COP0_CAUSE_MASK_EXC_CODE);
+
+   return (enum Tux64PlatformMipsVr4300Cop0ExceptionCode)code;
+}
+
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */
 

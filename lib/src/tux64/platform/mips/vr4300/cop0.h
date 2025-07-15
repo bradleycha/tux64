@@ -226,6 +226,34 @@ tux64_platform_mips_vr4300_cop0_register_write_errorepc(
    Tux64UInt32 value
 );
 
+enum Tux64PlatformMipsVr4300Cop0ExceptionCode {
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_INTERRUPT = ( 0 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_MOD       = ( 1 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_TLBL      = ( 2 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_TLBS      = ( 3 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_ADEL      = ( 4 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_ADES      = ( 5 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_IBE       = ( 6 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_DBE       = ( 7 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_SYS       = ( 8 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_BP        = ( 9 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_RI        = (10 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_CPU       = (11 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_OV        = (12 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_TR        = (13 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_FPE       = (15 << 5u),
+   TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_WATCH     = (23 << 5u)
+};
+
+/*----------------------------------------------------------------------------*/
+/* Reads the Exc Code bits from the given Cause register copy. 'cause' must   */
+/* be a valid copy of the Causes register.                                    */
+/*----------------------------------------------------------------------------*/
+enum Tux64PlatformMipsVr4300Cop0ExceptionCode
+tux64_platform_mips_vr4300_cop0_cause_exception_code(
+   Tux64UInt32 cause
+);
+
 /*----------------------------------------------------------------------------*/
 /* Various bitflags for various co-processor 0 registers.                     */
 /*----------------------------------------------------------------------------*/
