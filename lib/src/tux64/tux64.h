@@ -38,6 +38,9 @@
 #define TUX64_STRING_CHARACTERS(string)\
    (TUX64_ARRAY_ELEMENTS(string) - 1u)
 
+#define TUX64_OFFSET_OF(type, member)\
+   ((Tux64UIntPtr)(&((const type *)(TUX64_NULLPTR))->member))
+
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
 
