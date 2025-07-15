@@ -152,8 +152,19 @@ void
 tux64_boot_stage1_interrupt_handler(
    struct Tux64BootStage1InterruptContext * context
 ) {
-   tux64_boot_stage1_interrupt_handler_unhandled(context);
-   return;
+   Tux64UInt32 cause;
+   enum Tux64PlatformMipsVr4300Cop0ExceptionCode exception_code;
+
+   cause = tux64_platform_mips_vr4300_cop0_register_read_cause();
+   exception_code = tux64_platform_mips_vr4300_cop0_cause_exception_code(cause);
+
+   switch (exception_code) {
+      default:
+         tux64_boot_stage1_interrupt_handler_unhandled(context);
+         return;
+   }
+
+   TUX64_UNREACHABLE;
 }
 
 #define TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_RAM_OFFSET\
