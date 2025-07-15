@@ -10,7 +10,6 @@
 #include "tux64-boot/stage1/interrupt.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
-#include <tux64/platform/mips/vr4300/cop0.h>
 #include <tux64/platform/mips/vr4300/cache.h>
 #include <tux64/endian.h>
 #include "tux64-boot/stage1/service.h"
@@ -62,8 +61,6 @@ tux64_boot_stage1_interrupt_assemble_service_routine_code(
 
    code = code | (((Tux64UInt64)jump_bits) << TUX64_LITERAL_UINT8(32u));
 
-   code = tux64_endian_convert_uint64(code, TUX64_ENDIAN_FORMAT_BIG);
-
    return code;
 }
 
@@ -91,18 +88,25 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
       TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_UNCACHED
    );
 
+   /* insert the address of the service handler into the machine code */
    service_routine_code = tux64_boot_stage1_interrupt_assemble_service_routine_code(
       jump_target.data
    );
 
-   *service_routine_address = service_routine_code;
+   /* correct for endianess...aaaand boom! just like magic! */
+   *service_routine_address = tux64_endian_convert_uint64(
+      service_routine_code,
+      TUX64_ENDIAN_FORMAT_BIG
+   );
 
-   /* TODO: wrap this better.  it's now *even better*, but still a little unweildy. */
-   tux64_platform_mips_vr4300_cop0_register_write_taglo(TUX64_LITERAL_UINT32(0x00000000));
-   tux64_platform_mips_vr4300_cop0_register_write_taghi(TUX64_LITERAL_UINT32(0x00000000));
-   tux64_platform_mips_vr4300_cache_operation_instruction_index_store_tag((const void *)TUX64_LITERAL_UINTPTR(
-      TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_CACHED
-   ));
+   /* don't forget to tell the CPU what we just did, as instruction cache */
+   /* isn't aware of what's going in in data cache (which we aren't using */
+   /* anyways) */
+   tux64_platform_mips_vr4300_cache_operation_instruction_hit_invalidate(
+      (const void *)TUX64_LITERAL_UINTPTR(
+         TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_CACHED
+      )
+   );
 
    return;
 }
