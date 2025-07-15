@@ -72,10 +72,13 @@ struct Tux64BootStage1InterruptContext {
 void
 tux64_boot_stage1_interrupt_initialize(void);
 
+/*----------------------------------------------------------------------------*/
+/* Enable or disable VI interrupts.                                           */
+/*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage1_interrupt_enable(void);
+tux64_boot_stage1_interrupt_vi_enable(void);
 void
-tux64_boot_stage1_interrupt_disable(void);
+tux64_boot_stage1_interrupt_vi_disable(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_INTERRUPT_H */

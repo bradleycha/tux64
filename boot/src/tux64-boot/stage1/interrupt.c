@@ -298,29 +298,23 @@ tux64_boot_stage1_interrupt_initialize(void) {
    return;
 }
 
-static void
-tux64_boot_stage1_interrupt_enable_mi(void) {
-   tux64_platform_mips_n64_mmio_registers_mi.mask = TUX64_LITERAL_UINT32(
+void
+tux64_boot_stage1_interrupt_vi_enable(void) {
+   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_bitwise_flags_set_uint32(
+      tux64_platform_mips_n64_mmio_registers_mi.mask,
       TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_VI
    );
+
    return;
 }
 
 void
-tux64_boot_stage1_interrupt_enable(void) {
-   tux64_boot_stage1_interrupt_enable_mi();
-   return;
-}
+tux64_boot_stage1_interrupt_vi_disable(void) {
+   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_bitwise_flags_clear_uint32(
+      tux64_platform_mips_n64_mmio_registers_mi.mask,
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_VI
+   );
 
-static void
-tux64_boot_stage1_interrupt_disable_mi(void) {
-   tux64_platform_mips_n64_mmio_registers_mi.mask = TUX64_LITERAL_UINT32(0u);
-   return;
-}
-
-void
-tux64_boot_stage1_interrupt_disable(void) {
-   tux64_boot_stage1_interrupt_disable_mi();
    return;
 }
 
