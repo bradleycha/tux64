@@ -28,6 +28,7 @@ libtux64_la_SOURCES = \
 	src/tux64/math.c \
 	src/tux64/checksum.c \
 	src/tux64/parse/string-integer.c \
+	src/tux64/platform/mips/vr4300/cache.c \
 	src/tux64/platform/mips/vr4300/cop0.c
 
 libtux64_includedir = $(pkgincludedir)
@@ -66,6 +67,7 @@ libtux64_platform_mips_n64_include_HEADERS = \
 	src/tux64/platform/mips/n64/boot.h
 libtux64_platform_mips_vr4300_include_HEADERS = \
 	src/tux64/platform/mips/vr4300/vr4300.h \
+	src/tux64/platform/mips/vr4300/cache.h \
 	src/tux64/platform/mips/vr4300/cop0.h
 
 ldscripts_pkgdatadir = $(pkgdatadir)/ldscripts
