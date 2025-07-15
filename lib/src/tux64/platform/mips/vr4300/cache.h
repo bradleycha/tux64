@@ -33,54 +33,64 @@
    (512u)
 
 /*----------------------------------------------------------------------------*/
-/* Cache operation target constants, for use with the 'cache' instruction.    */
+/* Low-level wrappers for the cache instruction.  These may have side-effects */
+/* on co-processor 0, or may also required co-processor 0 registers to be set */
+/* before use.  These are essentially directly executing the 'cache'          */
+/* instruction verbatim according to the VR4300 manual.  'address' must point */
+/* to a memory region which supports cache operations.                        */
 /*----------------------------------------------------------------------------*/
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TARGET_INSTRUCTION\
-   (0x00u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TARGET_DATA\
-   (0x01u)
-
-/*----------------------------------------------------------------------------*/
-/* Cache operation type constants, for use with the 'cache' instruction.      */
-/*----------------------------------------------------------------------------*/
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_INVALIDATE\
-   (0x00u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_WRITE_BACK_INVALIDATE\
-   (0x00u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_LOAD_TAG\
-   (0x01u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_STORE_TAG\
-   (0x02u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_CREATE_DIRTY_EXCLUSIVE\
-   (0x03u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_HIT_INVALIDATE\
-   (0x04u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_HIT_WRITE_BACK_INVALIDATE\
-   (0x05u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_FILL\
-   (0x05u)
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_HIT_WRITE_BACK\
-   (0x06u)
-
-/*----------------------------------------------------------------------------*/
-/* Constructs a cache operation literal for use with the 'cache' instruction. */
-/*----------------------------------------------------------------------------*/
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION(target, operation)\
-   ((target) | ((operation) << 2u))
-
-/*----------------------------------------------------------------------------*/
-/* The raw cache instruction.  This should be avoided at all costs, using     */
-/* wrapper functions if possible.  'address' is the address to perform the    */
-/* cache instruction on, and 'operation' is the constant describing the cache */
-/* operation to perform.  'address' can either be a pointer type or a         */
-/* Tux64UIntPtr type containing the address to perform the instruction on.    */
-/* 'operation' must be a 16-bit integer literal.                              */
-/*----------------------------------------------------------------------------*/
-#define TUX64_PLATFORM_MIPS_VR4300_CACHE_INSTRUCTION(address, operation)\
-   __asm__ volatile ( \
-      "cache   %0,%1"\
-      :: "K" (operation), "ZC" (*((const Tux64UInt8 *)(address)))\
-   );
+void
+tux64_platform_mips_vr4300_cache_operation_instruction_index_invalidate(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_instruction_index_load_tag(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_instruction_index_store_tag(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_instruction_hit_invalidate(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_instruction_fill(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_instruction_hit_write_back(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_data_index_write_back_invalidate(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_data_index_load_tag(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_data_index_store_tag(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_data_create_dirty_exclusive(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_data_hit_invalidate(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_data_hit_write_back_invalidate(
+   const void * address
+);
+void
+tux64_platform_mips_vr4300_cache_operation_data_hit_write_back(
+   const void * address
+);
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */
