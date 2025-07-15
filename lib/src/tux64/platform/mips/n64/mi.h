@@ -49,6 +49,34 @@
       0x0000003cu\
    )
 
+/* MI_INTERRUPT bits */
+#define TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_SP\
+   (1u << 0u)
+#define TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_SI\
+   (1u << 1u)
+#define TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_AI\
+   (1u << 2u)
+#define TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_VI\
+   (1u << 3u)
+#define TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_PI\
+   (1u << 4u)
+#define TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_DP\
+   (1u << 5u)
+
+/* MI_MASK bits */
+#define TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SP\
+   (1u << 0u)
+#define TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SI\
+   (1u << 1u)
+#define TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_AI\
+   (1u << 2u)
+#define TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_VI\
+   (1u << 3u)
+#define TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_PI\
+   (1u << 4u)
+#define TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_DP\
+   (1u << 5u)
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_MI_H */
 
