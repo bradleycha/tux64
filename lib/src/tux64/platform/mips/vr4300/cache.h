@@ -16,7 +16,19 @@
 #if TUX64_PLATFORM_MIPS_VR4300_ENABLE
 /*----------------------------------------------------------------------------*/
 
-
+/*----------------------------------------------------------------------------*/
+/* The raw cache instruction.  This should be avoided at all costs, using     */
+/* wrapper functions if possible.  'address' is the address to perform the    */
+/* cache instruction on, and 'operation' is the constant describing the cache */
+/* operation to perform.  'address' can either be a pointer type or a         */
+/* Tux64UIntPtr type containing the address to perform the instruction on.    */
+/* 'operation' must be a 16-bit integer literal.                              */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_INSTRUCTION(address, operation)\
+   __asm__ volatile ( \
+      "cache   %0,%1"\
+      :: "K" (operation), "ZC" (*((const Tux64UInt8 *)(address)))\
+   );
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */
