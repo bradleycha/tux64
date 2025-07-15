@@ -12,12 +12,39 @@
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/vr4300/cache.h>
 #include <tux64/endian.h>
-#include "tux64-boot/stage1/service.h"
 
-/* this must be public so it can be called from service.s */
+/* we use inline asm so we don't have to use a seperate file, but also so we */
+/* can automate struct sizes and offsets using assembler templates stuff. */
+/* it's ugly due to having everything in a string literal, but it's the best */
+/* way of doing it. */
 void
-tux64_boot_stage1_interrupt_handler(void) {
+tux64_boot_stage1_interrupt_entry(void);
+__asm__ (
+   "# disable syntactic sugar so we have complete control\n"
+   ".set noreorder\n"
+   ".set noat\n"
+   ".set nomacro\n"
+   "\n"
+   ".extern tux64_boot_stage1_interrupt_handler\n"
+   "\n"
+   "   .section .text\n"
+   "   .global tux64_boot_stage1_interrupt_entry\n"
+   "tux64_boot_stage1_interrupt_entry:\n"
+   "   # TODO: implement\n"
+   "   addiu $a0,$zero,0\n"
+   "   jal   tux64_boot_stage1_interrupt_handler\n"
+   "   nop\n"
+   "   eret\n"
+   "#tux64_boot_stage1_interrupt_entry\n"
+);
+
+/* this must be public so we can access it from assembly above */
+void
+tux64_boot_stage1_interrupt_handler(
+   struct Tux64BootStage1InterruptContext * context
+) {
    /* TODO: implement */
+   (void)context;
    return;
 }
 
@@ -79,7 +106,7 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
    Tux64UInt64 * service_routine_address;
    Tux64UInt64 service_routine_code;
 
-   jump_target.function = tux64_boot_stage1_service_exception;
+   jump_target.function = tux64_boot_stage1_interrupt_entry;
 
    /* we use the uncached address because we have to invalidate instruction */
    /* cache anyways, so there's no point in caching the write in data cache. */
