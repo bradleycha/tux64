@@ -10,6 +10,7 @@
 #include "tux64-boot/stage1/interrupt.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
+#include <tux64/platform/mips/vr4300/cop0.h>
 #include <tux64/endian.h>
 #include "tux64-boot/stage1/service.h"
 
@@ -95,9 +96,9 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
 
    /* TODO: wrap and move this to tux64-lib, this is horrendously ugly. */
    service_routine_address = (Tux64UInt64 *)(TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_CACHED);
+   tux64_platform_mips_vr4300_cop0_register_write_taglo(TUX64_LITERAL_UINT32(0x00000000));
+   tux64_platform_mips_vr4300_cop0_register_write_taghi(TUX64_LITERAL_UINT32(0x00000000));
    __asm__ volatile (
-      "mtc0  $zero,$28\n"
-      "mtc0  $zero,$29\n"
       "cache (0x0000 | 0x0008),0(%0) # index store tag for icache\n"
       :: "r" (service_routine_address)
    );
