@@ -281,6 +281,8 @@ struct Tux64String {
    ((Tux64UInt32)(value))
 #define TUX64_LITERAL_UINT64(value)\
    ((Tux64UInt64)(value))
+#define TUX64_LITERAL_UINTPTR(value)\
+   ((Tux64UIntPtr)(value))
 #define TUX64_LITERAL_SINT8(value)\
    ((Tux64SInt8)(value))
 #define TUX64_LITERAL_SINT16(value)\
@@ -289,6 +291,8 @@ struct Tux64String {
    ((Tux64SInt32)(value))
 #define TUX64_LITERAL_SINT64(value)\
    ((Tux64SInt64)(value))
+#define TUX64_LITERAL_SINTPTR(value)\
+   ((Tux64SIntPtr)(value))
 #define TUX64_LITERAL_FLOAT32(value)\
    ((Tux64Float32)(value))
 #define TUX64_LITERAL_FLOAT64(value)\
