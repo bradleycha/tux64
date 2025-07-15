@@ -13,6 +13,8 @@
 #include <tux64/platform/mips/vr4300/cop0.h>
 #include <tux64/platform/mips/vr4300/cache.h>
 #include <tux64/endian.h>
+#include <tux64/bitwise.h>
+#include "tux64-boot/stage1/halt.h"
 
 /* we use inline asm so we don't have to use a seperate file, but also so we */
 /* can automate struct sizes and offsets using assembler templates stuff. */
@@ -136,14 +138,21 @@ __asm__ (
       [context_register_bytes]         "K" TUX64_LITERAL_UINT16(sizeof(Tux64BootStage1InterruptContextRegister))
 );
 
+static void
+tux64_boot_stage1_interrupt_handler_unhandled(
+   struct Tux64BootStage1InterruptContext * context
+) {
+   (void)context;
+   tux64_boot_stage1_halt();
+   TUX64_UNREACHABLE;
+}
+
 /* this must be public so we can access it from the assembly above */
 void
 tux64_boot_stage1_interrupt_handler(
    struct Tux64BootStage1InterruptContext * context
 ) {
-   /* TODO: implement */
-   context->register_file.pc.uint += 4;
-   (void)context;
+   tux64_boot_stage1_interrupt_handler_unhandled(context);
    return;
 }
 
@@ -168,8 +177,8 @@ tux64_boot_stage1_interrupt_handler(
 /* us, but I haven't yet tested if that's the case. */
 #define TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_CODE\
    (\
-      /* j 0x00000000   */ (0x08000000llu) << 32u |   \
-      /* nop            */ (0x00000000llu) <<  0u     \
+      /* j 0x00000000   */ ((0x08000000llu) << 32u) | \
+      /* nop            */ ((0x00000000llu) <<  0u)   \
    )
 
 static Tux64UInt64
