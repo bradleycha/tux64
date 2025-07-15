@@ -69,6 +69,12 @@ tux64_boot_stage1_video_swap_buffers(void) {
    return;
 }
 
+void
+tux64_boot_stage1_video_vblank_handler(void) {
+   /* TODO: implement */
+   return;
+}
+
 struct Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_get_render_target(void) {
    Tux64UInt8 idx_rendering;

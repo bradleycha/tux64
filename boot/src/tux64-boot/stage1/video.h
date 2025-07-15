@@ -56,6 +56,13 @@ void
 tux64_boot_stage1_video_swap_buffers(void);
 
 /*----------------------------------------------------------------------------*/
+/* The code to run when v-blank is triggered.  This should only be called     */
+/* from the interrupt handler.                                                */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_video_vblank_handler(void);
+
+/*----------------------------------------------------------------------------*/
 /* Gets mutable access to the current render-target framebuffer.  This can be */
 /* freely modified until you call tux64_boot_stage1_video_swap_buffers().     */
 /*----------------------------------------------------------------------------*/

@@ -10,11 +10,14 @@
 #include "tux64-boot/stage1/interrupt.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
+#include <tux64/platform/mips/n64/mmio.h>
+#include <tux64/platform/mips/n64/mi.h>
 #include <tux64/platform/mips/vr4300/cop0.h>
 #include <tux64/platform/mips/vr4300/cache.h>
 #include <tux64/endian.h>
 #include <tux64/bitwise.h>
 #include "tux64-boot/stage1/halt.h"
+#include "tux64-boot/stage1/video.h"
 
 /* we use inline asm so we don't have to use a seperate file, but also so we */
 /* can automate struct sizes and offsets using assembler templates stuff. */
@@ -139,6 +142,35 @@ __asm__ (
 );
 
 static void
+tux64_boot_stage1_interrupt_handler_vi(
+   struct Tux64BootStage1InterruptContext * context
+) {
+   (void)context;
+   tux64_boot_stage1_video_vblank_handler();
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_handler_interrupt(
+   struct Tux64BootStage1InterruptContext * context
+) {
+   Tux64UInt32 mi_interrupt;
+
+   mi_interrupt = tux64_platform_mips_n64_mmio_registers_mi.interrupt;
+
+   if (tux64_bitwise_flags_check_one_uint32(
+      mi_interrupt,
+      TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_VI
+   )) {
+      tux64_boot_stage1_interrupt_handler_vi(context);
+      return;
+   }
+   
+   (void)context;
+   return;
+}
+
+static void
 tux64_boot_stage1_interrupt_handler_unhandled(
    struct Tux64BootStage1InterruptContext * context
 ) {
@@ -159,12 +191,15 @@ tux64_boot_stage1_interrupt_handler(
    exception_code = tux64_platform_mips_vr4300_cop0_cause_exception_code(cause);
 
    switch (exception_code) {
+      case TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_INTERRUPT:
+         tux64_boot_stage1_interrupt_handler_interrupt(context);
+         break;
       default:
          tux64_boot_stage1_interrupt_handler_unhandled(context);
-         return;
+         break;
    }
 
-   TUX64_UNREACHABLE;
+   return;
 }
 
 #define TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_RAM_OFFSET\
@@ -263,15 +298,29 @@ tux64_boot_stage1_interrupt_initialize(void) {
    return;
 }
 
+static void
+tux64_boot_stage1_interrupt_enable_mi(void) {
+   tux64_platform_mips_n64_mmio_registers_mi.mask = TUX64_LITERAL_UINT32(
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_VI
+   );
+   return;
+}
+
 void
 tux64_boot_stage1_interrupt_enable(void) {
-   /* TODO: implement */
+   tux64_boot_stage1_interrupt_enable_mi();
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_disable_mi(void) {
+   tux64_platform_mips_n64_mmio_registers_mi.mask = TUX64_LITERAL_UINT32(0u);
    return;
 }
 
 void
 tux64_boot_stage1_interrupt_disable(void) {
-   /* TODO: implement */
+   tux64_boot_stage1_interrupt_disable_mi();
    return;
 }
 

@@ -52,6 +52,9 @@ tux64_boot_stage1_start(
 ) {
    struct Tux64BootStage1MainLoopContext main_loop_context;
 
+   /* make sure interrupts are disabled, just in case */
+   tux64_boot_stage1_interrupt_disable();
+
    tux64_boot_stage1_interrupt_initialize();
    tux64_boot_stage1_video_initialize();
    tux64_boot_stage1_video_display_output(TUX64_BOOLEAN_TRUE);
