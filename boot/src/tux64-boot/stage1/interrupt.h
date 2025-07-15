@@ -12,49 +12,57 @@
 
 #include "tux64-boot/tux64-boot.h"
 
-struct Tux64BootStage1InterruptRegisterFile {
-   union Tux64IntPtr zero;
-   union Tux64IntPtr at;
-   union Tux64IntPtr v0;
-   union Tux64IntPtr v1;
-   union Tux64IntPtr a0;
-   union Tux64IntPtr a1;
-   union Tux64IntPtr a2;
-   union Tux64IntPtr a3;
-   union Tux64IntPtr t0;
-   union Tux64IntPtr t1;
-   union Tux64IntPtr t2;
-   union Tux64IntPtr t3;
-   union Tux64IntPtr t4;
-   union Tux64IntPtr t5;
-   union Tux64IntPtr t6;
-   union Tux64IntPtr t7;
-   union Tux64IntPtr s0;
-   union Tux64IntPtr s1;
-   union Tux64IntPtr s2;
-   union Tux64IntPtr s3;
-   union Tux64IntPtr s4;
-   union Tux64IntPtr s5;
-   union Tux64IntPtr s6;
-   union Tux64IntPtr s7;
-   union Tux64IntPtr t8;
-   union Tux64IntPtr t9;
-   union Tux64IntPtr k0;
-   union Tux64IntPtr k1;
-   union Tux64IntPtr gp;
-   union Tux64IntPtr sp;
-   union Tux64IntPtr fp;
-   union Tux64IntPtr ra;
-   union Tux64IntPtr pc;
-   union Tux64IntPtr lo;
-   union Tux64IntPtr hi;
+/* we can assume we're using 64-bit integers since we always target VR4300 */
+typedef union Tux64Int64 Tux64BootStage1InterruptContextRegister;
+
+struct Tux64BootStage1InterruptContextRegisterFile {
+   /* warning: if you change the order of these, make sure to update the asm */
+   /* entry function as well.  i tried using offsetof with everything, but */
+   /* for some reason GCC doesn't let me use more than 30 operands... */
+   /* also I know it's a bit goofy to store $zero, but it may be useful for */
+   /* debugging purposes. */
+   Tux64BootStage1InterruptContextRegister zero;
+   Tux64BootStage1InterruptContextRegister at;
+   Tux64BootStage1InterruptContextRegister v0;
+   Tux64BootStage1InterruptContextRegister v1;
+   Tux64BootStage1InterruptContextRegister a0;
+   Tux64BootStage1InterruptContextRegister a1;
+   Tux64BootStage1InterruptContextRegister a2;
+   Tux64BootStage1InterruptContextRegister a3;
+   Tux64BootStage1InterruptContextRegister t0;
+   Tux64BootStage1InterruptContextRegister t1;
+   Tux64BootStage1InterruptContextRegister t2;
+   Tux64BootStage1InterruptContextRegister t3;
+   Tux64BootStage1InterruptContextRegister t4;
+   Tux64BootStage1InterruptContextRegister t5;
+   Tux64BootStage1InterruptContextRegister t6;
+   Tux64BootStage1InterruptContextRegister t7;
+   Tux64BootStage1InterruptContextRegister s0;
+   Tux64BootStage1InterruptContextRegister s1;
+   Tux64BootStage1InterruptContextRegister s2;
+   Tux64BootStage1InterruptContextRegister s3;
+   Tux64BootStage1InterruptContextRegister s4;
+   Tux64BootStage1InterruptContextRegister s5;
+   Tux64BootStage1InterruptContextRegister s6;
+   Tux64BootStage1InterruptContextRegister s7;
+   Tux64BootStage1InterruptContextRegister t8;
+   Tux64BootStage1InterruptContextRegister t9;
+   Tux64BootStage1InterruptContextRegister k0;
+   Tux64BootStage1InterruptContextRegister k1;
+   Tux64BootStage1InterruptContextRegister gp;
+   Tux64BootStage1InterruptContextRegister sp;
+   Tux64BootStage1InterruptContextRegister fp;
+   Tux64BootStage1InterruptContextRegister ra;
+   Tux64BootStage1InterruptContextRegister pc;
+   Tux64BootStage1InterruptContextRegister lo;
+   Tux64BootStage1InterruptContextRegister hi;
 };
 
 /*----------------------------------------------------------------------------*/
 /* The CPU's state coming from an interrupt.                                  */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootStage1InterruptContext {
-   struct Tux64BootStage1InterruptRegisterFile register_file;
+   struct Tux64BootStage1InterruptContextRegisterFile register_file;
 };
 
 /*----------------------------------------------------------------------------*/
