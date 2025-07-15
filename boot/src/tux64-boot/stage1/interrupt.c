@@ -87,7 +87,9 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
    /* we use the uncached address because we have to invalidate instruction */
    /* cache anyways, so there's no point in caching the write in data cache. */
    /* in fact, that could cause further issues that can be easily avoided. */
-   service_routine_address = (Tux64UInt64 *)TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_UNCACHED;
+   service_routine_address = (Tux64UInt64 *)TUX64_LITERAL_UINTPTR(
+      TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_UNCACHED
+   );
 
    service_routine_code = tux64_boot_stage1_interrupt_assemble_service_routine_code(
       jump_target.data
@@ -95,16 +97,12 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
 
    *service_routine_address = service_routine_code;
 
-   /* TODO: wrap this better.  it's better than before, but it's still fugly. */
+   /* TODO: wrap this better.  it's now *even better*, but still a little unweildy. */
    tux64_platform_mips_vr4300_cop0_register_write_taglo(TUX64_LITERAL_UINT32(0x00000000));
    tux64_platform_mips_vr4300_cop0_register_write_taghi(TUX64_LITERAL_UINT32(0x00000000));
-   TUX64_PLATFORM_MIPS_VR4300_CACHE_INSTRUCTION(
-      TUX64_LITERAL_UINTPTR(TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_CACHED),
-      TUX64_LITERAL_UINT16(TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION(
-         TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TARGET_INSTRUCTION,
-         TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_STORE_TAG
-      )) /* store tag index */
-   );
+   tux64_platform_mips_vr4300_cache_operation_instruction_index_store_tag((const void *)TUX64_LITERAL_UINTPTR(
+      TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_CACHED
+   ));
 
    return;
 }
