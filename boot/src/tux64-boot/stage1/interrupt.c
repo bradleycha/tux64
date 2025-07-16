@@ -296,7 +296,29 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
 
 void
 tux64_boot_stage1_interrupt_initialize(void) {
+   Tux64UInt32 status;
+
+   status = tux64_platform_mips_vr4300_cop0_register_read_status();
+   
+   /* disable interrupts while we initialize */
+   tux64_platform_mips_vr4300_cop0_register_write_status(
+      tux64_bitwise_flags_clear_uint32(
+         status,
+         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE
+      )
+   );
+
    tux64_boot_stage1_interrupt_initialize_handler();
+
+   /* enable interrupts now that we have the handler initialized.  note that */
+   /* individual sub-systems, like the VI, may need to be enabled manually. */
+   tux64_platform_mips_vr4300_cop0_register_write_status(
+      tux64_bitwise_flags_set_uint32(
+         status,
+         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE
+      )
+   );
+
    return;
 }
 
