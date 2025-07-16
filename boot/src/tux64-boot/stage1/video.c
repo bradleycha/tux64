@@ -24,6 +24,20 @@ struct Tux64BootStage1VideoContext {
 static struct Tux64BootStage1VideoContext
 tux64_boot_stage1_video_context;
 
+static void
+tux64_boot_stage1_video_vi_set_framebuffer(
+   Tux64UInt8 index
+) {
+   const void * address;
+
+   address = &tux64_boot_stage1_video_context.framebuffers[index];
+   address = tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(address);
+
+   tux64_platform_mips_n64_mmio_registers_vi.origin = (Tux64UInt32)address;
+
+   return;
+}
+
 void
 tux64_boot_stage1_video_initialize(void) {
    /* TODO: implement */
@@ -75,19 +89,21 @@ tux64_boot_stage1_video_vblank_handler(void) {
    tux64_boot_stage1_video_context.framebuffer_index_pending = idx_displaying;
 
    /* now tell the VI to use the new framebuffer */
-   tux64_platform_mips_n64_mmio_registers_vi.origin = ((Tux64UInt32)(
-      &tux64_boot_stage1_video_context.framebuffers[idx_pending]
-   ));
+   tux64_boot_stage1_video_vi_set_framebuffer(idx_pending);
 
    return;
 }
 
 struct Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_get_render_target(void) {
+   struct Tux64BootStage1VideoFramebuffer * retn;
    Tux64UInt8 idx_rendering;
 
    idx_rendering = tux64_boot_stage1_video_context.framebuffer_index_rendering;
 
-   return &tux64_boot_stage1_video_context.framebuffers[idx_rendering];
+   retn = &tux64_boot_stage1_video_context.framebuffers[idx_rendering];
+   retn = (struct Tux64BootStage1VideoFramebuffer *)tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(retn);
+
+   return retn;
 }
 
