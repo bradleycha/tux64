@@ -145,13 +145,17 @@ static void
 tux64_boot_stage1_interrupt_handler_vi(
    struct Tux64BootStage1InterruptContext * context
 ) {
-   (void)context;
    tux64_boot_stage1_video_vblank_handler();
+
+   /* clears the VI interrupt */
+   tux64_platform_mips_n64_mmio_registers_vi.v_current = TUX64_LITERAL_UINT32(0u);
+
+   (void)context;
    return;
 }
 
 static void
-tux64_boot_stage1_interrupt_handler_interrupt(
+tux64_boot_stage1_interrupt_handler_ip2_mi(
    struct Tux64BootStage1InterruptContext * context
 ) {
    Tux64UInt32 mi_interrupt;
@@ -185,20 +189,18 @@ tux64_boot_stage1_interrupt_handler(
    struct Tux64BootStage1InterruptContext * context
 ) {
    Tux64UInt32 cause;
-   enum Tux64PlatformMipsVr4300Cop0ExceptionCode exception_code;
 
    cause = tux64_platform_mips_vr4300_cop0_register_read_cause();
-   exception_code = tux64_platform_mips_vr4300_cop0_cause_exception_code(cause);
 
-   switch (exception_code) {
-      case TUX64_PLATFORM_MIPS_VR4300_COP0_EXCEPTION_CODE_INTERRUPT:
-         tux64_boot_stage1_interrupt_handler_interrupt(context);
-         break;
-      default:
-         tux64_boot_stage1_interrupt_handler_unhandled(context);
-         break;
+   if (tux64_bitwise_flags_check_one_uint32(
+      cause,
+      TUX64_PLATFORM_MIPS_VR4300_COP0_CAUSE_BIT_IP2
+   )) {
+      tux64_boot_stage1_interrupt_handler_ip2_mi(context);
+      return;
    }
 
+   tux64_boot_stage1_interrupt_handler_unhandled(context);
    return;
 }
 
