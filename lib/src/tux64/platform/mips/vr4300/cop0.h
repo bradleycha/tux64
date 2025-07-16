@@ -257,6 +257,8 @@ tux64_platform_mips_vr4300_cop0_cause_exception_code(
 /*----------------------------------------------------------------------------*/
 /* Various bitflags for various co-processor 0 registers.                     */
 /*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE\
+   (1u << 0u)
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_RP\
    (1u << 27u)
 
