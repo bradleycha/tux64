@@ -8,6 +8,7 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/video.h"
 
+#include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/n64/mmio.h>
 #include "tux64-boot/stage1/interrupt.h"
 
