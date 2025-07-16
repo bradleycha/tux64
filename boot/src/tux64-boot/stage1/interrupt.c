@@ -19,10 +19,16 @@
 #include "tux64-boot/stage1/halt.h"
 #include "tux64-boot/stage1/video.h"
 
-/* we use inline asm so we don't have to use a seperate file, but also so we */
-/* can automate struct sizes and offsets using assembler templates stuff. */
-/* it's ugly due to having everything in a string literal, but it's the best */
-/* way of doing it. */
+/* TODO: move this to a seperate file, because if you compile with LTO, which */
+/* is the default for release builds, you get this lovely error: */
+/*
+src/tux64-boot/stage1/interrupt.c:28:1: sorry, unimplemented: LTO streaming of toplevel extended ‘asm’ unimplemented
+   33 | __asm__ (
+      | ^~~~~~~
+*/
+/* this is unfortunate as we will have to hard-code offsets, but it is what */
+/* it is.  meh, the inline asm was ugly, so it doesn't break my heart too */
+/* much to see it go. */
 void
 tux64_boot_stage1_interrupt_entry(void);
 __asm__ (
