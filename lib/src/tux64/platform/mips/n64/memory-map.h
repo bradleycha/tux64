@@ -2,7 +2,8 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/tux64/platform/mips/n64/memory-map.h - CPU memory map constants.   */
+/* lib/src/tux64/platform/mips/n64/memory-map.h - CPU memory map constants    */
+/*    and helper functions.                                                   */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_H
@@ -170,6 +171,34 @@
       TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_SEGMENT_DIRECT_UNCACHED + \
       TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_PIF_RAM\
    )
+
+/*----------------------------------------------------------------------------*/
+/* Converts an address between various memory map segment types.              */
+/*----------------------------------------------------------------------------*/
+const void *
+tux64_platform_mips_n64_memory_map_physical_to_direct_cached(
+   const void * address
+);
+const void *
+tux64_platform_mips_n64_memory_map_physical_to_direct_uncached(
+   const void * address
+);
+const void *
+tux64_platform_mips_n64_memory_map_direct_cached_to_physical(
+   const void * address
+);
+const void *
+tux64_platform_mips_n64_memory_map_direct_uncached_to_physical(
+   const void * address
+);
+const void *
+tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(
+   const void * address
+);
+const void *
+tux64_platform_mips_n64_memory_map_direct_uncached_to_direct_cached(
+   const void * address
+);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_H */
