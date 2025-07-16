@@ -155,7 +155,7 @@ tux64_boot_stage1_interrupt_handler_vi(
 }
 
 static void
-tux64_boot_stage1_interrupt_handler_ip2_mi(
+tux64_boot_stage1_interrupt_handler_mi(
    struct Tux64BootStage1InterruptContext * context
 ) {
    Tux64UInt32 mi_interrupt;
@@ -189,18 +189,23 @@ tux64_boot_stage1_interrupt_handler(
    struct Tux64BootStage1InterruptContext * context
 ) {
    Tux64UInt32 cause;
+   Tux64Boolean interrupt_handled;
 
    cause = tux64_platform_mips_vr4300_cop0_register_read_cause();
+   interrupt_handled = TUX64_BOOLEAN_FALSE;
 
    if (tux64_bitwise_flags_check_one_uint32(
       cause,
       TUX64_PLATFORM_MIPS_VR4300_COP0_CAUSE_BIT_IP2
    )) {
-      tux64_boot_stage1_interrupt_handler_ip2_mi(context);
-      return;
+      tux64_boot_stage1_interrupt_handler_mi(context);
+      interrupt_handled = TUX64_BOOLEAN_TRUE;
    }
 
-   tux64_boot_stage1_interrupt_handler_unhandled(context);
+   if (interrupt_handled == TUX64_BOOLEAN_FALSE) {
+      tux64_boot_stage1_interrupt_handler_unhandled(context);
+   }
+
    return;
 }
 
