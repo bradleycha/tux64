@@ -69,8 +69,10 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/halt.c \
 	src/tux64-boot/stage1/halt.h \
 	src/tux64-boot/stage1/boot-header.h \
-	src/tux64-boot/stage1/interrupt.c \
-	src/tux64-boot/stage1/interrupt.h \
+	src/tux64-boot/stage1/interrupt/interrupt.c \
+	src/tux64-boot/stage1/interrupt/interrupt.h \
+	src/tux64-boot/stage1/interrupt/entry.s \
+	src/tux64-boot/stage1/interrupt/entry.h \
 	src/tux64-boot/stage1/video.c \
 	src/tux64-boot/stage1/video.h
 stage2_SOURCES = \

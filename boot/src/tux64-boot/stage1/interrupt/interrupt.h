@@ -2,8 +2,8 @@
 /*                          Copyright (C) Tux64 2025                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/stage1/interrupt.h - Interrupt service routine         */
-/*    interface.                                                              */
+/* boot/src/tux64-boot/stage1/interrupt/interrupt.h - Interrupt service       */
+/*    routine interface.                                                      */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_BOOT_STAGE1_INTERRUPT_H

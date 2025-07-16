@@ -10,7 +10,7 @@
 
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/n64/mmio.h>
-#include "tux64-boot/stage1/interrupt.h"
+#include "tux64-boot/stage1/interrupt/interrupt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (3u) /* triple-buffered */

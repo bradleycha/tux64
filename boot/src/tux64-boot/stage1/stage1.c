@@ -6,7 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include "tux64-boot/stage1/interrupt.h"
+#include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 
 struct Tux64BootStage1MainLoopContextMemory {
