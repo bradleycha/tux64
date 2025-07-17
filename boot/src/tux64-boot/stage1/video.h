@@ -28,8 +28,9 @@
 /* are the in RGBA5553 format.                                                */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootStage1VideoFramebuffer {
-   /* use RGBA5553 pixel format to save memory */
-   Tux64UInt16 pixels [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
+   /* use RGBA5553 pixel format to save memory.  marked volatile since it can */
+   /* be observed externally and also modified by RSP DMA. */
+   volatile Tux64UInt16 pixels [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
    __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
 };
 
