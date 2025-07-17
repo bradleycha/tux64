@@ -63,8 +63,9 @@ tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(
 ) {
    const void * retn;
 
-   retn = tux64_platform_mips_n64_memory_map_direct_cached_to_physical(address);
-   retn = tux64_platform_mips_n64_memory_map_physical_to_direct_uncached(address);
+   retn = address;
+   retn = tux64_platform_mips_n64_memory_map_direct_cached_to_physical(retn);
+   retn = tux64_platform_mips_n64_memory_map_physical_to_direct_uncached(retn);
 
    return retn;
 }
@@ -75,8 +76,9 @@ tux64_platform_mips_n64_memory_map_direct_uncached_to_direct_cached(
 ) {
    const void * retn;
 
-   retn = tux64_platform_mips_n64_memory_map_direct_uncached_to_physical(address);
-   retn = tux64_platform_mips_n64_memory_map_physical_to_direct_cached(address);
+   retn = address;
+   retn = tux64_platform_mips_n64_memory_map_direct_uncached_to_physical(retn);
+   retn = tux64_platform_mips_n64_memory_map_physical_to_direct_cached(retn);
 
    return retn;
 }
