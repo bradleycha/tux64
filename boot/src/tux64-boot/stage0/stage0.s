@@ -509,6 +509,7 @@ tux64_boot_stage0_start:
    addu  $a0,$zero,$s0
    addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
    addiu $a1,$a1,-TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY
+   addiu $a2,$zero,0 # TODO: store
    jr    $t0
    addiu $sp,$s4,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 #tux64_boot_stage0_start

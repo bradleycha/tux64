@@ -41,18 +41,23 @@ tux64_boot_stage1_main_loop_context_execute(
 void
 tux64_boot_stage1_start(
    Tux64UInt32 memory_total,
-   Tux64UInt32 memory_available
+   Tux64UInt32 memory_available,
+   Tux64Boolean ique
 )
 __attribute__((noreturn, section(".start"), externally_visible));
 
 void
 tux64_boot_stage1_start(
    Tux64UInt32 memory_total,
-   Tux64UInt32 memory_available
+   Tux64UInt32 memory_available,
+   Tux64Boolean running_on_ique
 ) {
    struct Tux64BootStage1MainLoopContext main_loop_context;
 
    tux64_boot_stage1_interrupt_initialize();
+
+   /* TODO: pass through whether we're on ique or not to video subsystem */
+   (void)running_on_ique;
 
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize();
