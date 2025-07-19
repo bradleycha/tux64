@@ -50,6 +50,14 @@
 # though, that branch delay slots lead to 1 instruction after most branch
 # instructions to be executed.  This does make it even more difficult to
 # program, but just remember...no pain, no gain!
+# 
+# Note #3: For optimization, we use a custom calling convention that goes like
+# this:
+# 
+# $t0-$t3:           arguments, volatile
+# $t4-$t7, $at:      volatile
+# $v0-$v1:           return addresses, volatile, unused here
+# everything else:   non-volatile
 
 .set noreorder
 .set noat
