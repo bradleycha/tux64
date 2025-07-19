@@ -527,7 +527,7 @@ tux64_boot_stage0_start:
    # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x00000d64
-   .word 0xd0f1fc54
+   .word 0x00002eed
+   .word 0xfc5c56a7
 #tux64_boot_stage0_cic
 
