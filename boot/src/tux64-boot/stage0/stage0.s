@@ -304,34 +304,34 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY
 
-   addiu $s0,$zero,0
-   lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI
-   lui   $s2,TUX64_BOOT_STAGE0_1MIB_HI
-   lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI + (TUX64_BOOT_STAGE0_1MIB_HI * 8)
+   addiu $a0,$zero,0
+   lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI
+   lui   $s1,TUX64_BOOT_STAGE0_1MIB_HI
+   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI + (TUX64_BOOT_STAGE0_1MIB_HI * 8)
    tux64_boot_stage0_start.detect_total_memory:
-      ld    $s4,0($s1)     # load current value
-      nor   $s5,$s4,$zero  # flips all bits
-      sd    $s5,0($s1)     # store the flipped bits
-      ld    $s6,0($s1)     # reload to see what was stored
-      sd    $s4,0($s1)     # restore the old value
+      ld    $s3,0($s0)     # load current value
+      nor   $s4,$s3,$zero  # flips all bits
+      sd    $s4,0($s0)     # store the flipped bits
+      ld    $s5,0($s0)     # reload to see what was stored
+      sd    $s3,0($s0)     # restore the old value
 
       # if the values differ, then either the memory chip is bad or we're at the
       # end of available memory.  exit the loop.
-      bne   $s5,$s6,tux64_boot_stage0_start.detect_total_memory.exit
+      bne   $s4,$s5,tux64_boot_stage0_start.detect_total_memory.exit
 
       # advance the memory pointer using the branch delay slot
-      addu  $s1,$s1,$s2
+      addu  $s0,$s0,$s1
 
       # the maximum amount of possible memory is 8MiB.  if we're not past 8MiB
       # of memory, continue looping
-      bne   $s1,$s3,tux64_boot_stage0_start.detect_total_memory
+      bne   $s0,$s2,tux64_boot_stage0_start.detect_total_memory
 
       # increment the total detected memory using the branch delay slot
-      addu  $s0,$s0,$s2
+      addu  $a0,$a0,$s1
    #tux64_boot_stage0_start.detect_total_memory
    tux64_boot_stage0_start.detect_total_memory.exit:
 
-   # from this point forward, $s0 is reserved for the total system memory, in
+   # from this point forward, $a0 is reserved for the total system memory, in
    # bytes until stage-1 begins.  this will be passed as an argument to stage-1
    # to avoid using memory unnecessarily.
 
@@ -380,7 +380,7 @@ tux64_boot_stage0_start:
 
    # we will now reserve $s4 for the cached RDRAM base address. here are the
    # current reserved registers:
-   # $s0 - total memory
+   # $a0 - total memory
    # $s2 - PI MMIO registers base address
    # $s3 - cartridge ROM base address (physical address)
    # $s4 - cached RDRAM base address
@@ -423,7 +423,7 @@ tux64_boot_stage0_start:
 
    # check if we have enough memory to load the stage-1 binary, done in terms of
    # words to avoid potential overflow
-   srl   $t0,$s0,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT
+   srl   $t0,$a0,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT
    addiu $t0,$t0,-(TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY/TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE)
    slt   $at,$t0,$s1
    bne   $at,$zero,tux64_boot_stage0_halt
@@ -445,7 +445,7 @@ tux64_boot_stage0_start:
    sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($s2)
 
    # as a reminder, here are the current registers we care about:
-   # $s0 - total memory
+   # $a0 - total memory
    # $s1 - stage-1 memory usage byte length
    # $s2 - PI MMIO registers base address
    # $s3 - cartridge ROM base address (physical address)
@@ -480,7 +480,7 @@ tux64_boot_stage0_start:
    tux64_boot_stage0_start.skip_checksum_stage1:
 
    # this is now our current register allocation:
-   # $s0 - total memory
+   # $a0 - total memory
    # $s1 - stage-1 memory usage byte length
    # $s2 - PI MMIO registers base address
    # $s3 - cartridge ROM base address (physical address)
@@ -508,8 +508,7 @@ tux64_boot_stage0_start:
    #tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
 
    # calculate available memory, initialize the stack, and start stage-1
-   subu  $a1,$s0,$s1
-   addu  $a0,$zero,$s0
+   subu  $a1,$a0,$s1
    addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO
    addiu $a1,$a1,-TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY
    jr    $t0
