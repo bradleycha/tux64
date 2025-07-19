@@ -266,15 +266,18 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
 
-   # if we're on ique, there's no RDRAM to initialize, so we skip it
+   # detect if we're on ique or not, reserving $a2 for the boolean if we're on
+   # ique or not.  we then skip RDRAM initialization if we're on ique, as
+   # there's no RDRAM to initialize.
    lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_MI_HI
    lui   $s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI
    lw    $s2,TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO($s0)
    ori   $s1,$s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO
+   xor   $a2,$s1,$s2
    beq   $s1,$s2,tux64_boot_stage0_start.skip_rdram_initialization
+   sltiu $a2,$a2,1 # branch delay slot
 
-   # reserve $s3 for the RI base address until the end of RDRAM initialization,
-   # using the branch delay slot above
+   # reserve $s3 for the RI base address until the end of RDRAM initialization
    lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_RI_HI
 
    # check if RDRAM has already been initialized
@@ -507,9 +510,8 @@ tux64_boot_stage0_start:
    # calculate available memory, initialize the stack, and start stage-1
    subu  $a1,$s0,$s1
    addu  $a0,$zero,$s0
-   addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO
    addiu $a1,$a1,-TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY
-   addiu $a2,$zero,0 # TODO: store
    jr    $t0
    addiu $sp,$s4,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 #tux64_boot_stage0_start
