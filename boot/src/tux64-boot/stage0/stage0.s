@@ -203,11 +203,11 @@ tux64_boot_stage0_halt:
 
    .section .text
 tux64_boot_stage0_status_code_write:
-   lui   $t0,TUX64_BOOT_STAGE0_STATUS_HWORD2
-   ori   $t0,$t0,TUX64_BOOT_STAGE0_STATUS_HWORD3
-   or    $t0,$t0,$a0
+   lui   $t1,TUX64_BOOT_STAGE0_STATUS_HWORD2
+   ori   $t1,$t1,TUX64_BOOT_STAGE0_STATUS_HWORD3
+   or    $t1,$t1,$t0
    jr    $ra
-   sw    $t0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x04($gp)
+   sw    $t1,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x04($gp)
 #tux64_boot_stage0_status_code_write
 
    .section .text
@@ -215,22 +215,22 @@ tux64_boot_stage0_checksum_calculate_and_verify:
    # calculates a checksum and verifies it's correct, halting if it's not
    # correct and returning if it is correct.  data must be word-aligned.
    # 
-   # $a0 - data start ptr
-   # $a1 - data end ptr
-   # $a2 - expected checksum
+   # $t0 - data start ptr
+   # $t1 - data end ptr
+   # $t2 - expected checksum
 
-   addiu $t0,$zero,0 # sum_hi
-   addiu $t1,$zero,0 # sum_lo
+   addiu $t3,$zero,0 # sum_hi
+   addiu $t4,$zero,0 # sum_lo
    tux64_boot_stage0_checksum_calculate_and_verify.digest_word:
-      lw    $t2,0($a0)
-      addu  $t0,$t0,$t2
-      addu  $t1,$t1,$t0
-      addiu $a0,$a0,4
-      bne   $a0,$a1,tux64_boot_stage0_checksum_calculate_and_verify.digest_word
+      lw    $t5,0($t0)
+      addu  $t3,$t3,$t5
+      addu  $t4,$t4,$t3
+      addiu $t0,$t0,4
+      bne   $t0,$t1,tux64_boot_stage0_checksum_calculate_and_verify.digest_word
    #tux64_boot_stage0_checksum_calculate_and_verify.digest_word
 
-   subu  $t3,$t1,$t0 # executes in branch delay slot of loop above
-   bne   $t3,$a2,tux64_boot_stage0_halt
+   subu  $t6,$t4,$t3 # executes in branch delay slot of loop above
+   bne   $t6,$t2,tux64_boot_stage0_halt
 
    nop
    jr    $ra
@@ -248,11 +248,11 @@ tux64_boot_stage0_start:
    ori   $s0,$s0,TUX64_BOOT_STAGE0_STATUS_HWORD1
    sw    $s0,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x00($gp)
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
 
    # begin initializing COP0 registers
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE
 
    # i'm not entirely sure why everyone initializes these specific registers.
    # it seems it's to clear exceptions and some timer thing from a reset?
@@ -264,7 +264,7 @@ tux64_boot_stage0_start:
 
    # begin initializing RDRAM
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
 
    # if we're on ique, there's no RDRAM to initialize, so we skip it
    lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_MI_HI
@@ -299,7 +299,7 @@ tux64_boot_stage0_start:
    # so this code still works.  we cap the upper limit to 8MiB since that's the
    # maximum amount of memory possible.
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY
 
    addiu $s0,$zero,0
    lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI
@@ -334,7 +334,7 @@ tux64_boot_stage0_start:
 
    # load the boot header into RDRAM via PI DMA
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER
 
    # reserve $s2 for the PI base address and $s3 for the high-order cartridge
    # ROM offset
@@ -359,7 +359,7 @@ tux64_boot_stage0_start:
    # initialize the CPU caches, setting each line to 'invalid', continue
    # loading the boot header in the background
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
    lui   $s5,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
    lui   $s6,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
    lui   $s4,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
@@ -385,7 +385,7 @@ tux64_boot_stage0_start:
    # calculate the checksum of the boot header and verify it matches what's
    # given by the header
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER
 
    # wait for the boot header to have finished loading
    tux64_boot_stage0_start.pi_io_dma_spinlock.boot_header:
@@ -403,14 +403,14 @@ tux64_boot_stage0_start:
    # calculate the header's checksum and verify it, this also gets the boot
    # header into cache so that rambus goes vroom vroom, also the next
    # instruction executes in the above branch delay slot
-   lw    $a2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s4)
-   addiu $a0,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
+   lw    $t2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s4)
+   addiu $t0,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
    jal   tux64_boot_stage0_checksum_calculate_and_verify
-   addiu $a1,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
+   addiu $t1,$s4,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
 
    # begin loading the stage-1 binary into memory
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
 
    # read the flags, stage-1 checksum, stage-1 data word count, and stage-1 memory word count
    lw    $s1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY_WORDS($s4)
@@ -454,7 +454,7 @@ tux64_boot_stage0_start:
    # calculate the checksum of the stage-1 binary and verify it's correct
    # unless the NO_CHECKSUM flag is set
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1
 
    # check if the NO_CHECKSUM flag is set, freeing $s5 from this point forward
    andi  $s5,$s5,TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM
@@ -462,7 +462,7 @@ tux64_boot_stage0_start:
 
    # wait for the PI DMA operation to complete, then verify the checksum
    # branch delay slot.  we now free $s6 and $s7.
-   addiu $a0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   addiu $t0,$s4,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
 
    tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum:
       lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($s2)
@@ -470,8 +470,8 @@ tux64_boot_stage0_start:
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum
    #tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum
 
-   addu  $a2,$zero,$s6 # branch delay slot
-   addu  $a1,$a0,$s7
+   addu  $t2,$zero,$s6 # branch delay slot
+   addu  $t1,$t0,$s7
    jal   tux64_boot_stage0_checksum_calculate_and_verify
 
    tux64_boot_stage0_start.skip_checksum_stage1:
@@ -487,14 +487,14 @@ tux64_boot_stage0_start:
    # instruction to block the CPU until the SI bus isn't busy.
    lui   $s7,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI # branch delay slot
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
    addiu $s6,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
    lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s7)
    sw    $s6,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($s7)
 
    # jump to stage-1 start address
    jal   tux64_boot_stage0_status_code_write
-   addiu $a0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1
    
    # wait for PI DMA, as we could reach here if we skipped the stage-1 checksum
    # without waiting on PI DMA to complete.
