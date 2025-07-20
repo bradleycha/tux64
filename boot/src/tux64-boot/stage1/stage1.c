@@ -11,15 +11,14 @@
 
 static enum Tux64BootStage1VideoPlatform
 tux64_boot_stage1_choose_video_platform(
+   Tux64UInt32 video_standard,
    Tux64Boolean running_on_ique
 ) {
    if (running_on_ique) {
       return TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE;
    }
 
-   /* TODO: check for PAL or M-PAL */
-
-   return TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC;
+   return (enum Tux64BootStage1VideoPlatform)video_standard;
 }
 
 struct Tux64BootStage1MainLoopContextMemory {
@@ -55,7 +54,8 @@ void
 tux64_boot_stage1_start(
    Tux64UInt32 memory_total,
    Tux64UInt32 memory_available,
-   Tux64Boolean ique
+   Tux64UInt32 video_standard,
+   Tux64Boolean running_on_ique
 )
 __attribute__((noreturn, section(".start"), externally_visible));
 
@@ -63,6 +63,7 @@ void
 tux64_boot_stage1_start(
    Tux64UInt32 memory_total,
    Tux64UInt32 memory_available,
+   Tux64UInt32 video_standard,
    Tux64Boolean running_on_ique
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
@@ -70,7 +71,10 @@ tux64_boot_stage1_start(
 
    tux64_boot_stage1_interrupt_initialize();
 
-   video_platform = tux64_boot_stage1_choose_video_platform(running_on_ique);
+   video_platform = tux64_boot_stage1_choose_video_platform(
+      video_standard,
+      running_on_ique
+   );
 
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(video_platform);

@@ -159,17 +159,18 @@
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD2,0x4530 /* E0 */
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD3,0x3a00 /* :(null) */
 
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                '0'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,      '1'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,     '2'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,  '3'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,     '4'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE, '5'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,    '6'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,          '7'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,         '8'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,   '9'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,         'A'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                         '0'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,               '1'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_HARDWARE_INFORMATION,   '2'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,              '3'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,           '4'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,              '5'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE,          '6'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,             '7'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,                   '8'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  '9'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,            'A'
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  'B'
 
    .section .status
 tux64_boot_stage0_status:
@@ -270,20 +271,27 @@ tux64_boot_stage0_start:
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE
 
-   # begin initializing RDRAM
+   # begin detecting hardware information
    jal   tux64_boot_stage0_status_code_write
-   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_HARDWARE_INFORMATION
 
-   # detect if we're on ique or not, reserving $a2 for the boolean if we're on
+   # reserve $a2 for the video standard to use, passed in from IPL2
+   addiu $a2,$s4,0
+
+   # detect if we're on ique or not, reserving $a3 for the boolean if we're on
    # ique or not.  we then skip RDRAM initialization if we're on ique, as
    # there's no RDRAM to initialize.
    lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_MI_HI
    lui   $s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI
    lw    $s2,TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO($s0)
    ori   $s1,$s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO
-   xor   $a2,$s1,$s2
+   xor   $a3,$s1,$s2
    beq   $s1,$s2,tux64_boot_stage0_start.skip_rdram_initialization
-   sltiu $a2,$a2,1 # branch delay slot
+   sltiu $a3,$a3,1 # branch delay slot
+
+   # begin initializing RDRAM
+   jal   tux64_boot_stage0_status_code_write
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
 
    # reserve $s3 for the RI base address until the end of RDRAM initialization
    lui   $s3,TUX64_BOOT_STAGE0_ADDRESS_RI_HI
@@ -527,7 +535,7 @@ tux64_boot_stage0_start:
    # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x00002eed
-   .word 0xfc5c56a7
+   .word 0x0001b4dd
+   .word 0xf4d21694
 #tux64_boot_stage0_cic
 
