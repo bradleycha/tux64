@@ -102,7 +102,9 @@ tux64_boot_stage1_video_initialize_context(void) {
 }
 
 static void
-tux64_boot_stage1_video_initialize_vi(void) {
+tux64_boot_stage1_video_initialize_vi(
+   enum Tux64BootStage1VideoPlatform platform
+) {
    volatile struct Tux64PlatformMipsN64MmioRegistersVi * vi;
 
    /* done to save on typing */
@@ -110,13 +112,16 @@ tux64_boot_stage1_video_initialize_vi(void) {
 
    /* TODO: implement */
    (void)vi;
+   (void)platform;
    return;
 }
 
 void
-tux64_boot_stage1_video_initialize(void) {
+tux64_boot_stage1_video_initialize(
+   enum Tux64BootStage1VideoPlatform platform
+) {
    tux64_boot_stage1_video_initialize_context();
-   tux64_boot_stage1_video_initialize_vi();
+   tux64_boot_stage1_video_initialize_vi(platform);
    return;
 }
 

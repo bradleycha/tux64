@@ -34,12 +34,21 @@ struct Tux64BootStage1VideoFramebuffer {
    __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
 };
 
+enum Tux64BootStage1VideoPlatform {
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC,
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL,
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL,
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE
+};
+
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
 /* using any other video functions.                                           */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage1_video_initialize(void);
+tux64_boot_stage1_video_initialize(
+   enum Tux64BootStage1VideoPlatform platform
+);
 
 /*----------------------------------------------------------------------------*/
 /* Sets whether video output should be enabled or not.  Default is to         */

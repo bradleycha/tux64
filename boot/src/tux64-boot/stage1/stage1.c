@@ -9,6 +9,19 @@
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 
+static enum Tux64BootStage1VideoPlatform
+tux64_boot_stage1_choose_video_platform(
+   Tux64Boolean running_on_ique
+) {
+   if (running_on_ique) {
+      return TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE;
+   }
+
+   /* TODO: check for PAL or M-PAL */
+
+   return TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC;
+}
+
 struct Tux64BootStage1MainLoopContextMemory {
    Tux64UInt32 total;
    Tux64UInt32 available;
@@ -52,15 +65,15 @@ tux64_boot_stage1_start(
    Tux64UInt32 memory_available,
    Tux64Boolean running_on_ique
 ) {
+   enum Tux64BootStage1VideoPlatform video_platform;
    struct Tux64BootStage1MainLoopContext main_loop_context;
 
    tux64_boot_stage1_interrupt_initialize();
 
-   /* TODO: pass through whether we're on ique or not to video subsystem */
-   (void)running_on_ique;
+   video_platform = tux64_boot_stage1_choose_video_platform(running_on_ique);
 
    tux64_boot_stage1_interrupt_vi_disable();
-   tux64_boot_stage1_video_initialize();
+   tux64_boot_stage1_video_initialize(video_platform);
    tux64_boot_stage1_video_display_output(TUX64_BOOLEAN_TRUE);
    tux64_boot_stage1_interrupt_vi_enable();
 
