@@ -94,6 +94,16 @@
       0x0000003cu\
    )
 
+/* bit flags, masks, and what-not relating to VI registers */
+#define TUX64_PLATFORM_MIPS_N64_VI_TYPE_MASK\
+   (0x00000003u)
+
+enum Tux64PlatformMipsN64ViType {
+   TUX64_PLATFORM_MIPS_N64_VI_TYPE_DISABLED = 0x0u,
+   TUX64_PLATFORM_MIPS_N64_VI_TYPE_RGBA5553 = 0x2u,
+   TUX64_PLATFORM_MIPS_N64_VI_TYPE_RGBA8888 = 0x3u
+};
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_VI_H */
 
