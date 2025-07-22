@@ -102,6 +102,11 @@ stage2_LDFLAGS = \
 pkgdata_DATA = \
 	$(BIN_FILES) $(SYM_FILES)
 
+# TODO: something is not right here.  if we configure with dependency tracking
+# enabled this works fine, but if we disable dependency tracking, this breaks
+# in multiple places.  figure out why this happens because this shouldn't
+# happen.
+
 $(stage0_BIN) : $(stage0_ELF)
 	$(OBJCOPY) $< --dump-section .rsp_dmem=$@ && chmod -x $@
 
