@@ -74,7 +74,6 @@ tux64_boot_stage1_main(
 
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(video_platform);
-   tux64_boot_stage1_video_display_output(TUX64_BOOLEAN_TRUE);
    tux64_boot_stage1_interrupt_vi_enable();
 
    tux64_boot_stage1_main_loop_context_initialize(

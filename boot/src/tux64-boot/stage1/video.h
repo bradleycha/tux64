@@ -47,7 +47,7 @@ enum Tux64BootStage1VideoPlatform {
 
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
-/* using any other video functions.                                           */
+/* using any other video functions.  Implicitly enables video output.         */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_initialize(
@@ -56,7 +56,7 @@ tux64_boot_stage1_video_initialize(
 
 /*----------------------------------------------------------------------------*/
 /* Sets whether video output should be enabled or not.  Default is to         */
-/* disable.                                                                   */
+/* enable.                                                                    */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_display_output(
