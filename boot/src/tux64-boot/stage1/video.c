@@ -13,13 +13,12 @@
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
-   (3u) /* triple-buffered */
+   (2u) /* double-buffered */
 
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
+   volatile Tux64Boolean vblank_fired;
    Tux64UInt8 framebuffer_index_displaying;
-   Tux64UInt8 framebuffer_index_pending;
-   Tux64UInt8 framebuffer_index_rendering;
 };
 
 static struct Tux64BootStage1VideoContext
@@ -39,6 +38,26 @@ tux64_boot_stage1_video_framebuffer_get(
    /* be used, which also leads to issues with the CPU caches. */
    retn = &tux64_boot_stage1_video_context.framebuffers[idx];
    retn = (struct Tux64BootStage1VideoFramebuffer *)tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(retn);
+
+   return retn;
+}
+
+static Tux64UInt8
+tux64_boot_stage1_video_framebuffer_index_get_displaying(void) {
+   Tux64UInt8 retn;
+
+   retn = tux64_boot_stage1_video_context.framebuffer_index_displaying;
+
+   return retn;
+}
+
+static Tux64UInt8
+tux64_boot_stage1_video_framebuffer_index_get_rendering(void) {
+   Tux64UInt8 retn;
+
+   retn = tux64_boot_stage1_video_framebuffer_index_get_displaying();
+   retn = retn + TUX64_LITERAL_UINT8(1u);
+   retn = retn % TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT);
 
    return retn;
 }
@@ -94,9 +113,8 @@ tux64_boot_stage1_video_initialize_context(void) {
       i--;
    }
 
-   ctx->framebuffer_index_displaying = TUX64_LITERAL_UINT8(2u);
-   ctx->framebuffer_index_pending = TUX64_LITERAL_UINT8(1u);
-   ctx->framebuffer_index_rendering = TUX64_LITERAL_UINT8(0u);
+   ctx->vblank_fired = TUX64_BOOLEAN_FALSE;
+   ctx->framebuffer_index_displaying = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT - 1u);
 
    return;
 }
@@ -136,51 +154,39 @@ tux64_boot_stage1_video_display_output(
 
 void
 tux64_boot_stage1_video_swap_buffers(void) {
-   Tux64UInt32 idx_rendering;
-   Tux64UInt32 idx_pending;
+   struct Tux64BootStage1VideoContext * ctx;
+   Tux64UInt8 idx_rendering;
 
-   /* disable VI interrupts to prevent interrupting buffer swapping, which */
-   /* can cause problems. */
-   tux64_boot_stage1_interrupt_vi_disable();
+   ctx = &tux64_boot_stage1_video_context;
 
-   /* swap the rendering and pending buffers */
-   idx_rendering = tux64_boot_stage1_video_context.framebuffer_index_rendering;
-   idx_pending = tux64_boot_stage1_video_context.framebuffer_index_pending;
+   /* use a spinlock to wait for vblank to fire, locking the framerate to a */
+   /* maximum of 60 FPS. */
+   while (ctx->vblank_fired == TUX64_BOOLEAN_FALSE) {}
+   ctx->vblank_fired = TUX64_BOOLEAN_FALSE;
 
-   tux64_boot_stage1_video_context.framebuffer_index_rendering = idx_pending;
-   tux64_boot_stage1_video_context.framebuffer_index_pending = idx_rendering;
+   /* the rest of this code shouldn't take longer than 1/60 of a second to */
+   /* complete, so no futher synchronization is required */
 
-   /* re-enable VI interrupts after we disabled them at the start*/
-   tux64_boot_stage1_interrupt_vi_enable();
+   idx_rendering = tux64_boot_stage1_video_framebuffer_index_get_rendering();
+
+   ctx->framebuffer_index_displaying = idx_rendering;
+   tux64_boot_stage1_video_set_vi_framebuffer(idx_rendering);
+
    return;
 }
 
 void
 tux64_boot_stage1_video_vblank_handler(void) {
-   Tux64UInt32 idx_displaying;
-   Tux64UInt32 idx_pending;
-
-   /* we will never run this while swapping buffers since that function */
-   /* disables VI interrupts, so we're safe to swap the displaying and */
-   /* pending buffers. */
-   idx_displaying = tux64_boot_stage1_video_context.framebuffer_index_displaying;
-   idx_pending = tux64_boot_stage1_video_context.framebuffer_index_pending;
-
-   tux64_boot_stage1_video_context.framebuffer_index_displaying = idx_pending;
-   tux64_boot_stage1_video_context.framebuffer_index_pending = idx_displaying;
-
-   /* now tell the VI to use the new framebuffer */
-   tux64_boot_stage1_video_set_vi_framebuffer(idx_pending);
-
+   tux64_boot_stage1_video_context.vblank_fired = TUX64_BOOLEAN_TRUE;
    return;
 }
 
 struct Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_get_render_target(void) {
-   Tux64UInt8 idx_rendering;
+   Tux64UInt8 idx;
 
-   idx_rendering = tux64_boot_stage1_video_context.framebuffer_index_rendering;
+   idx = tux64_boot_stage1_video_framebuffer_index_get_rendering();
 
-   return tux64_boot_stage1_video_framebuffer_get(idx_rendering);
+   return tux64_boot_stage1_video_framebuffer_get(idx);
 }
 
