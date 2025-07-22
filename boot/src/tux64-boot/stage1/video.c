@@ -19,8 +19,8 @@
 
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
-   volatile Tux64Boolean vblank_fired;
    Tux64UInt8 framebuffer_index_displaying;
+   volatile Tux64Boolean swap_requested;
 };
 
 static struct Tux64BootStage1VideoContext
@@ -115,8 +115,8 @@ tux64_boot_stage1_video_initialize_context(void) {
       i--;
    }
 
-   ctx->vblank_fired = TUX64_BOOLEAN_FALSE;
    ctx->framebuffer_index_displaying = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT - 1u);
+   ctx->swap_requested = TUX64_BOOLEAN_FALSE;
 
    return;
 }
@@ -179,29 +179,39 @@ tux64_boot_stage1_video_display_output(
 void
 tux64_boot_stage1_video_swap_buffers(void) {
    struct Tux64BootStage1VideoContext * ctx;
-   Tux64UInt8 idx_rendering;
 
    ctx = &tux64_boot_stage1_video_context;
 
-   /* use a spinlock to wait for vblank to fire, locking the framerate to a */
-   /* maximum of 60 FPS. */
-   while (ctx->vblank_fired == TUX64_BOOLEAN_FALSE) {}
-   ctx->vblank_fired = TUX64_BOOLEAN_FALSE;
-
-   /* the rest of this code shouldn't take longer than 1/60 of a second to */
-   /* complete, so no futher synchronization is required */
-
-   idx_rendering = tux64_boot_stage1_video_framebuffer_index_get_rendering();
-
-   ctx->framebuffer_index_displaying = idx_rendering;
-   tux64_boot_stage1_video_set_vi_framebuffer(idx_rendering);
+   /* spinlock to wait for vblank to handle the swap, done to prevent screen */
+   /* tearing under lag conditions.  the spinlock also locks the framerate to */
+   /* 60FPS. */
+   ctx->swap_requested = TUX64_BOOLEAN_TRUE;
+   while (ctx->swap_requested == TUX64_BOOLEAN_TRUE) {};
 
    return;
 }
 
 void
 tux64_boot_stage1_video_vblank_handler(void) {
-   tux64_boot_stage1_video_context.vblank_fired = TUX64_BOOLEAN_TRUE;
+   struct Tux64BootStage1VideoContext * ctx;
+   Tux64UInt8 idx_rendering;
+
+   ctx = &tux64_boot_stage1_video_context;
+
+   /* new frame isn't available? don't swap buffers. */
+   if (ctx->swap_requested == TUX64_BOOLEAN_FALSE) {
+      return;
+   }
+
+   /* swap buffers since we have a new frame ready */
+   idx_rendering = tux64_boot_stage1_video_framebuffer_index_get_rendering();
+   ctx->framebuffer_index_displaying = idx_rendering;
+   tux64_boot_stage1_video_set_vi_framebuffer(idx_rendering);
+
+   /* signals to tux64_boot_stage1_video_swap_buffers() that the swap is */
+   /* complete and to exit its spinlock. */
+   ctx->swap_requested = TUX64_BOOLEAN_FALSE;
+
    return;
 }
 
