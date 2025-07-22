@@ -38,3 +38,12 @@ original with an improved bootloader, up-to-date kernel patches, and more.
 ## Getting Started
 To get started, read the [Installation Guide](https://github.com/bradleycha/tux64/wiki/Installation-Guide).
 
+## Credits
+Special thanks to the following projects.  Without these, this project would be
+significantly more difficult, if not impossible:
+ - [Ares](https://ares-emu.net) for providing a tolerable development environment for the bootloader
+ - [ipl3hasher-new](https://github.com/Polprzewodnikowy/ipl3hasher-new) for allowing `tux64-boot` to boot freestanding on real hardware
+ - [Libdragon](https://libdragon.dev) for providing examples of low-level software implementation details
+ - [N64brew Wiki](https://n64brew.dev) for providing detailed hardware information about the N64
+ - And users like you.  Thank you.
+
