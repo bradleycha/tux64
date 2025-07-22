@@ -36,10 +36,10 @@ struct Tux64BootStage1VideoFramebuffer {
 
 enum Tux64BootStage1VideoPlatform {
    /* manually define for compatability with IPL2 video standard enum */
-   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL  = 0,
-   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC = 1,
-   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL = 2,
-   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE     = 3
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL  = 0u,
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC = 1u,
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL = 2u,
+   TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE     = 3u
 };
 
 /*----------------------------------------------------------------------------*/

@@ -79,7 +79,8 @@ stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
 
 noinst_HEADERS = \
-	src/tux64-boot/tux64-boot.h
+	src/tux64-boot/tux64-boot.h \
+	src/tux64-boot/ipl2.h
 
 EXTRA_DIST = \
 	src/tux64-boot/stage0/stage0.ld \
