@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
+#include <tux64/platform/mips/n64/vi.h>
 
 #define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X\
    (320u)
@@ -22,6 +23,8 @@
    )
 #define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT\
    (8u)
+#define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXEL_FORMAT\
+   TUX64_PLATFORM_MIPS_N64_VI_TYPE_RGBA5553
 
 /*----------------------------------------------------------------------------*/
 /* A single framebuffer which can be directly accessed by the CPU.  Pixels    */

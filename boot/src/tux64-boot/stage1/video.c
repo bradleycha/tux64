@@ -10,6 +10,8 @@
 
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/n64/mmio.h>
+#include <tux64/platform/mips/n64/vi.h>
+#include <tux64/bitwise.h>
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
@@ -147,7 +149,29 @@ void
 tux64_boot_stage1_video_display_output(
    Tux64Boolean state
 ) {
-   /* TODO: implement */
+   Tux64UInt32 ctrl;
+   Tux64UInt32 type;
+
+   ctrl = tux64_platform_mips_n64_mmio_registers_vi.ctrl;
+   ctrl = tux64_bitwise_flags_clear_uint32(
+      ctrl,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_VI_TYPE_MASK)
+   );
+
+   switch (state) {
+      case TUX64_BOOLEAN_FALSE:
+         type = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_VI_TYPE_DISABLED);
+         break;
+      case TUX64_BOOLEAN_TRUE:
+         type = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXEL_FORMAT);
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   ctrl = tux64_bitwise_flags_set_uint32(ctrl, type);
+   tux64_platform_mips_n64_mmio_registers_vi.ctrl = ctrl;
+
    (void)state;
    return;
 }
