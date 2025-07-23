@@ -112,6 +112,13 @@ tux64_boot_stage1_start(void) {
    register Tux64UInt32 memory_available  __asm__("$a1");
    register Tux64UInt32 running_on_ique   __asm__("$a2");
 
+   /* we have to initialize $gp for use with small data sections.  "_gp" is */
+   /* defined by the linker. */
+   __asm__ volatile (
+      "lui $gp,%hi(_gp)\n"
+      "addiu $gp,$gp,%lo(_gp)\n"
+   );
+
    tux64_boot_stage1_main(
       (enum Tux64BootIpl2RomType)rom_type,
       (enum Tux64BootIpl2VideoStandard)video_standard,
