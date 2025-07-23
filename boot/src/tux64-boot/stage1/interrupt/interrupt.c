@@ -210,7 +210,7 @@ void
 tux64_boot_stage1_interrupt_vi_enable(void) {
    tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_bitwise_flags_set_uint32(
       tux64_platform_mips_n64_mmio_registers_mi.mask,
-      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_VI
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_VI
    );
 
    return;
@@ -218,9 +218,9 @@ tux64_boot_stage1_interrupt_vi_enable(void) {
 
 void
 tux64_boot_stage1_interrupt_vi_disable(void) {
-   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_bitwise_flags_clear_uint32(
+   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_bitwise_flags_set_uint32(
       tux64_platform_mips_n64_mmio_registers_mi.mask,
-      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_VI
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_VI
    );
 
    return;
