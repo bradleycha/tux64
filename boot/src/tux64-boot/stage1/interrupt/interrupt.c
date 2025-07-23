@@ -199,7 +199,8 @@ tux64_boot_stage1_interrupt_initialize(void) {
    tux64_platform_mips_vr4300_cop0_register_write_status(
       tux64_bitwise_flags_set_uint32(
          status,
-         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE
+         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE |
+         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IM2
       )
    );
 
