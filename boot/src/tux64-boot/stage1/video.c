@@ -17,6 +17,64 @@
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (2u) /* double-buffered */
 
+#define TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT\
+   (0x3u)
+#define TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_IQUE\
+   (0x1u)
+
+#define TUX64_BOOT_STAGE1_VIDEO_BURST_PAL\
+   (0x0404233au)
+#define TUX64_BOOT_STAGE1_VIDEO_BURST_NTSC\
+   (0x03e52239u)
+
+#define TUX64_BOOT_STAGE1_VIDEO_SCANLINES_PAL\
+   (626u)
+#define TUX64_BOOT_STAGE1_VIDEO_SCANLINES_NTSC\
+   (526u)
+
+#define TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_PAL\
+   (3118u)
+#define TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_NTSC\
+   (3094u)
+#define TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_MPAL\
+   (3090u)
+
+#define TUX64_BOOT_STAGE1_VIDEO_H_START_PAL\
+   (128u)
+#define TUX64_BOOT_STAGE1_VIDEO_H_END_PAL\
+   (768u)
+#define TUX64_BOOT_STAGE1_VIDEO_H_START_NTSC\
+   (108u)
+#define TUX64_BOOT_STAGE1_VIDEO_H_END_NTSC\
+   (748u)
+
+#define TUX64_BOOT_STAGE1_VIDEO_V_START_PAL\
+   (0x05fu)
+#define TUX64_BOOT_STAGE1_VIDEO_V_END_PAL\
+   (0x239u)
+#define TUX64_BOOT_STAGE1_VIDEO_V_START_NTSC\
+   (0x025u)
+#define TUX64_BOOT_STAGE1_VIDEO_V_END_NTSC\
+   (0x1ffu)
+
+#define TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_PAL\
+   (0x009u)
+#define TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_PAL\
+   (0x26bu)
+#define TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_NTSC\
+   (0x00eu)
+#define TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_NTSC\
+   (0x204u)
+
+#define TUX64_BOOT_STAGE1_VIDEO_X_OFFSET\
+   (0u)
+#define TUX64_BOOT_STAGE1_VIDEO_X_SCALE\
+   (0x400u)
+#define TUX64_BOOT_STAGE1_VIDEO_Y_OFFSET\
+   (0u)
+#define TUX64_BOOT_STAGE1_VIDEO_Y_SCALE\
+   (0x400u)
+
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
    Tux64UInt8 framebuffer_index_displaying;
@@ -91,7 +149,7 @@ tux64_boot_stage1_video_initialize_framebuffer(
    iter_pixels = (volatile Tux64UInt64 *)&framebuffer->pixels;
    bytes_remaining = TUX64_LITERAL_UINT32(sizeof(framebuffer->pixels));
    while (bytes_remaining != TUX64_LITERAL_UINT32(0u)) {
-      *iter_pixels = TUX64_LITERAL_UINT64(0llu);
+      *iter_pixels = TUX64_LITERAL_UINT64(0x0001f80107c1003fllu);
       iter_pixels++;
       bytes_remaining -= TUX64_LITERAL_UINT32(sizeof(*iter_pixels));
    }
@@ -103,6 +161,9 @@ static void
 tux64_boot_stage1_video_initialize_context(void) {
    struct Tux64BootStage1VideoContext * ctx;
    Tux64UInt8 i;
+
+   /* TODO: choose resolution at runtime so we can support both PAL and NTSC */
+   /* framebuffers with the same code. */
 
    /* done to save on typing */
    ctx = &tux64_boot_stage1_video_context;
@@ -126,13 +187,126 @@ tux64_boot_stage1_video_initialize_vi(
    enum Tux64BootStage1VideoPlatform platform
 ) {
    volatile struct Tux64PlatformMipsN64MmioRegistersVi * vi;
+   Tux64UInt32 pixel_advance;
+   Tux64UInt32 burst;
+   Tux64UInt32 v_total;
+   Tux64UInt32 h_total;
+   Tux64UInt32 h_start;
+   Tux64UInt32 h_end;
+   Tux64UInt32 v_start;
+   Tux64UInt32 v_end;
+   Tux64UInt32 v_burst_start;
+   Tux64UInt32 v_burst_end;
 
    /* done to save on typing */
    vi = &tux64_platform_mips_n64_mmio_registers_vi;
 
-   /* TODO: implement */
-   (void)vi;
-   (void)platform;
+   /* set platform-specific configurations */
+   switch (platform) {
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL:
+         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT);
+         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_PAL);
+         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_PAL);
+         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_PAL);
+         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_PAL);
+         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_PAL);
+         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_PAL);
+         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_PAL);
+         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_PAL);
+         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_PAL);
+         break;
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC:
+         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT);
+         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_NTSC);
+         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_NTSC);
+         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_NTSC);
+         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_NTSC);
+         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_NTSC);
+         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_NTSC);
+         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_NTSC);
+         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_NTSC);
+         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_NTSC);
+         break;
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL:
+         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT);
+         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_NTSC);
+         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_NTSC);
+         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_MPAL);
+         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_NTSC);
+         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_NTSC);
+         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_NTSC);
+         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_NTSC);
+         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_NTSC);
+         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_NTSC);
+         break;
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE:
+         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_IQUE);
+         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_NTSC);
+         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_NTSC);
+         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_NTSC);
+         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_NTSC);
+         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_NTSC);
+         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_NTSC);
+         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_NTSC);
+         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_NTSC);
+         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_NTSC);
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   tux64_boot_stage1_video_set_vi_framebuffer(
+      tux64_boot_stage1_video_framebuffer_index_get_displaying()
+   );
+
+   vi->width = TUX64_LITERAL_UINT32(
+      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X
+   );
+
+   vi->v_intr = TUX64_LITERAL_UINT32(
+      0x00000002u /* trigger interrupt on 2nd line of vblank*/
+   );
+   vi->burst = burst;
+
+   vi->v_total = v_total - TUX64_LITERAL_UINT32(1u);
+
+   vi->h_total =
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_VI_LEAP_DEFAULT) |
+      (h_total - TUX64_LITERAL_UINT32(1u));
+
+   vi->h_video =
+      (h_start << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_H_START_BIT_OFFSET)) |
+      (h_end   << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_H_END_BIT_OFFSET));
+
+   vi->v_video =
+      (v_start << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_START_BIT_OFFSET)) |
+      (v_end   << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_END_BIT_OFFSET));
+
+   vi->v_burst =
+      (v_burst_start << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_BURST_START_BIT_OFFSET)) |
+      (v_burst_end   << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_BURST_END_BIT_OFFSET));
+
+   vi->x_scale = TUX64_LITERAL_UINT32(
+      TUX64_BOOT_STAGE1_VIDEO_X_OFFSET << TUX64_PLATFORM_MIPS_N64_VI_X_OFFSET_BIT_OFFSET |
+      TUX64_BOOT_STAGE1_VIDEO_X_SCALE  << TUX64_PLATFORM_MIPS_N64_VI_X_SCALE_BIT_OFFSET
+   );
+
+   vi->y_scale = TUX64_LITERAL_UINT32(
+      TUX64_BOOT_STAGE1_VIDEO_Y_OFFSET << TUX64_PLATFORM_MIPS_N64_VI_Y_OFFSET_BIT_OFFSET |
+      TUX64_BOOT_STAGE1_VIDEO_Y_SCALE  << TUX64_PLATFORM_MIPS_N64_VI_Y_SCALE_BIT_OFFSET
+   );
+
+   /* VI_CTRL should be set last since setting this will enable video output */
+   vi->ctrl = TUX64_LITERAL_UINT32(
+      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_DEDITHER_DISABLE |
+      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_AA_MODE_DISABLE |
+      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_SERRATE_DISABLE |
+      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_DIVOT_DISABLE |
+      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_GAMMA_DISABLE |
+      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_GAMMA_DITHER_DISABLE |
+      (Tux64UInt32)TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXEL_FORMAT
+   ) | (pixel_advance << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_PIXEL_ADVANCE_BIT_OFFSET));
+
    return;
 }
 
