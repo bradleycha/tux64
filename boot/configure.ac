@@ -36,5 +36,18 @@ AM_PROG_AS
 
 AC_CHECK_HEADER([tux64/tux64.h])
 
+tux64_boot_config_status=0
+
+AC_ARG_ENABLE([status],
+   AS_HELP_STRING([--enable-status], [Write status codes to a fixed memory location during the boot process]),
+   [tux64_boot_config_status=1],
+   [tux64_boot_config_status=0]
+)
+
+AC_DEFINE_UNQUOTED([CONFIG_STATUS],
+   [$tux64_boot_config_status],
+   [Write status codes to a fixed memory location during the boot process]
+)
+
 AC_OUTPUT
 

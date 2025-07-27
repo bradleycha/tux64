@@ -7,6 +7,7 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/ipl2.h"
+#include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 
@@ -65,6 +66,11 @@ tux64_boot_stage1_main(
    enum Tux64BootStage1VideoPlatform video_platform;
    struct Tux64BootStage1MainLoopContext main_loop_context;
 
+   tux64_boot_stage1_status_initialize();
+
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_BEGIN);
+
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT);
    tux64_boot_stage1_interrupt_initialize();
 
    video_platform = tux64_boot_stage1_choose_video_platform(
@@ -72,6 +78,7 @@ tux64_boot_stage1_main(
       running_on_ique
    );
 
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(video_platform);
    tux64_boot_stage1_interrupt_vi_enable();
@@ -81,7 +88,8 @@ tux64_boot_stage1_main(
       memory_total,
       memory_available
    );
-
+   
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_LOOP);
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_main_loop_context_execute(&main_loop_context);
       tux64_boot_stage1_video_swap_buffers();

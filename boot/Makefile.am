@@ -74,7 +74,9 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/interrupt/entry.s \
 	src/tux64-boot/stage1/interrupt/entry.h \
 	src/tux64-boot/stage1/video.c \
-	src/tux64-boot/stage1/video.h
+	src/tux64-boot/stage1/video.h \
+	src/tux64-boot/stage1/status.c \
+	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
 
@@ -87,6 +89,7 @@ EXTRA_DIST = \
 	src/tux64-boot/stage1/stage1.ld \
 	src/tux64-boot/stage1/stack.ld \
 	src/tux64-boot/stage1/boot-header.ld \
+	src/tux64-boot/stage1/status.ld \
 	src/tux64-boot/stage2/stage2.ld
 
 stage0_LDFLAGS = \
