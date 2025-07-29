@@ -152,8 +152,6 @@
 
 .equ TUX64_BOOT_STAGE0_STATUS_BYTES,8
 
-.equ TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO+0x0ff8
-
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD0,0x5354 /* ST */
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD1,0x4147 /* AG */
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD2,0x4530 /* E0 */
@@ -172,6 +170,9 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,            'K'
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  'L'
 
+# defined in stage1/boot-header.ld, included in stage0/stage0.ld
+.extern tux64_boot_stage1_boot_header
+
    .section .status
 tux64_boot_stage0_status:
    # This is a chunk of memory placed at the end of RSP DMEM to show the current
@@ -180,11 +181,6 @@ tux64_boot_stage0_status:
    # text, where 'c' is the current boot stage code.
    .skip TUX64_BOOT_STAGE0_STATUS_BYTES
 #tux64_boot_stage0_status
-
-   .section .boot_header
-tux64_boot_stage0_boot_header:
-   .skip TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
-#tux64_boot_stage0_boot_header
 
    .section .text
 tux64_boot_stage0_halt:
@@ -216,7 +212,7 @@ tux64_boot_stage0_status_code_write:
    ori   $t1,$t1,TUX64_BOOT_STAGE0_STATUS_HWORD3
    or    $t1,$t1,$t0
    jr    $ra
-   sw    $t1,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x04($gp)
+   sw    $t1,%lo(tux64_boot_stage0_status)+0x04($gp)
 #tux64_boot_stage0_status_code_write
 
    .section .text
@@ -265,7 +261,7 @@ tux64_boot_stage0_start:
    ori   $t2,$t2,TUX64_BOOT_STAGE0_STATUS_HWORD1
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
    jal   tux64_boot_stage0_status_code_write
-   sw    $t2,TUX64_BOOT_STAGE0_STATUS_ADDRESS_LO+0x00($gp)
+   sw    $t2,%lo(tux64_boot_stage0_status)+0x00($gp)
 
    # begin initializing COP0 registers
    jal   tux64_boot_stage0_status_code_write
@@ -373,7 +369,7 @@ tux64_boot_stage0_start:
    # initiate the transfer in the background, we don't need to invalidate cache
    # as we're initializing it below anyways.  also note we don't need to wait on
    # any previous PI DMA operations since we halted them above
-   addiu $t3,$zero,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO
+   addiu $t3,$zero,%lo(tux64_boot_stage1_boot_header)
    addiu $t4,$zero,(TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES - 1)
    ori   $t5,$s1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
    sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($s0)
@@ -422,25 +418,25 @@ tux64_boot_stage0_start:
 
    # verify the boot header magic is present
    lui   $t0,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI # branch delay slot
-   lw    $t1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($s2)
+   lw    $t1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($s2)
    ori   $t0,$t0,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO
    bne   $t0,$t1,tux64_boot_stage0_halt
    
    # calculate the header's checksum and verify it, this also gets the boot
    # header into cache so that rambus goes vroom vroom, also the next
    # instruction executes in the above branch delay slot
-   lw    $t2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s2)
-   addiu $t0,$s2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
+   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s2)
+   addiu $t0,$s2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
    jal   tux64_boot_stage0_checksum_calculate_and_verify
-   addiu $t1,$s2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
+   addiu $t1,$s2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
 
    # begin loading the stage-1 binary into memory
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
 
    # read the stage-1 required memory and length
-   lw    $k0,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY_WORDS($s2)
-   lw    $k1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($s2)
+   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY_WORDS($s2)
+   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($s2)
 
    # check if we have enough memory to load the stage-1 binary, done in terms of
    # words to avoid potential overflow
@@ -469,7 +465,7 @@ tux64_boot_stage0_start:
    subu  $a1,$a0,$k0
 
    # load the boot flags and stage-1 checksum, reserving $fp
-   lw    $fp,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($s0)
+   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($s0)
 
    # as a reminder, here are the current registers we care about:
    # $a0       - total memory
@@ -502,7 +498,7 @@ tux64_boot_stage0_start:
    #tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum
 
    addu  $t1,$t0,$k1 # branch delay slot
-   lw    $t2,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($s2)
+   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($s2)
    jal   tux64_boot_stage0_checksum_calculate_and_verify
 
    tux64_boot_stage0_start.skip_checksum_stage1:

@@ -17,7 +17,6 @@ SECTIONS
 {
    .rdram.boot_header (TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS) : {
       tux64_boot_stage1_boot_header = .;
-      *(.boot_header);
 
       /* force the position to be correct if its not already. we align to a */
       /* 16-byte boundary so we can use PI DMA into RDRAM, as well as ensure */
