@@ -157,18 +157,20 @@
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD2,0x4530 /* E0 */
 .equ TUX64_BOOT_STAGE0_STATUS_HWORD3,0x3a00 /* :(null) */
 
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                         'A'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,               'B'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_HARDWARE_INFORMATION,   'C'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,              'D'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,           'E'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,              'F'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE,          'G'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,             'H'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,                   'I'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  'J'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,            'K'
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  'L'
+# we store the upper and lower byte of the status code together to save on an
+# 'or' instruction for free in tux64_boot_stage0_status_code_write().
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                         (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'A')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,               (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'B')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_HARDWARE_INFORMATION,   (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'C')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,              (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'D')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,           (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'E')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,              (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'F')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE,          (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'G')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,             (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'H')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,                   (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'I')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'J')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,            (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'K')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'L')
 
 # defined in stage1/boot-header.ld, included in stage0/stage0.ld
 .extern tux64_boot_stage1_boot_header
@@ -208,8 +210,9 @@ tux64_boot_stage0_halt:
 
    .section .text
 tux64_boot_stage0_status_code_write:
+   # $t0 contains HWORD3 or'd with the status code already, so we only need to
+   # load the upper 2 bytes.
    lui   $t1,TUX64_BOOT_STAGE0_STATUS_HWORD2
-   ori   $t1,$t1,TUX64_BOOT_STAGE0_STATUS_HWORD3
    or    $t1,$t1,$t0
    jr    $ra
    sw    $t1,%lo(tux64_boot_stage0_status)+0x04($gp)
