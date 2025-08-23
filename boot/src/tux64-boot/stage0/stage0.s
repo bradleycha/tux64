@@ -56,7 +56,7 @@
 # 
 # $t0-$t3:           arguments, volatile
 # $t4-$t7, $at:      volatile
-# $v0-$v1:           return addresses, volatile, unused here
+# $v0-$v1:           return addresses, volatile
 # everything else:   non-volatile
 
 .set noreorder
@@ -90,7 +90,10 @@
 .equ TUX64_BOOT_STAGE0_ADDRESS_MI_HI,0xa430
 .equ TUX64_BOOT_STAGE0_ADDRESS_MI_LO,0x0000
 
+.equ TUX64_BOOT_STAGE0_ADDRESS_MI_MODE_LO,TUX64_BOOT_STAGE0_ADDRESS_MI_LO+0x0000
 .equ TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO,TUX64_BOOT_STAGE0_ADDRESS_MI_LO+0x0004
+
+.equ TUX64_BOOT_STAGE0_MI_MODE_REPEAT_16,0x010f
 
 .equ TUX64_BOOT_STAGE0_ADDRESS_PI_HI,0xa460
 .equ TUX64_BOOT_STAGE0_ADDRESS_PI_LO,0x0000
@@ -107,7 +110,14 @@
 .equ TUX64_BOOT_STAGE0_ADDRESS_RI_HI,0xa470
 .equ TUX64_BOOT_STAGE0_ADDRESS_RI_LO,0x0000
 
+.equ TUX64_BOOT_STAGE0_ADDRESS_RI_MODE_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x0000
+.equ TUX64_BOOT_STAGE0_ADDRESS_RI_CONFIG_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x0004
+.equ TUX64_BOOT_STAGE0_ADDRESS_RI_CURRENT_LOAD_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x0008
 .equ TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x000c
+
+.equ TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION,0x0040
+.equ TUX64_BOOT_STAGE0_RI_RX_TX_TIMINGS,0x0014
+.equ TUX64_BOOT_STAGE0_RI_MODE_STANDARD,0x000e
 
 .equ TUX64_BOOT_STAGE0_ADDRESS_CARTRIDGE_ROM_HI,0xb000
 .equ TUX64_BOOT_STAGE0_ADDRESS_CARTRIDGE_ROM_LO,0x0000
@@ -117,6 +127,13 @@
 
 .equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI,0x0202
 .equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO,0xb0b0
+
+.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_HI,0xa3f8
+.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_LO,0x0000
+
+.equ TUX64_BOOT_STAGE0_RDRAM_REGISTER_DELAY_LO,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_LO+0x0008
+
+.equ TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING,0x18082838
 
 .equ TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT,0x0008
 
@@ -245,6 +262,19 @@ tux64_boot_stage0_checksum_calculate_and_verify:
    nop
 #tux64_boot_stage0_checksum_calculate_and_verify
 
+   .section .text
+tux64_boot_stage0_rdram_wait:
+   addiu $t0,$zero,0x0100
+   tux64_boot_stage0_rdram_wait.loop:
+      addiu $t0,$t0,-1
+      bne   $t0,$zero,tux64_boot_stage0_rdram_wait.loop
+      nop
+   #tux64_boot_stage0_rdram_wait.loop
+
+   jr    $ra
+   nop
+#tux64_boot_stage0_rdram_wait
+
    .section .start
    .global tux64_boot_stage0_start
 tux64_boot_stage0_start:
@@ -282,33 +312,80 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_HARDWARE_INFORMATION
 
-   # detect if we're on ique or not, reserving $a2 for the boolean if we're on
-   # ique or not.  we then skip RDRAM initialization if we're on ique, as
-   # there's no RDRAM to initialize.
-   lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_MI_HI
-   lui   $s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI
-   lw    $s2,TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO($s0)
-   ori   $s1,$s1,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO
-   xor   $a2,$s1,$s2
-   beq   $s1,$s2,tux64_boot_stage0_start.skip_rdram_initialization
+   # reserve $fp for the MI base address until the end of RDRAM initialization
+   lui   $fp,TUX64_BOOT_STAGE0_ADDRESS_MI_HI
+
+   # detect the hardware revision, which is used in RDRAM initialization and to
+   # detect ique support.  we then reserve $s0 for the hardware revision until
+   # we detect HW1/HW2 RDRAM and $a2 for the boolean if we're on ique or not.
+   # we then skip RDRAM initialization if we're on ique, as there's no RDRAM to
+   # initialize.
+   lui   $t0,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI
+   lw    $t1,TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO($fp)
+   ori   $t0,$t0,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO
+   xor   $a2,$t0,$t1
+   andi  $s0,$t2,0x00ff
+   beq   $t0,$t1,tux64_boot_stage0_start.skip_rdram_initialization
    sltiu $a2,$a2,1 # branch delay slot
 
    # begin initializing RDRAM
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
 
-   # reserve $t0 for the RI base address until the end of RDRAM initialization
-   lui   $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_HI
+   # reserve $s1 for the RI base address until the end of RDRAM initialization
+   lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_RI_HI
 
    # check if RDRAM has already been initialized
-   lw    $t1,TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO($t0)
-   andi  $t1,$t1,0x00ff # mask out undefined bits
-   bne   $t1,$zero,tux64_boot_stage0_start.skip_rdram_initialization
+   lw    $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO($s1)
+   andi  $t0,$t0,0x00ff # mask out undefined bits
+   bne   $t0,$zero,tux64_boot_stage0_start.skip_rdram_initialization
 
-   # TODO: implement actual initialization, it seems Ares doesn't emulate
-   # RDRAM properly as its initialized for us, so for now we can skip this, but
-   # to boot on real hardware we're going to have to revisit this.
-   nop
+   # i'll admit, the RDRAM code below is mostly referenced from libdragon, as
+   # this shit is too complex to free-style.
+
+   # perform current calibration
+   addiu $t1,$zero,TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION # branch delay slot
+   jal   tux64_boot_stage0_rdram_wait
+   sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_RI_CONFIG_LO($s1) # branch delay slot
+   sw    $zero,TUX64_BOOT_STAGE0_ADDRESS_RI_CURRENT_LOAD_LO($s1)
+
+   # configure rx/tx signal timings
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_RI_RX_TX_TIMINGS
+   sw    $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO($s1)
+
+   # reset all the chips
+   jal   tux64_boot_stage0_rdram_wait
+   sw    $zero,TUX64_BOOT_STAGE0_ADDRESS_RI_MODE_LO($s1) # RI_MODE = reset, branch delay slot
+   addiu $t0,$zero,TUX64_BOOT_STAGE0_RI_MODE_STANDARD
+   jal   tux64_boot_stage0_rdram_wait
+   sw    $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_MODE_LO($s1) # branch delay slot
+
+   # reserve $s2 for the spacing between RDRAM registers.  HW1 RDRAM, found on
+   # early development boards, is spaced out 0x200 bytes.  Everything else is
+   # spaced out 0x400 bytes.  also frees $s0.
+   addiu $t0,$zero,1
+   beq   $t0,$s0,tux64_boot_stage0_start.rdram_hw1
+   addiu $s2,$zero,0x200 # branch delay slot
+   addiu $s2,$s2,0x200
+   tux64_boot_stage0_start.rdram_hw1:
+
+   # initialize Delay register.  see libdragon/boot/rdram.c:142 for more
+   # information.  also loads the RDRAM broadcast registers base address into
+   # $t2.
+   lui   $t0,%hi(TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING)
+   addiu $t1,$zero,TUX64_BOOT_STAGE0_MI_MODE_REPEAT_16
+   lui   $t2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_HI
+   ori   $t0,$t0,%lo(TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING)
+   sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_MI_MODE_LO($fp)
+   sw    $t0,TUX64_BOOT_STAGE0_RDRAM_REGISTER_DELAY_LO($t2)
+
+   # TODO initialize the device IDs for every chip
+
+
+   # TODO: implement per-chip initialization loop
+
+
+   # TODO: configure RI refresh rate
    b     tux64_boot_stage0_halt
    nop
 
