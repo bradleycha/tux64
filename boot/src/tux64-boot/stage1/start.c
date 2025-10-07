@@ -9,20 +9,39 @@
 #include "tux64-boot/stage1/stage1.h"
 #include "tux64-boot/ipl2.h"
 
+/* we do this so we can read parameters from both IPL2 and stage-0 without */
+/* having to either move registers around or use a custom calling */
+/* convention.  we also define these globally so that the compiler doesn't */
+/* needlessly store non-volatiles on the stack.  for example, if these were */
+/* defined locally, GCC would generate the following: */
+/*                   */
+/* addiu $sp,$sp,40  */
+/* sd    $s3,0($sp)  */
+/* sd    $s4,8($sp)  */
+/* sd    $s5,16($sp) */
+/* sd    $s6,24($sp) */
+/* sd    $s7,32($sp) */
+/*        ...        */
+/*                   */
+/* ...but defined globally, we eliminate this crap.  however, GCC isn't very */
+/* happy about this, so we need to temporarily gag GCC. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+register Tux64UInt32 rom_type          __asm__("$s3");
+register Tux64UInt32 video_standard    __asm__("$s4");
+register Tux64UInt32 reset_type        __asm__("$s5");
+register Tux64UInt8  rom_cic_seed      __asm__("$s6");
+register Tux64UInt8  pif_rom_version   __asm__("$s7");
+#pragma GCC diagnostic pop
+
 void
 tux64_boot_stage1_start(void)
 __attribute__((noreturn, section(".start"), externally_visible));
 
 void
 tux64_boot_stage1_start(void) {
-   /* we do this so we can read parameters from both IPL2 and stage-0 without */
-   /* having to either move registers around or use a custom calling */
-   /* convention. */
-   register Tux64UInt32 rom_type          __asm__("$s3");
-   register Tux64UInt32 video_standard    __asm__("$s4");
-   register Tux64UInt32 reset_type        __asm__("$s5");
-   register Tux64UInt8  rom_cic_seed      __asm__("$s6");
-   register Tux64UInt8  pif_rom_version   __asm__("$s7");
+   /* the rest of our arguments are defined locally since they are volatile, */
+   /* and thus won't generate spurious pushes. */
    register Tux64UInt32 memory_total      __asm__("$a0");
    register Tux64UInt32 memory_available  __asm__("$a1");
    register Tux64UInt32 running_on_ique   __asm__("$a2");
