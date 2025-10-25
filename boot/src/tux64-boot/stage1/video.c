@@ -126,11 +126,15 @@ static void
 tux64_boot_stage1_video_set_vi_framebuffer(
    Tux64UInt8 index
 ) {
-   const void * address;
+   const void * address_virtual;
+   const void * address_physical;
 
-   address = tux64_boot_stage1_video_framebuffer_get(index);
+   /* VI uses the physical address into RDRAM, not the virtual address */
+   /* used by the SysAD bus, which is why we do this. */
+   address_virtual   = tux64_boot_stage1_video_framebuffer_get(index);
+   address_physical  = tux64_platform_mips_n64_memory_map_direct_uncached_to_physical(address_virtual);
 
-   tux64_platform_mips_n64_mmio_registers_vi.origin = (Tux64UInt32)address;
+   tux64_platform_mips_n64_mmio_registers_vi.origin = (Tux64UInt32)(Tux64UIntPtr)address_physical;
 
    return;
 }
