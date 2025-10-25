@@ -1,0 +1,124 @@
+## Introduction
+
+Welcome to the Tux64 development guide!  This will help those looking to do their own work on Tux64, whether you're hacking on the kernel for fun or are looking to contribute.
+
+## Changes to ```buildconf.sh```
+
+It's recommended to make the following changes to ```buildconf.sh``` to aid in debugging:
+
+| Name | Value |
+|------|-------|
+| TUX64_CFLAGS_HOST | -pipe -march=native -O0 -g -fsanitize=undefined |
+| TUX64_LDFLAGS_HOST | -g |
+| TUX64_CFLAGS_N64_COMMON |  -pipe -march=vr4300 -mfix4300 -mabi=o64 -O0 -g |
+| TUX64_LDFLAGS_N64_COMMON | -g |
+
+You may either overwrite ```buildconf.sh```, or save the modified version to a new file, such as ```buildconf-dev.sh``` so you may use the development ```buildconf-dev.sh``` only for Tux64 code.  This may be desirable for compiling external software and libraries with optimized compiler flags, while still retaining enhanced debug support for internal code.
+
+## Enabling dependency tracking
+
+If you look closely, the ```configure``` commands from the Installation Guide include ```--disable-dependency-tracking```.  This is done to skip all dependency tracking for sources files in order to speed up compilation.  Dependency tracking is used to detect if a file's dependencies are modified, and if so, recompile that file.  For example, if a C header file is modified, all C source files which include that header will be recompiled.  For end-users, this functionality serves no purpose but to slow down compilation.  However, for developers, this is a must if you don't want to constantly run ```make clean``` before each recompile.
+
+To enable dependency tracking, simply replace all instances of ```---disable-dependency-tracking``` with ```--enable-dependency-tracking```, or omit both as the default is to enable dependency tracking.
+
+## Enabling ```tux64-lib``` log origin
+
+```tux64-lib```'s logging functions include support to include the source file and line number each log message originates from.  This can be useful for development to quickly track down specific log messages without needing a debugger attached.
+
+To do this, reconfigure ```tux64-lib``` with ```---enable-log-origin```.
+
+## Enabling boot status codes
+
+`tux64-boot` can be optionally configured with `--enable-status`.  This will write status code information to a fixed memory address at the end of RSP DMEM, specifically 8 bytes to `0xa4000ff0`.  The bytes are ASCII characters which spell out `STAGEn:p`, where "n" is the bootloader stage and "p" is the location last reached within the relevant bootloader stage.
+
+These may be useful for extremely low-level debugging, such as debugging very early boot failures on real hardware before the remote debugger is available by probing the SysAD bus with a logic analyzer.  Otherwise, these serve no purpose and can be safely left disabled.
+
+## Bootloader and kernel debugging in an emulator
+
+It's recommended to use Ares with the N64 core for development, as it's an accurate emulator with support for development features, such as viewing memory, monitoring various I/O components, and most importantly - remote debugging via GDB.  It's open-source and cross-platform, and there's no wonderful features like adding a donation pop-up which blocks using the emulator for 30 seconds.  We will show how to attach GDB and debug as early as the first instruction of the boot process, complete with full symbolic debugging.
+
+### Obtaining sources
+
+The process of obtaining sources is the same as the Installation Guide.
+
+| Package | Version | Notes |
+|---------|---------|-------|
+| [gdb](https://www.sourceware.org/gdb/) | 16.3 | |
+| [ares](https://ares-emu.net/) | v144 | |
+
+### Building GDB
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gdb
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gdb
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/gdb-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --target=${TUX64_TARGET_N64_KERNEL} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      --program-prefix=${TUX64_TARGET_N64_KERNEL}- \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --enable-host-pie \
+      --enable-lto
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+### Building Ares
+
+Building Ares is different to the rest of the guide because it uses CMake as its build system instead of GNU Autotools.  Make sure you enable the N64 core.  The final binary will be under ```(build directory)/desktop-ui/ares```.
+
+### Configuring Ares for debugging
+
+Before attempting to attach GDB, you should do the following:
+   * Disable the recompiler and use the interpreter under Settings > Options > Force Interpreter
+   * Enable GDB server under Settings > Debug > Enabled
+   * Enable GDB IPv4 support under Settings > Debug > Use IPv4
+   * Set on-focus-loss behavior to "Block input" under Settings > Drivers > When focus is lost
+   * Launch the GDB server on boot under Settings > Boot Options > Launch Debugger
+
+### Attaching GDB
+
+Launch GDB with the following command:
+
+```
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}-gdb
+```
+
+Connect to Ares with the following GDB command:
+
+```
+target remote localhost:(Ares GDB Server Port, default 9123)
+```
+
+This will attach to Ares's GDB server, debugging the emulated N64.  To debug the bootloader, type the following GDB command, where 'N' is the bootloader stage you wish to debug:
+
+```
+symbol-file ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}/share/tux64-boot/stageN.sym
+```
+
+Note that shell environment variable substitution doesn't work here, so these will need to be resolved manually.  You should now be able to set breakpoints, list functions, disassemble, and all the usual GDB fanciness.
+
+Alternatively, you can load the symbol file when launching GDB:
+
+```
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}-gdb \
+   -s ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}/share/tux64-boot/stageN.sym
+```
+
+To start the emulator, type ```continue```, or ```c``` for short in GDB, then untick Tools > Pause Emulation.
+
+## Recalculating the ```tux64-boot``` stage-0 CIC data
+
+If you are an end-user, you should not have to do this.  However, if you modify a single byte of the stage-0 binary, it will cause the checksum calculated by the PIF to be incorrect, thus the console won't boot.  You must recalculate the CIC data in order to modify the stage-0 bootloader.
+
+We will use [ipl3hasher-new](https://github.com/Polprzewodnikowy/ipl3hasher-new) to calculate the CIC data.  To calculate, create a ROM image using ```tux64-mkrom``` containing your modified stage-0 bootloader.  Launch ```ipl3hasher-new``` with the path to the ROM image as the only argument.  It will run until it finds data which creates a checksum collision.  The "Y" value is the first word in the CIC data, and the "X" value is the second word in the CIC data.  Copy and paste the output X and Y values into ```stage0.s```, recompile ```tux64-boot```, and rebuild the ROM image.  The ROM image should now pass the checksum test.
