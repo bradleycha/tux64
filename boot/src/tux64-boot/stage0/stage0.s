@@ -545,7 +545,7 @@ tux64_boot_stage0_start:
    subu  $a1,$a0,$k0
 
    # load the boot flags and stage-1 checksum, reserving $fp
-   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($s0)
+   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($s2)
 
    # as a reminder, here are the current registers we care about:
    # $a0       - total memory
