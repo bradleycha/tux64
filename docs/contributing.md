@@ -242,7 +242,34 @@ ignoring you, I'm probably just busy or burnt out on life.
 
 ## Issues
 
-TODO
+Issues follow a similar principle to pull requests, but instead of explaining
+your code, you should explain your issue if it's not obvious from the title.
+You should also prefix the title of your issue with the relevant subsystem.
+You should also provide enough information about your setup so that others can
+reasonably recreate your issue (so that it can be debugged!).  If you're using
+a modified `buildconf.sh` or `configure` command, that should be included.
+
+Here is an example of a **bad** issue that will be deleted:
+
+```
+WHY DOENS'T THIS WORK
+
+    Hye i tried running this on my laptop using an emulator and it doesnt' work!
+    
+    hEre is a link to a screenshot: (dead link to some random image hosting website)
+```
+
+Here is an example of a **good** issue that will get your problem solved:
+
+```
+tux64-boot: boot failure on PAL consoles
+
+    When running tux64-boot-0.1.0, on a PAL console with a black screen.
+    Monitoring the SysAD bus and status codes give status code STAGE0:4
+
+    My buildconf.sh is the default, and I'm also using default configure
+    commands.
+```
 
 ## AI Generated Code
 
