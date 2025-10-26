@@ -203,7 +203,42 @@ that blatantly sticks out from everything around it.
 
 ## Pull Requests
 
-TODO
+When submitting code, it is expected you are able to explain every line of code
+you submit and _why_ you want your code accepted.  If it's not either obvious
+from context what your code does or you provide no information, your pull
+request will likely be rejected.
+
+It is also expected to have a clean commit history.  Commits should be formatted
+so that each commit does "one thing" and only does what it says it does.  You
+should also make sure each commit message includes the subsystem it affects.
+
+For example, an example of a **bad** commit history looks like this:
+
+```
+fix bug
+fix bad formtating
+(no commit message)
+aaaaaaaaa
+fix regression and add new helper function
+```
+
+An example of a **good** commit history looks like this:
+
+```
+tux64-boot: fix incorrect virtual to physical address translation in tux64_boot_stage1_video_swap_buffers()
+tux64-lib: fix typo in field for Tux64ArgumentsParseContext
+tux64-lib: create new API for parsing arguments from a single-line string
+tux64-boot: fix regression in stage-0 after incorrectly reallocating registers
+```
+
+Be prepared for changes to be requested and for you to explain yourself.  This
+doesn't mean you're a bad programmer and should bugger off necessarily, as you
+could get your code submitted after a few simple changes, but you shouldn't
+expect your code to always be graciously accepted immediately.  As of writing
+(October 2025), I'm in my Senior year of a CS and Math major and I'm also taking
+graduate CS classes, and I also have other projects I work on.  If I take some
+time to review your pull request, please be patient.  I'm not deliberately
+ignoring you, I'm probably just busy or burnt out on life.
 
 ## Issues
 
