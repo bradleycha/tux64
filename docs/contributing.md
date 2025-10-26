@@ -276,8 +276,28 @@ tux64-boot: boot failure on PAL consoles
 
 ## AI Generated Code
 
-TODO
+If you choose to use AI to generate code, it should be indistinguishable from
+human-written code.  It is expected to adhere to the above code formatting
+guidelines, and you are expected to have reviewed and verified the generated
+code.  If you choose to ignore this and AI generate random code and submit it
+without reading what the AI did, please refer to the section on AI generated
+slop down below.
+
+It's worth noting that there's a bit of contention on the legality of AI
+generated code with respect to the GPLv3 license.  Personally, as long as you
+are using AI as stated above, telling the difference between human-written
+and AI written code should be impossible.  Thus, I don't see a problem with
+accepting such AI generated code with respect to the GPLv3.
 
 ## AI Generated Slop
 
-TODO
+If you're here just to generate random crap using some bot and get your name
+on this project, go away.  We don't want you here.  Nobody wants you.  You do
+nothing but waste everyone's time having to review the garbage you try to shovel
+down our throats just to get your name on a random GitHub project.  If you do
+this, you'll probably be flat-out banned from contributing, or let off with a
+warning and rejection if I'm in a good mood.  Other projects already get hit
+with what is essentially a DDoS attack due to people like you, and I'm not
+interested in falling victim to this crap as well.
+
+Go waste another project's time and never come back.
