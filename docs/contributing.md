@@ -208,11 +208,14 @@ you submit and _why_ you want your code accepted.  If it's not either obvious
 from context what your code does or you provide no information, your pull
 request will likely be rejected.
 
+All pull requests should merge into the `master` branch.  Never submit pull
+requests targetting a final release branch.
+
 It is also expected to have a clean commit history.  Commits should be formatted
 so that each commit does "one thing" and only does what it says it does.  You
 should also make sure each commit message includes the subsystem it affects.
 
-For example, an example of a **bad** commit history looks like this:
+An example of a **bad** commit history looks like this:
 
 ```
 fix bug
