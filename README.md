@@ -36,7 +36,13 @@ documentation and custom software to fix these issues, while building upon the
 original with an improved bootloader, up-to-date kernel patches, and more.
 
 ## Getting Started
-To get started, read the [Installation Guide](https://github.com/bradleycha/tux64/wiki/Installation-Guide).
+To get started, read the [Installation Guide](docs/installation.md).
+
+## Development and Contribution
+If you're looking to get involved with development, there is a
+[Development Guide](docs/development.md) available for learning about the
+technical side of development, and a [Contribution Guide](docs/contributing.md)
+for getting your work submitted and merged successfully.
 
 ## Credits
 Special thanks to the following projects.  Without these, this project would be
