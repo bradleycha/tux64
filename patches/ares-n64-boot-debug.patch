@@ -1,0 +1,172 @@
+diff --git a/ares/n64/accuracy.hpp b/ares/n64/accuracy.hpp
+index 4bad233..7c73e2f 100644
+--- a/ares/n64/accuracy.hpp
++++ b/ares/n64/accuracy.hpp
+@@ -19,14 +19,8 @@ struct Accuracy {
+     static constexpr bool SIMD = !SISD;
+   };
+ 
+-  struct RDRAM {
+-    static constexpr bool Broadcasting = 0;
+-  };
+-
+   struct PIF {
+     // Emulate a region-locked console
+     static constexpr bool RegionLock = false;
+-    // Emulate the PIF's checksum security check
+-    static constexpr bool IPL2Checksum = true;
+   };
+ };
+diff --git a/ares/n64/pif/hle.cpp b/ares/n64/pif/hle.cpp
+index 6420029..dc34f8c 100644
+--- a/ares/n64/pif/hle.cpp
++++ b/ares/n64/pif/hle.cpp
+@@ -340,7 +340,7 @@ auto PIF::mainHLE() -> void {
+           " != cpu:", 
+           hex(intram.cpuChecksum[0], 2L), hex(intram.cpuChecksum[1], 2L), hex(intram.cpuChecksum[2], 2L),
+           hex(intram.cpuChecksum[3], 2L), hex(intram.cpuChecksum[4], 2L), hex(intram.cpuChecksum[5], 2L));
+-        if constexpr(Accuracy::PIF::IPL2Checksum) {
++        if (system.enforceIpl2Checksum) {
+           state = Error;
+           return;
+         }
+diff --git a/ares/n64/ri/io.cpp b/ares/n64/ri/io.cpp
+index f6c37c8..693cfce 100644
+--- a/ares/n64/ri/io.cpp
++++ b/ares/n64/ri/io.cpp
+@@ -20,7 +20,7 @@ auto RI::readWord(u32 address, Thread& thread) -> u32 {
+   if(address == 3) {
+     //RI_SELECT
+     data = io.select;
+-    if constexpr(!Accuracy::RDRAM::Broadcasting) {
++    if (system.initializeRdram) {
+       //this register is read by IPL3 to check if RDRAM initialization should be
+       //skipped. if we are forcing it to be skipped, we should also consume
+       //enough cycles to not inadvertently speed up the boot process.
+diff --git a/ares/n64/ri/ri.cpp b/ares/n64/ri/ri.cpp
+index 5267965..7d3582e 100644
+--- a/ares/n64/ri/ri.cpp
++++ b/ares/n64/ri/ri.cpp
+@@ -19,7 +19,7 @@ auto RI::unload() -> void {
+ 
+ auto RI::power(bool reset) -> void {
+   io = {};
+-  if constexpr(!Accuracy::RDRAM::Broadcasting) {
++  if (system.initializeRdram) {
+     //simulate PIF ROM RDRAM power-on self test
+     io.mode    = 0x0e;
+     io.config  = 0x40;
+diff --git a/ares/n64/system/system.cpp b/ares/n64/system/system.cpp
+index def30d1..8350c59 100644
+--- a/ares/n64/system/system.cpp
++++ b/ares/n64/system/system.cpp
+@@ -42,6 +42,8 @@ auto option(string name, string value) -> bool {
+     }
+   }
+   if(Model::Nintendo64() && name == "Expansion Pak") system.expansionPak = value.boolean();
++  if(Model::Nintendo64() && name == "Pre-Initialize RDRAM") system.initializeRdram = value.boolean();
++  if(Model::Nintendo64() && name == "Enforce IPL2 Checksum") system.enforceIpl2Checksum = value.boolean();
+   if(Model::Nintendo64() && name == "Controller Pak Banks") {
+     if (value == "32KiB (Default)") {
+       system.configuredControllerPakBankCount = 1;
+diff --git a/ares/n64/system/system.hpp b/ares/n64/system/system.hpp
+index 1f96f18..11996b0 100644
+--- a/ares/n64/system/system.hpp
++++ b/ares/n64/system/system.hpp
+@@ -3,6 +3,8 @@ struct System {
+   VFS::Pak pak;
+   bool homebrewMode = false;
+   bool expansionPak = true;
++  bool initializeRdram = true;
++  bool enforceIpl2Checksum = true;
+   u8 configuredControllerPakBankCount = 1;
+   u8 controllerPakBankCount = 1;
+ 
+diff --git a/desktop-ui/emulator/nintendo-64.cpp b/desktop-ui/emulator/nintendo-64.cpp
+index 01526dc..2afd226 100644
+--- a/desktop-ui/emulator/nintendo-64.cpp
++++ b/desktop-ui/emulator/nintendo-64.cpp
+@@ -116,6 +116,8 @@ auto Nintendo64::load() -> LoadResult {
+   ares::Nintendo64::option("Homebrew Mode", settings.general.homebrewMode);
+   ares::Nintendo64::option("Recompiler", !settings.general.forceInterpreter);
+   ares::Nintendo64::option("Expansion Pak", settings.nintendo64.expansionPak);
++  ares::Nintendo64::option("Pre-Initialize RDRAM", settings.nintendo64.initializeRdram);
++  ares::Nintendo64::option("Enforce IPL2 Checksum", settings.nintendo64.enforceIpl2Checksum);
+   ares::Nintendo64::option("Controller Pak Banks", settings.nintendo64.controllerPakBankString);
+ 
+   if(!ares::Nintendo64::load(root, {"[Nintendo] ", name, " (", region, ")"})) return otherError;
+diff --git a/desktop-ui/emulator/nintendo-64dd.cpp b/desktop-ui/emulator/nintendo-64dd.cpp
+index b9db18f..bb349fa 100644
+--- a/desktop-ui/emulator/nintendo-64dd.cpp
++++ b/desktop-ui/emulator/nintendo-64dd.cpp
+@@ -91,6 +91,8 @@ auto Nintendo64DD::load() -> LoadResult {
+   ares::Nintendo64::option("Homebrew Mode", settings.general.homebrewMode);
+   ares::Nintendo64::option("Recompiler", !settings.general.forceInterpreter);
+   ares::Nintendo64::option("Expansion Pak", settings.nintendo64.expansionPak);
++  ares::Nintendo64::option("Pre-Initialize RDRAM", settings.nintendo64.initializeRdram);
++  ares::Nintendo64::option("Enforce IPL2 Checksum", settings.nintendo64.enforceIpl2Checksum);
+   ares::Nintendo64::option("Controller Pak Banks", settings.nintendo64.controllerPakBankString);
+ 
+   if(!ares::Nintendo64::load(root, {"[Nintendo] Nintendo 64DD (", region, ")"})) return otherError;
+diff --git a/desktop-ui/settings/options.cpp b/desktop-ui/settings/options.cpp
+index b1969b6..e12699a 100644
+--- a/desktop-ui/settings/options.cpp
++++ b/desktop-ui/settings/options.cpp
+@@ -44,6 +44,18 @@ auto OptionSettings::construct() -> void {
+   nintendo64ExpansionPakLayout.setAlignment(1).setPadding(12_sx, 0);
+       nintendo64ExpansionPakHint.setText("Enable/Disable the 4MB Expansion Pak").setFont(Font().setSize(7.0)).setForegroundColor(SystemColor::Sublabel);
+ 
++  nintendo64InitializeRdramOption.setText("Pre-Initialize RDRAM").setChecked(settings.nintendo64.initializeRdram).onToggle([&] {
++    settings.nintendo64.initializeRdram = nintendo64InitializeRdramOption.checked();
++  });
++  nintendo64InitializeRdramLayout.setAlignment(1).setPadding(12_sx, 0);
++      nintendo64InitializeRdramHint.setText("Enable/Disable pre-initializing RDRAM before boot").setFont(Font().setSize(7.0)).setForegroundColor(SystemColor::Sublabel);
++
++  nintendo64EnforceIpl2ChecksumOption.setText("Enforce IPL2 Checksum").setChecked(settings.nintendo64.enforceIpl2Checksum).onToggle([&] {
++    settings.nintendo64.enforceIpl2Checksum = nintendo64EnforceIpl2ChecksumOption.checked();
++  });
++  nintendo64EnforceIpl2ChecksumLayout.setAlignment(1).setPadding(12_sx, 0);
++      nintendo64EnforceIpl2ChecksumHint.setText("Enable/Disable halting the CPU when IPL2 checksum verification of IPL3 fails").setFont(Font().setSize(7.0)).setForegroundColor(SystemColor::Sublabel);
++
+   for (auto& opt : array<string[4]>{"32KiB (Default)", "128KiB (Datel 1Meg)", "512KiB (Datel 4Meg)", "1984KiB (Maximum)"}) {
+     ComboButtonItem item{&nintendo64ControllerPakBankOption};
+     item.setText(opt);
+diff --git a/desktop-ui/settings/settings.cpp b/desktop-ui/settings/settings.cpp
+index ac4195b..71a05ce 100644
+--- a/desktop-ui/settings/settings.cpp
++++ b/desktop-ui/settings/settings.cpp
+@@ -123,6 +123,8 @@ auto Settings::process(bool load) -> void {
+   bind(boolean, "DebugServer/UseIPv4", debugServer.useIPv4);
+ 
+   bind(boolean, "Nintendo64/ExpansionPak", nintendo64.expansionPak);
++  bind(boolean, "Nintendo64/InitializeRdram", nintendo64.initializeRdram);
++  bind(boolean, "Nintendo64/EnforceIpl2Checksum", nintendo64.enforceIpl2Checksum);
+   bind(string, "Nintendo64/ControllerPakBankString", nintendo64.controllerPakBankString);
+ 
+   bind(boolean, "GameBoyAdvance/Player", gameBoyAdvance.player);
+diff --git a/desktop-ui/settings/settings.hpp b/desktop-ui/settings/settings.hpp
+index c8335d5..4dc7fce 100644
+--- a/desktop-ui/settings/settings.hpp
++++ b/desktop-ui/settings/settings.hpp
+@@ -103,6 +103,8 @@ struct Settings : Markup::Node {
+ 
+   struct Nintendo64 {
+     bool expansionPak = true;
++    bool initializeRdram = true;
++    bool enforceIpl2Checksum = true;
+     u8 controllerPakBankCount = 1;
+     string controllerPakBankString = "32KiB (Default)";
+   } nintendo64;
+@@ -268,6 +270,12 @@ struct OptionSettings : VerticalLayout {
+     HorizontalLayout nintendo64ExpansionPakLayout{this, Size{~0, 0}, 5};
+       CheckLabel nintendo64ExpansionPakOption{&nintendo64ExpansionPakLayout, Size{0, 0}, 5};
+       Label nintendo64ExpansionPakHint{&nintendo64ExpansionPakLayout, Size{0, 0}};
++    HorizontalLayout nintendo64InitializeRdramLayout{this, Size{~0, 0}, 5};
++      CheckLabel nintendo64InitializeRdramOption{&nintendo64InitializeRdramLayout, Size{0, 0}, 5};
++      Label nintendo64InitializeRdramHint{&nintendo64InitializeRdramLayout, Size{0, 0}};
++    HorizontalLayout nintendo64EnforceIpl2ChecksumLayout{this, Size{~0, 0}, 5};
++      CheckLabel nintendo64EnforceIpl2ChecksumOption{&nintendo64EnforceIpl2ChecksumLayout, Size{0, 0}, 5};
++      Label nintendo64EnforceIpl2ChecksumHint{&nintendo64EnforceIpl2ChecksumLayout, Size{0, 0}};
+     HorizontalLayout nintendo64ControllerPakBankLayout{this, Size{~0, 0}, 5};
+       Label nintendo64ControllerPakBankLabel{&nintendo64ControllerPakBankLayout, Size{0, 0}};
+       ComboButton nintendo64ControllerPakBankOption{&nintendo64ControllerPakBankLayout, Size{0, 0}};
