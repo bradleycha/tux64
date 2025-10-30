@@ -142,8 +142,10 @@ target remote localhost:(Ares GDB Server Port, default 9123)
 This will attach to Ares's GDB server, debugging the emulated N64.  To debug the bootloader, type the following GDB command, where 'N' is the bootloader stage you wish to debug:
 
 ```
-symbol-file ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}/share/tux64-boot/stageN.sym
+add-symbol-file ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}/share/tux64-boot/stageN.sym
 ```
+
+We can repeat the above command to load symbols from as many stages as we like.  This can be useful for debugging multiple bootloader stages at the same time.
 
 Note that shell environment variable substitution doesn't work here, so these will need to be resolved manually.  You should now be able to set breakpoints, list functions, disassemble, and all the usual GDB fanciness.
 
@@ -153,6 +155,8 @@ Alternatively, you can load the symbol file when launching GDB:
 ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}-gdb \
    -s ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}/share/tux64-boot/stageN.sym
 ```
+
+This has the advantage of being an easily copy-pasted command, but only one symbol file can be loaded at a time.  Adding additional symbol files will require the above `add-symbol-file` GDB command.
 
 To start the emulator, type ```continue```, or ```c``` for short in GDB, then untick Tools > Pause Emulation.
 
