@@ -44,7 +44,7 @@ The process of obtaining sources is the same as the Installation Guide.
 | Package | Version | Notes |
 |---------|---------|-------|
 | [gdb](https://www.sourceware.org/gdb/) | 16.3 | |
-| [ares](https://ares-emu.net/) | v144 | |
+| [ares](https://ares-emu.net/) | v146 | |
 
 ### Building GDB
 
@@ -75,7 +75,42 @@ make -j${TUX64_MAKEOPTS} install-strip
 
 ### Building Ares
 
-Building Ares is different to the rest of the guide because it uses CMake as its build system instead of GNU Autotools.  Make sure you enable the N64 core.  The final binary will be under ```(build directory)/desktop-ui/ares```.
+If you are looking to debug or develop the stage-0 bootloader, there is a source patch you can apply which adds options to aid in stage-0 development.  This can be applied with the following:
+
+```
+cd ${TUX64_BUILD_ROOT}/sources/ares-*
+git apply ${TUX64_BUILD_ROOT}/sources/tux64-*/patches/ares-n64-boot-debug.patch
+```
+
+If you aren't interested in stage-0 development, the above step may be skipped.
+
+Next, we build Ares with the following:
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/ares
+cd ${TUX64_BUILD_ROOT}/builds/ares
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   cmake \
+      -DCMAKE_INSTALL_PREFIX=${TUX64_BUILD_ROOT}/tools \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_FLAGS="${TUX64_CFLAGS_HOST}" \
+      -DCMAKE_CXX_FLAGS="${TUX64_CXXFLAGS_HOST}" \
+      -DARES_CORES=n64 \
+      -S ../../sources/ares-*
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
+You can now run Ares with the following command:
+
+```
+${TUX64_BUILD_ROOT}/tools/bin/ares
+```
 
 ### Configuring Ares for debugging
 
@@ -85,6 +120,10 @@ Before attempting to attach GDB, you should do the following:
    * Enable GDB IPv4 support under Settings > Debug > Use IPv4
    * Set on-focus-loss behavior to "Block input" under Settings > Drivers > When focus is lost
    * Launch the GDB server on boot under Settings > Boot Options > Launch Debugger
+
+Additionally, if you're doing stage-0 bootloader development and applied the above boot debugging patch, the following options might be interesting:
+   * Disable RDRAM pre-initialization under Settings > Options > Nintendo 64 Settings > Pre-Initialize RDRAM
+   * Disable IPL2 checksum enforcement under Settings > Options > Nintendo 64 Settings > Enforce IPL2 Checksum
 
 ### Attaching GDB
 
