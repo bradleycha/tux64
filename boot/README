@@ -50,7 +50,7 @@ power-on to kernel entry:
              extremely slow.  Once this finishes, the CPU jumps to RSP IMEM and
              executues the IPL2.
 
-   3: IPL2 - this initializes the PI cartridge timings to their slowest valies
+   3: IPL2 - this initializes the PI cartridge timings to their slowest values
              to allow reading the cartridge ROM header, which contains the
              fastest PI cartridge timings supported by the cartridge ROM.
 
