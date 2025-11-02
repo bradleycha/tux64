@@ -485,6 +485,9 @@ Create a file named ```${TUX64_BUILD_ROOT}/builds/tux64-rom-image/mkrom-config``
 --bootloader-stage1
 /share/tux64-boot/stage1.bin
 
+--bootloader-stage1-bss
+/share/tux64-boot/stage1.bin
+
 --bootloader-stage2
 /share/tux64-boot/stage2.bin
 
