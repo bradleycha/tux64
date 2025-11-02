@@ -119,10 +119,10 @@ Every package listed should be stored uncompressed inside of `sources/`, with th
 | Package | Version | Notes |
 |---------|---------|-------|
 | [tux64](https://github.com/bradleycha/tux64/) | master | Currently no stable release.  Use `git` to clone the latest version of the 'master' branch.  If cloning directly from GitHub, you must run ```autoreconf -i```  for each sub-project which contains a GNU Autoconf script (```configure.ac```) |
-| [binutils](https://www.gnu.org/software/binutils/) | 2.44 | |
-| [gcc](https://gcc.gnu.org/) | 15.1.0 | |
+| [binutils](https://www.gnu.org/software/binutils/) | 2.45 | |
+| [gcc](https://gcc.gnu.org/) | 15.2.0 | |
 | [musl](https://musl.libc.org/) | 1.2.5 | |
-| [linux](https://kernel.org/) | 6.12.35 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
+| [linux](https://kernel.org/) | 6.12.57 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 
 ## Chapter 3 - Building the Toolchains
 
