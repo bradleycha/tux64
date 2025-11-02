@@ -434,11 +434,11 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       LDFLAGS="${TUX64_LDFLAGS_N64_KERNEL}"
 )
 
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install
+make -j1
+make -j1 install
 ```
 
-Note that we have to configure with ```--enable-dependency-tracking```.  This is a workaround for an issue with the current version of ```tux64-boot``` where many strange issues pop up if you disable dependency tracking.
+Note that we have to configure with ```--enable-dependency-tracking```, as well as build with ```-j1```  This is a workaround for an issue with the current version of ```tux64-boot``` where many strange issues pop up if you disable dependency tracking or attempt a multithreaded build.
 
 ### Building tux64-mkrom
 
