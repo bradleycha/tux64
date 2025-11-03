@@ -148,11 +148,11 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_CFLAGS_HOST | Flags to pass to the host's C compiler. | -pipe -march=native -O2 -flto |
 | TUX64_CXXFLAGS_HOST | Flags to pass to the host's C++ compiler. | ${TUX64_CFLAGS_HOST} |
 | TUX64_ASFLAGS_HOST | Flags to pass to the host's assembler. | |
-| TUX64_LDFLAGS_HOST | Flags to pass to the host's linker. | -flto -Wl,--gc-sections -s |
-| TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -mabi=o64 -Oz -flto -fno-stack-protector -fomit-frame-pointer -ffunction-sections -fdata-sections |
+| TUX64_LDFLAGS_HOST | Flags to pass to the host's linker. | -flto |
+| TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -mabi=o64 -Oz -flto -fno-stack-protector |
 | TUX64_CXXFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C++ compilers. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_ASFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's assemblers. | -march=vr4300 -mtune=vr4300 |
-| TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -flto -Wl,--gc-sections -s |
+| TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -flto |
 | TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's bootloader and kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_CXXFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's bootloader and kernel C++ compiler. | ${TUX64_CXXFLAGS_N64_COMMON} |
 | TUX64_ASFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's bootloader and kernel assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
