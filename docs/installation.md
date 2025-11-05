@@ -424,7 +424,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}
    ../../sources/tux64-*/boot/configure \
-      --enable-dependency-tracking \
+      --disable-dependency-tracking \
       --host=${TUX64_TARGET_HOST} \
       --target=${TUX64_TARGET_N64_KERNEL} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL} \
@@ -434,11 +434,9 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       LDFLAGS="${TUX64_LDFLAGS_N64_KERNEL}"
 )
 
-make -j1
-make -j1 install
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
 ```
-
-Note that we have to configure with ```--enable-dependency-tracking```, as well as build with ```-j1```  This is a workaround for an issue with the current version of ```tux64-boot``` where many strange issues pop up if you disable dependency tracking or attempt a multithreaded build.
 
 ### Building tux64-mkrom
 
