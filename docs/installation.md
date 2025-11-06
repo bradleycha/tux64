@@ -386,7 +386,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install
+make -j${TUX64_MAKEOPTS} install-strip
 ```
 
 ### Building tux64-lib (bootloader)
@@ -412,7 +412,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-tux64-lib
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install
+make -j${TUX64_MAKEOPTS} install-strip
 ```
 
 ### Building tux64-boot
