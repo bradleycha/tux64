@@ -13,19 +13,19 @@ AC_CONFIG_SRCDIR([src/tux64-boot/tux64-boot.h])
 AC_CONFIG_AUX_DIR([configdir])
 AC_CONFIG_HEADERS([configdir/config-noprefix.h])
 
-AC_CANONICAL_TARGET
+AC_CANONICAL_HOST
 
-if [[ "$target_cpu" != "mips64" ]]; then
-   echo configure.ac: error: expected target cpu mips64, found $target_cpu
+if [[ "$host_cpu" != "mips64" ]]; then
+   echo configure.ac: error: expected host cpu mips64, found $host_cpu
    exit 1
 fi
-if [[ "$target_os" != "elf" ]]; then
-   echo configure.ac: error: expected target os elf, found $target_os
+if [[ "$host_os" != "elf" ]]; then
+   echo configure.ac: error: expected host os elf, found $host_os
    exit 1
 fi
 
-AC_CHECK_TARGET_TOOL([OBJCOPY], [objcopy])
-AC_CHECK_TARGET_TOOL([OBJDUMP], [objdump])
+AC_CHECK_TOOL([OBJCOPY], [objcopy])
+AC_CHECK_TOOL([OBJDUMP], [objdump])
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])
