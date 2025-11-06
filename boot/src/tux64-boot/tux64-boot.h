@@ -13,11 +13,11 @@
 #include "tux64-boot/config.h"
 
 #if !TUX64_CONFIG_PLATFORM_MIPS_N64
-#error "tux64-lib has TUX64_CONFIG_PLATFORM_MIPS_N64 disabled.  please rebuild tux64-lib with --enable-platform-n64."
+#error "tux64-lib has TUX64_CONFIG_PLATFORM_MIPS_N64 disabled.  please rebuild tux64-lib with --enable-platform-mips-n64."
 #endif /* !TUX64_CONFIG_PLATFORM_MIPS_N64 */
 
 #if !TUX64_CONFIG_PLATFORM_MIPS_VR4300
-#error "tux64-lib has TUX64_CONFIG_PLATFORM_MIPS_VR4300 disabled.  please rebuild tux64-lib with --enable-platform-vr4300."
+#error "tux64-lib has TUX64_CONFIG_PLATFORM_MIPS_VR4300 disabled.  please rebuild tux64-lib with --enable-platform-mips-vr4300."
 #endif /* !TUX64_CONFIG_PLATFORM_MIPS_VR4300 */
 
 /*----------------------------------------------------------------------------*/
