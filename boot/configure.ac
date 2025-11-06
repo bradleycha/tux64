@@ -15,12 +15,8 @@ AC_CONFIG_HEADERS([configdir/config-noprefix.h])
 
 AC_CANONICAL_HOST
 
-if [[ "$host_cpu" != "mips64" ]]; then
-   echo configure.ac: error: expected host cpu mips64, found $host_cpu
-   exit 1
-fi
-if [[ "$host_os" != "elf" ]]; then
-   echo configure.ac: error: expected host os elf, found $host_os
+if [[ "$host_cpu" != "mips64" ]] || [[ "$host_os" != "elf" ]]; then
+   echo configure.ac: error: expected host system type mips64-elf, found $host
    exit 1
 fi
 
