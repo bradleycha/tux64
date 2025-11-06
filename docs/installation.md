@@ -196,6 +196,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-binutils-stage1
 
 ../../sources/binutils-*/configure \
    --disable-dependency-tracking \
+   --host=${TUX64_TARGET_HOST} \
    --prefix=${TUX64_BUILD_ROOT}/tools \
    --program-prefix=${TUX64_TARGET_HOST}- \
    CFLAGS="${TUX64_CFLAGS_HOST}" \
@@ -236,6 +237,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-gcc
 
 ../../sources/gcc-*/configure \
    --disable-dependency-tracking \
+   --host=${TUX64_TARGET_HOST} \
    --prefix=${TUX64_BUILD_ROOT}/tools \
    CFLAGS="${TUX64_CFLAGS_HOST} -fno-lto" \
    CXXFLAGS="${TUX64_CXXFLAGS_HOST} -fno-lto" \
@@ -261,6 +263,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-binutils-stage2
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
    ../../sources/binutils-*/configure \
       --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
       --program-prefix=${TUX64_TARGET_HOST}- \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
@@ -372,7 +375,6 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
    ../../sources/tux64-*/lib/configure \
       --disable-dependency-tracking \
       --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_HOST} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
@@ -398,8 +400,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-tux64-lib
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}
    ../../sources/tux64-*/lib/configure \
       --disable-dependency-tracking \
-      --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_N64_KERNEL} \
+      --host=${TUX64_TARGET_N64_KERNEL} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL} \
       CFLAGS="${TUX64_CFLAGS_N64_KERNEL}" \
       CXXFLAGS="${TUX64_CXXFLAGS_N64_KERNEL}" \
@@ -425,8 +426,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}
    ../../sources/tux64-*/boot/configure \
       --disable-dependency-tracking \
-      --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_N64_KERNEL} \
+      --host=${TUX64_TARGET_N64_KERNEL} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL} \
       CFLAGS="${TUX64_CFLAGS_N64_KERNEL}" \
       CXXFLAGS="${TUX64_CXXFLAGS_N64_KERNEL}" \
@@ -450,7 +450,6 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-mkrom
    ../../sources/tux64-*/mkrom/configure \
       --disable-dependency-tracking \
       --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_HOST} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
