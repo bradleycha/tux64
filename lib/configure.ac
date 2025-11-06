@@ -13,7 +13,7 @@ AC_CONFIG_SRCDIR([src/tux64/tux64.h])
 AC_CONFIG_AUX_DIR([configdir])
 AC_CONFIG_HEADERS([configdir/config-noprefix.h])
 
-AC_CANONICAL_TARGET
+AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])
@@ -45,7 +45,7 @@ tux64_config_log=0
 tux64_config_log_origin=0
 tux64_config_log_ansi=0
 
-case $target_cpu in
+case $host_cpu in
    "mips" | "mips64")
       tux64_config_platform_cpu_isa_mips=1
    ;;
