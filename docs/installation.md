@@ -498,5 +498,8 @@ Create a file named ```${TUX64_BUILD_ROOT}/builds/tux64-rom-image/mkrom-config``
 Create a ROM image with the following:
 
 ```
-${TUX64_BUILD_ROOT}/tools/bin/tux64-mkrom -c mkrom-config -o tux64.n64 -p ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}
+${TUX64_BUILD_ROOT}/tools/bin/tux64-mkrom \
+   -p ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL} \
+   -c mkrom-config \
+   -o tux64.n64
 ```
