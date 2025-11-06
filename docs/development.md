@@ -96,8 +96,8 @@ cd ${TUX64_BUILD_ROOT}/builds/ares
    cmake \
       -DCMAKE_INSTALL_PREFIX=${TUX64_BUILD_ROOT}/tools \
       -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_C_FLAGS="${TUX64_CFLAGS_HOST}" \
-      -DCMAKE_CXX_FLAGS="${TUX64_CXXFLAGS_HOST}" \
+      -DCMAKE_C_FLAGS="${TUX64_CFLAGS_HOST} -s" \
+      -DCMAKE_CXX_FLAGS="${TUX64_CXXFLAGS_HOST} -s" \
       -DARES_CORES=n64 \
       -S ../../sources/ares-*
 )
