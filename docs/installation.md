@@ -143,8 +143,8 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_BUILD_ROOT | The absolute path to [TUX64 BUILD ROOT]. | |
 | TUX64_MAKEOPTS | The number of parallel make jobs to run. | $(nproc) |
 | TUX64_TARGET_HOST | The target system for the host. | |
-| TUX64_TARGET_N64_KERNEL | The target system for the Nintendo 64's bootloader and kernel. | mips64-elf |
-| TUX64_TARGET_N64_USERSPACE | The target system for the Nintendo 64's userspace programs. | mips64-linux-musl |
+| TUX64_TARGET_N64_BOOTLOADER | The target system for the Nintendo 64's bootloader. | mips64-elf |
+| TUX64_TARGET_N64_LINUX | The target system for the Nintendo 64's kernel and userspace programs. | mips64-linux-musl |
 | TUX64_CFLAGS_HOST | Flags to pass to the host's C compiler. | -pipe -march=native -O2 -flto |
 | TUX64_CXXFLAGS_HOST | Flags to pass to the host's C++ compiler. | ${TUX64_CFLAGS_HOST} |
 | TUX64_ASFLAGS_HOST | Flags to pass to the host's assembler. | |
@@ -153,15 +153,15 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_CXXFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C++ compilers. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_ASFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's assemblers. | -march=vr4300 -mtune=vr4300 |
 | TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -flto |
-| TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's bootloader and kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
-| TUX64_CXXFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's bootloader and kernel C++ compiler. | ${TUX64_CXXFLAGS_N64_COMMON} |
-| TUX64_ASFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's bootloader and kernel assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
-| TUX64_LDFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's bootloader and kernel linker. | ${TUX64_LDFLAGS_N64_COMMON} |
-| TUX64_CFLAGS_N64_USERSPACE | Flags to pass to the Nintendo 64's userspace C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
-| TUX64_CXXFLAGS_N64_USERSPACE | Flags to pass to the Nintendo 64's userspace C++ compiler. | ${TUX64_CXXFLAGS_N64_COMMON} |
-| TUX64_ASFLAGS_N64_USERSPACE | Flags to pass to the Nintendo 64's userspace assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
-| TUX64_LDFLAGS_N64_USERSPACE | Flags to pass to the Nintendo 64's userspace linker. | ${TUX64_LDFLAGS_N64_COMMON} |
-
+| TUX64_CFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
+| TUX64_ASFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
+| TUX64_LDFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader linker. | ${TUX64_LDFLAGS_N64_COMMON} |
+| TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} -fno-lto -mabi=64 |
+| TUX64_ASFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
+| TUX64_CFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
+| TUX64_CXXFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C++ compiler. | ${TUX64_CXXFLAGS_N64_COMMON} |
+| TUX64_ASFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
+| TUX64_LDFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace linker. | ${TUX64_LDFLAGS_N64_COMMON} |
 
 A couple of these warrant additional explanation.
 
@@ -282,13 +282,13 @@ Note that the `configure` step also sets environment variables for the toolchain
 
 If successful so far, you now have a fully bootstrapped host toolchain!
 
-### Chapter 3.3 - Building the Bootloader's and Kernel's Toolchain
+### Chapter 3.3 - Building the Bootloader's Toolchain
 
-First we need to build `binutils` for the Nintendo 64's bootloader and kernel toolchain.  Note that we use our bootstrapped host toolchain to build the cross-toolchain, however we are still building code to run on the host right now, so we use the host's compiler flags.
+First we need to build `binutils` for the Nintendo 64's bootloader toolchain.  Note that we use our bootstrapped host toolchain to build the cross-toolchain, however we are still building code to run on the host right now, so we use the host's compiler flags.
 
 ```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-binutils
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-binutils
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-binutils
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-binutils
 
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
@@ -296,9 +296,9 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-binutils
    ../../sources/binutils-*/configure \
       --disable-dependency-tracking \
       --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_N64_KERNEL} \
+      --target=${TUX64_TARGET_N64_BOOTLOADER} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
-      --program-prefix=${TUX64_TARGET_N64_KERNEL}- \
+      --program-prefix=${TUX64_TARGET_N64_BOOTLOADER}- \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
@@ -312,11 +312,11 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
-Next, we will build `gcc`.  We don't need to build the full toolchain since we will only be using it to build the bootloader and kernel, which only requires the compiler runtime for basic operations.
+Next, we will build `gcc`.  We don't need to build the full toolchain since we will only be using it to build the bootloader, which only requires the compiler runtime for basic operations.
 
 ```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gcc
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gcc
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
 
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
@@ -324,20 +324,20 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gcc
    ../../sources/gcc-*/configure \
       --disable-dependency-tracking \
       --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_N64_KERNEL} \
+      --target=${TUX64_TARGET_N64_BOOTLOADER} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
       CFLAGS="${TUX64_CFLAGS_HOST} -fno-lto" \
       CXXFLAGS="${TUX64_CXXFLAGS_HOST} -fno-lto" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST} -fno-lto" \
-      CFLAGS_FOR_TARGET="${TUX64_CFLAGS_N64_KERNEL} -fno-lto" \
-      CXXFLAGS_FOR_TARGET="${TUX64_CXXFLAGS_N64_KERNEL} -fno-lto" \
-      ASFLAGS_FOR_TARGET="${TUX64_ASFLAGS_N64_KERNEL}" \
-      LDFLAGS_FOR_TARGET="${TUX64_LDFLAGS_N64_KERNEL} -fno-lto" \
+      CFLAGS_FOR_TARGET="${TUX64_CFLAGS_N64_BOOTLOADER} -fno-lto" \
+      CXXFLAGS_FOR_TARGET="${TUX64_CXXFLAGS_N64_BOOTLOADER} -fno-lto" \
+      ASFLAGS_FOR_TARGET="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
+      LDFLAGS_FOR_TARGET="${TUX64_LDFLAGS_N64_BOOTLOADER} -fno-lto" \
       --enable-host-pie \
       --enable-lto \
       --disable-bootstrap \
-      --enable-languages=c,c++ \
+      --enable-languages=c \
       --with-arch=vr4300 \
       --with-tune=vr4300 \
       --with-abi=o64 \
@@ -355,7 +355,7 @@ make -j${TUX64_MAKEOPTS} install-target-libgcc
 
 We now have all the tools required to build the bootloader!
 
-### Chapter 3.4 - Building the Nintendo 64 userspace toolchain
+### Chapter 3.4 - Building the Nintendo 64 kernel and userspace toolchain
 
 TODO
 
@@ -377,7 +377,6 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
       --host=${TUX64_TARGET_HOST} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
-      CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST}" \
       --enable-platform-cpu-signed-integer-format-twos-complement \
@@ -392,20 +391,19 @@ make -j${TUX64_MAKEOPTS} install-strip
 ### Building tux64-lib (bootloader)
 
 ```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-tux64-lib
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-tux64-lib
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
 
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}
    ../../sources/tux64-*/lib/configure \
       --disable-dependency-tracking \
-      --host=${TUX64_TARGET_N64_KERNEL} \
-      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL} \
-      CFLAGS="${TUX64_CFLAGS_N64_KERNEL}" \
-      CXXFLAGS="${TUX64_CXXFLAGS_N64_KERNEL}" \
-      ASFLAGS="${TUX64_ASFLAGS_N64_KERNEL}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_KERNEL}" \
+      --host=${TUX64_TARGET_N64_BOOTLOADER} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER} \
+      CFLAGS="${TUX64_CFLAGS_N64_BOOTLOADER}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
       --enable-platform-cpu-signed-integer-format-twos-complement \
       --enable-platform-mips-n64 \
       --enable-platform-mips-vr4300
@@ -423,15 +421,14 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
 
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}
    ../../sources/tux64-*/boot/configure \
       --disable-dependency-tracking \
-      --host=${TUX64_TARGET_N64_KERNEL} \
-      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL} \
-      CFLAGS="${TUX64_CFLAGS_N64_KERNEL}" \
-      CXXFLAGS="${TUX64_CXXFLAGS_N64_KERNEL}" \
-      ASFLAGS="${TUX64_ASFLAGS_N64_KERNEL}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_KERNEL}"
+      --host=${TUX64_TARGET_N64_BOOTLOADER} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER} \
+      CFLAGS="${TUX64_CFLAGS_N64_BOOTLOADER}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}"
 )
 
 make -j1
@@ -454,7 +451,6 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-mkrom
       --host=${TUX64_TARGET_HOST} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
-      CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST}"
 )
@@ -501,7 +497,7 @@ Create a ROM image with the following:
 
 ```
 ${TUX64_BUILD_ROOT}/tools/bin/tux64-mkrom \
-   -p ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL} \
+   -p ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER} \
    -c mkrom-config \
    -o tux64.n64
 ```

@@ -33,7 +33,7 @@ To do this, reconfigure ```tux64-lib``` with ```---enable-log-origin```.
 
 These may be useful for extremely low-level debugging, such as debugging very early boot failures on real hardware before the remote debugger is available by probing the SysAD bus with a logic analyzer.  Otherwise, these serve no purpose and can be safely left disabled.
 
-## Bootloader and kernel debugging in an emulator
+## Bootloader debugging in an emulator
 
 It's recommended to use Ares with the N64 core for development, as it's an accurate emulator with support for development features, such as viewing memory, monitoring various I/O components, and most importantly - remote debugging via GDB.  It's open-source and cross-platform, and there's no wonderful features like adding a donation pop-up which blocks using the emulator for 30 seconds.  We will show how to attach GDB and debug as early as the first instruction of the boot process, complete with full symbolic debugging.
 
@@ -49,8 +49,8 @@ The process of obtaining sources is the same as the Installation Guide.
 ### Building GDB
 
 ```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gdb
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gdb
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gdb
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gdb
 
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
@@ -58,9 +58,9 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_KERNEL}-gdb
    ../../sources/gdb-*/configure \
       --disable-dependency-tracking \
       --host=${TUX64_TARGET_HOST} \
-      --target=${TUX64_TARGET_N64_KERNEL} \
+      --target=${TUX64_TARGET_N64_BOOTLOADER} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
-      --program-prefix=${TUX64_TARGET_N64_KERNEL}- \
+      --program-prefix=${TUX64_TARGET_N64_BOOTLOADER}- \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
@@ -130,7 +130,7 @@ Additionally, if you're doing stage-0 bootloader development and applied the abo
 Launch GDB with the following command:
 
 ```
-${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}-gdb
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}-gdb
 ```
 
 Connect to Ares with the following GDB command:
@@ -142,7 +142,7 @@ target remote localhost:(Ares GDB Server Port, default 9123)
 This will attach to Ares's GDB server, debugging the emulated N64.  To debug the bootloader, type the following GDB command, where 'N' is the bootloader stage you wish to debug:
 
 ```
-add-symbol-file ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}/share/tux64-boot/stageN.sym
+add-symbol-file ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/share/tux64-boot/stageN.sym
 ```
 
 We can repeat the above command to load symbols from as many stages as we like.  This can be useful for debugging multiple bootloader stages at the same time.
@@ -152,8 +152,8 @@ Note that shell environment variable substitution doesn't work here, so these wi
 Alternatively, you can load the symbol file when launching GDB:
 
 ```
-${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_KERNEL}-gdb \
-   -s ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_KERNEL}/share/tux64-boot/stageN.sym
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}-gdb \
+   -s ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/share/tux64-boot/stageN.sym
 ```
 
 This has the advantage of being an easily copy-pasted command, but only one symbol file can be loaded at a time.  Adding additional symbol files will require the above `add-symbol-file` GDB command.
