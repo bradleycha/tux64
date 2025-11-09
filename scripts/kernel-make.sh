@@ -18,7 +18,7 @@ fi
 make_target=${1}
 
 make -C ${TUX64_BUILD_ROOT}/sources/linux-* -j${TUX64_MAKEOPTS} \
-   O=${TUX64_BUILD_ROOT}/builds/linux \
+   O=$(pwd) \
    ARCH=mips \
    CROSS_COMPILE=${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}- \
    INSTALL_PATH=${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER} \
@@ -26,6 +26,6 @@ make -C ${TUX64_BUILD_ROOT}/sources/linux-* -j${TUX64_MAKEOPTS} \
    INSTALL_HDR_PATH=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
    KCFLAGS="${TUX64_CFLAGS_N64_KERNEL}" \
    KAFLAGS="${TUX64_ASFLAGS_N64_KERNEL}" \
-   KCONFIG_CONFIG=${TUX64_BUILD_ROOT}/builds/linux/kernel-config \
+   KCONFIG_CONFIG=$(pwd)/kernel-config \
    $make_target
 
