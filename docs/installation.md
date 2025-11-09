@@ -461,7 +461,96 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
+We now have our stage-1 toolchain.  We will use this to build the full-featured stage-2 toolchain.
+
+First, we will install kernel headers.  These are required for various supporting `gcc` libraries.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/linux-headers
+cd ${TUX64_BUILD_ROOT}/builds/linux-headers
+
+${TUX64_BUILD_ROOT}/scripts/kernel-make.sh headers_install
+```
+
 TODO: Build full stage-2 `gcc` and `musl`.  We want to build both static and shared objects and also make use of LTO.  We also want to build the libraries above we disabled.
+
+## Chapter 4 - Building userspace software
+
+TODO: Build `tux64-lib` for all platforms as well as `tux64-mkrom` and also future Nintendo 64 userspace software.
+
+## Chapter 5 - Building the Linux kernel
+
+Now is the time you've been waiting for!  Time to build a Linux kernel for the Nintendo 64!
+
+Since the kernel is built with raw Makefiles, there is no `configure` step to store the build tools and flags.  This means we have to specify our toolchain every time we run a make command.  To mitigate this, we'll make use of the `kernel-make` script.  If you'd like to customize your kernel make command, take a look at `${TUX64_BUILD_ROOT}/scripts/kernel-make.sh`.
+
+### Chapter 5.1 - Configuring the kernel
+
+First, we'll set up our build directory and generate a minimal config.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/linux
+cd ${TUX64_BUILD_ROOT}/builds/linux
+
+${TUX64_BUILD_ROOT}/scripts/kernel-make.sh tinyconfig
+```
+
+Next, we'll launch the configuration tool and begin configuring the kernel.
+
+```
+${TUX64_BUILD_ROOT}/scripts/kernel-make.sh menuconfig
+```
+
+We will need to set the following configuration items:
+
+TODO: verify these actually boot.  these are here for testing and almost definitely don't work.
+
+```
+Machine selection  --->
+   System type  --->
+      (X) Nintendo 64 console
+
+Kernel type  --->
+   Kernel code model  --->
+      (X) 64-bit kernel
+
+General setup  --->
+   Local version - append to kernel release
+      -tux64
+```
+
+Note that you don't necessarily have to use "-tux64" as the local version, but the branding is nice. :)
+
+Make sure to save the kernel config before exiting.  You are now ready to build a kernel image.
+
+### Chapter 5.2 - Building the kernel
+
+Building the kernel should be as simple as a single `make` command:
+
+```
+${TUX64_BUILD_ROOT}/scripts/kernel-make.sh
+```
+
+The kernel image will be named `vmlinuz` in the build directory.
+
+### Chapter 5.3 - Installing the kernel
+
+Now we need to install the kernel image and modules.  The kernel image will be used by the bootloader, while the modules will be used once we are already booted into linux.
+
+We first install the kernel image to the bootloader tools directory with the following:
+
+```
+mkdir ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot
+cp vmlinuz ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot/
+```
+
+We then install kernel modules to the Nintendo 64's root filesystem with the following:
+
+```
+${TUX64_BUILD_ROOT}/scripts/kernel-make.sh modules_install
+```
+
+We now have a fully built Linux kernel!
 
 ## Miscellaneous and testing
 
