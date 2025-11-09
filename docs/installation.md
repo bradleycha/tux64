@@ -550,7 +550,9 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-tux64-lib
       LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
       --enable-platform-cpu-signed-integer-format-twos-complement \
       --enable-platform-mips-n64 \
-      --enable-platform-mips-vr4300
+      --enable-platform-mips-vr4300 \
+      --enable-log \
+      --enable-log-ansi
 )
 
 make -j${TUX64_MAKEOPTS}
