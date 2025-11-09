@@ -476,7 +476,110 @@ TODO: Build full stage-2 `gcc` and `musl`.  We want to build both static and sha
 
 ## Chapter 4 - Building userspace software
 
-TODO: Build `tux64-lib` for all platforms as well as `tux64-mkrom` and also future Nintendo 64 userspace software.
+Before we continue, we need to build various tools and libraries which will be used later in the guide.
+
+### Chapter 4.1 - Building tux64-lib
+
+`tux64-lib` is a library for Tux64 programs which contains globally-shared functionality.  This is required for all platforms which will run Tux64-specific programs.
+
+First we'll build `tux64-lib` for our host platform:
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/tux64-*/lib/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --enable-platform-cpu-signed-integer-format-twos-complement \
+      --enable-log \
+      --enable-log-ansi
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+Next, we'll build `tux64-lib` for the bootloader:
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}
+   ../../sources/tux64-*/lib/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_BOOTLOADER} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER} \
+      CFLAGS="${TUX64_CFLAGS_N64_BOOTLOADER}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
+      --enable-platform-cpu-signed-integer-format-twos-complement \
+      --enable-platform-mips-n64 \
+      --enable-platform-mips-vr4300
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+Finally, we'll build `tux64-lib` for the Nintendo 64 userspace:
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-tux64-lib
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-tux64-lib
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/tux64-*/lib/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --enable-platform-cpu-signed-integer-format-twos-complement \
+      --enable-platform-mips-n64 \
+      --enable-platform-mips-vr4300
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+### Chapter 4.2 - Building tux64-mkrom
+
+`tux64-mkrom` is a tool used to create the final bootable ROM image which will run on the Nintendo 64.  This will be needed near the end of the installation.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/tux64-mkrom
+cd ${TUX64_BUILD_ROOT}/builds/tux64-mkrom
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/tux64-*/mkrom/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}"
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
 
 ## Chapter 5 - Building the Linux kernel
 
@@ -552,61 +655,21 @@ ${TUX64_BUILD_ROOT}/scripts/kernel-make.sh modules_install
 
 We now have a fully built Linux kernel!
 
-## Miscellaneous and testing
+### Chapter 5.4 - Creating the initramfs
 
-These are miscellaneous commands being used during development and haven't yet been categorized.
-
-### Building tux64-lib (host)
+TODO: figure out what exactly we need in our initramfs, if we even need one at all.  for now, just do the following:
 
 ```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
-
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
-   ../../sources/tux64-*/lib/configure \
-      --disable-dependency-tracking \
-      --host=${TUX64_TARGET_HOST} \
-      --prefix=${TUX64_BUILD_ROOT}/tools \
-      CFLAGS="${TUX64_CFLAGS_HOST}" \
-      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
-      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
-      --enable-platform-cpu-signed-integer-format-twos-complement \
-      --enable-log \
-      --enable-log-ansi
-)
-
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+touch ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot/initramfs.cpio
 ```
 
-### Building tux64-lib (bootloader)
+## Chapter 6 - Creating a bootable ROM image
 
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
+We now have a kernel image and a bunch of software, but how do we boot this?  With a bootloader, of course!  Specifically, `tux64-boot`.
 
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}
-   ../../sources/tux64-*/lib/configure \
-      --disable-dependency-tracking \
-      --host=${TUX64_TARGET_N64_BOOTLOADER} \
-      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER} \
-      CFLAGS="${TUX64_CFLAGS_N64_BOOTLOADER}" \
-      ASFLAGS="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
-      --enable-platform-cpu-signed-integer-format-twos-complement \
-      --enable-platform-mips-n64 \
-      --enable-platform-mips-vr4300
-)
+### Chapter 6.1 - Building tux64-boot
 
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
-```
-
-### Building tux64-boot
+We first need to build the bootloader.  This will produce a series of binary "stage" files.  These are the executable code which will run right after the console powers on and starts executing code from the cartridge.
 
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/tux64-boot
@@ -630,36 +693,19 @@ make -j1 install
 
 Notice how we only build with a single job.  This is because with the current version of `tux64-boot`, multithreaded builds are broken and result in strange behavior.
 
-### Building tux64-mkrom
+### Chapter 6.2 - Configuring the ROM image
 
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/tux64-mkrom
-cd ${TUX64_BUILD_ROOT}/builds/tux64-mkrom
+We will be creating a bootable ROM image using `tux64-mkrom`.  This tool has various options to confiure the output ROM, all of which can be seen by running `tux64-mkrom --help`.
 
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
-   ../../sources/tux64-*/mkrom/configure \
-      --disable-dependency-tracking \
-      --host=${TUX64_TARGET_HOST} \
-      --prefix=${TUX64_BUILD_ROOT}/tools \
-      CFLAGS="${TUX64_CFLAGS_HOST}" \
-      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
-      LDFLAGS="${TUX64_LDFLAGS_HOST}"
-)
-
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
-```
-
-### Using tux64-mkrom to create a ROM image
+We'll first create our directory for the configuration file and final ROM image:
 
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/tux64-rom-image
 cd ${TUX64_BUILD_ROOT}/builds/tux64-rom-image
+touch mkrom-config
 ```
 
-Create a file named ```${TUX64_BUILD_ROOT}/builds/tux64-rom-image/mkrom-config``` with the following contents:
+If you'd like a nice sample configuration, the following should work for most people:
 
 ```
 # tux64-mkrom sample configuration
@@ -686,7 +732,9 @@ Create a file named ```${TUX64_BUILD_ROOT}/builds/tux64-rom-image/mkrom-config``
 /boot/initramfs.cpio
 ```
 
-Create a ROM image with the following:
+### Chapter 6.3 - Building the ROM image
+
+We now have all the pieces to build the ROM image.  Build it with the following:
 
 ```
 ${TUX64_BUILD_ROOT}/tools/bin/tux64-mkrom \
@@ -694,3 +742,5 @@ ${TUX64_BUILD_ROOT}/tools/bin/tux64-mkrom \
    -c mkrom-config \
    -o tux64.n64
 ```
+
+Our final Tux64 ROM image should now be output to `tux64.n64`!
