@@ -149,14 +149,14 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_CXXFLAGS_HOST | Flags to pass to the host's C++ compiler. | ${TUX64_CFLAGS_HOST} |
 | TUX64_ASFLAGS_HOST | Flags to pass to the host's assembler. | |
 | TUX64_LDFLAGS_HOST | Flags to pass to the host's linker. | -flto |
-| TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -mabi=o64 -Oz -flto -fno-stack-protector |
+| TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -mabi=64 -Oz -flto -fno-stack-protector |
 | TUX64_CXXFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C++ compilers. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_ASFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's assemblers. | -march=vr4300 -mtune=vr4300 |
 | TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -flto |
-| TUX64_CFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
+| TUX64_CFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader C compiler. | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 |
 | TUX64_ASFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
 | TUX64_LDFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader linker. | ${TUX64_LDFLAGS_N64_COMMON} |
-| TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} -fno-lto -mabi=64 |
+| TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} -fno-lto |
 | TUX64_ASFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
 | TUX64_CFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_CXXFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C++ compiler. | ${TUX64_CXXFLAGS_N64_COMMON} |
@@ -173,6 +173,8 @@ TUX64_TARGET_HOST is the target for the host machine.  This needs to be set manu
 `x86_64-pc-linux-gnu`.  For more information, refer to [this website](https://clang.llvm.org/docs/CrossCompilation.html).
 
 TUX64_CFLAGS_N64_COMMON includes `-mfix4300`.  This is a flag which patches code to work around hardware bugs in early N64 CPU revisions, at the cost of code size and performance.  We include this flag by default for compatibility with all N64 revisions.  However if you are planning on only running Tux64 on NUS-CPU-04 and later revisions, you should be able to safely remove this flag for improved performance and smaller code size.
+
+TUX64_CFLAGS_N64_BOOTLOADER includes `-mabi=o64`.  This uses GCC's MIPS O64 ABI, which is basically the regular 64-bit ABI but with 32-bit pointers.  Since the VR4300's virtual address space is only 32-bit, there's no purpose to 64-bit pointers.  In the future, the kernel and userspace will also be built with `-mabi=o64`, but currently it's unsupported outside of the bootloader.
 
 After reviewing and setting the required environment variables, these can be exported to the current shell with the following command:
 
@@ -343,7 +345,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
       --with-abi=o64 \
       --disable-multilib \
       --without-headers \
-      --without-shared \
+      --disable-shared \
       --disable-libssp
 )
 
@@ -357,7 +359,109 @@ We now have all the tools required to build the bootloader!
 
 ### Chapter 3.4 - Building the Nintendo 64 kernel and userspace toolchain
 
-TODO
+Now we need to build the toolchail which will compile the Nintendo 64's Linux kernel and userspace software.  This is the most tedious part, because we have to build `musl` to build the toolchain, but we need the toolchain to build `musl`.
+
+First we build `binutils` as we did for the previous parts, but now targetting Linux instead of the bootloader.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-binutils
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-binutils
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/binutils-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --target=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      --program-prefix=${TUX64_TARGET_N64_LINUX}- \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --enable-host-pie \
+      --enable-lto \
+      --with-cpu=mips64vr4300
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+Next, we build the stage-1 `gcc`.  This will be used to compile `musl`, which whill then be used to build the full `gcc` toolchain.  We only want to build and install the compiler itself, as `libgcc` depends on `musl`.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-stage1
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-stage1
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/gcc-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --target=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      CFLAGS="${TUX64_CFLAGS_HOST} -fno-lto" \
+      CXXFLAGS="${TUX64_CXXFLAGS_HOST} -fno-lto" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST} -fno-lto" \
+      CFLAGS_FOR_TARGET="${TUX64_CFLAGS_N64_LINUX} -fno-lto" \
+      CXXFLAGS_FOR_TARGET="${TUX64_CXXFLAGS_N64_LINUX} -fno-lto" \
+      ASFLAGS_FOR_TARGET="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS_FOR_TARGET="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
+      --enable-host-pie \
+      --enable-lto \
+      --disable-bootstrap \
+      --enable-languages=c,c++ \
+      --with-arch=vr4300 \
+      --with-tune=vr4300 \
+      --with-abi=o64 \
+      --disable-multilib \
+      --disable-shared \
+      --disable-libssp \
+      --disable-libgomp \
+      --disable-libsanitizer \
+      --disable-libatomic
+)
+
+make -j${TUX64_MAKEOPTS} all-gcc
+make -j${TUX64_MAKEOPTS} install-strip-gcc
+```
+
+Once this completes, we need to configure `musl` and install its headers and compiler runtime.  We will build a shared object for `musl` once our toolchain is complete.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-musl-stage1
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-musl-stage1
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/musl-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -fno-lto" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
+      --disable-shared
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
+Now we will return to the stage-1 `gcc` build to build the rest of the toolchain.
+
+```
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-stage1
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+TODO: Build full stage-2 `gcc` and `musl`.  We want to build both static and shared objects and also make use of LTO.  We also want to build the libraries above we disabled.
 
 ## Miscellaneous and testing
 
