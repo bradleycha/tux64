@@ -78,7 +78,8 @@
 
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
-   Tux64BootStage1VideoPixel clear_color;
+   volatile Tux64UInt64 clear_color_rsp_dma_buffer [0x1000u / sizeof(Tux64UInt64)]
+   __attribute__((aligned(16u))); /* alignment required for RSP DMA */
    Tux64UInt8 framebuffer_index_displaying;
    volatile Tux64Boolean swap_requested;
 };
@@ -128,8 +129,8 @@ static void
 tux64_boot_stage1_video_set_vi_framebuffer(
    Tux64UInt8 index
 ) {
-   const void * address_virtual;
-   const void * address_physical;
+   const volatile void * address_virtual;
+   const volatile void * address_physical;
 
    /* VI uses the physical address into RDRAM, not the virtual address */
    /* used by the SysAD bus, which is why we do this. */
@@ -142,11 +143,13 @@ tux64_boot_stage1_video_set_vi_framebuffer(
 }
 
 static Tux64UInt64
-tux64_boot_stage1_video_clear_color_get_uint64(void) {
+tux64_boot_stage1_video_clear_color_get_uint64(
+   Tux64BootStage1VideoPixel clear_color
+) {
    Tux64UInt64 retn;
    Tux64UInt8 i;
 
-   retn = tux64_boot_stage1_video_context.clear_color;
+   retn = (Tux64UInt64)clear_color;
    i = TUX64_LITERAL_UINT8(sizeof(retn) / sizeof(Tux64BootStage1VideoPixel));
 
    do {
@@ -158,31 +161,87 @@ tux64_boot_stage1_video_clear_color_get_uint64(void) {
 }
 
 static void
-tux64_boot_stage1_video_framebuffer_clear(
-   Tux64UInt8 idx
+tux64_boot_stage1_video_initialize_context_clear_color(
+   Tux64BootStage1VideoPixel clear_color
 ) {
-   struct Tux64BootStage1VideoFramebuffer * framebuffer;
-   Tux64UInt64 clear_color_x4;
-   volatile Tux64UInt64 * iter_pixels;
-   Tux64UInt32 bytes_remaining;
+   struct Tux64BootStage1VideoContext * ctx;
+   Tux64UInt64 clear_color_x8b;
+   volatile Tux64UInt64 * iter_dma_buffer;
+   Tux64UInt32 words_remaining;
 
-   framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
+   ctx = &tux64_boot_stage1_video_context;
 
    /* we do this because it's cheaper to loop less times and issue 64-bit */
    /* stores than 2x/4x as many 32-bit/16-bit stores. */
-   clear_color_x4 = tux64_endian_convert_uint64(
-      tux64_boot_stage1_video_clear_color_get_uint64(),
+   clear_color_x8b = tux64_endian_convert_uint64(
+      tux64_boot_stage1_video_clear_color_get_uint64(clear_color),
       TUX64_ENDIAN_FORMAT_BIG
    );
 
-   /* TODO: use RSP DMA to do this.  in comparison, this is painfully slow. */
-   iter_pixels = (volatile Tux64UInt64 *)&framebuffer->pixels;
-   bytes_remaining = TUX64_LITERAL_UINT32(sizeof(framebuffer->pixels));
+   /* we now fill the rsp dma buffer 8 bytes at a time with out pixel data. */
+   /* when we later clear the framebuffer, this will be used to fill the */
+   /* entire framebuffer one 4kb chunk at a time.  also, we don't cache */
+   /* writes because they could be used by the RSP before writeback, also it */
+   /* will need to be flushed immediately anyways, which could waste cache */
+   /* and unnecessarily writeback legitimately cached data. */
+   iter_dma_buffer = (volatile Tux64UInt64 *)tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(ctx->clear_color_rsp_dma_buffer);
+   words_remaining = TUX64_LITERAL_UINT32(sizeof(ctx->clear_color_rsp_dma_buffer));
    do {
-      *iter_pixels = clear_color_x4;
-      iter_pixels++;
-      bytes_remaining -= TUX64_LITERAL_UINT32(sizeof(*iter_pixels));
-   } while (bytes_remaining != TUX64_LITERAL_UINT32(0u));
+      *iter_dma_buffer = clear_color_x8b;
+
+      iter_dma_buffer++;
+      words_remaining--;
+   } while (words_remaining != TUX64_LITERAL_UINT32(0u));
+
+   return;
+}
+
+static void
+tux64_boot_stage1_video_framebuffer_clear(
+   Tux64UInt8 idx
+) {
+   struct Tux64BootStage1VideoContext * ctx;
+   struct Tux64BootStage1VideoFramebuffer * framebuffer;
+   Tux64UInt8 blocks;
+   Tux64UInt8 bytes_remainder;
+
+   ctx         = &tux64_boot_stage1_video_context;
+   framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
+
+   blocks            = TUX64_LITERAL_UINT8(sizeof(framebuffer->pixels) / sizeof(ctx->clear_color_rsp_dma_buffer));
+   bytes_remainder   = TUX64_LITERAL_UINT8(sizeof(framebuffer->pixels) % sizeof(ctx->clear_color_rsp_dma_buffer));
+
+   /* here, we use RSP DMA to efficiently fill the entire framebuffer with a  */
+   /* repeating pattern of pixels.  this is the fastest way to fill any chunk */
+   /* of memory on the N64, and this is a perfect use case.  visually, this   */
+   /* is what we're doing:                                                    */
+   /*                                                                         */
+   /*         [RDRAM]            [RSP DMA TRANSFER]          [RSP IMEM]       */
+   /*                                                                         */
+   /* clear_color_rsp_dma_buffer ----- 4KiB ---->        (uninitialized)      */
+   /* framebuffer[0]             <---- 4KiB -----  clear_color_rsp_dma_buffer */
+   /* framebuffer[1]             <---- 4KiB -----  clear_color_rsp_dma_buffer */
+   /*                                  ...                                    */
+   /* framebuffer[blocks - 1]    <---- 4KiB -----  clear_color_rsp_dma_buffer */
+   /* framebuffer[blocks]        <-- remainder --  clear_color_rsp_dma_buffer */
+   /*                                                                         */
+   /* here, we use a spinlock after each DMA transfer to make this code       */
+   /* synchronous with the RSP.  theoretically, we could use SP interrupts to */
+   /* do this asynchronously, but performance in the main loop isn't an issue */
+   /* here, and this severely complicates our code, so we don't do this.      */
+   /*                                                                         */
+   /* also, the reason we use IMEM and not DMEM is so we preserve boot status */
+   /* codes (if they're enabled).  otherwise, we either sacrifice on transfer */
+   /* size to avoid overwriting the boot status code or we have to write to a */
+   /* different location, which is not ideal since now multiple boot stages   */
+   /* have multiple status code addresses.  this is also why we're not        */
+   /* uploading microcode to the RSP, as that could interfere with boot       */
+   /* status codes for the same reason.                                       */
+
+   /* TODO: implement */
+   (void)framebuffer;
+   (void)blocks;
+   (void)bytes_remainder;
    
    return;
 }
@@ -200,10 +259,10 @@ tux64_boot_stage1_video_initialize_context(
    /* done to save on typing */
    ctx = &tux64_boot_stage1_video_context;
 
-   ctx->clear_color = (Tux64BootStage1VideoPixel)clear_color;
+   tux64_boot_stage1_video_initialize_context_clear_color(clear_color);
 
-   /* initialize non-rendering framebuffers to black which prevents garbage */
-   /* from being rendered on screen. */
+   /* clear non-rendering framebuffers to prevent garbage from being */
+   /* displayed on startup */
    i = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT - 1u);
    while (i != TUX64_LITERAL_UINT8(0u)) {
       tux64_boot_stage1_video_framebuffer_clear(i);
