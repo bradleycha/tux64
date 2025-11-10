@@ -80,7 +80,10 @@ tux64_boot_stage1_main(
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
    tux64_boot_stage1_interrupt_vi_disable();
-   tux64_boot_stage1_video_initialize(video_platform);
+   tux64_boot_stage1_video_initialize(
+      video_platform,
+      TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_SAPPHIRE /* a lovely blue color to stare at until we make this configurable! */
+   );
    tux64_boot_stage1_interrupt_vi_enable();
 
    tux64_boot_stage1_main_loop_context_initialize(
@@ -91,6 +94,7 @@ tux64_boot_stage1_main(
    
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_LOOP);
    while (TUX64_BOOLEAN_TRUE) {
+      tux64_boot_stage1_video_render_target_clear();
       tux64_boot_stage1_main_loop_context_execute(&main_loop_context);
       tux64_boot_stage1_video_swap_buffers();
    }

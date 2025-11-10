@@ -12,6 +12,7 @@
 #include <tux64/platform/mips/n64/mmio.h>
 #include <tux64/platform/mips/n64/vi.h>
 #include <tux64/bitwise.h>
+#include <tux64/endian.h>
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
@@ -77,6 +78,7 @@
 
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
+   Tux64BootStage1VideoPixel clear_color;
    Tux64UInt8 framebuffer_index_displaying;
    volatile Tux64Boolean swap_requested;
 };
@@ -139,30 +141,56 @@ tux64_boot_stage1_video_set_vi_framebuffer(
    return;
 }
 
+static Tux64UInt64
+tux64_boot_stage1_video_clear_color_get_uint64(void) {
+   Tux64UInt64 retn;
+   Tux64UInt8 i;
+
+   retn = tux64_boot_stage1_video_context.clear_color;
+   i = TUX64_LITERAL_UINT8(sizeof(retn) / sizeof(Tux64BootStage1VideoPixel));
+
+   do {
+      retn |= (retn << TUX64_LITERAL_UINT8(sizeof(Tux64BootStage1VideoPixel) * 8u));
+      i--;
+   } while (i != TUX64_LITERAL_UINT32(0));
+
+   return retn;
+}
+
 static void
-tux64_boot_stage1_video_initialize_framebuffer(
+tux64_boot_stage1_video_framebuffer_clear(
    Tux64UInt8 idx
 ) {
    struct Tux64BootStage1VideoFramebuffer * framebuffer;
+   Tux64UInt64 clear_color_x4;
    volatile Tux64UInt64 * iter_pixels;
    Tux64UInt32 bytes_remaining;
 
    framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
 
+   /* we do this because it's cheaper to loop less times and issue 64-bit */
+   /* stores than 2x/4x as many 32-bit/16-bit stores. */
+   clear_color_x4 = tux64_endian_convert_uint64(
+      tux64_boot_stage1_video_clear_color_get_uint64(),
+      TUX64_ENDIAN_FORMAT_BIG
+   );
+
    /* TODO: use RSP DMA to do this.  in comparison, this is painfully slow. */
    iter_pixels = (volatile Tux64UInt64 *)&framebuffer->pixels;
    bytes_remaining = TUX64_LITERAL_UINT32(sizeof(framebuffer->pixels));
-   while (bytes_remaining != TUX64_LITERAL_UINT32(0u)) {
-      *iter_pixels = TUX64_LITERAL_UINT64(0x0001f80107c1003fllu);
+   do {
+      *iter_pixels = clear_color_x4;
       iter_pixels++;
       bytes_remaining -= TUX64_LITERAL_UINT32(sizeof(*iter_pixels));
-   }
+   } while (bytes_remaining != TUX64_LITERAL_UINT32(0u));
    
    return;
 }
 
 static void
-tux64_boot_stage1_video_initialize_context(void) {
+tux64_boot_stage1_video_initialize_context(
+   enum Tux64BootStage1VideoClearColor clear_color
+) {
    struct Tux64BootStage1VideoContext * ctx;
    Tux64UInt8 i;
 
@@ -172,11 +200,13 @@ tux64_boot_stage1_video_initialize_context(void) {
    /* done to save on typing */
    ctx = &tux64_boot_stage1_video_context;
 
+   ctx->clear_color = (Tux64BootStage1VideoPixel)clear_color;
+
    /* initialize non-rendering framebuffers to black which prevents garbage */
    /* from being rendered on screen. */
    i = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT - 1u);
    while (i != TUX64_LITERAL_UINT8(0u)) {
-      tux64_boot_stage1_video_initialize_framebuffer(i);
+      tux64_boot_stage1_video_framebuffer_clear(i);
       i--;
    }
 
@@ -316,9 +346,10 @@ tux64_boot_stage1_video_initialize_vi(
 
 void
 tux64_boot_stage1_video_initialize(
-   enum Tux64BootStage1VideoPlatform platform
+   enum Tux64BootStage1VideoPlatform platform,
+   enum Tux64BootStage1VideoClearColor clear_color
 ) {
-   tux64_boot_stage1_video_initialize_context();
+   tux64_boot_stage1_video_initialize_context(clear_color);
    tux64_boot_stage1_video_initialize_vi(platform);
    return;
 }
@@ -394,11 +425,21 @@ tux64_boot_stage1_video_vblank_handler(void) {
 }
 
 struct Tux64BootStage1VideoFramebuffer *
-tux64_boot_stage1_video_get_render_target(void) {
+tux64_boot_stage1_video_render_target_get(void) {
    Tux64UInt8 idx;
 
    idx = tux64_boot_stage1_video_framebuffer_index_get_rendering();
 
    return tux64_boot_stage1_video_framebuffer_get(idx);
+}
+
+void
+tux64_boot_stage1_video_render_target_clear(void) {
+   Tux64UInt8 idx;
+
+   idx = tux64_boot_stage1_video_framebuffer_index_get_rendering();
+
+   tux64_boot_stage1_video_framebuffer_clear(idx);
+   return;
 }
 

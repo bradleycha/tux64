@@ -27,13 +27,18 @@
    TUX64_PLATFORM_MIPS_N64_VI_TYPE_RGBA5553
 
 /*----------------------------------------------------------------------------*/
+/* A single pixel in the expected pixel format.                               */
+/*----------------------------------------------------------------------------*/
+typedef Tux64UInt16 Tux64BootStage1VideoPixel; /* RGBA5551 */
+
+/*----------------------------------------------------------------------------*/
 /* A single framebuffer which can be directly accessed by the CPU.  Pixels    */
 /* are the in RGBA5553 format.                                                */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootStage1VideoFramebuffer {
-   /* use RGBA5553 pixel format to save memory.  marked volatile since it can */
-   /* be observed externally and also modified by RSP DMA. */
-   volatile Tux64UInt16 pixels [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
+   /* marked volatile since it can be observed externally and also modified */
+   /* by RSP DMA. */
+   volatile Tux64BootStage1VideoPixel pixels [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
    __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
 };
 
@@ -45,13 +50,33 @@ enum Tux64BootStage1VideoPlatform {
    TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE     = 3u
 };
 
+enum Tux64BootStage1VideoClearColor {
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_BLACK    = 0x0001u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_WHITE    = 0xffffu,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_GRAY     = 0x8421u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_MAGENTA  = 0xd829u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_RED      = 0xf801u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_ORANGE   = 0xfbc1u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_YELLOW   = 0xffc1u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_GREEN    = 0x07c1u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_CYAN     = 0x0529u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_BLUE     = 0x003fu,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_INDIGO   = 0x2823u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_VIOLET   = 0x8835u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_PURPLE   = 0x5029u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_RUBY     = 0x4801u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_EMERALD  = 0x0241u,
+   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_SAPPHIRE = 0x0013u
+};
+
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
 /* using any other video functions.  Implicitly enables video output.         */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_initialize(
-   enum Tux64BootStage1VideoPlatform platform
+   enum Tux64BootStage1VideoPlatform platform,
+   enum Tux64BootStage1VideoClearColor clear_color
 );
 
 /*----------------------------------------------------------------------------*/
@@ -81,7 +106,14 @@ tux64_boot_stage1_video_vblank_handler(void);
 /* freely modified until you call tux64_boot_stage1_video_swap_buffers().     */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootStage1VideoFramebuffer *
-tux64_boot_stage1_video_get_render_target(void);
+tux64_boot_stage1_video_render_target_get(void);
+
+/*----------------------------------------------------------------------------*/
+/* Clear the current render-target framebuffer to the clear color specified   */
+/* on initialization.                                                         */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_video_render_target_clear(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_VIDEO_H */
