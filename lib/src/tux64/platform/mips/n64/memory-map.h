@@ -175,29 +175,29 @@
 /*----------------------------------------------------------------------------*/
 /* Converts an address between various memory map segment types.              */
 /*----------------------------------------------------------------------------*/
-const void *
+const volatile void *
 tux64_platform_mips_n64_memory_map_physical_to_direct_cached(
-   const void * address
+   const volatile void * address
 );
-const void *
+const volatile void *
 tux64_platform_mips_n64_memory_map_physical_to_direct_uncached(
-   const void * address
+   const volatile void * address
 );
-const void *
+const volatile void *
 tux64_platform_mips_n64_memory_map_direct_cached_to_physical(
-   const void * address
+   const volatile void * address
 );
-const void *
+const volatile void *
 tux64_platform_mips_n64_memory_map_direct_uncached_to_physical(
-   const void * address
+   const volatile void * address
 );
-const void *
+const volatile void *
 tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(
-   const void * address
+   const volatile void * address
 );
-const void *
+const volatile void *
 tux64_platform_mips_n64_memory_map_direct_uncached_to_direct_cached(
-   const void * address
+   const volatile void * address
 );
 
 /*----------------------------------------------------------------------------*/
