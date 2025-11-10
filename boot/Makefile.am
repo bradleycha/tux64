@@ -79,6 +79,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/interrupt/interrupt.h \
 	src/tux64-boot/stage1/interrupt/entry.s \
 	src/tux64-boot/stage1/interrupt/entry.h \
+	src/tux64-boot/stage1/rsp.c \
+	src/tux64-boot/stage1/rsp.h \
 	src/tux64-boot/stage1/video.c \
 	src/tux64-boot/stage1/video.h \
 	src/tux64-boot/stage1/status.c \
