@@ -14,6 +14,7 @@
 #include <tux64/bitwise.h>
 #include <tux64/endian.h>
 #include "tux64-boot/stage1/interrupt/interrupt.h"
+#include "tux64-boot/stage1/idle.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (2u) /* double-buffered */
@@ -453,8 +454,10 @@ tux64_boot_stage1_video_swap_buffers(void) {
    /* spinlock to wait for vblank to handle the swap, done to prevent screen */
    /* tearing under lag conditions.  the spinlock also locks the framerate to */
    /* 60FPS. */
+   tux64_boot_stage1_idle_enter();
    ctx->swap_requested = TUX64_BOOLEAN_TRUE;
    while (ctx->swap_requested == TUX64_BOOLEAN_TRUE) {};
+   tux64_boot_stage1_idle_exit();
 
    return;
 }
