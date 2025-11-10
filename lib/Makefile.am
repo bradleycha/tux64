@@ -58,6 +58,7 @@ libtux64_parse_include_HEADERS = \
 libtux64_platform_mips_n64_include_HEADERS = \
 	src/tux64/platform/mips/n64/memory-map.h \
 	src/tux64/platform/mips/n64/mmio.h \
+	src/tux64/platform/mips/n64/sp.h \
 	src/tux64/platform/mips/n64/mi.h \
 	src/tux64/platform/mips/n64/vi.h \
 	src/tux64/platform/mips/n64/ai.h \
