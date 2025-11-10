@@ -189,7 +189,7 @@ tux64_boot_stage1_video_framebuffer_clear(
 
 static void
 tux64_boot_stage1_video_initialize_context(
-   enum Tux64BootStage1VideoClearColor clear_color
+   Tux64BootStage1VideoPixel clear_color
 ) {
    struct Tux64BootStage1VideoContext * ctx;
    Tux64UInt8 i;
@@ -347,7 +347,7 @@ tux64_boot_stage1_video_initialize_vi(
 void
 tux64_boot_stage1_video_initialize(
    enum Tux64BootStage1VideoPlatform platform,
-   enum Tux64BootStage1VideoClearColor clear_color
+   Tux64BootStage1VideoPixel clear_color
 ) {
    tux64_boot_stage1_video_initialize_context(clear_color);
    tux64_boot_stage1_video_initialize_vi(platform);

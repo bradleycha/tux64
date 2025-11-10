@@ -50,24 +50,7 @@ enum Tux64BootStage1VideoPlatform {
    TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE     = 3u
 };
 
-enum Tux64BootStage1VideoClearColor {
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_BLACK    = 0x0001u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_WHITE    = 0xffffu,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_GRAY     = 0x8421u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_MAGENTA  = 0xd829u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_RED      = 0xf801u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_ORANGE   = 0xfbc1u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_YELLOW   = 0xffc1u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_GREEN    = 0x07c1u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_CYAN     = 0x0529u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_BLUE     = 0x003fu,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_INDIGO   = 0x2823u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_VIOLET   = 0x8835u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_PURPLE   = 0x5029u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_RUBY     = 0x4801u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_EMERALD  = 0x0241u,
-   TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_SAPPHIRE = 0x0013u
-};
+
 
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
@@ -76,7 +59,7 @@ enum Tux64BootStage1VideoClearColor {
 void
 tux64_boot_stage1_video_initialize(
    enum Tux64BootStage1VideoPlatform platform,
-   enum Tux64BootStage1VideoClearColor clear_color
+   Tux64BootStage1VideoPixel clear_color
 );
 
 /*----------------------------------------------------------------------------*/

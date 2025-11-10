@@ -11,6 +11,25 @@
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 
+enum Tux64BootStage1Color {
+   TUX64_BOOT_STAGE1_COLOR_BLACK    = 0x0001u,
+   TUX64_BOOT_STAGE1_COLOR_WHITE    = 0xffffu,
+   TUX64_BOOT_STAGE1_COLOR_GRAY     = 0x8421u,
+   TUX64_BOOT_STAGE1_COLOR_MAGENTA  = 0xd829u,
+   TUX64_BOOT_STAGE1_COLOR_RED      = 0xf801u,
+   TUX64_BOOT_STAGE1_COLOR_ORANGE   = 0xfbc1u,
+   TUX64_BOOT_STAGE1_COLOR_YELLOW   = 0xffc1u,
+   TUX64_BOOT_STAGE1_COLOR_GREEN    = 0x07c1u,
+   TUX64_BOOT_STAGE1_COLOR_CYAN     = 0x0529u,
+   TUX64_BOOT_STAGE1_COLOR_BLUE     = 0x003fu,
+   TUX64_BOOT_STAGE1_COLOR_INDIGO   = 0x2823u,
+   TUX64_BOOT_STAGE1_COLOR_VIOLET   = 0x8835u,
+   TUX64_BOOT_STAGE1_COLOR_PURPLE   = 0x5029u,
+   TUX64_BOOT_STAGE1_COLOR_RUBY     = 0x4801u,
+   TUX64_BOOT_STAGE1_COLOR_EMERALD  = 0x0241u,
+   TUX64_BOOT_STAGE1_COLOR_SAPPHIRE = 0x0013u
+};
+
 static enum Tux64BootStage1VideoPlatform
 tux64_boot_stage1_choose_video_platform(
    enum Tux64BootIpl2VideoStandard video_standard,
@@ -82,7 +101,7 @@ tux64_boot_stage1_main(
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(
       video_platform,
-      TUX64_BOOT_STAGE1_VIDEO_CLEAR_COLOR_SAPPHIRE /* a lovely blue color to stare at until we make this configurable! */
+      TUX64_BOOT_STAGE1_COLOR_SAPPHIRE /* a lovely blue color to stare at until we make this configurable! */
    );
    tux64_boot_stage1_interrupt_vi_enable();
 
