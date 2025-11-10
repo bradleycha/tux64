@@ -8,6 +8,12 @@
 
 SECTIONS
 {
+   /* RSP Registers */
+   .mmio.sp TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_REGISTERS : {
+      tux64_platform_mips_n64_mmio_registers_sp = .;
+      *(.tux64.platform.mips.n64.mmio.sp);
+   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_REGISTERS
+
    /* MIPS Interface (MI) */
    .mmio.mi TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_MI : {
       tux64_platform_mips_n64_mmio_registers_mi = .;

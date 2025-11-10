@@ -16,6 +16,17 @@
 
 #include "tux64/platform/mips/n64/pi.h"
 
+struct Tux64PlatformMipsN64MmioRegistersSp {
+   Tux64UInt32       dma_spaddr;
+   Tux64UInt32       dma_ramaddr;
+   Tux64UInt32       dma_rdlen;
+   Tux64UInt32       dma_wrlen;
+   Tux64UInt32       status;
+   const Tux64UInt32 dma_full;
+   const Tux64UInt32 dma_busy;
+   Tux64UInt32       semaphore;
+};
+
 struct Tux64PlatformMipsN64MmioRegistersMi {
    Tux64UInt32       mode;
    const Tux64UInt32 version;
@@ -111,6 +122,9 @@ struct Tux64PlatformMipsN64MmioRegistersSi {
 
 /* Memory-mapped I/O registers which can be directly accessed.  These will be */
 /* defined and relocated to the correct memory address by the linker. */
+extern volatile struct Tux64PlatformMipsN64MmioRegistersSp
+tux64_platform_mips_n64_mmio_registers_sp
+__attribute__((section(".tux64.platform.mips.n64.mmio.sp")));
 extern volatile struct Tux64PlatformMipsN64MmioRegistersMi
 tux64_platform_mips_n64_mmio_registers_mi
 __attribute__((section(".tux64.platform.mips.n64.mmio.mi")));
