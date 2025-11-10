@@ -65,17 +65,34 @@ tux64_boot_stage1_rsp_dma_start(
    return;
 }
 
-void
-tux64_boot_stage1_rsp_dma_wait_idle(void) {
-   Tux64UInt32 dma_busy;
+static void
+tux64_boot_stage1_rsp_dma_wait_spinlock(
+   const volatile Tux64UInt32 * reg
+) {
+   Tux64UInt32 busy;
 
-   /* wait for the DMA_BUSY bit in SP_STATUS to be clear in a spinlock */
    tux64_boot_stage1_idle_enter();
    do {
-      dma_busy = tux64_platform_mips_n64_mmio_registers_sp.dma_busy;
-   } while (dma_busy != TUX64_LITERAL_UINT32(0u));
+      busy = *reg;
+   } while (busy != TUX64_LITERAL_UINT32(0u));
    tux64_boot_stage1_idle_exit();
 
+   return;
+}
+
+void
+tux64_boot_stage1_rsp_dma_wait_idle(void) {
+   tux64_boot_stage1_rsp_dma_wait_spinlock(
+      &tux64_platform_mips_n64_mmio_registers_sp.dma_busy
+   );
+   return;
+}
+
+void
+tux64_boot_stage1_rsp_dma_wait_idle_queue(void) {
+   tux64_boot_stage1_rsp_dma_wait_spinlock(
+      &tux64_platform_mips_n64_mmio_registers_sp.dma_full
+   );
    return;
 }
 

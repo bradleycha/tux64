@@ -61,10 +61,17 @@ tux64_boot_stage1_rsp_dma_start(
 );
 
 /*----------------------------------------------------------------------------*/
-/* Waits for the RSP to complete its last DMA transfer.                       */
+/* Waits for the RSP to complete all queued and active DMA transfers.         */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_rsp_dma_wait_idle(void);
+
+/*----------------------------------------------------------------------------*/
+/* Waits for the RSP to start its queued DMA transfer, allowing a new DMA     */
+/* transfer to be queued.                                                     */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_rsp_dma_wait_idle_queue(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_RSP_H */
