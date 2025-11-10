@@ -68,6 +68,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/start.c \
 	src/tux64-boot/stage1/stage1.c \
 	src/tux64-boot/stage1/stage1.h \
+	src/tux64-boot/stage1/idle.c \
+	src/tux64-boot/stage1/idle.h \
 	src/tux64-boot/stage1/halt.c \
 	src/tux64-boot/stage1/halt.h \
 	src/tux64-boot/stage1/boot-header.h \
