@@ -71,7 +71,7 @@ tux64_boot_stage1_rsp_dma_wait_idle(void);
 /* transfer to be queued.                                                     */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage1_rsp_dma_wait_idle_queue(void);
+tux64_boot_stage1_rsp_dma_wait_queue(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_RSP_H */

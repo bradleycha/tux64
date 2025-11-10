@@ -89,7 +89,7 @@ tux64_boot_stage1_rsp_dma_wait_idle(void) {
 }
 
 void
-tux64_boot_stage1_rsp_dma_wait_idle_queue(void) {
+tux64_boot_stage1_rsp_dma_wait_queue(void) {
    tux64_boot_stage1_rsp_dma_wait_spinlock(
       &tux64_platform_mips_n64_mmio_registers_sp.dma_full
    );
