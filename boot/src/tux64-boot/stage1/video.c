@@ -15,6 +15,7 @@
 #include <tux64/endian.h>
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/sync.h"
+#include "tux64-boot/stage1/rsp.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (2u) /* double-buffered */
@@ -204,13 +205,14 @@ tux64_boot_stage1_video_framebuffer_clear(
    struct Tux64BootStage1VideoContext * ctx;
    struct Tux64BootStage1VideoFramebuffer * framebuffer;
    Tux64UInt8 blocks;
-   Tux64UInt8 bytes_remainder;
+   Tux64UInt16 bytes_remainder;
+   struct Tux64BootStage1RspDmaTransfer rsp_dma_transfer;
 
    ctx         = &tux64_boot_stage1_video_context;
    framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
 
    blocks            = TUX64_LITERAL_UINT8(sizeof(framebuffer->pixels) / sizeof(ctx->clear_color_rsp_dma_buffer));
-   bytes_remainder   = TUX64_LITERAL_UINT8(sizeof(framebuffer->pixels) % sizeof(ctx->clear_color_rsp_dma_buffer));
+   bytes_remainder   = TUX64_LITERAL_UINT16(sizeof(framebuffer->pixels) % sizeof(ctx->clear_color_rsp_dma_buffer));
 
    /* here, we use RSP DMA to efficiently fill the entire framebuffer with a  */
    /* repeating pattern of pixels.  this is the fastest way to fill any chunk */
@@ -239,10 +241,38 @@ tux64_boot_stage1_video_framebuffer_clear(
    /* uploading microcode to the RSP, as that could interfere with boot       */
    /* status codes for the same reason.                                       */
 
-   /* TODO: implement */
-   (void)framebuffer;
-   (void)blocks;
-   (void)bytes_remainder;
+   /* initialize transfer values which will be shared across transfers.  note */
+   /* that we have to split this as 2 "rows", since we can't store 4KiB */
+   /* inside a 12-bit integer. */
+   rsp_dma_transfer.addr_rsp_mem    = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
+   rsp_dma_transfer.row_bytes_copy  = TUX64_LITERAL_UINT16(sizeof(ctx->clear_color_rsp_dma_buffer) / 2u);
+   rsp_dma_transfer.row_bytes_skip  = TUX64_LITERAL_UINT16(0u);
+   rsp_dma_transfer.row_count       = TUX64_LITERAL_UINT8(1u);
+
+   /* copy the color fill buffer to RSP IMEM */
+   rsp_dma_transfer.addr_rdram = (Tux64UInt32)(Tux64UIntPtr)(&ctx->clear_color_rsp_dma_buffer);
+   tux64_boot_stage1_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RSP_MEMORY);
+
+   /* start filling the framebuffer with the clear color */
+   rsp_dma_transfer.addr_rdram = (Tux64UInt32)(Tux64UIntPtr)framebuffer;
+   do {
+      tux64_boot_stage1_rsp_dma_wait_queue();
+      tux64_boot_stage1_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
+      rsp_dma_transfer.addr_rdram += TUX64_LITERAL_UINT32(sizeof(ctx->clear_color_rsp_dma_buffer));
+      blocks--;
+   } while (blocks != TUX64_LITERAL_UINT32(0u));
+
+   /* fill the remainder bytes */
+   if (bytes_remainder != TUX64_LITERAL_UINT32(0u)) {
+      rsp_dma_transfer.row_bytes_copy  = (Tux64UInt16)bytes_remainder;
+      rsp_dma_transfer.row_count       = TUX64_LITERAL_UINT8(0u);
+
+      tux64_boot_stage1_rsp_dma_wait_queue();
+      tux64_boot_stage1_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
+   }
+
+   /* wait for the RSP to finish its last copy before we return */
+   tux64_boot_stage1_rsp_dma_wait_idle();
    
    return;
 }
