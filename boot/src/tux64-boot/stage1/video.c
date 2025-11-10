@@ -79,7 +79,7 @@
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
    volatile Tux64UInt64 clear_color_rsp_dma_buffer [0x1000u / sizeof(Tux64UInt64)]
-   __attribute__((aligned(16u))); /* alignment required for RSP DMA */
+   __attribute__((aligned(8u))); /* alignment required for RSP DMA */
    Tux64UInt8 framebuffer_index_displaying;
    volatile Tux64Boolean swap_requested;
 };
