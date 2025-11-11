@@ -87,6 +87,11 @@ tux64_boot_stage1_video_vblank_handler(void);
 /*----------------------------------------------------------------------------*/
 /* Gets mutable access to the current render-target framebuffer.  This can be */
 /* freely modified until you call tux64_boot_stage1_video_swap_buffers().     */
+/*                                                                            */
+/* WARNING:  This returns the framebuffer address in the cached segment.  If  */
+/* you are planning on rendering using the CPU, either writeback the data     */
+/* cache or convert to the uncached segment, otherwise you'll get incomplete  */
+/* frames displayed on screen!                                                */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_render_target_get(void);

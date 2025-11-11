@@ -93,18 +93,7 @@ static struct Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_framebuffer_get(
    Tux64UInt8 idx
 ) {
-   struct Tux64BootStage1VideoFramebuffer * retn;
-
-   /* we convert from cached to uncached because the VI works with uncached */
-   /* addresses and we run into issues with data not being written back in */
-   /* time to be read by the RCP.  particularly, we aren't doing a lot of */
-   /* random accesses; only linear filling of the image, so there is little */
-   /* value in using the CPU cache.  for large copies/fills, RSP DMA should */
-   /* be used, which also leads to issues with the CPU caches. */
-   retn = &tux64_boot_stage1_video_context.framebuffers[idx];
-   retn = (struct Tux64BootStage1VideoFramebuffer *)tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(retn);
-
-   return retn;
+   return &tux64_boot_stage1_video_context.framebuffers[idx];
 }
 
 static Tux64UInt8
@@ -131,15 +120,12 @@ static void
 tux64_boot_stage1_video_set_vi_framebuffer(
    Tux64UInt8 index
 ) {
-   const volatile void * address_virtual;
-   const volatile void * address_physical;
+   const volatile void * address;
 
-   /* VI uses the physical address into RDRAM, not the virtual address */
-   /* used by the SysAD bus, which is why we do this. */
-   address_virtual   = tux64_boot_stage1_video_framebuffer_get(index);
-   address_physical  = tux64_platform_mips_n64_memory_map_direct_uncached_to_physical(address_virtual);
-
-   tux64_platform_mips_n64_mmio_registers_vi.origin = (Tux64UInt32)(Tux64UIntPtr)address_physical;
+   /* the upper 8 bits of the address are ignored, so we can safely write the */
+   /* virtual address without having to convert to a physical address. */
+   address = tux64_boot_stage1_video_framebuffer_get(index);
+   tux64_platform_mips_n64_mmio_registers_vi.origin = (Tux64UInt32)(Tux64UIntPtr)address;
 
    return;
 }
