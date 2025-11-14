@@ -1048,7 +1048,7 @@ tux64_mkrom_arguments_config_file_options_optional [] = {
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_options_required)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_OPTIONAL_COUNT\
-   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_options_required)
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_options_optional)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_STORAGE_BYTES\
    ((TUX64_MKROM_ARGUMENTS_CONFIG_FILE_LIST_REQUIRED_COUNT + 8u) / 8u)
 
