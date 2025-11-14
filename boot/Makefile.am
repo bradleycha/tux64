@@ -88,7 +88,6 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/video.h \
 	src/tux64-boot/stage1/fbcon.c \
 	src/tux64-boot/stage1/fbcon.h \
-	$(stage1_FONTMAP) \
 	src/tux64-boot/stage1/status.c \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
