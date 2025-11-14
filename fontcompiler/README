@@ -1,0 +1,5 @@
+tux64-fontcompiler is a command-line tool used to convert a bitmap font to a
+compressed array of bits intended for use with tux64-boot.  This tool is
+required to build tux64-boot, but most people shouldn't need to manually
+invoke it.
+
