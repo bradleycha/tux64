@@ -583,6 +583,30 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
+### Chapter 4.3 - Building tux64-fontcompiler
+
+`tux64-fontcompiler` is a tool used to generate compressed binary data from a font map image for use with `tux64-boot`.  It is a required build tool for `tux64-boot`.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/tux64-fontcompiler
+cd ${TUX64_BUILD_ROOT}/builds/tux64-fontcompiler
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/tux64-*/fontcompiler/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}"
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
 ## Chapter 5 - Building the Linux kernel
 
 Now is the time you've been waiting for!  Time to build a Linux kernel for the Nintendo 64!
