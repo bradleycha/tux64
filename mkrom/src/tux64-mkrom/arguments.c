@@ -1209,7 +1209,7 @@ tux64_mkrom_arguments_config_file_parse(
    "      The path to prepend to all file paths in the configuration file.  File\n"\
    "      paths from the command-line will not have the prefix applied.\n"\
    "\n"\
-   "   " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_SHORT "h, " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_LONG "?, " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_LONG "help\n"\
+   "   " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_SHORT "h, " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_SHORT "?, " TUX64_MKROM_ARGUMENTS_COMMAND_LINE_PREFIX_LONG "help\n"\
    "\n"\
    "      Prints the program's help menu and usage information.\n"\
    "\n"\
