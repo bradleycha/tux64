@@ -10,6 +10,9 @@ noinst_PROGRAMS = \
 	stage1 \
 	stage2
 
+stage1_FONTMAP = \
+	$(top_builddir)/src/tux64-boot/stage1/fontmap.bin.c
+
 stage0_ELF = \
 	$(top_builddir)/stage0
 stage1_ELF = \
@@ -83,6 +86,9 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/rsp.h \
 	src/tux64-boot/stage1/video.c \
 	src/tux64-boot/stage1/video.h \
+	src/tux64-boot/stage1/fbcon.c \
+	src/tux64-boot/stage1/fbcon.h \
+	$(stage1_FONTMAP) \
 	src/tux64-boot/stage1/status.c \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
@@ -112,6 +118,12 @@ stage2_LDFLAGS = \
 
 pkgdata_DATA = \
 	$(BIN_FILES) $(SYM_FILES)
+
+# explicit dependency needed since we're generating the font map C source code
+$(top_srcdir)/src/tux64-boot/stage1/fbcon.c : $(stage1_FONTMAP)
+
+$(stage1_FONTMAP) : $(top_srcdir)/src/tux64-boot/stage1/fontmap.data
+	$(TUX64_FONTCOMPILER) --input $< --output $@ --name TUX64_BOOT_STAGE1_FONTMAP_BIN
 
 # TODO: something is not right here.  if we configure with dependency tracking
 # enabled this works fine, but if we disable dependency tracking, this breaks
@@ -146,5 +158,5 @@ $(stage2_SYM) : $(stage2_ELF)
 all-local : $(BIN_FILES) $(SYM_FILES)
 
 clean-local :
-	rm -f $(BIN_FILES) $(SYM_FILES)
+	rm -f $(BIN_FILES) $(SYM_FILES) $(stage1_FONTMAP)
 

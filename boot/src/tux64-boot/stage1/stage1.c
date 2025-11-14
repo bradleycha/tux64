@@ -10,6 +10,7 @@
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/video.h"
+#include "tux64-boot/stage1/fbcon.h"
 
 enum Tux64BootStage1Color {
    TUX64_BOOT_STAGE1_COLOR_BLACK    = 0x0001u,
@@ -83,6 +84,8 @@ tux64_boot_stage1_main(
    Tux64Boolean running_on_ique
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
+   Tux64BootStage1VideoPixel fbcon_color_foreground;
+   Tux64BootStage1VideoPixel fbcon_color_background;
    struct Tux64BootStage1MainLoopContext main_loop_context;
 
    tux64_boot_stage1_status_initialize();
@@ -97,13 +100,22 @@ tux64_boot_stage1_main(
       running_on_ique
    );
 
+   /* a lovely shade of w*ndows KeBugCheck() to let us know our code works! */
+   fbcon_color_foreground = TUX64_BOOT_STAGE1_COLOR_GRAY;
+   fbcon_color_background = TUX64_BOOT_STAGE1_COLOR_SAPPHIRE;
+
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(
       video_platform,
-      TUX64_BOOT_STAGE1_COLOR_SAPPHIRE /* a lovely blue color to stare at until we make this configurable! */
+      fbcon_color_background
    );
    tux64_boot_stage1_interrupt_vi_enable();
+
+   tux64_boot_stage1_fbcon_initialize(
+      fbcon_color_foreground,
+      fbcon_color_background
+   );
 
    tux64_boot_stage1_main_loop_context_initialize(
       &main_loop_context,
@@ -115,6 +127,7 @@ tux64_boot_stage1_main(
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_video_render_target_clear();
       tux64_boot_stage1_main_loop_context_execute(&main_loop_context);
+      tux64_boot_stage1_fbcon_render();
       tux64_boot_stage1_video_swap_buffers();
    }
 
