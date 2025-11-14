@@ -20,8 +20,23 @@ if [[ "$host_cpu" != "mips64" ]] || [[ "$host_os" != "elf" ]]; then
    exit 1
 fi
 
+AC_CHECK_PROG([TUX64_FONTCOMPILER], [tux64-fontcompiler])
+if [[ -z "$TUX64_FONTCOMPILER" ]]; then
+   echo configure.ac: error: unable to find tux64-fontcompiler.  please verify the build was configured correctly.
+   exit 1
+fi
+
 AC_CHECK_TOOL([OBJCOPY], [objcopy])
+if [[ -z "$OBJCOPY" ]]; then
+   echo configure.ac: error: unable to find $host_cpu-$host_os-objcopy.  please verify the build was configured correctly.
+   exit 1
+fi
+
 AC_CHECK_TOOL([OBJDUMP], [objdump])
+if [[ -z "$OBJDUMP" ]]; then
+   echo configure.ac: error: unable to find $host_cpu-$host_os-objdump.  please verify the build was configured correctly.
+   exit 1
+fi
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])
