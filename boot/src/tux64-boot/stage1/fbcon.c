@@ -36,7 +36,32 @@
 /* RDRAM with only a single DMA operation.  this, along with the              */
 /* double-buffering of the RSP DMA queue, allows super efficient text         */
 /* rendering without needing too much code, keeping the binary small.         */
+/*                                                                            */
+/* storing text is a little more complicated.  we can represent a single      */
+/* character with only 6 bits, which saves us 25% of our memory used when     */
+/* compared to a simple byte array.  however, we can't linearly address       */
+/* characters anymore, and instead need helper functions which do the correct */
+/* bit math.  for a 320x240 screen and an 8 pixel border on all sides, this   */
+/* saves us 576 bytes of memory, which gives us 133 instructions until we     */
+/* make this optimization not worth it.  it is important to note, however,    */
+/* that this uses more cartridge memory since .bss sections aren't stored in  */
+/* the binary, but code is.                                                   */
 /*----------------------------------------------------------------------------*/
+
+#define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL 4u
+#define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL   8u
+#define TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS               8u
+
+#define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_ROWS \
+   (( \
+      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_Y - \
+      (2u*(TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS)) \
+   ) / TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL)
+#define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS \
+   (( \
+      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X - \
+      (2u*(TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS)) \
+   ) / TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL)
 
 static const Tux64UInt8
 tux64_boot_stage1_fbcon_fontmap_compressed [] = {
@@ -49,6 +74,41 @@ tux64_boot_stage1_fbcon_fontmap_compressed [] = {
 static volatile Tux64BootStage1VideoPixel
 tux64_boot_stage1_fbcon_fontmap [4096u / sizeof(Tux64BootStage1VideoPixel)]
 __attribute__((aligned(8u)));
+
+Tux64BootStage1FbconLabel
+tux64_boot_stage1_fbcon_label_push(
+   const Tux64BootStage1FbconLabelCharacter * ptr,
+   Tux64UInt8 characters
+) {
+   /* TODO: implement */
+   (void)ptr;
+   (void)characters;
+   return TUX64_LITERAL_UINT8(0u);
+}
+
+Tux64BootStage1FbconLabelCharacter
+tux64_boot_stage1_fbcon_label_character_get(
+   Tux64BootStage1FbconLabel label,
+   Tux64UInt8 idx
+) {
+   /* TODO: implement */
+   (void)label;
+   (void)idx;
+   return TUX64_LITERAL_UINT8(0u);
+}
+
+void
+tux64_boot_stage1_fbcon_label_character_set(
+   Tux64BootStage1FbconLabel label,
+   Tux64UInt8 idx,
+   Tux64BootStage1FbconLabelCharacter character
+) {
+   /* TODO: implement */
+   (void)label;
+   (void)idx;
+   (void)character;
+   return;
+}
 
 static void
 tux64_boot_stage1_fbcon_fontmap_decompress_byte(

@@ -122,7 +122,7 @@ tux64_boot_stage1_main(
       memory_total,
       memory_available
    );
-   
+
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_LOOP);
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_video_render_target_clear();
