@@ -279,9 +279,9 @@ tux64_boot_stage1_fbcon_render(void) {
    /* rows because we can't store 4KiB in 11 bits */
    transfer.addr_rsp_mem   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
    transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_fbcon_fontmap;
-   transfer.row_bytes_copy = TUX64_LITERAL_UINT16(sizeof(tux64_boot_stage1_fbcon_fontmap) / 2u);
+   transfer.row_bytes_copy = TUX64_LITERAL_UINT16((sizeof(tux64_boot_stage1_fbcon_fontmap) / 2u) - 1u);
    transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
-   transfer.row_count      = TUX64_LITERAL_UINT8(2u);
+   transfer.row_count      = TUX64_LITERAL_UINT8(1u);
    tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RSP_MEMORY);
    tux64_boot_stage1_rsp_dma_wait_queue();
 

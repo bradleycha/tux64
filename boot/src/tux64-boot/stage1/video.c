@@ -231,7 +231,7 @@ tux64_boot_stage1_video_framebuffer_clear(
    /* that we have to split this as 2 "rows", since we can't store 4KiB */
    /* inside a 12-bit integer. */
    rsp_dma_transfer.addr_rsp_mem    = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
-   rsp_dma_transfer.row_bytes_copy  = TUX64_LITERAL_UINT16(sizeof(ctx->clear_color_rsp_dma_buffer) / 2u);
+   rsp_dma_transfer.row_bytes_copy  = TUX64_LITERAL_UINT16((sizeof(ctx->clear_color_rsp_dma_buffer) / 2u) - 1u);
    rsp_dma_transfer.row_bytes_skip  = TUX64_LITERAL_UINT16(0u);
    rsp_dma_transfer.row_count       = TUX64_LITERAL_UINT8(1u);
 
@@ -250,7 +250,7 @@ tux64_boot_stage1_video_framebuffer_clear(
 
    /* fill the remainder bytes */
    if (bytes_remainder != TUX64_LITERAL_UINT32(0u)) {
-      rsp_dma_transfer.row_bytes_copy  = (Tux64UInt16)bytes_remainder;
+      rsp_dma_transfer.row_bytes_copy  = ((Tux64UInt16)bytes_remainder - TUX64_LITERAL_UINT16(1u));
       rsp_dma_transfer.row_count       = TUX64_LITERAL_UINT8(0u);
 
       tux64_boot_stage1_rsp_dma_wait_queue();
