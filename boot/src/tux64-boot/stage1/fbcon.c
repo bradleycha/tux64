@@ -285,6 +285,12 @@ tux64_boot_stage1_fbcon_render(void) {
    tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RSP_MEMORY);
 
    /* TODO: implement rendering loop */
+   transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_video_render_target_get() + ((TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X * sizeof(Tux64BootStage1VideoPixel)) * 8);
+   transfer.row_bytes_copy = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL * sizeof(Tux64BootStage1VideoPixel)) - 1u);
+   transfer.row_bytes_skip = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X - TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL) * sizeof(Tux64BootStage1VideoPixel));
+   transfer.row_count      = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL - 1u);
+   tux64_boot_stage1_rsp_dma_wait_queue();
+   tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
 
    /* wait for the final DMA to finish and return */
    tux64_boot_stage1_rsp_dma_wait_idle();
