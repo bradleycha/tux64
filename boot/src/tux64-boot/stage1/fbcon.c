@@ -283,7 +283,6 @@ tux64_boot_stage1_fbcon_render(void) {
    transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
    transfer.row_count      = TUX64_LITERAL_UINT8(1u);
    tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RSP_MEMORY);
-   tux64_boot_stage1_rsp_dma_wait_queue();
 
    /* TODO: implement rendering loop */
 
