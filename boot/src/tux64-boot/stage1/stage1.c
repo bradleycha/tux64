@@ -11,6 +11,7 @@
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/fbcon.h"
+#include "tux64-boot/stage1/text.h"
 
 enum Tux64BootStage1Color {
    TUX64_BOOT_STAGE1_COLOR_BLACK    = 0x0001u,
@@ -122,6 +123,8 @@ tux64_boot_stage1_main(
       memory_total,
       memory_available
    );
+
+   (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_text_splash);
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_LOOP);
    while (TUX64_BOOLEAN_TRUE) {

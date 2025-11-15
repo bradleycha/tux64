@@ -40,8 +40,8 @@
 /* rendering without needing too much code, keeping the binary small.         */
 /*                                                                            */
 /* storing text is pretty simple.  we could make it more complicated by using */
-/* only 6 bits per character, but the overhead from doing bit math makes this */
-/* optimization not worth it.*/
+/* only 7 bits per character, but the overhead from doing bit math makes this */
+/* optimization not worth it.                                                 */
 /*----------------------------------------------------------------------------*/
 
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL 4u
