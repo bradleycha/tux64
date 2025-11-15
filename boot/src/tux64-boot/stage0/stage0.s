@@ -225,10 +225,11 @@ tux64_boot_stage0_halt:
    or    $t0,$t0,$t1
    mtc0  $t0,TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS
 
-   # we are now met with a terrible fate.
-   tux64_boot_stage0_halt.spinlock:
-   b     tux64_boot_stage0_halt.spinlock
-   nop
+   # we now deliberately make an invalid 64-bit read to RSP DMEM.  this will
+   # cause the CPU to hang indefinitely waiting for a second 32-bit word to
+   # be returned, which will never happen.  this saves an instruction over a
+   # basic spinlock and might save more power as well
+   ld    $zero,0($gp)
 #tux64_boot_stage0_halt
 
    .section .text
@@ -635,7 +636,7 @@ tux64_boot_stage0_start:
    # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x00008940
-   .word 0xdbc14576
+   .word 0x00006d90
+   .word 0x9da70a74
 #tux64_boot_stage0_cic
 
