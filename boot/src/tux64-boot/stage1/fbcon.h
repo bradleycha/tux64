@@ -13,7 +13,7 @@
 #include "tux64-boot/stage1/video.h"
 
 /*----------------------------------------------------------------------------*/
-/* A 6-bit fbcon-encoded character.  Characters are encoded in the following  */
+/* An 8-bit fbcon-encoded character.  Characters are encoded in the following */
 /* format:                                                                    */
 /*                                                                            */
 /* A-Z =  0-25                                                                */
@@ -32,13 +32,32 @@ typedef Tux64UInt8 Tux64BootStage1FbconLabelCharacter;
 typedef Tux64UInt8 Tux64BootStage1FbconLabel;
 
 /*----------------------------------------------------------------------------*/
+/* A text string used to initialize a label.                                  */
+/*----------------------------------------------------------------------------*/
+/* ptr -                                                                      */
+/*    The pointer to the 8-bit fbcon-encoded text string of length 'length'.  */
+/*                                                                            */
+/* length -                                                                   */
+/*    The number of characters pointed at by 'ptr'.                           */
+/*                                                                            */
+/* capacity -                                                                 */
+/*    The size of the allocated string buffer.  This can be useful for        */
+/*    appending text at runtime to a constant string, which can be used for   */
+/*    animating text.                                                         */
+/*----------------------------------------------------------------------------*/
+struct Tux64BootStage1FbconText {
+   const Tux64BootStage1FbconLabelCharacter * ptr;
+   Tux64UInt8 length;
+   Tux64UInt8 capacity;
+};
+
+/*----------------------------------------------------------------------------*/
 /* Pushes a new line of text to the fbcon, placed on the next line after the  */
 /* last text label.                                                           */
 /*----------------------------------------------------------------------------*/
 Tux64BootStage1FbconLabel
 tux64_boot_stage1_fbcon_label_push(
-   const Tux64BootStage1FbconLabelCharacter * ptr,
-   Tux64UInt8 characters
+   const struct Tux64BootStage1FbconText * text
 );
 
 /*----------------------------------------------------------------------------*/

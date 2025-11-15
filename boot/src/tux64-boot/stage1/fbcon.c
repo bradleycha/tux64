@@ -10,7 +10,9 @@
 #include "tux64-boot/stage1/fbcon.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
+#include <tux64/memory.h>
 #include <tux64/endian.h>
+#include <tux64/math.h>
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/rsp.h"
 
@@ -37,19 +39,14 @@
 /* double-buffering of the RSP DMA queue, allows super efficient text         */
 /* rendering without needing too much code, keeping the binary small.         */
 /*                                                                            */
-/* storing text is a little more complicated.  we can represent a single      */
-/* character with only 6 bits, which saves us 25% of our memory used when     */
-/* compared to a simple byte array.  however, we can't linearly address       */
-/* characters anymore, and instead need helper functions which do the correct */
-/* bit math.  for a 320x240 screen and an 8 pixel border on all sides, this   */
-/* saves us 576 bytes of memory, which gives us 133 instructions until we     */
-/* make this optimization not worth it.  it is important to note, however,    */
-/* that this uses more cartridge memory since .bss sections aren't stored in  */
-/* the binary, but code is.                                                   */
+/* storing text is pretty simple.  we could make it more complicated by using */
+/* only 6 bits per character, but the overhead from doing bit math makes this */
+/* optimization not worth it.*/
 /*----------------------------------------------------------------------------*/
 
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL 4u
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL   8u
+#define TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER          8u
 #define TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS               8u
 
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_ROWS \
@@ -62,6 +59,11 @@
       TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X - \
       (2u*(TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS)) \
    ) / TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL)
+#define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS_BYTES \
+   (( \
+      TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS * \
+      TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER \
+   ) / 8u)
 
 static const Tux64UInt8
 tux64_boot_stage1_fbcon_fontmap_compressed [] = {
@@ -75,15 +77,75 @@ static volatile Tux64BootStage1VideoPixel
 tux64_boot_stage1_fbcon_fontmap [4096u / sizeof(Tux64BootStage1VideoPixel)]
 __attribute__((aligned(8u)));
 
+struct Tux64BootStage1FbconCharacterMapLine {
+   /* the number of characters in the line */
+   Tux64UInt8 characters_count;
+
+   /* data for each character in the line */
+   Tux64UInt8 characters_buffer
+   [TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS_BYTES];
+};
+
+struct Tux64BootStage1FbconCharacterMap {
+   /* the number of valid lines */
+   Tux64UInt8 lines_count;
+
+   /* data for each individual line */
+   struct Tux64BootStage1FbconCharacterMapLine lines_buffer
+   [TUX64_BOOT_STAGE1_FBCON_CHARACTERS_ROWS];
+};
+
+static void
+tux64_boot_stage1_fbcon_character_map_initialize(
+   struct Tux64BootStage1FbconCharacterMap * map
+) {
+   map->lines_count = TUX64_LITERAL_UINT8(0u);
+   return;
+}
+
+/* this is what stores all the text in the console */
+static struct Tux64BootStage1FbconCharacterMap
+tux64_boot_stage1_fbcon_character_map;
+
+static void
+tux64_boot_stage1_fbcon_character_map_line_initialize(
+   struct Tux64BootStage1FbconCharacterMapLine * line,
+   const struct Tux64BootStage1FbconText * text
+) {
+   Tux64UInt32 bytes;
+
+   bytes = (Tux64UInt32)text->length;
+   bytes = bytes * TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER);
+   bytes = tux64_math_ceil_divide_uint32(bytes, TUX64_LITERAL_UINT32(8u));
+
+   line->characters_count = text->capacity;
+   tux64_memory_copy(
+      line->characters_buffer,
+      text->ptr,
+      bytes
+   );
+
+   return;
+}
+
 Tux64BootStage1FbconLabel
 tux64_boot_stage1_fbcon_label_push(
-   const Tux64BootStage1FbconLabelCharacter * ptr,
-   Tux64UInt8 characters
+   const struct Tux64BootStage1FbconText * text
 ) {
-   /* TODO: implement */
-   (void)ptr;
-   (void)characters;
-   return TUX64_LITERAL_UINT8(0u);
+   struct Tux64BootStage1FbconCharacterMap * map;
+   Tux64UInt8 idx;
+
+   map = &tux64_boot_stage1_fbcon_character_map;
+
+   idx = map->lines_count;
+   map->lines_count++;
+
+   tux64_boot_stage1_fbcon_character_map_line_initialize(
+      &map->lines_buffer[idx],
+      text
+   );
+
+   return (Tux64BootStage1FbconLabel)idx;
 }
 
 Tux64BootStage1FbconLabelCharacter
@@ -91,10 +153,13 @@ tux64_boot_stage1_fbcon_label_character_get(
    Tux64BootStage1FbconLabel label,
    Tux64UInt8 idx
 ) {
-   /* TODO: implement */
-   (void)label;
-   (void)idx;
-   return TUX64_LITERAL_UINT8(0u);
+   const struct Tux64BootStage1FbconCharacterMap * map;
+   const struct Tux64BootStage1FbconCharacterMapLine * line;
+
+   map   = &tux64_boot_stage1_fbcon_character_map;
+   line  = &map->lines_buffer[label];
+
+   return line->characters_buffer[idx];
 }
 
 void
@@ -103,10 +168,13 @@ tux64_boot_stage1_fbcon_label_character_set(
    Tux64UInt8 idx,
    Tux64BootStage1FbconLabelCharacter character
 ) {
-   /* TODO: implement */
-   (void)label;
-   (void)idx;
-   (void)character;
+   struct Tux64BootStage1FbconCharacterMap * map;
+   struct Tux64BootStage1FbconCharacterMapLine * line;
+
+   map   = &tux64_boot_stage1_fbcon_character_map;
+   line  = &map->lines_buffer[label];
+
+   line->characters_buffer[idx] = character;
    return;
 }
 
@@ -194,6 +262,10 @@ tux64_boot_stage1_fbcon_initialize(
    tux64_boot_stage1_fbcon_fontmap_decompress(
       color_foreground,
       color_background
+   );
+
+   tux64_boot_stage1_fbcon_character_map_initialize(
+      &tux64_boot_stage1_fbcon_character_map
    );
    
    return;
