@@ -48,6 +48,7 @@
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL   8u
 #define TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER          8u
 #define TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS               8u
+#define TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS           1u
 
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_ROWS \
    (( \
@@ -271,6 +272,45 @@ tux64_boot_stage1_fbcon_initialize(
    return;
 }
 
+static Tux64UInt32
+tux64_boot_stage1_fbcon_character_pixel_offset(
+   Tux64UInt8 idx_vertical,
+   Tux64UInt8 idx_horizontal
+) {
+   Tux64UInt32 offset;
+
+   offset = TUX64_LITERAL_UINT32(0u);
+
+   /* vertical border */
+   offset = offset + TUX64_LITERAL_UINT32(
+      TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS *
+      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X
+   );
+
+   /* horizontal border */
+   offset = offset + TUX64_LITERAL_UINT32(
+      TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS
+   );
+
+   /* vertical line */
+   offset = offset + (
+      (Tux64UInt32)idx_vertical * TUX64_LITERAL_UINT32(
+         TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL +
+         TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS
+      )
+   ) * TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X);
+
+   /* horizontal column */
+   offset = offset + (
+      (Tux64UInt32)idx_horizontal * TUX64_LITERAL_UINT32(
+         TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL +
+         TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS
+      )
+   );
+
+   return offset;
+}
+
 void
 tux64_boot_stage1_fbcon_render(void) {
    const struct Tux64BootStage1FbconCharacterMap * map;
@@ -282,6 +322,7 @@ tux64_boot_stage1_fbcon_render(void) {
    Tux64UInt8 idx_character;
    Tux64BootStage1FbconLabelCharacter character;
    Tux64UInt32 offset_rsp_imem;
+   Tux64UInt32 offset_framebuffer;
 
    map = &tux64_boot_stage1_fbcon_character_map;
 
@@ -328,9 +369,11 @@ tux64_boot_stage1_fbcon_render(void) {
          );
          transfer.addr_rsp_mem = (addr_base_rsp_imem + offset_rsp_imem);
 
-         /* TODO: calculate pointer into framebuffer.  this is where we do */
-         /* padding and character placement. */
-         transfer.addr_rdram = addr_base_framebuffer;
+         offset_framebuffer = tux64_boot_stage1_fbcon_character_pixel_offset(
+            idx_line,
+            idx_character
+         ) * TUX64_LITERAL_UINT32(sizeof(Tux64BootStage1VideoPixel));
+         transfer.addr_rdram = (addr_base_framebuffer + offset_framebuffer);
 
          tux64_boot_stage1_rsp_dma_wait_queue();
          tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
