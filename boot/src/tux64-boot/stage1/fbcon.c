@@ -272,45 +272,6 @@ tux64_boot_stage1_fbcon_initialize(
    return;
 }
 
-static Tux64UInt32
-tux64_boot_stage1_fbcon_character_pixel_offset(
-   Tux64UInt8 idx_vertical,
-   Tux64UInt8 idx_horizontal
-) {
-   Tux64UInt32 offset;
-
-   offset = TUX64_LITERAL_UINT32(0u);
-
-   /* vertical border */
-   offset = offset + TUX64_LITERAL_UINT32(
-      TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS *
-      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X
-   );
-
-   /* horizontal border */
-   offset = offset + TUX64_LITERAL_UINT32(
-      TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS
-   );
-
-   /* vertical line */
-   offset = offset + (
-      (Tux64UInt32)idx_vertical * TUX64_LITERAL_UINT32(
-         TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL +
-         TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS
-      )
-   ) * TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X);
-
-   /* horizontal column */
-   offset = offset + (
-      (Tux64UInt32)idx_horizontal * TUX64_LITERAL_UINT32(
-         TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL +
-         TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS
-      )
-   );
-
-   return offset;
-}
-
 void
 tux64_boot_stage1_fbcon_render(void) {
    const struct Tux64BootStage1FbconCharacterMap * map;
@@ -322,7 +283,8 @@ tux64_boot_stage1_fbcon_render(void) {
    Tux64UInt8 idx_character;
    Tux64BootStage1FbconLabelCharacter character;
    Tux64UInt32 offset_rsp_imem;
-   Tux64UInt32 offset_framebuffer;
+   Tux64UInt32 addr_framebuffer_row;
+   Tux64UInt32 addr_framebuffer_column;
 
    map = &tux64_boot_stage1_fbcon_character_map;
 
@@ -343,23 +305,35 @@ tux64_boot_stage1_fbcon_render(void) {
    transfer.row_bytes_skip = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X - TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL) * sizeof(Tux64BootStage1VideoPixel));
    transfer.row_count      = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL - 1u);
 
+   /* start the framebuffer iterator after applying padding on both sides */
+   addr_framebuffer_row = addr_base_framebuffer;
+   addr_framebuffer_row = addr_framebuffer_row + TUX64_LITERAL_UINT32(
+      TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS *
+      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X *
+      sizeof(Tux64BootStage1VideoPixel)
+   );
+   addr_framebuffer_row = addr_framebuffer_row + TUX64_LITERAL_UINT32(
+      TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS *
+      sizeof(Tux64BootStage1VideoPixel)
+   );
+
    /* iterate character by character and render via DMA until the entire */
    /* is drawn.  we can't use 'do while' loops here because these counts */
-   /* could legitimately be zero. */
-   idx_line = map->lines_count;
-   while (idx_line != TUX64_LITERAL_UINT8(0u)) {
-      idx_line--;
-
+   /* could legitimately be zero.  also, we're forced to use forward loops */
+   /* since we have to iterate over the characters and lines in order. */
+   idx_line = TUX64_LITERAL_UINT8(0u);
+   while (idx_line != map->lines_count) {
       line = &map->lines_buffer[idx_line];
 
-      idx_character = line->characters_count;
-      while (idx_character != TUX64_LITERAL_UINT8(0u)) {
-         idx_character--;
+      addr_framebuffer_column = addr_framebuffer_row;
+
+      idx_character = TUX64_LITERAL_UINT8(0u);
+      while (idx_character != line->characters_count) {
 
          character = line->characters_buffer[idx_character];
          if (character == TUX64_LITERAL_UINT8(0x40u)) {
             /* skip space characters as there's nothing to render */
-            continue;
+            goto skip_rendering;
          }
 
          offset_rsp_imem = character * TUX64_LITERAL_UINT32(
@@ -367,17 +341,32 @@ tux64_boot_stage1_fbcon_render(void) {
             TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL *
             sizeof(Tux64BootStage1VideoPixel)
          );
-         transfer.addr_rsp_mem = (addr_base_rsp_imem + offset_rsp_imem);
 
-         offset_framebuffer = tux64_boot_stage1_fbcon_character_pixel_offset(
-            idx_line,
-            idx_character
-         ) * TUX64_LITERAL_UINT32(sizeof(Tux64BootStage1VideoPixel));
-         transfer.addr_rdram = (addr_base_framebuffer + offset_framebuffer);
+         transfer.addr_rsp_mem   = (addr_base_rsp_imem + offset_rsp_imem);
+         transfer.addr_rdram     = addr_framebuffer_column;
 
          tux64_boot_stage1_rsp_dma_wait_queue();
          tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
+
+skip_rendering:
+         idx_character++;
+         addr_framebuffer_column += TUX64_LITERAL_UINT32(
+            (
+               TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL +
+               TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS
+            ) * sizeof(Tux64BootStage1VideoPixel)
+         );
       }
+
+      idx_line++;
+      addr_framebuffer_row += TUX64_LITERAL_UINT32(
+         (
+            TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL +
+            TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS
+         ) *
+         TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X *
+         sizeof(Tux64BootStage1VideoPixel)
+      );
    }
 
    /* wait for the final DMA to finish and return */
