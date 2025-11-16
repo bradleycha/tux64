@@ -273,24 +273,69 @@ tux64_boot_stage1_fbcon_initialize(
 
 void
 tux64_boot_stage1_fbcon_render(void) {
+   const struct Tux64BootStage1FbconCharacterMap * map;
+   Tux64UInt32 addr_base_rsp_imem;
+   Tux64UInt32 addr_base_framebuffer;
    struct Tux64BootStage1RspDmaTransfer transfer;
+   Tux64UInt8 idx_line;
+   const struct Tux64BootStage1FbconCharacterMapLine * line;
+   Tux64UInt8 idx_character;
+   Tux64BootStage1FbconLabelCharacter character;
+   Tux64UInt32 offset_rsp_imem;
+
+   map = &tux64_boot_stage1_fbcon_character_map;
+
+   addr_base_rsp_imem      = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
+   addr_base_framebuffer   = (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_video_render_target_get();
 
    /* first start off by loading the font map into RSP IMEM, split into 2 */
    /* rows because we can't store 4KiB in 11 bits */
-   transfer.addr_rsp_mem   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
+   transfer.addr_rsp_mem   = addr_base_rsp_imem;
    transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_fbcon_fontmap;
    transfer.row_bytes_copy = TUX64_LITERAL_UINT16((sizeof(tux64_boot_stage1_fbcon_fontmap) / 2u) - 1u);
    transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
    transfer.row_count      = TUX64_LITERAL_UINT8(1u);
    tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RSP_MEMORY);
 
-   /* TODO: implement rendering loop */
-   transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_video_render_target_get() + ((TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X * sizeof(Tux64BootStage1VideoPixel)) * 8);
+   /* set up copy dimensions for every character */
    transfer.row_bytes_copy = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL * sizeof(Tux64BootStage1VideoPixel)) - 1u);
    transfer.row_bytes_skip = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X - TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL) * sizeof(Tux64BootStage1VideoPixel));
    transfer.row_count      = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL - 1u);
-   tux64_boot_stage1_rsp_dma_wait_queue();
-   tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
+
+   /* iterate character by character and render via DMA until the entire */
+   /* is drawn.  we can't use 'do while' loops here because these counts */
+   /* could legitimately be zero. */
+   idx_line = map->lines_count;
+   while (idx_line != TUX64_LITERAL_UINT8(0u)) {
+      idx_line--;
+
+      line = &map->lines_buffer[idx_line];
+
+      idx_character = line->characters_count;
+      while (idx_character != TUX64_LITERAL_UINT8(0u)) {
+         idx_character--;
+
+         character = line->characters_buffer[idx_character];
+         if (character == TUX64_LITERAL_UINT8(0x40u)) {
+            /* skip space characters as there's nothing to render */
+            continue;
+         }
+
+         offset_rsp_imem = character * TUX64_LITERAL_UINT32(
+            TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL *
+            TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL *
+            sizeof(Tux64BootStage1VideoPixel)
+         );
+         transfer.addr_rsp_mem = (addr_base_rsp_imem + offset_rsp_imem);
+
+         /* TODO: calculate pointer into framebuffer.  this is where we do */
+         /* padding and character placement. */
+         transfer.addr_rdram = addr_base_framebuffer;
+
+         tux64_boot_stage1_rsp_dma_wait_queue();
+         tux64_boot_stage1_rsp_dma_start(&transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
+      }
+   }
 
    /* wait for the final DMA to finish and return */
    tux64_boot_stage1_rsp_dma_wait_idle();
