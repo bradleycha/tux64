@@ -50,8 +50,6 @@ enum Tux64BootStage1VideoPlatform {
    TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE     = 3u
 };
 
-
-
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
 /* using any other video functions.  Implicitly enables video output.         */

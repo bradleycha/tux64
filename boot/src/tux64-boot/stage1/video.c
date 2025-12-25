@@ -270,9 +270,6 @@ tux64_boot_stage1_video_initialize_context(
    struct Tux64BootStage1VideoContext * ctx;
    Tux64UInt8 i;
 
-   /* TODO: choose resolution at runtime so we can support both PAL and NTSC */
-   /* framebuffers with the same code. */
-
    /* done to save on typing */
    ctx = &tux64_boot_stage1_video_context;
 
@@ -291,130 +288,192 @@ tux64_boot_stage1_video_initialize_context(
    return;
 }
 
+/* basically a duplicate definition of the usual tux64-lib MMIO struct, but */
+/* without VI_TEST_ADDR and VI_STAGED_DATA, which don't need to be written */
+/* for screen initialization. */
+struct Tux64BootStage1VideoViRegisterArrayRegisters {
+   Tux64UInt32 ctrl;
+   Tux64UInt32 origin;
+   Tux64UInt32 width;
+   Tux64UInt32 v_intr;
+   Tux64UInt32 v_current;
+   Tux64UInt32 burst;
+   Tux64UInt32 v_total;
+   Tux64UInt32 h_total;
+   Tux64UInt32 h_total_leap;
+   Tux64UInt32 h_video;
+   Tux64UInt32 v_video;
+   Tux64UInt32 v_burst;
+   Tux64UInt32 x_scale;
+   Tux64UInt32 y_scale;
+};
+
+/* this is used to more efficiently initialize the VI while also trying to */
+/* prevent the code from being too undecipherable.  instead of having to */
+/* manually set each individual register, we can just iterate through memory. */
+/* to give credit where credit's due, i got this idea from clbr's original */
+/* n64linux code in linux/arch/mips/n64/init.c, where he does the same thing, */
+/* just with a lot more magic number and a lot less documentation. */
+union Tux64BootStage1VideoViRegisterArray {
+   struct Tux64BootStage1VideoViRegisterArrayRegisters regs;
+   Tux64UInt32 words [sizeof(struct Tux64BootStage1VideoViRegisterArrayRegisters) / sizeof(Tux64UInt32)];
+};
+
+#define TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_BASE \
+   (\
+      TUX64_PLATFORM_MIPS_N64_VI_DEDITHER_DISABLE | \
+      TUX64_PLATFORM_MIPS_N64_VI_AA_MODE_DISABLE | \
+      TUX64_PLATFORM_MIPS_N64_VI_SERRATE_DISABLE | \
+      TUX64_PLATFORM_MIPS_N64_VI_DIVOT_DISABLE | \
+      TUX64_PLATFORM_MIPS_N64_VI_GAMMA_DISABLE | \
+      TUX64_PLATFORM_MIPS_N64_VI_GAMMA_DITHER_DISABLE | \
+      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXEL_FORMAT \
+   )
+
+#define TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD \
+   ( \
+     TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_BASE | \
+     (0x3u << TUX64_PLATFORM_MIPS_N64_VI_PIXEL_ADVANCE_BIT_OFFSET) \
+   )
+
+#define TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_IQUE \
+   ( \
+     TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_BASE | \
+     (0x1u << TUX64_PLATFORM_MIPS_N64_VI_PIXEL_ADVANCE_BIT_OFFSET) \
+   )
+
+#define TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE \
+   ( \
+      (0u      << TUX64_PLATFORM_MIPS_N64_VI_X_OFFSET_BIT_OFFSET) | \
+      (0x200u  << TUX64_PLATFORM_MIPS_N64_VI_X_SCALE_BIT_OFFSET) \
+   )
+
+#define TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE \
+   ( \
+      (0u      << TUX64_PLATFORM_MIPS_N64_VI_Y_OFFSET_BIT_OFFSET) | \
+      (0x400u  << TUX64_PLATFORM_MIPS_N64_VI_Y_SCALE_BIT_OFFSET) \
+   )
+
+#define TUX64_BOOT_STAGE1_VIDOE_VI_INTR \
+   (2u)
+
+#define TUX64_BOOT_STAGE1_VIDEO_VI_V_CURRENT \
+   (0u)
+
+/* we have a bit of duplication, but the code required to iterate seperately */
+/* and avoid duplication outweighs the benefits. */
+
+static const union Tux64BootStage1VideoViRegisterArray
+tux64_boot_stage1_video_vi_register_array_pal = {.regs = {
+   .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
+   .origin        = TUX64_LITERAL_UINT32(0x00000000u),
+   .width         = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X),
+   .v_intr        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDOE_VI_INTR),
+   .v_current     = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_V_CURRENT),
+   .burst         = TUX64_LITERAL_UINT32(0x0404233au),
+   .v_total       = TUX64_LITERAL_UINT32(625u),
+   .h_total       = TUX64_LITERAL_UINT32(3177u),
+   .h_total_leap  = TUX64_LITERAL_UINT32(0x0c6f0c6eu),
+   .h_video       = TUX64_LITERAL_UINT32(0x00800300u),
+   .v_video       = TUX64_LITERAL_UINT32(0x005f0239u),
+   .v_burst       = TUX64_LITERAL_UINT32(0x0009026bu),
+   .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
+   .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
+}};
+
+static const union Tux64BootStage1VideoViRegisterArray
+tux64_boot_stage1_video_vi_register_array_ntsc = {.regs = {
+   .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
+   .origin        = TUX64_LITERAL_UINT32(0x00000000u),
+   .width         = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X),
+   .v_intr        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDOE_VI_INTR),
+   .v_current     = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_V_CURRENT),
+   .burst         = TUX64_LITERAL_UINT32(0x03e52239u),
+   .v_total       = TUX64_LITERAL_UINT32(525u),
+   .h_total       = TUX64_LITERAL_UINT32(3093u),
+   .h_total_leap  = TUX64_LITERAL_UINT32(0x0c150c15u),
+   .h_video       = TUX64_LITERAL_UINT32(0x006c02ecu),
+   .v_video       = TUX64_LITERAL_UINT32(0x002501ffu),
+   .v_burst       = TUX64_LITERAL_UINT32(0x000e0204u),
+   .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
+   .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
+}};
+
+/* TODO: make sure all below constants are correct for MPAL */
+
+static const union Tux64BootStage1VideoViRegisterArray
+tux64_boot_stage1_video_vi_register_array_mpal = {.regs = {
+   .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
+   .origin        = TUX64_LITERAL_UINT32(0x00000000u),
+   .width         = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X),
+   .v_intr        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDOE_VI_INTR),
+   .v_current     = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_V_CURRENT),
+   .burst         = TUX64_LITERAL_UINT32(0x0404233au), /* ??? */
+   .v_total       = TUX64_LITERAL_UINT32(525u),
+   .h_total       = TUX64_LITERAL_UINT32(3090u),
+   .h_total_leap  = TUX64_LITERAL_UINT32(0x0c150c15u), /* ??? */
+   .h_video       = TUX64_LITERAL_UINT32(0x006c02ecu), /* ??? */
+   .v_video       = TUX64_LITERAL_UINT32(0x002501ffu), /* ??? */
+   .v_burst       = TUX64_LITERAL_UINT32(0x000e0204u), /* ??? */
+   .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
+   .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
+}};
+
+static const union Tux64BootStage1VideoViRegisterArray
+tux64_boot_stage1_video_vi_register_array_ique = {.regs = {
+   .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_IQUE),
+   .origin        = TUX64_LITERAL_UINT32(0x00000000u),
+   .width         = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X),
+   .v_intr        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDOE_VI_INTR),
+   .v_current     = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_V_CURRENT),
+   .burst         = TUX64_LITERAL_UINT32(0x03e52239u),
+   .v_total       = TUX64_LITERAL_UINT32(525u),
+   .h_total       = TUX64_LITERAL_UINT32(3093u),
+   .h_total_leap  = TUX64_LITERAL_UINT32(0x0c150c15u),
+   .h_video       = TUX64_LITERAL_UINT32(0x006c02ecu),
+   .v_video       = TUX64_LITERAL_UINT32(0x002501ffu),
+   .v_burst       = TUX64_LITERAL_UINT32(0x000e0204u),
+   .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
+   .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
+}};
+
+/* and then we do this so we can directly index the correct registers for the */
+/* video platform without a rat's nest of if statements. */
+static const union Tux64BootStage1VideoViRegisterArray
+tux64_boot_stage1_video_vi_register_arrays [] = {
+   tux64_boot_stage1_video_vi_register_array_pal,
+   tux64_boot_stage1_video_vi_register_array_ntsc,
+   tux64_boot_stage1_video_vi_register_array_mpal,
+   tux64_boot_stage1_video_vi_register_array_ique
+};
+
 static void
 tux64_boot_stage1_video_initialize_vi(
    enum Tux64BootStage1VideoPlatform platform
 ) {
-   volatile struct Tux64PlatformMipsN64MmioRegistersVi * vi;
-   Tux64UInt32 pixel_advance;
-   Tux64UInt32 burst;
-   Tux64UInt32 v_total;
-   Tux64UInt32 h_total;
-   Tux64UInt32 h_start;
-   Tux64UInt32 h_end;
-   Tux64UInt32 v_start;
-   Tux64UInt32 v_end;
-   Tux64UInt32 v_burst_start;
-   Tux64UInt32 v_burst_end;
+   const union Tux64BootStage1VideoViRegisterArray * register_array;
+   const Tux64UInt32 * iter_register_words;
+   volatile Tux64UInt32 * iter_vi;
+   Tux64UInt8 i;
 
-   /* done to save on typing */
-   vi = &tux64_platform_mips_n64_mmio_registers_vi;
+   register_array = &tux64_boot_stage1_video_vi_register_arrays[(Tux64UInt32)platform];
 
-   /* set platform-specific configurations */
-   switch (platform) {
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL:
-         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT);
-         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_PAL);
-         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_PAL);
-         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_PAL);
-         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_PAL);
-         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_PAL);
-         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_PAL);
-         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_PAL);
-         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_PAL);
-         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_PAL);
-         break;
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC:
-         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT);
-         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_NTSC);
-         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_NTSC);
-         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_NTSC);
-         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_NTSC);
-         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_NTSC);
-         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_NTSC);
-         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_NTSC);
-         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_NTSC);
-         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_NTSC);
-         break;
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL:
-         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT);
-         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_NTSC);
-         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_NTSC);
-         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_MPAL);
-         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_NTSC);
-         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_NTSC);
-         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_NTSC);
-         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_NTSC);
-         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_NTSC);
-         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_NTSC);
-         break;
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE:
-         pixel_advance  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_IQUE);
-         burst          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_BURST_NTSC);
-         v_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_SCANLINES_NTSC);
-         h_total        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_TOTAL_NTSC);
-         h_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_START_NTSC);
-         h_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_H_END_NTSC);
-         v_start        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_START_NTSC);
-         v_end          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_END_NTSC);
-         v_burst_start  = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_START_NTSC);
-         v_burst_end    = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_V_BURST_END_NTSC);
-         break;
-      default:
-         TUX64_UNREACHABLE;
-   }
+   iter_register_words = register_array->words;
+   iter_vi = (volatile Tux64UInt32 *)&tux64_platform_mips_n64_mmio_registers_vi;
 
-   tux64_boot_stage1_video_set_vi_framebuffer(
-      tux64_boot_stage1_video_framebuffer_index_get_displaying()
-   );
+   /* we iterate backwards so that VI_CTRL is the last register we set, which */
+   /* is what enables video output and starts drawing pixels to the screen. */
+   iter_register_words  += TUX64_ARRAY_ELEMENTS(register_array->words);
+   iter_vi              += TUX64_ARRAY_ELEMENTS(register_array->words);
 
-   vi->width = TUX64_LITERAL_UINT32(
-      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X
-   );
+   i = TUX64_LITERAL_UINT8(TUX64_ARRAY_ELEMENTS(register_array->words));
+   do {
+      iter_register_words--;
+      iter_vi--;
+      i--;
 
-   vi->v_intr = TUX64_LITERAL_UINT32(
-      0x00000002u /* trigger interrupt on 2nd line of vblank*/
-   );
-   vi->burst = burst;
-
-   vi->v_total = v_total - TUX64_LITERAL_UINT32(1u);
-
-   vi->h_total =
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_VI_LEAP_DEFAULT) |
-      (h_total - TUX64_LITERAL_UINT32(1u));
-
-   vi->h_video =
-      (h_start << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_H_START_BIT_OFFSET)) |
-      (h_end   << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_H_END_BIT_OFFSET));
-
-   vi->v_video =
-      (v_start << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_START_BIT_OFFSET)) |
-      (v_end   << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_END_BIT_OFFSET));
-
-   vi->v_burst =
-      (v_burst_start << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_BURST_START_BIT_OFFSET)) |
-      (v_burst_end   << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_V_BURST_END_BIT_OFFSET));
-
-   vi->x_scale = TUX64_LITERAL_UINT32(
-      TUX64_BOOT_STAGE1_VIDEO_X_OFFSET << TUX64_PLATFORM_MIPS_N64_VI_X_OFFSET_BIT_OFFSET |
-      TUX64_BOOT_STAGE1_VIDEO_X_SCALE  << TUX64_PLATFORM_MIPS_N64_VI_X_SCALE_BIT_OFFSET
-   );
-
-   vi->y_scale = TUX64_LITERAL_UINT32(
-      TUX64_BOOT_STAGE1_VIDEO_Y_OFFSET << TUX64_PLATFORM_MIPS_N64_VI_Y_OFFSET_BIT_OFFSET |
-      TUX64_BOOT_STAGE1_VIDEO_Y_SCALE  << TUX64_PLATFORM_MIPS_N64_VI_Y_SCALE_BIT_OFFSET
-   );
-
-   /* VI_CTRL should be set last since setting this will enable video output */
-   vi->ctrl = TUX64_LITERAL_UINT32(
-      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_DEDITHER_DISABLE |
-      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_AA_MODE_DISABLE |
-      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_SERRATE_DISABLE |
-      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_DIVOT_DISABLE |
-      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_GAMMA_DISABLE |
-      (Tux64UInt32)TUX64_PLATFORM_MIPS_N64_VI_GAMMA_DITHER_DISABLE |
-      (Tux64UInt32)TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXEL_FORMAT
-   ) | (pixel_advance << TUX64_LITERAL_UINT8(TUX64_PLATFORM_MIPS_N64_VI_PIXEL_ADVANCE_BIT_OFFSET));
+      *iter_vi = *iter_register_words;
+   } while (i != TUX64_LITERAL_UINT8(0u));
 
    return;
 }
@@ -424,8 +483,11 @@ tux64_boot_stage1_video_initialize(
    enum Tux64BootStage1VideoPlatform platform,
    Tux64BootStage1VideoPixel clear_color
 ) {
-   tux64_boot_stage1_video_initialize_context(clear_color);
+   /* must initialize VI first, so that the context initialization can set */
+   /* the correct framebuffer.  otherwise, the first frame displayed will be */
+   /* garbage. */
    tux64_boot_stage1_video_initialize_vi(platform);
+   tux64_boot_stage1_video_initialize_context(clear_color);
    return;
 }
 
