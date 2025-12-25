@@ -48,7 +48,7 @@
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL   8u
 #define TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER          8u
 #define TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS               8u
-#define TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS           1u
+#define TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS           3u
 
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_ROWS \
    (( \
@@ -313,7 +313,8 @@ tux64_boot_stage1_fbcon_render(void) {
       sizeof(Tux64BootStage1VideoPixel)
    );
    addr_framebuffer_row = addr_framebuffer_row + TUX64_LITERAL_UINT32(
-      TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS *
+      /* for some reason there's 5 pixels of nothing we need to skip over */
+      (TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS + 5u) *
       sizeof(Tux64BootStage1VideoPixel)
    );
 
@@ -351,10 +352,8 @@ tux64_boot_stage1_fbcon_render(void) {
 skip_rendering:
          idx_character++;
          addr_framebuffer_column += TUX64_LITERAL_UINT32(
-            (
-               TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL +
-               TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS
-            ) * sizeof(Tux64BootStage1VideoPixel)
+            TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL *
+            sizeof(Tux64BootStage1VideoPixel)
          );
       }
 
