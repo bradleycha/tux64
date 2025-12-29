@@ -435,7 +435,7 @@ void
 tux64_fontcompiler_arguments_print_menu_help(void) {
    tux64_fontcompiler_arguments_print_menu(
       TUX64_FONTCOMPILER_ARGUMENTS_MENU_HELP,
-      TUX64_LITERAL_UINT32(sizeof(TUX64_FONTCOMPILER_ARGUMENTS_MENU_HELP))
+      TUX64_LITERAL_UINT32(TUX64_STRING_CHARACTERS(TUX64_FONTCOMPILER_ARGUMENTS_MENU_HELP) * sizeof(char))
    );
    return;
 }
@@ -444,7 +444,7 @@ void
 tux64_fontcompiler_arguments_print_menu_version(void) {
    tux64_fontcompiler_arguments_print_menu(
       TUX64_FONTCOMPILER_ARGUMENTS_MENU_VERSION,
-      TUX64_LITERAL_UINT32(sizeof(TUX64_FONTCOMPILER_ARGUMENTS_MENU_VERSION))
+      TUX64_LITERAL_UINT32(TUX64_STRING_CHARACTERS(TUX64_FONTCOMPILER_ARGUMENTS_MENU_VERSION) * sizeof(char))
    );
    return;
 }

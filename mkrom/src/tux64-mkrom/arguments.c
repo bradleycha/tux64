@@ -1319,7 +1319,7 @@ void
 tux64_mkrom_arguments_command_line_print_menu_help(void) {
    tux64_mkrom_arguments_command_line_print_menu(
       TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_HELP,
-      sizeof(TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_HELP)
+      TUX64_LITERAL_UINT32(TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_HELP) * sizeof(char))
    );
    return;   
 }
@@ -1328,7 +1328,7 @@ void
 tux64_mkrom_arguments_command_line_print_menu_version(void) {
    tux64_mkrom_arguments_command_line_print_menu(
       TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_VERSION,
-      sizeof(TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_VERSION)
+      TUX64_LITERAL_UINT32(TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_COMMAND_LINE_MENU_VERSION) * sizeof(char))
    );
    return;
 }
