@@ -12,6 +12,7 @@
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
+#include "tux64-boot/stage1/percentage.h"
 
 enum Tux64BootStage1Color {
    TUX64_BOOT_STAGE1_COLOR_BLACK    = 0x0001u,
@@ -51,6 +52,8 @@ struct Tux64BootStage1MainLoopContextMemory {
 
 struct Tux64BootStage1MainLoopContext {
    struct Tux64BootStage1MainLoopContextMemory memory;
+   struct Tux64BootStage1PercentageContext percentage_test;
+   Tux64BootStage1FbconLabel label_test;
 };
 
 static void
@@ -61,6 +64,13 @@ tux64_boot_stage1_main_loop_context_initialize(
 ) {
    context->memory.total = memory_total;
    context->memory.available = memory_available;
+
+   (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
+   tux64_boot_stage1_fbcon_skip_line();
+
+   tux64_boot_stage1_percentage_initialize(&context->percentage_test);
+   context->label_test = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_hello_world);
+
    return;
 }
 
@@ -68,8 +78,16 @@ static void
 tux64_boot_stage1_main_loop_context_execute(
    struct Tux64BootStage1MainLoopContext * context
 ) {
-   /* TODO: implement */
-   (void)context;
+   /* test code for percentage */
+   tux64_boot_stage1_percentage_format(
+      &context->percentage_test,
+      context->label_test
+   );
+   tux64_boot_stage1_percentage_accumulate(
+      &context->percentage_test,
+      TUX64_LITERAL_UINT32(0x00500000u)
+   );
+
    return;
 }
 
@@ -123,12 +141,6 @@ tux64_boot_stage1_main(
       memory_total,
       memory_available
    );
-
-   (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
-   tux64_boot_stage1_fbcon_skip_line();
-
-   /* TODO: replace this with actual status information. */
-   (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_hello_world);
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_LOOP);
    while (TUX64_BOOLEAN_TRUE) {

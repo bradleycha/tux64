@@ -88,6 +88,31 @@ tux64_boot_stage1_fbcon_label_character_set(
 );
 
 /*----------------------------------------------------------------------------*/
+/* Get the number of characters which can be stored in the allocated memory   */
+/* for the text label.                                                        */
+/*----------------------------------------------------------------------------*/
+Tux64UInt8
+tux64_boot_stage1_fbcon_label_capacity_get(
+   Tux64BootStage1FbconLabel label
+);
+
+/*----------------------------------------------------------------------------*/
+/* Encodes an ASCII character into the internal representation for a          */
+/* character.  This character must be one of the following:                   */
+/*                                                                            */
+/*    A-Z                                                                     */
+/*    a-z                                                                     */
+/*    0-9                                                                     */
+/*    '%'                                                                     */
+/*    '.'                                                                     */
+/*    ' '                                                                     */
+/*----------------------------------------------------------------------------*/
+Tux64BootStage1FbconLabelCharacter
+tux64_boot_stage1_fbcon_character_encode(
+   char character
+);
+
+/*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer console.  Requires the video subsystem to be   */
 /* initialized beforehand.                                                    */
 /*----------------------------------------------------------------------------*/

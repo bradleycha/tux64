@@ -204,6 +204,45 @@ tux64_boot_stage1_fbcon_label_character_set(
    return;
 }
 
+Tux64UInt8
+tux64_boot_stage1_fbcon_label_capacity_get(
+   Tux64BootStage1FbconLabel label
+) {
+   struct Tux64BootStage1FbconCharacterMap * map;
+   struct Tux64BootStage1FbconCharacterMapLine * line;
+
+   map   = &tux64_boot_stage1_fbcon_character_map;
+   line  = &map->lines_buffer[label];
+
+   return line->characters_count;
+}
+
+Tux64BootStage1FbconLabelCharacter
+tux64_boot_stage1_fbcon_character_encode(
+   char character
+) {
+   if (character >= 'A' && character <= 'Z') {
+      return (Tux64BootStage1FbconLabelCharacter)(character - 'A') + TUX64_LITERAL_UINT8(0u);
+   }
+   if (character >= 'a' && character <= 'z') {
+      return (Tux64BootStage1FbconLabelCharacter)(character - 'a') + TUX64_LITERAL_UINT8(26u);
+   }
+   if (character >= '0' && character <= '9') {
+      return (Tux64BootStage1FbconLabelCharacter)(character - '0') + TUX64_LITERAL_UINT8(52u);
+   }
+   if (character == '%') {
+      return TUX64_LITERAL_UINT8(62u);
+   }
+   if (character == '.') {
+      return TUX64_LITERAL_UINT8(63u);
+   }
+   if (character == ' ') {
+      return TUX64_LITERAL_UINT8(64u);
+   }
+
+   TUX64_UNREACHABLE;
+}
+
 static void
 tux64_boot_stage1_fbcon_fontmap_decompress_byte(
    Tux64BootStage1VideoPixel color_foreground,
@@ -357,7 +396,7 @@ tux64_boot_stage1_fbcon_render(void) {
       while (idx_character != line->characters_count) {
 
          character = line->characters_buffer[idx_character];
-         if (character == TUX64_LITERAL_UINT8(0x40u)) {
+         if (character == tux64_boot_stage1_fbcon_character_encode(' ')) {
             /* skip space characters as there's nothing to render */
             goto skip_rendering;
          }
