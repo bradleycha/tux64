@@ -9,6 +9,11 @@
 {
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH;
+   .text                = "Tux64 Bootloader version 0.1.0";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH;
    .text                = "Hello world";
 }
 

@@ -18,6 +18,11 @@ tux64_boot_stage1_strings_data_splash [] = {
    TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA
 };
 
+static const Tux64BootStage1FbconLabelCharacter
+tux64_boot_stage1_strings_data_hello_world [] = {
+   TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA
+};
+
 /* all text strings stored next to each other in memory to hopefully improve */
 /* caching via locality */
 static const struct Tux64BootStage1FbconText
@@ -26,9 +31,16 @@ tux64_boot_stage1_strings [] = {
       .ptr        = tux64_boot_stage1_strings_data_splash,
       .length     = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH),
       .capacity   = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH)
+   },
+   {
+      .ptr        = tux64_boot_stage1_strings_data_hello_world,
+      .length     = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH),
+      .capacity   = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH)
    }
 };
 
 const struct Tux64BootStage1FbconText *
 tux64_boot_stage1_strings_splash = &tux64_boot_stage1_strings[0u];
+const struct Tux64BootStage1FbconText *
+tux64_boot_stage1_strings_hello_world = &tux64_boot_stage1_strings[1u];
 

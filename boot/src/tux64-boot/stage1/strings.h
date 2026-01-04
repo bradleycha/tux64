@@ -14,6 +14,8 @@
 
 extern const struct Tux64BootStage1FbconText *
 tux64_boot_stage1_strings_splash;
+extern const struct Tux64BootStage1FbconText *
+tux64_boot_stage1_strings_hello_world;
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_STRINGS_H */
