@@ -60,10 +60,46 @@ AC_ARG_ENABLE([status],
    [tux64_boot_config_status=1],
    [tux64_boot_config_status=0]
 )
+AC_ARG_ENABLE([ique],
+   AS_HELP_STRING([--enable-ique], [Enable iQue player support]),
+   [tux64_boot_config_ique=1],
+   [tux64_boot_config_ique=0]
+)
+AC_ARG_ENABLE([region-pal],
+   AS_HELP_STRING([--enable-region-pal], [Enable PAL region support]),
+   [tux64_boot_config_region_pal=1],
+   [tux64_boot_config_region_pal=0]
+)
+AC_ARG_ENABLE([region-ntsc],
+   AS_HELP_STRING([--enable-region-ntsc], [Enable NTSC region support]),
+   [tux64_boot_config_region_ntsc=1],
+   [tux64_boot_config_region_ntsc=0]
+)
+AC_ARG_ENABLE([region-mpal],
+   AS_HELP_STRING([--enable-region-mpal], [Enable M-PAL region support]),
+   [tux64_boot_config_region_mpal=1],
+   [tux64_boot_config_region_mpal=0]
+)
 
 AC_DEFINE_UNQUOTED([CONFIG_STATUS],
    [$tux64_boot_config_status],
    [Write status codes to a fixed memory location during the boot process]
+)
+AC_DEFINE_UNQUOTED([CONFIG_IQUE],
+   [$tux64_boot_config_ique],
+   [Enable iQue player support]
+)
+AC_DEFINE_UNQUOTED([CONFIG_REGION_PAL],
+   [$tux64_boot_config_region_pal],
+   [Enable PAL region support]
+)
+AC_DEFINE_UNQUOTED([CONFIG_REGION_NTSC],
+   [$tux64_boot_config_region_ntsc],
+   [Enable NTSC region support]
+)
+AC_DEFINE_UNQUOTED([CONFIG_REGION_MPAL],
+   [$tux64_boot_config_region_mpal],
+   [Enable M-PAL region support]
 )
 
 AC_OUTPUT

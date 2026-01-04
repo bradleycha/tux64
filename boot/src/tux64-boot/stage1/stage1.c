@@ -38,9 +38,13 @@ tux64_boot_stage1_choose_video_platform(
    enum Tux64BootIpl2VideoStandard video_standard,
    Tux64Boolean running_on_ique
 ) {
+#if TUX64_BOOT_CONFIG_IQUE
    if (running_on_ique == TUX64_BOOLEAN_TRUE) {
       return TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE;
    }
+#else /* TUX64_BOOT_CONFIG_IQUE */
+   (void)running_on_ique;
+#endif /* TUX64_BOOT_CONFIG_IQUE */
 
    return (enum Tux64BootStage1VideoPlatform)video_standard;
 }
@@ -85,7 +89,7 @@ tux64_boot_stage1_main_loop_context_execute(
    );
    tux64_boot_stage1_percentage_accumulate(
       &context->percentage_test,
-      TUX64_LITERAL_UINT32(0x00500000u)
+      TUX64_LITERAL_UINT32(0x00200000u)
    );
 
    return;

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/video.c - Framebuffer video implementation.     */
@@ -16,6 +16,19 @@
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/sync.h"
 #include "tux64-boot/stage1/rsp.h"
+
+#define TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION \
+   !( \
+      TUX64_BOOT_CONFIG_REGION_PAL  || \
+      TUX64_BOOT_CONFIG_REGION_NTSC || \
+      TUX64_BOOT_CONFIG_REGION_MPAL || \
+      TUX64_BOOT_CONFIG_IQUE \
+   )
+
+/* we need this to prevent misconfigurations from exploding at runtime. */
+#if TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION
+#error unable to determine video configurations parameters.  please reconfigure with at least one region supported with --enable-region-[region], or enable iQue player support with --enable-ique
+#endif /* TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION */
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (2u) /* double-buffered */
@@ -363,6 +376,7 @@ union Tux64BootStage1VideoViRegisterArray {
 /* we have a bit of duplication, but the code required to iterate seperately */
 /* and avoid duplication outweighs the benefits. */
 
+#if TUX64_BOOT_CONFIG_REGION_PAL
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_pal = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
@@ -380,7 +394,9 @@ tux64_boot_stage1_video_vi_register_array_pal = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
+#endif /* TUX64_BOOT_CONFIG_REGION_PAL */
 
+#if TUX64_BOOT_CONFIG_REGION_NTSC
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_ntsc = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
@@ -398,9 +414,11 @@ tux64_boot_stage1_video_vi_register_array_ntsc = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
+#endif /* TUX64_BOOT_CONFIG_REGION_NTSC */
 
 /* TODO: make sure all below constants are correct for MPAL */
 
+#if TUX64_BOOT_CONFIG_REGION_MPAL
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_mpal = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
@@ -418,7 +436,9 @@ tux64_boot_stage1_video_vi_register_array_mpal = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
+#endif /* TUX64_BOOT_CONFIG_REGION_MPAL */
 
+#if TUX64_BOOT_CONFIG_IQUE
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_ique = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_IQUE),
@@ -436,16 +456,39 @@ tux64_boot_stage1_video_vi_register_array_ique = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
+#endif /* TUX64_BOOT_CONFIG_IQUE */
 
-/* and then we do this so we can directly index the correct registers for the */
-/* video platform without a rat's nest of if statements. */
-static const union Tux64BootStage1VideoViRegisterArray
-tux64_boot_stage1_video_vi_register_arrays [] = {
-   tux64_boot_stage1_video_vi_register_array_pal,
-   tux64_boot_stage1_video_vi_register_array_ntsc,
-   tux64_boot_stage1_video_vi_register_array_mpal,
-   tux64_boot_stage1_video_vi_register_array_ique
-};
+static const union Tux64BootStage1VideoViRegisterArray *
+tux64_boot_stage1_video_vi_choose_register_array(
+   enum Tux64BootStage1VideoPlatform platform
+) {
+   switch (platform) {
+#if TUX64_BOOT_CONFIG_REGION_PAL
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL:
+         return &tux64_boot_stage1_video_vi_register_array_pal;
+#endif /* TUX64_BOOT_CONFIG_REGION_PAL */
+
+#if TUX64_BOOT_CONFIG_REGION_NTSC
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC:
+         return &tux64_boot_stage1_video_vi_register_array_ntsc;
+#endif /* TUX64_BOOT_CONFIG_REGION_NTSC */
+
+#if TUX64_BOOT_CONFIG_REGION_MPAL
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL:
+         return &tux64_boot_stage1_video_vi_register_array_mpal;
+#endif /* TUX64_BOOT_CONFIG_REGION_MPAL */
+
+#if TUX64_BOOT_CONFIG_IQUE
+      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE:
+         return &tux64_boot_stage1_video_vi_register_array_ique;
+#endif /* TUX64_BOOT_CONFIG_IQUE */
+
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   TUX64_UNREACHABLE;
+}
 
 static void
 tux64_boot_stage1_video_initialize_vi(
@@ -456,7 +499,7 @@ tux64_boot_stage1_video_initialize_vi(
    volatile Tux64UInt32 * iter_vi;
    Tux64UInt8 i;
 
-   register_array = &tux64_boot_stage1_video_vi_register_arrays[(Tux64UInt32)platform];
+   register_array = tux64_boot_stage1_video_vi_choose_register_array(platform);
 
    iter_register_words = register_array->words;
    iter_vi = (volatile Tux64UInt32 *)&tux64_platform_mips_n64_mmio_registers_vi;
