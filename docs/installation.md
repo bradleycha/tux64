@@ -737,7 +737,8 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       CFLAGS="${TUX64_CFLAGS_N64_BOOTLOADER}" \
       ASFLAGS="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
       LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
-      TUX64_FONTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-fontcompiler
+      TUX64_FONTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-fontcompiler \
+      TUX64_TEXTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-textcompiler
 )
 
 make -j1
