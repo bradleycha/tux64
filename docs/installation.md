@@ -723,6 +723,10 @@ We now have a kernel image and a bunch of software, but how do we boot this?  Wi
 
 We first need to build the bootloader.  This will produce a series of binary "stage" files.  These are the executable code which will run right after the console powers on and starts executing code from the cartridge.
 
+For this, we have to choose which console region we want to support, or include support for multiple regions if desired.  We can either support PAL (European N64s), NTSC (American and Japanese N64s), or M-PAL (Brazilian N64s?), or alternatively only support the iQue player, which is treated as its own "region".  Including support for multiple regions is useful if you want a single unified bootloader that supports all regions and consoles, at the cost of some slight bloat.
+
+For most people, you will only need NTSC support.  To do this, configure with `--enable-region-ntsc`.  For other regions, refer to the help menu from the configure script with `--help`.
+
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/tux64-boot
 cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
@@ -738,7 +742,8 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       ASFLAGS="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
       LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
       TUX64_FONTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-fontcompiler \
-      TUX64_TEXTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-textcompiler
+      TUX64_TEXTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-textcompiler \
+      --enable-region-ntsc
 )
 
 make -j1
