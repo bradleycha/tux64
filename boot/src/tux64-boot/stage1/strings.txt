@@ -1,0 +1,14 @@
+/*----------------------------------------------------------------------------*/
+/*                          Copyright (C) Tux64 2026                          */
+/*                    https://github.com/bradleycha/tux64                     */
+/*----------------------------------------------------------------------------*/
+/* boot/src/tux64-boot/stage1/strings.txt - Definitions for fbcon text        */
+/*    strings.                                                                */
+/*----------------------------------------------------------------------------*/
+
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH;
+   .text                = "Hello world";
+}
+

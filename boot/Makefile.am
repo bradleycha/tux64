@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (c) Tux64 2025, 2026                   		 #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
 # boot/Makefile.am - GNU Automake script for the bootloader.			 			 #
@@ -12,6 +12,8 @@ noinst_PROGRAMS = \
 
 stage1_FONTMAP = \
 	$(top_builddir)/src/tux64-boot/stage1/fontmap.bin.c
+stage1_STRINGS = \
+	$(top_builddir)/src/tux64-boot/stage1/strings.bin.c
 
 stage0_ELF = \
 	$(top_builddir)/stage0
@@ -88,8 +90,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/video.h \
 	src/tux64-boot/stage1/fbcon.c \
 	src/tux64-boot/stage1/fbcon.h \
-	src/tux64-boot/stage1/text.c \
-	src/tux64-boot/stage1/text.h \
+	src/tux64-boot/stage1/strings.c \
+	src/tux64-boot/stage1/strings.h \
 	src/tux64-boot/stage1/status.c \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
@@ -120,11 +122,15 @@ stage2_LDFLAGS = \
 pkgdata_DATA = \
 	$(BIN_FILES) $(SYM_FILES)
 
-# explicit dependency needed since we're generating the font map C source code
+# explicit dependency needed since we're generating the C source code
 $(top_srcdir)/src/tux64-boot/stage1/fbcon.c : $(stage1_FONTMAP)
+$(top_srcdir)/src/tux64-boot/stage1/strings.c : $(stage1_STRINGS)
 
 $(stage1_FONTMAP) : $(top_srcdir)/src/tux64-boot/stage1/fontmap.data
 	$(TUX64_FONTCOMPILER) --input $< --output $@ --name TUX64_BOOT_STAGE1_FONTMAP_BIN
+
+$(stage1_STRINGS) : $(top_srcdir)/src/tux64-boot/stage1/strings.txt
+	$(TUX64_TEXTCOMPILER) --input $< --output $@
 
 # TODO: something is not right here.  if we configure with dependency tracking
 # enabled this works fine, but if we disable dependency tracking, this breaks

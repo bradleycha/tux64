@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (c) Tux64 2025, 2026                   		 #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
 # boot/configure.ac - GNU Autoconf script for the bootloader.                  #
@@ -23,6 +23,12 @@ fi
 AC_CHECK_PROG([TUX64_FONTCOMPILER], [tux64-fontcompiler])
 if [[ -z "$TUX64_FONTCOMPILER" ]]; then
    echo configure.ac: error: unable to find tux64-fontcompiler.  please verify the build was configured correctly.
+   exit 1
+fi
+
+AC_CHECK_PROG([TUX64_TEXTCOMPILER], [tux64-textcompiler])
+if [[ -z "$TUX64_TEXTCOMPILER" ]]; then
+   echo configure.ac: error: unable to find tux64-textcompiler.  please verify the build was configured correctly.
    exit 1
 fi
 
