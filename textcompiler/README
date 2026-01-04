@@ -1,0 +1,4 @@
+tux64-textcompiler is a command-line tool used to convert ASCII text into an
+embedded form used by the frame buffer console in tux64-boot.  This tool is
+required to build tux64-boot, but most people shouldn't need to manually invoke
+it.
