@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/fbcon.h - Interfaces for framebuffer console.   */
@@ -60,6 +60,12 @@ Tux64BootStage1FbconLabel
 tux64_boot_stage1_fbcon_label_push(
    const struct Tux64BootStage1FbconText * text
 );
+
+/*----------------------------------------------------------------------------*/
+/* Skips a line without printing any text.                                    */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_fbcon_skip_line(void);
 
 /*----------------------------------------------------------------------------*/
 /* Get the fbcon-encoded character at index 'idx' within 'label'.             */

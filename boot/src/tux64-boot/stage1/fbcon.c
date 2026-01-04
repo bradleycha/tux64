@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/fbcon.c - Implementations for framebuffer       */
@@ -109,7 +109,15 @@ static struct Tux64BootStage1FbconCharacterMap
 tux64_boot_stage1_fbcon_character_map;
 
 static void
-tux64_boot_stage1_fbcon_character_map_line_initialize(
+tux64_boot_stage1_fbcon_character_map_line_initialize_empty(
+   struct Tux64BootStage1FbconCharacterMapLine * line
+) {
+   line->characters_count = TUX64_LITERAL_UINT8(0u);
+   return;
+}
+
+static void
+tux64_boot_stage1_fbcon_character_map_line_initialize_content(
    struct Tux64BootStage1FbconCharacterMapLine * line,
    const struct Tux64BootStage1FbconText * text
 ) {
@@ -141,12 +149,29 @@ tux64_boot_stage1_fbcon_label_push(
    idx = map->lines_count;
    map->lines_count++;
 
-   tux64_boot_stage1_fbcon_character_map_line_initialize(
+   tux64_boot_stage1_fbcon_character_map_line_initialize_content(
       &map->lines_buffer[idx],
       text
    );
 
    return (Tux64BootStage1FbconLabel)idx;
+}
+
+void
+tux64_boot_stage1_fbcon_skip_line(void) {
+   struct Tux64BootStage1FbconCharacterMap * map;
+   Tux64UInt8 idx;
+
+   map = &tux64_boot_stage1_fbcon_character_map;
+
+   idx = map->lines_count;
+   map->lines_count++;
+
+   tux64_boot_stage1_fbcon_character_map_line_initialize_empty(
+      &map->lines_buffer[idx]
+   );
+
+   return;
 }
 
 Tux64BootStage1FbconLabelCharacter
