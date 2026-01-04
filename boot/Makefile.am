@@ -106,6 +106,8 @@ EXTRA_DIST = \
 	src/tux64-boot/stage1/stage1.ld \
 	src/tux64-boot/stage1/stack.ld \
 	src/tux64-boot/stage1/boot-header.ld \
+	src/tux64-boot/stage1/fontmap.data \
+	src/tux64-boot/stage1/strings.txt \
 	src/tux64-boot/stage1/status.ld \
 	src/tux64-boot/stage2/stage2.ld
 
