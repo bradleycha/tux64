@@ -33,6 +33,20 @@ enum Tux64BootStage1Color {
    TUX64_BOOT_STAGE1_COLOR_SAPPHIRE = 0x0013u
 };
 
+struct Tux64BootStage1Palette {
+   enum Tux64BootStage1Color foreground;
+   enum Tux64BootStage1Color background;
+};
+
+static struct Tux64BootStage1Palette
+tux64_boot_stage1_choose_video_palette(void) {
+   struct Tux64BootStage1Palette palette;
+
+   palette.foreground = TUX64_BOOT_CONFIG_COLOR_FOREGROUND;
+   palette.background = TUX64_BOOT_CONFIG_COLOR_BACKGROUND;
+   return palette;
+}
+
 static enum Tux64BootStage1VideoPlatform
 tux64_boot_stage1_choose_video_platform(
    enum Tux64BootIpl2VideoStandard video_standard,
@@ -110,8 +124,7 @@ tux64_boot_stage1_main(
    Tux64Boolean running_on_ique
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
-   Tux64BootStage1VideoPixel fbcon_color_foreground;
-   Tux64BootStage1VideoPixel fbcon_color_background;
+   struct Tux64BootStage1Palette video_palette;
    struct Tux64BootStage1MainLoopContext main_loop_context;
 
    tux64_boot_stage1_status_initialize();
@@ -121,26 +134,24 @@ tux64_boot_stage1_main(
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT);
    tux64_boot_stage1_interrupt_initialize();
 
+   video_palette = tux64_boot_stage1_choose_video_palette();
+
    video_platform = tux64_boot_stage1_choose_video_platform(
       video_standard,
       running_on_ique
    );
 
-   /* a lovely shade of w*ndows KeBugCheck() to let us know our code works! */
-   fbcon_color_foreground = TUX64_BOOT_STAGE1_COLOR_GRAY;
-   fbcon_color_background = TUX64_BOOT_STAGE1_COLOR_SAPPHIRE;
-
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(
       video_platform,
-      fbcon_color_background
+      video_palette.background
    );
    tux64_boot_stage1_interrupt_vi_enable();
 
    tux64_boot_stage1_fbcon_initialize(
-      fbcon_color_foreground,
-      fbcon_color_background
+      video_palette.foreground,
+      video_palette.background
    );
 
    tux64_boot_stage1_main_loop_context_initialize(

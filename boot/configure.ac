@@ -15,32 +15,36 @@ AC_CONFIG_HEADERS([configdir/config-noprefix.h])
 
 AC_CANONICAL_HOST
 
+tux64_boot_err_log() {
+   >&2 echo configure.ac: error: $1
+}
+
 if [[ "$host_cpu" != "mips64" ]] || [[ "$host_os" != "elf" ]]; then
-   echo configure.ac: error: expected host system type mips64-elf, found $host
+   $(tux64_boot_err_log "expected host system type mips64-elf, found ${host}")
    exit 1
 fi
 
 AC_CHECK_PROG([TUX64_FONTCOMPILER], [tux64-fontcompiler])
 if [[ -z "$TUX64_FONTCOMPILER" ]]; then
-   echo configure.ac: error: unable to find tux64-fontcompiler.  please verify the build was configured correctly.
+   $(tux64_boot_err_log "unable to find tux64-fontcompiler.  please verify the build was configured correctly.")
    exit 1
 fi
 
 AC_CHECK_PROG([TUX64_TEXTCOMPILER], [tux64-textcompiler])
 if [[ -z "$TUX64_TEXTCOMPILER" ]]; then
-   echo configure.ac: error: unable to find tux64-textcompiler.  please verify the build was configured correctly.
+   $(tux64_boot_err_log "unable to find tux64-textcompiler.  please verify the build was configured correctly.")
    exit 1
 fi
 
 AC_CHECK_TOOL([OBJCOPY], [objcopy])
 if [[ -z "$OBJCOPY" ]]; then
-   echo configure.ac: error: unable to find $host_cpu-$host_os-objcopy.  please verify the build was configured correctly.
+   $(tux64_boot_err_log "unable to find ${host_cpu}-${host_os}-objcopy.  please verify the build was configured correctly.")
    exit 1
 fi
 
 AC_CHECK_TOOL([OBJDUMP], [objdump])
 if [[ -z "$OBJDUMP" ]]; then
-   echo configure.ac: error: unable to find $host_cpu-$host_os-objdump.  please verify the build was configured correctly.
+   $(tux64_boot_err_log "unable to find ${host_cpu}-${host_os}-objdump.  please verify the build was configured correctly.")
    exit 1
 fi
 
@@ -52,8 +56,6 @@ AC_PROG_CC
 AM_PROG_AS
 
 AC_CHECK_HEADER([tux64/tux64.h])
-
-tux64_boot_config_status=0
 
 AC_ARG_ENABLE([status],
    AS_HELP_STRING([--enable-status], [Write status codes to a fixed memory location during the boot process]),
@@ -81,6 +83,72 @@ AC_ARG_ENABLE([region-mpal],
    [tux64_boot_config_region_mpal=0]
 )
 
+if [[ -z "$CONFIG_COLOR_FOREGROUND" ]]; then
+   CONFIG_COLOR_FOREGROUND="white"
+fi
+if [[ -z "$CONFIG_COLOR_BACKGROUND" ]]; then
+   CONFIG_COLOR_BACKGROUND="black"
+fi
+
+tux64_boot_enumerate_color() {
+   case "${1}" in
+      "black")
+         echo TUX64_BOOT_STAGE1_COLOR_BLACK ;;
+
+      "white")
+         echo TUX64_BOOT_STAGE1_COLOR_WHITE ;;
+
+      "gray" | "grey") # show some love for non-americans!
+         echo TUX64_BOOT_STAGE1_COLOR_GRAY ;;
+
+      "magenta")
+         echo TUX64_BOOT_STAGE1_COLOR_MAGENTA ;;
+
+      "red")
+         echo TUX64_BOOT_STAGE1_COLOR_RED ;;
+
+      "orange")
+         echo TUX64_BOOT_STAGE1_COLOR_ORANGE ;;
+
+      "yellow")
+         echo TUX64_BOOT_STAGE1_COLOR_YELLOW ;;
+
+      "green")
+         echo TUX64_BOOT_STAGE1_COLOR_GREEN ;;
+
+      "cyan")
+         echo TUX64_BOOT_STAGE1_COLOR_CYAN ;;
+
+      "blue")
+         echo TUX64_BOOT_STAGE1_COLOR_BLUE ;;
+
+      "indigo")
+         echo TUX64_BOOT_STAGE1_COLOR_INDIGO ;;
+
+      "violet")
+         echo TUX64_BOOT_STAGE1_COLOR_VIOLET ;;
+
+      "purple")
+         echo TUX64_BOOT_STAGE1_COLOR_PURPLE ;;
+
+      "ruby")
+         echo TUX64_BOOT_STAGE1_COLOR_RUBY ;;
+
+      "emerald")
+         echo TUX64_BOOT_STAGE1_COLOR_EMERALD ;;
+
+      "sapphire")
+         echo TUX64_BOOT_STAGE1_COLOR_SAPPHIRE ;;
+
+      *)
+         $(tux64_boot_err_log "invalid $2 color \"${1}\"")
+         exit 1 ;;
+   esac
+}
+
+tux64_boot_config_color_foreground_enum=$(tux64_boot_enumerate_color $CONFIG_COLOR_FOREGROUND "foreground") || exit $?
+tux64_boot_config_color_background_enum=$(tux64_boot_enumerate_color $CONFIG_COLOR_BACKGROUND "background") || exit $?
+
 AC_DEFINE_UNQUOTED([CONFIG_STATUS],
    [$tux64_boot_config_status],
    [Write status codes to a fixed memory location during the boot process]
@@ -100,6 +168,14 @@ AC_DEFINE_UNQUOTED([CONFIG_REGION_NTSC],
 AC_DEFINE_UNQUOTED([CONFIG_REGION_MPAL],
    [$tux64_boot_config_region_mpal],
    [Enable M-PAL region support]
+)
+AC_DEFINE_UNQUOTED([CONFIG_COLOR_FOREGROUND],
+   [$tux64_boot_config_color_foreground_enum],
+   [The foreground color for the console]
+)
+AC_DEFINE_UNQUOTED([CONFIG_COLOR_BACKGROUND],
+   [$tux64_boot_config_color_background_enum],
+   [The foreground color for the console]
 )
 
 AC_OUTPUT
