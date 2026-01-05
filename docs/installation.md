@@ -727,6 +727,8 @@ For this, we have to choose which console region we want to support, or include 
 
 For most people, you will only need NTSC support.  To do this, configure with `--enable-region-ntsc`.  For other regions, refer to the help menu from the `configure` script with `--help`.
 
+Important note:  If you try to use the bootloader with an unsupported console region, you will get a black screen.
+
 In addition, you can configure the color palette for the on-screen console.  By default, it uses white text on a black background.  To customize this, set the `CONFIG_COLOR_FOREGROUND` and `CONFIG_COLOR_BACKGROUND` to one of the pre-defined colors.  This can be any of the following:
 
 - `white`
