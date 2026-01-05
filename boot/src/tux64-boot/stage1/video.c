@@ -16,6 +16,7 @@
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/sync.h"
 #include "tux64-boot/stage1/rsp.h"
+#include "tux64-boot/stage1/halt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION \
    !( \
@@ -463,31 +464,41 @@ tux64_boot_stage1_video_vi_choose_register_array(
    enum Tux64BootStage1VideoPlatform platform
 ) {
    switch (platform) {
-#if TUX64_BOOT_CONFIG_REGION_PAL
       case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL:
+#if TUX64_BOOT_CONFIG_REGION_PAL
          return &tux64_boot_stage1_video_vi_register_array_pal;
+#else /* TUX64_BOOT_CONFIG_REGION_PAL */
+         break;
 #endif /* TUX64_BOOT_CONFIG_REGION_PAL */
 
-#if TUX64_BOOT_CONFIG_REGION_NTSC
       case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC:
+#if TUX64_BOOT_CONFIG_REGION_NTSC
          return &tux64_boot_stage1_video_vi_register_array_ntsc;
+#else /* TUX64_BOOT_CONFIG_REGION_NTSC */
+         break;
 #endif /* TUX64_BOOT_CONFIG_REGION_NTSC */
 
-#if TUX64_BOOT_CONFIG_REGION_MPAL
       case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL:
+#if TUX64_BOOT_CONFIG_REGION_MPAL
          return &tux64_boot_stage1_video_vi_register_array_mpal;
+#else /* TUX64_BOOT_CONFIG_REGION_MPAL */
+         break;
 #endif /* TUX64_BOOT_CONFIG_REGION_MPAL */
 
-#if TUX64_BOOT_CONFIG_IQUE
       case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE:
+#if TUX64_BOOT_CONFIG_IQUE
          return &tux64_boot_stage1_video_vi_register_array_ique;
+#else /* TUX64_BOOT_CONFIG_IQUE */
+         break;
 #endif /* TUX64_BOOT_CONFIG_IQUE */
 
       default:
          TUX64_UNREACHABLE;
    }
 
-   TUX64_UNREACHABLE;
+   /* if we reach here, it's because we got a video configuration we don't */
+   /* support, and thus the only safe option is to halt. */
+   tux64_boot_stage1_halt();
 }
 
 static void
