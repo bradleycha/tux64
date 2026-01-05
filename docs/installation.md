@@ -727,6 +727,25 @@ For this, we have to choose which console region we want to support, or include 
 
 For most people, you will only need NTSC support.  To do this, configure with `--enable-region-ntsc`.  For other regions, refer to the help menu from the configure script with `--help`.
 
+In addition, you can configure the color palette for the on-screen console.  By default, it uses white text on a black background.  To customize this, set the `CONFIG_COLOR_FOREGROUND` and `CONFIG_COLOR_BACKGROUND` to one of the pre-defined colors.  This can be any of the following:
+
+- `white`
+- `black`
+- `gray` or `grey`
+- `magenta`
+- `red`
+- `orange`
+- `yellow`
+- `green`
+- `cyan`
+- `blue`
+- `indigo`
+- `violet`
+- `purple`
+- `ruby`
+- `emerald`
+- `sapphire`
+
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/tux64-boot
 cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
@@ -743,6 +762,8 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
       TUX64_FONTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-fontcompiler \
       TUX64_TEXTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-textcompiler \
+      CONFIG_COLOR_FOREGROUND=white \
+      CONFIG_COLOR_BACKGROUND=black \
       --enable-region-ntsc
 )
 
