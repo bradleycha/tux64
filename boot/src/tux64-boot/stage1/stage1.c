@@ -97,7 +97,7 @@ tux64_boot_stage1_fsm_state_set_test(
       TUX64_LITERAL_UINT32(600u)
    );
 
-   mem->label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_hello_world);
+   mem->label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_hello_world);
 
    fsm->state = tux64_boot_stage1_fsm_state_test;
    return;
@@ -127,13 +127,13 @@ tux64_boot_stage1_fsm_initialize(
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
 
-   (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
+   (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_splash);
    tux64_boot_stage1_fbcon_skip_line();
 
 #if TUX64_BOOT_CONFIG_MEMORY_DISPLAY
-   label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_memory_total);
+   label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_memory_total);
    tux64_boot_stage1_format_mib(label, memory_total);
-   label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_memory_free);
+   label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_memory_free);
    tux64_boot_stage1_format_mib(label, memory_free);
    tux64_boot_stage1_fbcon_skip_line();
 #else /* TUX64_BOOT_CONFIG_MEMORY_DISPLAY */
