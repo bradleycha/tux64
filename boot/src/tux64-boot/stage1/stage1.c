@@ -127,8 +127,10 @@ tux64_boot_stage1_fsm_initialize(
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
 
+#if TUX64_BOOT_CONFIG_SPLASH
    (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_splash);
    tux64_boot_stage1_fbcon_skip_line();
+#endif /* TUX64_BOOT_CONFIG_SPLASH */
 
 #if TUX64_BOOT_CONFIG_MEMORY_DISPLAY
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_memory_total);
