@@ -62,6 +62,11 @@ AC_ARG_ENABLE([status],
    [tux64_boot_config_status=1],
    [tux64_boot_config_status=0]
 )
+AC_ARG_ENABLE([memory-display],
+   AS_HELP_STRING([--enable-memory-display], [Enable display of memory information on startup]),
+   [tux64_boot_config_memory_display=1],
+   [tux64_boot_config_memory_display=0]
+)
 AC_ARG_ENABLE([ique],
    AS_HELP_STRING([--enable-ique], [Enable iQue player support]),
    [tux64_boot_config_ique=1],
@@ -152,6 +157,10 @@ tux64_boot_config_color_background_enum=$(tux64_boot_enumerate_color $CONFIG_COL
 AC_DEFINE_UNQUOTED([CONFIG_STATUS],
    [$tux64_boot_config_status],
    [Write status codes to a fixed memory location during the boot process]
+)
+AC_DEFINE_UNQUOTED([CONFIG_MEMORY_DISPLAY],
+   [$tux64_boot_config_memory_display],
+   [Enable display of memory information on startup]
 )
 AC_DEFINE_UNQUOTED([CONFIG_IQUE],
    [$tux64_boot_config_ique],

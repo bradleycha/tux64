@@ -134,11 +134,17 @@ tux64_boot_stage1_fsm_initialize(
    (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
    tux64_boot_stage1_fbcon_skip_line();
 
+#if TUX64_BOOT_CONFIG_MEMORY_DISPLAY
    label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_memory_total);
    tux64_boot_stage1_format_mib(label, memory_total);
    label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_memory_free);
    tux64_boot_stage1_format_mib(label, memory_free);
    tux64_boot_stage1_fbcon_skip_line();
+#else /* TUX64_BOOT_CONFIG_MEMORY_DISPLAY */
+   (void)memory_total;
+   (void)memory_free;
+   (void)label;
+#endif /* TUX64_BOOT_CONFIG_MEMORY_DISPLAY */
 
    tux64_boot_stage1_fsm_state_set_test(fsm);
    return;
