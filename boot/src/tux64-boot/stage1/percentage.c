@@ -13,9 +13,12 @@
 
 void
 tux64_boot_stage1_percentage_initialize(
-   struct Tux64BootStage1PercentageContext * context
+   struct Tux64BootStage1PercentageContext * context,
+   Tux64UInt32 maximum_value
 ) {
+   context->maximum  = maximum_value;
    context->progress = TUX64_LITERAL_UINT32(0u);
+   return;
 }
 
 void
@@ -24,8 +27,8 @@ tux64_boot_stage1_percentage_accumulate(
    Tux64UInt32 value
 ) {
    /* clamping done cleverly to avoid UB. */
-   if (context->progress >= TUX64_LITERAL_UINT32(TUX64_UINT32_MAX) - value) {
-      context->progress = TUX64_LITERAL_UINT32(TUX64_UINT32_MAX);
+   if (context->progress >= context->maximum - value) {
+      context->progress = context->maximum;
       return;
    }
 
@@ -70,17 +73,11 @@ tux64_boot_stage1_percentage_to_integer(
 
    v = context->progress;
 
-   if (v == TUX64_LITERAL_UINT32(TUX64_UINT32_MAX)) {
+   if (v == context->maximum) {
       return TUX64_LITERAL_UINT8(100u);
    }
 
-   /* percentage = v * (100 / 2^32) */
-   /* we have to do an initial divide first to prevent overflow */
-   /* note: 100 < 128 = 2^7, 2^32 = 2^7 * 2^25 */
-   v = v / TUX64_LITERAL_UINT32(1u << 7u);
-   v = v * TUX64_LITERAL_UINT32(100u);
-   v = v / TUX64_LITERAL_UINT32(1u << 25u);
-   return v;
+   return ((v * TUX64_LITERAL_UINT32(100u)) / context->maximum);
 }
 
 static void

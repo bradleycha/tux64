@@ -18,22 +18,23 @@
    TUX64_STRING_CHARACTERS("...XXX%")
 
 struct Tux64BootStage1PercentageContext {
-   /* represents the fractional portion of a decimal number, where */
-   /* TUX64_UINT32_MAX represents 100% and 0u represents 0%. */
+   Tux64UInt32 maximum;
    Tux64UInt32 progress;
 };
 
 /*----------------------------------------------------------------------------*/
-/* Initializes the percentage to 0%.                                          */
+/* Initializes the percentage, setting the target value which represents 100% */
+/* completion.  Starts as 0% completion.  'maximum value' must be greater     */
+/* than zero, and less than or equal to floor(TUX64_UINT32_MAX / 100).        */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_percentage_initialize(
-   struct Tux64BootStage1PercentageContext * context
+   struct Tux64BootStage1PercentageContext * context,
+   Tux64UInt32 maximum_value
 );
 
 /*----------------------------------------------------------------------------*/
-/* Accumulates progress into the percentage value, clamping at 100%.  This    */
-/* value uses the same encoding scheme as the internal progress field.        */
+/* Accumulates progress into the percentage value, clamping at 100%.          */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_percentage_accumulate(

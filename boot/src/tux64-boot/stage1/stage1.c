@@ -72,7 +72,10 @@ tux64_boot_stage1_main_loop_context_initialize(
    (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
    tux64_boot_stage1_fbcon_skip_line();
 
-   tux64_boot_stage1_percentage_initialize(&context->percentage_test);
+   tux64_boot_stage1_percentage_initialize(
+      &context->percentage_test,
+      TUX64_LITERAL_UINT32(600u)
+   );
    context->label_test = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_hello_world);
 
    return;
@@ -89,7 +92,7 @@ tux64_boot_stage1_main_loop_context_execute(
    );
    tux64_boot_stage1_percentage_accumulate(
       &context->percentage_test,
-      TUX64_LITERAL_UINT32(0x00200000u)
+      TUX64_LITERAL_UINT32(1u)
    );
 
    return;
