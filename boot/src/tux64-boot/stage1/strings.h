@@ -20,6 +20,10 @@ tux64_boot_stage1_strings_memory_total;
 extern const struct Tux64BootStage1FbconText
 tux64_boot_stage1_strings_memory_free;
 extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_kernel_image;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_initramfs_image;
+extern const struct Tux64BootStage1FbconText
 tux64_boot_stage1_strings_hello_world;
 
 /*----------------------------------------------------------------------------*/

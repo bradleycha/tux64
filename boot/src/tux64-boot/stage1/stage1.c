@@ -13,6 +13,7 @@
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
+#include "tux64-boot/stage1/boot-header.h"
 
 enum Tux64BootStage1Color {
    TUX64_BOOT_STAGE1_COLOR_BLACK    = 0x0001u,
@@ -131,13 +132,29 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    Tux64UInt32 memory_free
 ) {
    Tux64BootStage1FbconLabel label;
+   Tux64UInt32 kernel_image_words;
+   Tux64UInt32 initramfs_image_words;
+   Tux64UInt32 kernel_image;
+   Tux64UInt32 initramfs_image;
+
+   kernel_image_words      = tux64_boot_stage1_boot_header.data.files.kernel.length_words;
+   initramfs_image_words   = tux64_boot_stage1_boot_header.data.files.initramfs.length_words;
+
+   kernel_image      = kernel_image_words    * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD);
+   initramfs_image   = initramfs_image_words * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD);
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_memory_total);
    tux64_boot_stage1_format_mib(label, memory_total);
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_memory_free);
    tux64_boot_stage1_format_mib(label, memory_free);
    tux64_boot_stage1_fbcon_skip_line();
-   
+
+   label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_image);
+   tux64_boot_stage1_format_mib(label, kernel_image);
+   label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_initramfs_image);
+   tux64_boot_stage1_format_mib(label, initramfs_image);
+   tux64_boot_stage1_fbcon_skip_line();
+
    return;
 }
 
