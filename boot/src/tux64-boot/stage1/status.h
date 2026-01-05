@@ -15,7 +15,7 @@ enum Tux64BootStage1StatusCode {
    TUX64_BOOT_STAGE1_STATUS_CODE_BEGIN                = 'A',
    TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT = 'B',
    TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO     = 'C',
-   TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_LOOP            = 'D'
+   TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL   = 'D'
 };
 
 /*----------------------------------------------------------------------------*/

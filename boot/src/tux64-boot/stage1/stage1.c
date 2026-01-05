@@ -63,52 +63,88 @@ tux64_boot_stage1_choose_video_platform(
    return (enum Tux64BootStage1VideoPlatform)video_standard;
 }
 
-struct Tux64BootStage1MainLoopContextMemory {
-   Tux64UInt32 total;
-   Tux64UInt32 available;
+struct Tux64BootStage1FsmMemoryTest {
+   struct Tux64BootStage1PercentageContext percentage;
+   Tux64BootStage1FbconLabel label;
 };
 
-struct Tux64BootStage1MainLoopContext {
-   struct Tux64BootStage1MainLoopContextMemory memory;
-   struct Tux64BootStage1PercentageContext percentage_test;
-   Tux64BootStage1FbconLabel label_test;
+union Tux64BootStage1FsmMemory {
+   struct Tux64BootStage1FsmMemoryTest test;
 };
+
+struct Tux64BootStage1Fsm;
+
+typedef void (*Tux64BootStage1FsmPfnState)(struct Tux64BootStage1Fsm * fsm);
+
+struct Tux64BootStage1Fsm {
+   union Tux64BootStage1FsmMemory memory;
+   Tux64BootStage1FsmPfnState state;
+};
+
+#define TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(identifier) \
+   static void identifier (struct Tux64BootStage1Fsm *)
+#define TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(identifier) \
+   static void identifier (struct Tux64BootStage1Fsm * fsm)
+
+TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_test);
 
 static void
-tux64_boot_stage1_main_loop_context_initialize(
-   struct Tux64BootStage1MainLoopContext * context,
-   Tux64UInt32 memory_total,
-   Tux64UInt32 memory_available
+tux64_boot_stage1_fsm_state_set_test(
+   struct Tux64BootStage1Fsm * fsm
 ) {
-   context->memory.total = memory_total;
-   context->memory.available = memory_available;
+   struct Tux64BootStage1FsmMemoryTest * mem;
 
-   (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
-   tux64_boot_stage1_fbcon_skip_line();
+   mem = &fsm->memory.test;
 
    tux64_boot_stage1_percentage_initialize(
-      &context->percentage_test,
+      &mem->percentage,
       TUX64_LITERAL_UINT32(600u)
    );
-   context->label_test = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_hello_world);
+
+   mem->label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_hello_world);
+
+   fsm->state = tux64_boot_stage1_fsm_state_test;
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_test) {
+   struct Tux64BootStage1FsmMemoryTest * mem;
+
+   mem = &fsm->memory.test;
+
+   tux64_boot_stage1_percentage_format(&mem->percentage, mem->label);
+   tux64_boot_stage1_percentage_accumulate(
+      &mem->percentage,
+      TUX64_LITERAL_UINT32(1u)
+   );
 
    return;
 }
 
 static void
-tux64_boot_stage1_main_loop_context_execute(
-   struct Tux64BootStage1MainLoopContext * context
+tux64_boot_stage1_fsm_initialize(
+   struct Tux64BootStage1Fsm * fsm,
+   Tux64UInt32 memory_total,
+   Tux64UInt32 memory_available
 ) {
-   /* test code for percentage */
-   tux64_boot_stage1_percentage_format(
-      &context->percentage_test,
-      context->label_test
-   );
-   tux64_boot_stage1_percentage_accumulate(
-      &context->percentage_test,
-      TUX64_LITERAL_UINT32(1u)
-   );
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
 
+   (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
+   tux64_boot_stage1_fbcon_skip_line();
+
+   /* TODO: print memory statistics */
+   (void)memory_total;
+   (void)memory_available;
+
+   tux64_boot_stage1_fsm_state_set_test(fsm);
+   return;
+}
+
+static void
+tux64_boot_stage1_fsm_execute(
+   struct Tux64BootStage1Fsm * fsm
+) {
+   fsm->state(fsm);
    return;
 }
 
@@ -125,7 +161,7 @@ tux64_boot_stage1_main(
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
    struct Tux64BootStage1Palette video_palette;
-   struct Tux64BootStage1MainLoopContext main_loop_context;
+   struct Tux64BootStage1Fsm fsm;
 
    tux64_boot_stage1_status_initialize();
 
@@ -154,16 +190,15 @@ tux64_boot_stage1_main(
       video_palette.background
    );
 
-   tux64_boot_stage1_main_loop_context_initialize(
-      &main_loop_context,
+   tux64_boot_stage1_fsm_initialize(
+      &fsm,
       memory_total,
       memory_available
    );
 
-   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_LOOP);
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_video_render_target_clear();
-      tux64_boot_stage1_main_loop_context_execute(&main_loop_context);
+      tux64_boot_stage1_fsm_execute(&fsm);
       tux64_boot_stage1_fbcon_render();
       tux64_boot_stage1_video_swap_buffers();
    }
