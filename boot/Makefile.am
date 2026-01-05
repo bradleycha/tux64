@@ -79,6 +79,7 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/halt.h \
 	src/tux64-boot/stage1/sync.c \
 	src/tux64-boot/stage1/sync.h \
+	src/tux64-boot/stage1/boot-header.c \
 	src/tux64-boot/stage1/boot-header.h \
 	src/tux64-boot/stage1/interrupt/interrupt.c \
 	src/tux64-boot/stage1/interrupt/interrupt.h \
