@@ -20,6 +20,16 @@ tux64_boot_stage1_strings_data_splash [] = {
 };
 
 static const Tux64BootStage1FbconLabelCharacter
+tux64_boot_stage1_strings_data_memory_total [] = {
+   TUX64_BOOT_STAGE1_STRINGS_MEMORY_TOTAL_DATA
+};
+
+static const Tux64BootStage1FbconLabelCharacter
+tux64_boot_stage1_strings_data_memory_free [] = {
+   TUX64_BOOT_STAGE1_STRINGS_MEMORY_FREE_DATA
+};
+
+static const Tux64BootStage1FbconLabelCharacter
 tux64_boot_stage1_strings_data_hello_world [] = {
    TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA
 };
@@ -34,6 +44,16 @@ tux64_boot_stage1_strings [] = {
       .capacity   = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH)
    },
    {
+      .ptr        = tux64_boot_stage1_strings_data_memory_total,
+      .length     = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_MEMORY_TOTAL_LENGTH),
+      .capacity   = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_MEMORY_TOTAL_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_MIB)
+   },
+   {
+      .ptr        = tux64_boot_stage1_strings_data_memory_free,
+      .length     = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_MEMORY_FREE_LENGTH),
+      .capacity   = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_MEMORY_FREE_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_MIB)
+   },
+   {
       .ptr        = tux64_boot_stage1_strings_data_hello_world,
       .length     = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH),
       .capacity   = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH + TUX64_BOOT_STAGE1_PERCENTAGE_FORMAT_BUFFER_CHARACTERS)
@@ -43,5 +63,9 @@ tux64_boot_stage1_strings [] = {
 const struct Tux64BootStage1FbconText *
 tux64_boot_stage1_strings_splash = &tux64_boot_stage1_strings[0u];
 const struct Tux64BootStage1FbconText *
-tux64_boot_stage1_strings_hello_world = &tux64_boot_stage1_strings[1u];
+tux64_boot_stage1_strings_memory_total = &tux64_boot_stage1_strings[1u];
+const struct Tux64BootStage1FbconText *
+tux64_boot_stage1_strings_memory_free = &tux64_boot_stage1_strings[2u];
+const struct Tux64BootStage1FbconText *
+tux64_boot_stage1_strings_hello_world = &tux64_boot_stage1_strings[3u];
 

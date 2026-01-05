@@ -13,6 +13,7 @@
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/percentage.h"
+#include "tux64-boot/stage1/format.h"
 
 enum Tux64BootStage1Color {
    TUX64_BOOT_STAGE1_COLOR_BLACK    = 0x0001u,
@@ -125,16 +126,20 @@ static void
 tux64_boot_stage1_fsm_initialize(
    struct Tux64BootStage1Fsm * fsm,
    Tux64UInt32 memory_total,
-   Tux64UInt32 memory_available
+   Tux64UInt32 memory_free
 ) {
+   Tux64BootStage1FbconLabel label;
+
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
 
    (void)tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_splash);
    tux64_boot_stage1_fbcon_skip_line();
 
-   /* TODO: print memory statistics */
-   (void)memory_total;
-   (void)memory_available;
+   label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_memory_total);
+   tux64_boot_stage1_format_mib(label, memory_total);
+   label = tux64_boot_stage1_fbcon_label_push(tux64_boot_stage1_strings_memory_free);
+   tux64_boot_stage1_format_mib(label, memory_free);
+   tux64_boot_stage1_fbcon_skip_line();
 
    tux64_boot_stage1_fsm_state_set_test(fsm);
    return;
@@ -156,7 +161,7 @@ tux64_boot_stage1_main(
    Tux64UInt8 rom_cic_seed,
    Tux64UInt8 pif_rom_version,
    Tux64UInt32 memory_total,
-   Tux64UInt32 memory_available,
+   Tux64UInt32 memory_free,
    Tux64Boolean running_on_ique
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
@@ -193,7 +198,7 @@ tux64_boot_stage1_main(
    tux64_boot_stage1_fsm_initialize(
       &fsm,
       memory_total,
-      memory_available
+      memory_free
    );
 
    while (TUX64_BOOLEAN_TRUE) {

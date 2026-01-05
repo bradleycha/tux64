@@ -11,9 +11,14 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/fbcon.h"
+#include "tux64-boot/stage1/format.h"
 
 extern const struct Tux64BootStage1FbconText *
 tux64_boot_stage1_strings_splash;
+extern const struct Tux64BootStage1FbconText *
+tux64_boot_stage1_strings_memory_total;
+extern const struct Tux64BootStage1FbconText *
+tux64_boot_stage1_strings_memory_free;
 extern const struct Tux64BootStage1FbconText *
 tux64_boot_stage1_strings_hello_world;
 
