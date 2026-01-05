@@ -84,8 +84,6 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/interrupt/interrupt.h \
 	src/tux64-boot/stage1/interrupt/entry.s \
 	src/tux64-boot/stage1/interrupt/entry.h \
-	src/tux64-boot/stage1/percentage.c \
-	src/tux64-boot/stage1/percentage.h \
 	src/tux64-boot/stage1/format.c \
 	src/tux64-boot/stage1/format.h \
 	src/tux64-boot/stage1/rsp.c \

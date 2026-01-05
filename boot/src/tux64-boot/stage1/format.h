@@ -26,6 +26,45 @@ tux64_boot_stage1_format_mib(
    Tux64UInt32 value
 );
 
+#define TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_PERCENTAGE \
+   TUX64_STRING_CHARACTERS("...XXX%")
+
+struct Tux64BootStage1FormatPercentageContext {
+   Tux64UInt32 maximum;
+   Tux64UInt32 progress;
+};
+
+/*----------------------------------------------------------------------------*/
+/* Initializes the percentage, setting the target value which represents 100% */
+/* completion.  Starts as 0% completion.  'maximum value' must be greater     */
+/* than zero, and less than or equal to floor(TUX64_UINT32_MAX / 100).        */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_format_percentage_initialize(
+   struct Tux64BootStage1FormatPercentageContext * context,
+   Tux64UInt32 maximum_value
+);
+
+/*----------------------------------------------------------------------------*/
+/* Accumulates progress into the percentage value, clamping at 100%.          */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_format_percentage_accumulate(
+   struct Tux64BootStage1FormatPercentageContext * context,
+   Tux64UInt32 value
+);
+
+/*----------------------------------------------------------------------------*/
+/* Formats the current percentage at the end of a text label.  Requires       */
+/* TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_PERCENTAGE number of free       */
+/* characters at the end to format correctly.                                 */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_format_percentage(
+   const struct Tux64BootStage1FormatPercentageContext * context,
+   Tux64BootStage1FbconLabel label
+);
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_FORMAT_H */
 

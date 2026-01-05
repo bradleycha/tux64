@@ -12,7 +12,6 @@
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
-#include "tux64-boot/stage1/percentage.h"
 #include "tux64-boot/stage1/format.h"
 
 enum Tux64BootStage1Color {
@@ -65,7 +64,7 @@ tux64_boot_stage1_choose_video_platform(
 }
 
 struct Tux64BootStage1FsmMemoryTest {
-   struct Tux64BootStage1PercentageContext percentage;
+   struct Tux64BootStage1FormatPercentageContext percentage;
    Tux64BootStage1FbconLabel label;
 };
 
@@ -97,7 +96,7 @@ tux64_boot_stage1_fsm_state_set_test(
 
    mem = &fsm->memory.test;
 
-   tux64_boot_stage1_percentage_initialize(
+   tux64_boot_stage1_format_percentage_initialize(
       &mem->percentage,
       TUX64_LITERAL_UINT32(600u)
    );
@@ -113,8 +112,8 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_test) {
 
    mem = &fsm->memory.test;
 
-   tux64_boot_stage1_percentage_format(&mem->percentage, mem->label);
-   tux64_boot_stage1_percentage_accumulate(
+   tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
+   tux64_boot_stage1_format_percentage_accumulate(
       &mem->percentage,
       TUX64_LITERAL_UINT32(1u)
    );
