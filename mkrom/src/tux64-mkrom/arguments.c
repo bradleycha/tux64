@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* mkrom/src/tux64-mkrom/arguments.c - Implementations for arguments parsing. */
@@ -563,6 +563,30 @@ tux64_mkrom_arguments_config_file_parser_no_checksum(
 }
 
 static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_memory_display(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64ArgumentsParseOptionResult result;
+   struct Tux64MkromArgumentsConfigFile * arguments;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   if (parameter->characters != TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
+      return result;
+   }
+
+   arguments->boot_header_flags = tux64_bitwise_flags_set_uint32(
+      arguments->boot_header_flags,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY)
+   );
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_config_file_parser_rom_header_clock_rate(
    const struct Tux64String * parameter,
    void * context
@@ -735,6 +759,8 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    "command-line"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIER\
    "no-checksum"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER\
+   "memory-display"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER\
    "rom-header-clock-rate"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER\
@@ -764,6 +790,8 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER_CHARACTERS\
@@ -848,6 +876,14 @@ tux64_mkrom_arguments_config_file_option_no_checksum_identifiers [] = {
 };
 
 static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_memory_display_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
 tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers [] = {
    {
       .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER,
@@ -905,6 +941,8 @@ tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers [] = {
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_command_line_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_no_checksum_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_memory_display_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIERS_COUNT\
@@ -1007,6 +1045,13 @@ tux64_mkrom_arguments_config_file_options_optional [] = {
       .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIERS_COUNT),
       .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
       .parser                    = tux64_mkrom_arguments_config_file_parser_no_checksum
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_memory_display_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_memory_display
    },
    {
       .identifiers_long          = tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers,
@@ -1270,6 +1315,10 @@ tux64_mkrom_arguments_config_file_parse(
    "      --no-checksum, default is off\n"\
    "\n"\
    "         Except for the boot header itself, disable all checksum verifications for the bootloader\n"\
+   "\n"\
+   "      --memory-display, default is off\n"\
+   "\n"\
+   "         Display memory usage information on startup\n"\
    "\n"\
    "      --rom-header-clock-rate=[value], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE_STRING "\"\n"\
    "\n"\
