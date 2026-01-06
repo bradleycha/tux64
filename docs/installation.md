@@ -769,6 +769,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       CONFIG_COLOR_FOREGROUND=white \
       CONFIG_COLOR_BACKGROUND=black \
       --enable-status \
+      --enable-checksum \
       --enable-splash \
       --enable-memory-display \
       --enable-region-pal \
