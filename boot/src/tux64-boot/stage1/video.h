@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/video.h - Framebuffer video inferface.          */
@@ -70,10 +70,25 @@ tux64_boot_stage1_video_display_output(
 );
 
 /*----------------------------------------------------------------------------*/
-/* Swaps the current active video buffer to be displayed.                     */
+/* Waits until vblank is active.  All code which relies on vblank should use  */
+/* this to block.                                                             */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage1_video_swap_buffers(void);
+tux64_boot_stage1_video_vblank_wait(void);
+
+/*----------------------------------------------------------------------------*/
+/* Signals the end of vblank.  All code which relies on vblank should call    */
+/* this after completion.                                                     */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_video_vblank_end(void);
+
+/*----------------------------------------------------------------------------*/
+/* Returns whether vblank was triggered.  This can be useful for writing CPU  */
+/* intensive code which is preemptive with respect to video output.           */
+/*----------------------------------------------------------------------------*/
+Tux64Boolean
+tux64_boot_stage1_video_vblank_triggered(void);
 
 /*----------------------------------------------------------------------------*/
 /* The code to run when v-blank is triggered.  This should only be called     */
@@ -81,6 +96,13 @@ tux64_boot_stage1_video_swap_buffers(void);
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_vblank_handler(void);
+
+/*----------------------------------------------------------------------------*/
+/* Swaps the current active video buffer to be displayed.  This should only   */
+/* be called when vblank is active.                                           */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_video_swap_buffers(void);
 
 /*----------------------------------------------------------------------------*/
 /* Gets mutable access to the current render-target framebuffer.  This can be */

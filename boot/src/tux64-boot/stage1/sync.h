@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/sync.h - Header for synchronization primitives. */
@@ -11,32 +11,47 @@
 
 #include "tux64-boot/tux64-boot.h"
 
-struct Tux64BootStage1SyncSpinlock {
-   volatile Tux64Boolean held;
+/*----------------------------------------------------------------------------*/
+/* Whether the CPU should be preempted under heavy load where it may not      */
+/* return for a long period of time, most commonly due to I/O.                */
+/*----------------------------------------------------------------------------*/
+Tux64Boolean
+tux64_boot_stage1_sync_preemption_requested(void);
+
+struct Tux64BootStage1SyncFence {
+   volatile Tux64Boolean flag;
 };
 
 /*----------------------------------------------------------------------------*/
-/* Holds the spinlock, waiting for someone to release the spinlock.           */
+/* Initializes the fence to be unsignaled.                                    */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage1_sync_spinlock_hold(
-   struct Tux64BootStage1SyncSpinlock * spinlock
-);
-/*----------------------------------------------------------------------------*/
-/* Releases any holders of the spinlock.  If nobody is holding the spinlock,  */
-/* this does nothing.                                                         */
-/*----------------------------------------------------------------------------*/
-void
-tux64_boot_stage1_sync_spinlock_release(
-   struct Tux64BootStage1SyncSpinlock * spinlock
+tux64_boot_stage1_sync_fence_initialize(
+   struct Tux64BootStage1SyncFence * fence
 );
 
 /*----------------------------------------------------------------------------*/
-/* Checks if the spinlock is currently being held by one or more holders.     */
+/* Waits in a low-power spinlock until the fence is signaled.                 */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_sync_fence_wait(
+   struct Tux64BootStage1SyncFence * fence
+);
+
+/*----------------------------------------------------------------------------*/
+/* Signals the fence, releasing any code waiting on it.                       */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_sync_fence_signal(
+   struct Tux64BootStage1SyncFence * fence
+);
+
+/*----------------------------------------------------------------------------*/
+/* Returns if the fence has been signaled or not.                             */
 /*----------------------------------------------------------------------------*/
 Tux64Boolean
-tux64_boot_stage1_sync_spinlock_is_held(
-   struct Tux64BootStage1SyncSpinlock * spinlock
+tux64_boot_stage1_sync_fence_is_signaled(
+   struct Tux64BootStage1SyncFence * fence
 );
 
 /*----------------------------------------------------------------------------*/

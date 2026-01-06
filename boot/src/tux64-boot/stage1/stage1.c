@@ -14,6 +14,7 @@
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
 #include "tux64-boot/stage1/boot-header.h"
+#include "tux64-boot/stage1/sync.h"
 
 static Tux64Boolean
 tux64_boot_stage1_checksum_enable(void) {
@@ -104,10 +105,11 @@ tux64_boot_stage1_fsm_state_set_test(
 
    tux64_boot_stage1_format_percentage_initialize(
       &mem->percentage,
-      TUX64_LITERAL_UINT32(600u)
+      TUX64_LITERAL_UINT32(30000000u)
    );
 
    mem->label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_hello_world);
+   tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
 
    fsm->state = tux64_boot_stage1_fsm_state_test;
    return;
@@ -115,15 +117,18 @@ tux64_boot_stage1_fsm_state_set_test(
 
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_test) {
    struct Tux64BootStage1FsmMemoryTest * mem;
+   volatile Tux64UInt32 value;
 
    mem = &fsm->memory.test;
 
-   tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
-   tux64_boot_stage1_format_percentage_accumulate(
-      &mem->percentage,
-      TUX64_LITERAL_UINT32(1u)
-   );
+   /* volatile so compiler optimizations can't remove the loop */
+   value = TUX64_LITERAL_UINT32(1u);
 
+   do {
+      tux64_boot_stage1_format_percentage_accumulate(&mem->percentage, value);
+   } while (tux64_boot_stage1_sync_preemption_requested() == TUX64_BOOLEAN_FALSE);
+
+   tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
    return;
 }
 
@@ -265,7 +270,9 @@ tux64_boot_stage1_main(
       tux64_boot_stage1_video_render_target_clear();
       tux64_boot_stage1_fsm_execute(&fsm);
       tux64_boot_stage1_fbcon_render();
+      tux64_boot_stage1_video_vblank_wait();
       tux64_boot_stage1_video_swap_buffers();
+      tux64_boot_stage1_video_vblank_end();
    }
 
    (void)rom_type;
