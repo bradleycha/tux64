@@ -27,3 +27,8 @@ tux64_boot_stage1_boot_header_flag_no_checksum(void) {
    return tux64_boot_stage1_boot_header_flag(TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_CHECKSUM);
 }
 
+Tux64Boolean
+tux64_boot_stage1_boot_header_flag_memory_display(void) {
+   return tux64_boot_stage1_boot_header_flag(TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY);
+}
+

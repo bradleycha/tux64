@@ -146,6 +146,10 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    Tux64UInt32 kernel_image;
    Tux64UInt32 initramfs_image;
 
+   if (tux64_boot_stage1_boot_header_flag_memory_display() == TUX64_BOOLEAN_FALSE) {
+      return;
+   }
+
    kernel_image_words      = tux64_boot_stage1_boot_header.data.files.kernel.length_words;
    initramfs_image_words   = tux64_boot_stage1_boot_header.data.files.initramfs.length_words;
 

@@ -26,6 +26,8 @@ __attribute__((section(".boot_header")));
 /*----------------------------------------------------------------------------*/
 Tux64Boolean
 tux64_boot_stage1_boot_header_flag_no_checksum(void);
+Tux64Boolean
+tux64_boot_stage1_boot_header_flag_memory_display(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_BOOT_HEADER_H */

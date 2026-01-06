@@ -73,7 +73,7 @@ AC_ARG_ENABLE([checksum],
    [tux64_boot_config_checksum=0]
 )
 AC_ARG_ENABLE([memory-display],
-   AS_HELP_STRING([--enable-memory-display], [Enable display of memory information on startup]),
+   AS_HELP_STRING([--enable-memory-display], [Enable support for the display of memory information on startup]),
    [tux64_boot_config_memory_display=1],
    [tux64_boot_config_memory_display=0]
 )
@@ -178,7 +178,7 @@ AC_DEFINE_UNQUOTED([CONFIG_CHECKSUM],
 )
 AC_DEFINE_UNQUOTED([CONFIG_MEMORY_DISPLAY],
    [$tux64_boot_config_memory_display],
-   [Enable display of memory information on startup]
+   [Enable support for the display of memory information on startup]
 )
 AC_DEFINE_UNQUOTED([CONFIG_IQUE],
    [$tux64_boot_config_ique],
