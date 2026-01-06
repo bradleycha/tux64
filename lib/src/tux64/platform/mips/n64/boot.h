@@ -31,6 +31,8 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
 
 #define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_CHECKSUM\
    (1u << 0u)
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY\
+   (1u << 1u)
 
 struct Tux64PlatformMipsN64BootHeaderFileStage1 {
    Tux64UInt32 checksum;
