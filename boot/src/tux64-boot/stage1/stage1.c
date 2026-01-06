@@ -15,6 +15,15 @@
 #include "tux64-boot/stage1/format.h"
 #include "tux64-boot/stage1/boot-header.h"
 
+static Tux64Boolean
+tux64_boot_stage1_checksum_enable(void) {
+   if (!TUX64_BOOT_CONFIG_CHECKSUM) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   return (tux64_boot_stage1_boot_header_flag_no_checksum() == TUX64_BOOLEAN_FALSE);
+}
+
 enum Tux64BootStage1Color {
    TUX64_BOOT_STAGE1_COLOR_BLACK    = 0x0001u,
    TUX64_BOOT_STAGE1_COLOR_WHITE    = 0xffffu,
@@ -159,6 +168,16 @@ tux64_boot_stage1_fsm_initialize_memory_display(
 }
 
 static void
+tux64_boot_stage1_fsm_initialize_checksum(void) {
+   if (!tux64_boot_stage1_checksum_enable()) {
+      (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_no_checksum);
+      return;
+   }
+
+   return;
+}
+
+static void
 tux64_boot_stage1_fsm_initialize(
    struct Tux64BootStage1Fsm * fsm,
    Tux64UInt32 memory_total,
@@ -172,6 +191,10 @@ tux64_boot_stage1_fsm_initialize(
 
    if (TUX64_BOOT_CONFIG_MEMORY_DISPLAY) {
       tux64_boot_stage1_fsm_initialize_memory_display(memory_total, memory_free);
+   }
+
+   if (TUX64_BOOT_CONFIG_CHECKSUM) {
+      tux64_boot_stage1_fsm_initialize_checksum();
    }
 
    tux64_boot_stage1_fsm_state_set_test(fsm);

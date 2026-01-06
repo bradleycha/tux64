@@ -11,7 +11,6 @@
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH;
    .text                = "Tux64 Bootloader version 0.1.0";
 }
-
 /* we use a bit of a hack here and manually align the memory columns */
 /* instead of using code.  this is good, though, because wasting a couple */
 /* bytes of memory here is way less than wasting dozens of instructions */
@@ -39,7 +38,11 @@
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_INITRAMFS_IMAGE_LENGTH;
    .text                = "Initramfs image";
 }
-
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_LENGTH;
+   .text                = "Checksum verification DISABLED";
+}
 {
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH;
