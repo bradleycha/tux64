@@ -13,10 +13,10 @@
 #include <tux64/platform/mips/n64/vi.h>
 #include <tux64/bitwise.h>
 #include <tux64/endian.h>
+#include "tux64-boot/halt.h"
+#include "tux64-boot/sync.h"
+#include "tux64-boot/rsp.h"
 #include "tux64-boot/stage1/interrupt/interrupt.h"
-#include "tux64-boot/stage1/sync.h"
-#include "tux64-boot/stage1/rsp.h"
-#include "tux64-boot/stage1/halt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION \
    !( \
@@ -96,7 +96,7 @@ struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
    volatile Tux64UInt64 clear_color_rsp_dma_buffer [0x1000u / sizeof(Tux64UInt64)]
    __attribute__((aligned(8u))); /* alignment required for RSP DMA */
-   struct Tux64BootStage1SyncFence vblank_fence;
+   struct Tux64BootSyncFence vblank_fence;
    Tux64UInt8 framebuffer_index_displaying;
 };
 
@@ -206,7 +206,7 @@ tux64_boot_stage1_video_framebuffer_clear(
    struct Tux64BootStage1VideoFramebuffer * framebuffer;
    Tux64UInt8 blocks;
    Tux64UInt16 bytes_remainder;
-   struct Tux64BootStage1RspDmaTransfer rsp_dma_transfer;
+   struct Tux64BootRspDmaTransfer rsp_dma_transfer;
 
    ctx         = &tux64_boot_stage1_video_context;
    framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
@@ -251,13 +251,13 @@ tux64_boot_stage1_video_framebuffer_clear(
 
    /* copy the color fill buffer to RSP IMEM */
    rsp_dma_transfer.addr_rdram = (Tux64UInt32)(Tux64UIntPtr)(&ctx->clear_color_rsp_dma_buffer);
-   tux64_boot_stage1_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RSP_MEMORY);
+   tux64_boot_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
 
    /* start filling the framebuffer with the clear color */
    rsp_dma_transfer.addr_rdram = (Tux64UInt32)(Tux64UIntPtr)framebuffer;
    do {
-      tux64_boot_stage1_rsp_dma_wait_queue();
-      tux64_boot_stage1_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
+      tux64_boot_rsp_dma_wait_queue();
+      tux64_boot_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RDRAM);
       rsp_dma_transfer.addr_rdram += TUX64_LITERAL_UINT32(sizeof(ctx->clear_color_rsp_dma_buffer));
       blocks--;
    } while (blocks != TUX64_LITERAL_UINT32(0u));
@@ -267,12 +267,12 @@ tux64_boot_stage1_video_framebuffer_clear(
       rsp_dma_transfer.row_bytes_copy  = ((Tux64UInt16)bytes_remainder - TUX64_LITERAL_UINT16(1u));
       rsp_dma_transfer.row_count       = TUX64_LITERAL_UINT8(0u);
 
-      tux64_boot_stage1_rsp_dma_wait_queue();
-      tux64_boot_stage1_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_STAGE1_RSP_DMA_DESTINATION_RDRAM);
+      tux64_boot_rsp_dma_wait_queue();
+      tux64_boot_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RDRAM);
    }
 
    /* wait for the RSP to finish its last copy before we return */
-   tux64_boot_stage1_rsp_dma_wait_idle();
+   tux64_boot_rsp_dma_wait_idle();
    
    return;
 }
@@ -288,7 +288,7 @@ tux64_boot_stage1_video_initialize_context(
    ctx = &tux64_boot_stage1_video_context;
 
    tux64_boot_stage1_video_initialize_context_clear_color(clear_color);
-   tux64_boot_stage1_sync_fence_initialize(&ctx->vblank_fence);
+   tux64_boot_sync_fence_initialize(&ctx->vblank_fence);
 
    /* clear non-rendering framebuffers to prevent garbage from being */
    /* displayed on startup */
@@ -499,7 +499,7 @@ tux64_boot_stage1_video_vi_choose_register_array(
 
    /* if we reach here, it's because we got a video configuration we don't */
    /* support, and thus the only safe option is to halt. */
-   tux64_boot_stage1_halt();
+   tux64_boot_halt();
 }
 
 static void
@@ -583,7 +583,7 @@ tux64_boot_stage1_video_vblank_wait(void) {
 
    ctx = &tux64_boot_stage1_video_context;
 
-   tux64_boot_stage1_sync_fence_wait(&ctx->vblank_fence);
+   tux64_boot_sync_fence_wait(&ctx->vblank_fence);
    return;
 }
 
@@ -593,7 +593,7 @@ tux64_boot_stage1_video_vblank_end(void) {
 
    ctx = &tux64_boot_stage1_video_context;
 
-   tux64_boot_stage1_sync_fence_initialize(&ctx->vblank_fence);
+   tux64_boot_sync_fence_initialize(&ctx->vblank_fence);
    return;
 }
 
@@ -603,7 +603,7 @@ tux64_boot_stage1_video_vblank_triggered(void) {
 
    ctx = &tux64_boot_stage1_video_context;
 
-   return tux64_boot_stage1_sync_fence_is_signaled(&ctx->vblank_fence); 
+   return tux64_boot_sync_fence_is_signaled(&ctx->vblank_fence); 
 }
 
 void
@@ -612,7 +612,7 @@ tux64_boot_stage1_video_vblank_handler(void) {
 
    ctx = &tux64_boot_stage1_video_context;
 
-   tux64_boot_stage1_sync_fence_signal(&ctx->vblank_fence);
+   tux64_boot_sync_fence_signal(&ctx->vblank_fence);
    return;
 }
 

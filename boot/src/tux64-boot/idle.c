@@ -1,20 +1,20 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/stage1/idle.c - Implementation for CPU idling and      */
-/*    power management.                                                       */
+/* boot/src/tux64-boot/idle.c - Implementation for CPU idling and power       */
+/*    management.                                                             */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include "tux64-boot/stage1/idle.h"
+#include "tux64-boot/idle.h"
 
 #include <tux64/platform/mips/vr4300/cop0.h>
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/bitwise.h>
 
 static void
-tux64_boot_stage1_idle_rp_bit_flip(void) {
+tux64_boot_idle_rp_bit_flip(void) {
    volatile Tux64UInt32 * halt_sysad;
    Tux64UInt32 status;
 
@@ -34,21 +34,21 @@ tux64_boot_stage1_idle_rp_bit_flip(void) {
 }
 
 void
-tux64_boot_stage1_idle_enter(void) {
+tux64_boot_idle_enter(void) {
    /* normally we would have to configure the memory refresh rate if it were */
    /* based on pclock cycles, but RDRAM refresh, when set to automatic */
    /* refresh, refreshes based on the VI timings, *not* the CPU, so all we */
    /* have to do is set/unset the RP bit in COP0. */
    /* also, the CPU initially starts with RP=0, so we don't need to */
    /* initialize RP manually. */
-   tux64_boot_stage1_idle_rp_bit_flip();
+   tux64_boot_idle_rp_bit_flip();
    return;
 }
 
 void
-tux64_boot_stage1_idle_exit(void) {
+tux64_boot_idle_exit(void) {
    /* see above documentation about memory timings. */
-   tux64_boot_stage1_idle_rp_bit_flip();
+   tux64_boot_idle_rp_bit_flip();
    return;
 }
 

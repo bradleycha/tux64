@@ -1,29 +1,30 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                          Copyright (C) Tux64 2026                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/stage1/idle.h - Header for CPU idling and power        */
-/*    management.                                                             */
+/* boot/src/tux64-boot/stage1/preempt.h - Header for preemption management.   */
 /*----------------------------------------------------------------------------*/
 
-#ifndef _TUX64_BOOT_STAGE1_IDLE_H
-#define _TUX64_BOOT_STAGE1_IDLE_H
+#ifndef _TUX64_BOOT_STAGE1_PREEMPT_H
+#define _TUX64_BOOT_STAGE1_PREEMPT_H
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
 
 /*----------------------------------------------------------------------------*/
-/* Enter the idle state, setting the CPU to a low power state.                */
+/* Returns if preemption is requested, and the calling code should be         */
+/* interrupted.  This is useful for CPU-intensive calculation loops, and      */
+/* yielding to I/O devies.                                                    */
 /*----------------------------------------------------------------------------*/
-void
-tux64_boot_stage1_idle_enter(void);
+Tux64Boolean
+tux64_boot_stage1_preempt_yield(void);
 
 /*----------------------------------------------------------------------------*/
-/* Exit the idle state, restoring the CPU to its previous power state.        */
+/* Idle the CPU until a preemption request is made.                           */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage1_idle_exit(void);
+tux64_boot_stage1_preempt_wait(void);
 
 /*----------------------------------------------------------------------------*/
-#endif /* _TUX64_BOOT_STAGE1_IDLE_H */
+#endif /* _TUX64_BOOT_STAGE1_PREEMPT_H */
 

@@ -1,12 +1,12 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/stage1/halt.h - Header for halting the CPU.            */
+/* boot/src/tux64-boot/halt.h - Header for halting the CPU.                   */
 /*----------------------------------------------------------------------------*/
 
-#ifndef _TUX64_BOOT_STAGE1_HALT_H
-#define _TUX64_BOOT_STAGE1_HALT_H
+#ifndef _TUX64_BOOT_HALT_H
+#define _TUX64_BOOT_HALT_H
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
@@ -16,9 +16,9 @@
 /* infinite loop.                                                             */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage1_halt(void)
+tux64_boot_halt(void)
 __attribute__((noreturn));
 
 /*----------------------------------------------------------------------------*/
-#endif /* _TUX64_BOOT_STAGE1_HALT_H */
+#endif /* _TUX64_BOOT_HALT_H */
 

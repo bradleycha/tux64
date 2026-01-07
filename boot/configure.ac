@@ -54,6 +54,8 @@ AX_PREFIX_CONFIG_H(configdir/tux64-boot/config.h)
 
 AC_PROG_CC
 AM_PROG_AS
+AM_PROG_AR
+AC_PROG_RANLIB
 
 AC_CHECK_HEADER([tux64/tux64.h])
 

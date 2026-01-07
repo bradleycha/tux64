@@ -5,6 +5,9 @@
 # boot/Makefile.am - GNU Automake script for the bootloader.			 			 #
 #------------------------------------------------------------------------------#
 
+noinst_LIBRARIES = \
+	libtux64-boot.a
+
 noinst_PROGRAMS = \
 	stage0 \
 	stage1 \
@@ -65,30 +68,36 @@ AM_LDFLAGS = \
 LDADD = \
 	-L $(top_srcdir)/src \
 	-L $(datadir) \
-	$(libdir)/libtux64.a
+	$(libdir)/libtux64.a \
+	$(top_builddir)/libtux64-boot.a
 
+libtux64_boot_a_SOURCES = \
+	src/tux64-boot/tux64-boot.h \
+	src/tux64-boot/ipl2.h \
+	src/tux64-boot/idle.c \
+	src/tux64-boot/idle.h \
+	src/tux64-boot/halt.c \
+	src/tux64-boot/halt.h \
+	src/tux64-boot/sync.c \
+	src/tux64-boot/sync.h \
+	src/tux64-boot/rsp.c \
+	src/tux64-boot/rsp.h
 stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.s
 stage1_SOURCES = \
 	src/tux64-boot/stage1/start.c \
 	src/tux64-boot/stage1/stage1.c \
 	src/tux64-boot/stage1/stage1.h \
-	src/tux64-boot/stage1/idle.c \
-	src/tux64-boot/stage1/idle.h \
-	src/tux64-boot/stage1/halt.c \
-	src/tux64-boot/stage1/halt.h \
-	src/tux64-boot/stage1/sync.c \
-	src/tux64-boot/stage1/sync.h \
 	src/tux64-boot/stage1/boot-header.c \
 	src/tux64-boot/stage1/boot-header.h \
 	src/tux64-boot/stage1/interrupt/interrupt.c \
 	src/tux64-boot/stage1/interrupt/interrupt.h \
 	src/tux64-boot/stage1/interrupt/entry.s \
 	src/tux64-boot/stage1/interrupt/entry.h \
+	src/tux64-boot/stage1/preempt.c \
+	src/tux64-boot/stage1/preempt.h \
 	src/tux64-boot/stage1/format.c \
 	src/tux64-boot/stage1/format.h \
-	src/tux64-boot/stage1/rsp.c \
-	src/tux64-boot/stage1/rsp.h \
 	src/tux64-boot/stage1/video.c \
 	src/tux64-boot/stage1/video.h \
 	src/tux64-boot/stage1/fbcon.c \
@@ -99,10 +108,6 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
-
-noinst_HEADERS = \
-	src/tux64-boot/tux64-boot.h \
-	src/tux64-boot/ipl2.h
 
 EXTRA_DIST = \
 	src/tux64-boot/stage0/stage0.ld \

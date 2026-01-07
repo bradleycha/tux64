@@ -14,7 +14,7 @@
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
 #include "tux64-boot/stage1/boot-header.h"
-#include "tux64-boot/stage1/sync.h"
+#include "tux64-boot/stage1/preempt.h"
 
 static Tux64Boolean
 tux64_boot_stage1_checksum_enable(void) {
@@ -126,7 +126,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_test) {
 
    do {
       tux64_boot_stage1_format_percentage_accumulate(&mem->percentage, value);
-   } while (tux64_boot_stage1_sync_preemption_requested() == TUX64_BOOLEAN_FALSE);
+   } while (tux64_boot_stage1_preempt_yield() == TUX64_BOOLEAN_FALSE);
 
    tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
    return;

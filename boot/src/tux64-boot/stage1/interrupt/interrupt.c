@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/interrupt/interrupt.c - Interrupt service       */
@@ -16,8 +16,8 @@
 #include <tux64/platform/mips/vr4300/cache.h>
 #include <tux64/endian.h>
 #include <tux64/bitwise.h>
+#include "tux64-boot/halt.h"
 #include "tux64-boot/stage1/interrupt/entry.h"
-#include "tux64-boot/stage1/halt.h"
 #include "tux64-boot/stage1/video.h"
 
 static void
@@ -58,7 +58,7 @@ tux64_boot_stage1_interrupt_handler_unhandled(
    struct Tux64BootStage1InterruptContext * context
 ) {
    (void)context;
-   tux64_boot_stage1_halt();
+   tux64_boot_halt();
    TUX64_UNREACHABLE;
 }
 
