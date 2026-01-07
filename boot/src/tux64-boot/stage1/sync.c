@@ -22,6 +22,15 @@ tux64_boot_stage1_sync_preemption_requested(void) {
 }
 
 void
+tux64_boot_stage1_sync_preemption_wait(void) {
+   tux64_boot_stage1_idle_enter();
+   while (tux64_boot_stage1_sync_preemption_requested() == TUX64_BOOLEAN_FALSE) {}
+   tux64_boot_stage1_idle_exit();
+
+   return;
+}
+
+void
 tux64_boot_stage1_sync_fence_initialize(
    struct Tux64BootStage1SyncFence * fence
 ) {

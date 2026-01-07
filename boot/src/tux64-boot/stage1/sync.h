@@ -18,6 +18,12 @@
 Tux64Boolean
 tux64_boot_stage1_sync_preemption_requested(void);
 
+/*----------------------------------------------------------------------------*/
+/* Idle the CPU until preemption is requested.                                */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_sync_preemption_wait(void);
+
 struct Tux64BootStage1SyncFence {
    volatile Tux64Boolean flag;
 };
