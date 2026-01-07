@@ -29,6 +29,7 @@ libtux64_la_SOURCES = \
 	src/tux64/checksum.c \
 	src/tux64/parse/string-integer.c \
 	src/tux64/platform/mips/n64/memory-map.c \
+	src/tux64/platform/mips/n64/pi.c \
 	src/tux64/platform/mips/vr4300/cache.c \
 	src/tux64/platform/mips/vr4300/cop0.c
 

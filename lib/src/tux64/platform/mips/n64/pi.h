@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/n64/pi.h - Peripheral Interface (PI) header.   */
@@ -124,6 +124,49 @@
    (2u)
 #define TUX64_PLATFORM_MIPS_N64_PI_IQUE_ATB_LOWER_COUNT\
    (192u)
+
+/*----------------------------------------------------------------------------*/
+/* Defines the offsets for the different domains in the PI address space.     */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_N64_PI_BUS_DOMAIN_OFFSET_DOM1_FREE \
+   (0x00000000u)
+#define TUX64_PLATFORM_MIPS_N64_PI_BUS_DOMAIN_OFFSET_DOM2_64DD_REGISTERS \
+   (0x05000000u)
+#define TUX64_PLATFORM_MIPS_N64_PI_BUS_DOMAIN_OFFSET_DOM1_64DD_ROM \
+   (0x06000000u)
+#define TUX64_PLATFORM_MIPS_N64_PI_BUS_DOMAIN_OFFSET_DOM2_SRAM \
+   (0x08000000u)
+#define TUX64_PLATFORM_MIPS_N64_PI_BUS_DOMAIN_OFFSET_DOM1_ROM \
+   (0x10000000u)
+
+/*----------------------------------------------------------------------------*/
+/* Defines an address in terms of the PI bus address space.                   */
+/*----------------------------------------------------------------------------*/
+typedef Tux64UInt32 Tux64PlatformMipsN64PiBusAddress;
+
+/*----------------------------------------------------------------------------*/
+/* Converts an offet into a PI domain into a physical PI bus address.         */
+/*----------------------------------------------------------------------------*/
+Tux64PlatformMipsN64PiBusAddress
+tux64_platform_mips_n64_pi_bus_address_dom1_free(
+   Tux64UInt32 offset
+);
+Tux64PlatformMipsN64PiBusAddress
+tux64_platform_mips_n64_pi_bus_address_dom2_64dd_registers(
+   Tux64UInt32 offset
+);
+Tux64PlatformMipsN64PiBusAddress
+tux64_platform_mips_n64_pi_bus_address_dom1_64dd_rom(
+   Tux64UInt32 offset
+);
+Tux64PlatformMipsN64PiBusAddress
+tux64_platform_mips_n64_pi_bus_address_dom2_sram(
+   Tux64UInt32 offset
+);
+Tux64PlatformMipsN64PiBusAddress
+tux64_platform_mips_n64_pi_bus_address_dom1_rom(
+   Tux64UInt32 offset
+);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_PI_H */
