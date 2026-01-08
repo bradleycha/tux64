@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (c) Tux64 2025, 2026                        #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
 # boot/src/tux64-boot/stage0/stage0.s - Stage-0 bootloader code and CIC data.  #
@@ -198,7 +198,7 @@
 # defined in stage1/boot-header.ld, included in stage0/stage0.ld
 .extern tux64_boot_stage1_boot_header
 
-   .section .status
+   .section .tux64_boot.status
 tux64_boot_stage0_status:
    # This is a chunk of memory placed at the end of RSP DMEM to show the current
    # boot status in memory to help debug early boot issues with memory

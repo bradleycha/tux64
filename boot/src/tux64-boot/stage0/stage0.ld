@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage0/stage0.ld - Stage-0 bootloader linker script.   */
@@ -7,16 +7,17 @@
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
+INCLUDE tux64-boot/status.ld
 INCLUDE tux64-boot/stage1/stack.ld
 INCLUDE tux64-boot/stage1/boot-header.ld
 
 ENTRY(tux64_boot_stage0_start)
 
+/* a neat trick we have is the CIC data can be overwritten by the boot status */
+/* code, which means we aren't wasting any memory at runtime by including the */
+/* CIC data. */
 TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA
- = TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x1000 - 0x08;
-
-TUX64_BOOT_STAGE0_MEMORY_ADDRESS_STATUS
- = TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA;
+ = TUX64_BOOT_MEMORY_ADDRESS_STATUS;
 
 SECTIONS
 {
@@ -24,11 +25,6 @@ SECTIONS
    .rsp_dmem (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x40) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
-
-   /* store the status code at the end of RSP DMEM, overwriting the CIC data */
-   .rsp_dmem.status (TUX64_BOOT_STAGE0_MEMORY_ADDRESS_STATUS) : {
-      *(.status);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 
    /* store the .bss items at the start of RSP IMEM */

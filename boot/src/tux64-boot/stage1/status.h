@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/status.h - Stage-1 status code inferface.       */
@@ -19,14 +19,9 @@ enum Tux64BootStage1StatusCode {
 };
 
 /*----------------------------------------------------------------------------*/
-/* Initializes the status struct.  Should be called before writing status     */
-/* codes.                                                                     */
-/*----------------------------------------------------------------------------*/
-void
-tux64_boot_stage1_status_initialize(void);
-
-/*----------------------------------------------------------------------------*/
-/* Writes the given status code to the status struct.                         */
+/* Writes the given status code to the status struct.  This should be called  */
+/* after initializing the status code with                                    */
+/* tux64_boot_status_code_initialize().                                       */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_status_code_write(

@@ -74,6 +74,8 @@ LDADD = \
 libtux64_boot_a_SOURCES = \
 	src/tux64-boot/tux64-boot.h \
 	src/tux64-boot/ipl2.h \
+	src/tux64-boot/status.c \
+	src/tux64-boot/status.h \
 	src/tux64-boot/idle.c \
 	src/tux64-boot/idle.h \
 	src/tux64-boot/halt.c \
@@ -110,13 +112,13 @@ stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
 
 EXTRA_DIST = \
+	src/tux64-boot/status.ld \
 	src/tux64-boot/stage0/stage0.ld \
 	src/tux64-boot/stage1/stage1.ld \
 	src/tux64-boot/stage1/stack.ld \
 	src/tux64-boot/stage1/boot-header.ld \
 	src/tux64-boot/stage1/fontmap.data \
 	src/tux64-boot/stage1/strings.txt \
-	src/tux64-boot/stage1/status.ld \
 	src/tux64-boot/stage2/stage2.ld
 
 stage0_LDFLAGS = \
