@@ -125,6 +125,20 @@
 #define TUX64_PLATFORM_MIPS_N64_PI_IQUE_ATB_LOWER_COUNT\
    (192u)
 
+/* various bit flags for the status register */
+#define TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_DMA_BUSY \
+   (1u << 0u)
+#define TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_IO_BUSY \
+   (1u << 1u)
+#define TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_DMA_ERROR \
+   (1u << 2u)
+#define TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_INTERRUPT \
+   (1u << 3u)
+#define TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_DMA_CONTROLLER_RESET \
+   (1u << 0u)
+#define TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_CLEAR_INTERRUPT \
+   (1u << 1u)
+
 /*----------------------------------------------------------------------------*/
 /* Defines the offsets for the different domains in the PI address space.     */
 /*----------------------------------------------------------------------------*/
