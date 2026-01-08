@@ -83,7 +83,9 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/sync.c \
 	src/tux64-boot/sync.h \
 	src/tux64-boot/rsp.c \
-	src/tux64-boot/rsp.h
+	src/tux64-boot/rsp.h \
+	src/tux64-boot/pi.c \
+	src/tux64-boot/pi.h
 stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.s
 stage1_SOURCES = \
