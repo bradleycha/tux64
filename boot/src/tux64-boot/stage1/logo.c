@@ -1,0 +1,460 @@
+/*----------------------------------------------------------------------------*/
+/*                          Copyright (C) Tux64 2026                          */
+/*                    https://github.com/bradleycha/tux64                     */
+/*----------------------------------------------------------------------------*/
+/* boot/src/tux64-boot/stage1/logo.c - Implementations for logo rendering.    */
+/*----------------------------------------------------------------------------*/
+
+#include "tux64-boot/tux64-boot.h"
+#include "tux64-boot/stage1/logo.h"
+
+#include <tux64/platform/mips/n64/memory-map.h>
+#include "tux64-boot/stage1/video.h"
+#include "tux64-boot/rsp.h"
+
+/*----------------------------------------------------------------------------*/
+/* This works by using a special encoding and compression for the image data, */
+/* then decompressing it to a buffer which is compatible with RSP DMA to copy */
+/* the image data into the framebuffer.                                       */
+/*                                                                            */
+/* The image is first encoded with the following specs:                       */
+/*    64x64 pixels                                                            */
+/*    4-bit color index for each pixel, giving 16 possible colors             */
+/*    Color 0 in the color table is reserved for 100% transparency            */
+/*    RGBA5551 pixel format for each entry in the color table                 */
+/*                                                                            */
+/* When encoded like this, we use 2048 bytes for all the pixels, and 30 bytes */
+/* for the color table.  This means we require 2078 bytes to encode the image */
+/* uncompressed.                                                              */
+/*                                                                            */
+/* We then compress the image using a modified version of run-length          */
+/* encoding (RLE).  We allow RLE to be toggled on and off throughout the      */
+/* image, depending on whichever is more efficient.  Pixels are packed from   */
+/* left to right, up to down.                                                 */
+/*                                                                            */
+/* The start of a compressed row of pixels starts out with a "RLE command"    */
+/* byte.  This determines whether to RLE compress the pixels or not, and for  */
+/* how many pixels.  Pixels are measured in "tuples", so that we can encode   */
+/* two colors in a single byte.  This makes efficient use of all bits without */
+/* having to deal with alignment junk or wasted bits.                         */
+/*                                                                            */
+/* An RLE command byte takes the following form:                              */
+/*    bits 0-6:   number of pixel tuples, minus one                           */
+/*    bit 7:      whether to enable RLE compression or not                    */
+/*                                                                            */
+/* An RLE color byte takes the following form:                                */
+/*    bits 0-3:   left color index                                            */
+/*    bits 4-7:   right color index                                           */
+/*                                                                            */
+/* An RLE command byte with RLE compression enabled should have an RLE color  */
+/* byte right after, encoding for the two colors to repeat.                   */
+/*                                                                            */
+/* An RLE command byte with RLE compression disabled should have enough RLE   */
+/* color bytes to fill the entire length of pixels.  For example, if we want  */
+/* to store 16 uncompressed pixels, we should have 8 RLE color bytes.         */
+/*                                                                            */
+/* For example, if we wanted to repeat two colors, color index 1 and color    */
+/* index 2 for 32 pixels, we would encode the following:                      */
+/*                                                                            */
+/*    0x8f <-- (32 / 2) - 1 = 15, RLE compression enabled                     */
+/*    0x12 <-- color index 1 on the left, color index 2 on the right          */
+/*                                                                            */
+/* As another example, if we wanted to store 4 uncompressed pixels with color */
+/* indices 1, 2, 3, and 4, we would store the following:                      */
+/*                                                                            */
+/*    0x01 <-- (4 / 2) - 1 = 1, RLE compression disabled                      */
+/*    0x12 <-- color index 1 on the left, color index 2 on the right          */
+/*    0x34 <-- color index 3 on the left, color index 4 on the right          */
+/*                                                                            */
+/* The compressed image should still work out to a 64x64 image, or 4096       */
+/* pixels.                                                                    */
+/*----------------------------------------------------------------------------*/
+
+/* TODO: metaprogramming! time to write yet ~another~ build tool to do this! */
+#define TUX64_BOOT_STAGE1_LOGO_IMAGE_PIXELS_COMPRESSED \
+   TUX64_LITERAL_UINT8(0xf7u), \
+   TUX64_LITERAL_UINT8(0x01u), \
+   TUX64_LITERAL_UINT8(0x07u), \
+   TUX64_LITERAL_UINT8(0x01u), \
+   TUX64_LITERAL_UINT8(0x23u), \
+   TUX64_LITERAL_UINT8(0x45u), \
+   TUX64_LITERAL_UINT8(0x67u), \
+   TUX64_LITERAL_UINT8(0x89u), \
+   TUX64_LITERAL_UINT8(0xabu), \
+   TUX64_LITERAL_UINT8(0xcdu), \
+   TUX64_LITERAL_UINT8(0xefu), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x20u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x03u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x40u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x05u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x60u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x07u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x80u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x09u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0xa0u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x0bu), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0xc0u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x0du), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0xe0u), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x0fu), \
+   TUX64_LITERAL_UINT8(0xffu), \
+   TUX64_LITERAL_UINT8(0x10u)
+#define TUX64_BOOT_STAGE1_LOGO_IMAGE_COLOR_TABLE \
+   TUX64_LITERAL_UINT16(0xffffu), \
+   TUX64_LITERAL_UINT16(0x8421u), \
+   TUX64_LITERAL_UINT16(0xd829u), \
+   TUX64_LITERAL_UINT16(0xf801u), \
+   TUX64_LITERAL_UINT16(0xfbc1u), \
+   TUX64_LITERAL_UINT16(0xffc1u), \
+   TUX64_LITERAL_UINT16(0x07c1u), \
+   TUX64_LITERAL_UINT16(0x0529u), \
+   TUX64_LITERAL_UINT16(0x003fu), \
+   TUX64_LITERAL_UINT16(0x2823u), \
+   TUX64_LITERAL_UINT16(0x8835u), \
+   TUX64_LITERAL_UINT16(0x5029u), \
+   TUX64_LITERAL_UINT16(0x4801u), \
+   TUX64_LITERAL_UINT16(0x0241u), \
+   TUX64_LITERAL_UINT16(0x0013u)
+
+#define TUX64_BOOT_STAGE1_LOGO_PIXELS_HORIZONTAL   64u
+#define TUX64_BOOT_STAGE1_LOGO_PIXELS_VERTICAL     64u
+#define TUX64_BOOT_STAGE1_LOGO_BORDER_PIXELS       8u
+
+#define TUX64_BOOT_STAGE1_LOGO_PIXELS \
+   ( \
+      TUX64_BOOT_STAGE1_LOGO_PIXELS_HORIZONTAL * \
+      TUX64_BOOT_STAGE1_LOGO_PIXELS_VERTICAL \
+   )
+#define TUX64_BOOT_STAGE1_LOGO_BYTES \
+   ( \
+      TUX64_BOOT_STAGE1_LOGO_PIXELS * \
+      sizeof(Tux64BootStage1VideoPixel) \
+   )
+
+#define TUX64_BOOT_STAGE1_LOGO_COLOR_TABLE_ENTRIES \
+   15u
+
+static const Tux64UInt8
+tux64_boot_stage1_logo_image_pixels_compressed [] = {
+   TUX64_BOOT_STAGE1_LOGO_IMAGE_PIXELS_COMPRESSED
+};
+
+static const Tux64BootStage1VideoPixel
+tux64_boot_stage1_logo_image_color_table [TUX64_BOOT_STAGE1_LOGO_COLOR_TABLE_ENTRIES] = {
+   TUX64_BOOT_STAGE1_LOGO_IMAGE_COLOR_TABLE
+};
+
+/* we use 32-bit integers to help optimize the decompression loop.  also */
+/* aligned/volatile for rsp dma. */
+static volatile Tux64UInt32
+tux64_boot_stage1_logo_image_pixels [TUX64_BOOT_STAGE1_LOGO_BYTES / sizeof(Tux64UInt32)]
+__attribute__((aligned(8u)));
+
+#define TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_MASK_TYPE \
+   (0x80u)
+#define TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_MASK_PIXEL_TUPLES \
+   (0x7fu)
+
+enum Tux64BootStage1LogoRleCommandType {
+   TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_TYPE_STRAIGHT   = 0x00u,
+   TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_TYPE_COMPRESSED = 0x80u
+};
+
+struct Tux64BootStage1LogoDecompressRleCommandResult {
+   Tux64UInt32 words_input;
+   Tux64UInt32 words_output;
+};
+
+static Tux64BootStage1VideoPixel
+tux64_boot_stage1_logo_decompress_rle_color(
+   Tux64BootStage1VideoPixel color_transparent,
+   Tux64UInt8 idx
+) {
+   if (idx == TUX64_LITERAL_UINT8(0u)) {
+      return color_transparent;
+   }
+
+   return tux64_boot_stage1_logo_image_color_table[idx - 1u];
+}
+
+static void
+tux64_boot_stage1_logo_decompress_rle_color_tuple(
+   Tux64BootStage1VideoPixel color_transparent,
+   volatile Tux64UInt32 * output,
+   Tux64UInt8 color_tuple
+) {
+   Tux64BootStage1VideoPixel pixel_left;
+   Tux64BootStage1VideoPixel pixel_right;
+   Tux64UInt32 color_word;
+
+   pixel_left  = tux64_boot_stage1_logo_decompress_rle_color(
+      color_transparent,
+      (color_tuple & TUX64_LITERAL_UINT8(0x0fu))
+   );
+   pixel_right = tux64_boot_stage1_logo_decompress_rle_color(
+      color_transparent,
+      ((color_tuple >> TUX64_LITERAL_UINT8(4u)) & TUX64_LITERAL_UINT8(0x0fu))
+   );
+
+   if (TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG) {
+      color_word = ((Tux64UInt32)pixel_right << TUX64_LITERAL_UINT8(16u) | (Tux64UInt32)pixel_left);
+   } else {
+      color_word = ((Tux64UInt32)pixel_left << TUX64_LITERAL_UINT8(16u) | (Tux64UInt32)pixel_right);
+   }
+
+   *output = color_word;
+   return;
+}
+
+static struct Tux64BootStage1LogoDecompressRleCommandResult
+tux64_boot_stage1_logo_decompress_rle_command_straight(
+   Tux64BootStage1VideoPixel color_transparent,
+   const Tux64UInt8 * iter_input,
+   volatile Tux64UInt32 * iter_output,
+   Tux64UInt8 pixel_tuples
+) {
+   struct Tux64BootStage1LogoDecompressRleCommandResult result;
+   Tux64UInt8 color_tuple;
+
+   result.words_input   = ((Tux64UInt32)pixel_tuples + TUX64_LITERAL_UINT32(1u));
+   result.words_output  = ((Tux64UInt32)pixel_tuples + TUX64_LITERAL_UINT32(1u));
+
+   /* loop written funky because tuples = pixel_tuples + 1 */
+   while (TUX64_BOOLEAN_TRUE) {
+      color_tuple = *iter_input;
+      iter_input++;
+
+      tux64_boot_stage1_logo_decompress_rle_color_tuple(
+         color_transparent,
+         iter_output,
+         color_tuple
+      );
+      iter_output++;
+
+      if (pixel_tuples == TUX64_LITERAL_UINT8(0u)) {
+         break;
+      }
+
+      pixel_tuples--;
+   }
+
+   return result;
+}
+
+static struct Tux64BootStage1LogoDecompressRleCommandResult
+tux64_boot_stage1_logo_decompress_rle_command_compressed(
+   Tux64BootStage1VideoPixel color_transparent,
+   const Tux64UInt8 * iter_input,
+   volatile Tux64UInt32 * iter_output,
+   Tux64UInt8 pixel_tuples
+) {
+   struct Tux64BootStage1LogoDecompressRleCommandResult result;
+   Tux64UInt8 color_tuple;
+
+   result.words_input   = TUX64_LITERAL_UINT32(1u);
+   result.words_output  = ((Tux64UInt32)pixel_tuples + TUX64_LITERAL_UINT32(1u));
+
+   color_tuple = *iter_input;
+   iter_input++;
+
+   while (TUX64_BOOLEAN_TRUE) {
+      tux64_boot_stage1_logo_decompress_rle_color_tuple(
+         color_transparent,
+         iter_output,
+         color_tuple
+      );
+      iter_output++;
+
+      if (pixel_tuples == TUX64_LITERAL_UINT8(0u)) {
+         break;
+      }
+
+      pixel_tuples--;
+   }
+
+   return result;
+}
+
+static struct Tux64BootStage1LogoDecompressRleCommandResult
+tux64_boot_stage1_logo_decompress_rle_command(
+   Tux64BootStage1VideoPixel color_transparent,
+   const Tux64UInt8 * iter_input,
+   volatile Tux64UInt32 * iter_output
+) {
+   struct Tux64BootStage1LogoDecompressRleCommandResult result;
+   struct Tux64BootStage1LogoDecompressRleCommandResult result_type;
+   Tux64UInt8 command;
+   enum Tux64BootStage1LogoRleCommandType type;
+   Tux64UInt8 pixel_tuples;
+
+   result.words_input   = TUX64_LITERAL_UINT32(0u);
+   result.words_output  = TUX64_LITERAL_UINT32(0u);
+
+   command = *iter_input++;
+   result.words_input++;
+
+   /* !!! warning !!! "pixel_tuples" is the number of pixel tuples, minus one. */
+   /* if pixel_tuples is zero, this means there is one pixel tuple to process. */
+   type           = (enum Tux64BootStage1LogoRleCommandType)(command & TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_MASK_TYPE));
+   pixel_tuples   = command & TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_MASK_PIXEL_TUPLES);
+
+   switch (type) {
+      case TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_TYPE_STRAIGHT:
+         result_type = tux64_boot_stage1_logo_decompress_rle_command_straight(
+            color_transparent,
+            iter_input,
+            iter_output,
+            pixel_tuples
+         );
+         break;
+
+      case TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_TYPE_COMPRESSED:
+         result_type = tux64_boot_stage1_logo_decompress_rle_command_compressed(
+            color_transparent,
+            iter_input,
+            iter_output,
+            pixel_tuples
+         );
+         break;
+
+      default:
+         /* if we get here, we have a bug either in the decompression loop or */
+         /* our compressed data was created incorrectly. */
+         TUX64_UNREACHABLE;
+   }
+
+   result.words_input += result_type.words_input;
+   result.words_output += result_type.words_output;
+   return result;
+}
+
+static void
+tux64_boot_stage1_logo_decompress(
+   Tux64BootStage1VideoPixel color_transparent
+) {
+   const Tux64UInt8 * iter_input;
+   volatile Tux64UInt32 * iter_output;
+   Tux64UInt32 bytes_remaining;
+   struct Tux64BootStage1LogoDecompressRleCommandResult result;
+
+   /* uncached writes for decompression buffer to avoid issues with rsp dma */
+   iter_input        = tux64_boot_stage1_logo_image_pixels_compressed;
+   iter_output       = (volatile Tux64UInt32 *)tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(tux64_boot_stage1_logo_image_pixels);
+   bytes_remaining   = TUX64_LITERAL_UINT32(sizeof(tux64_boot_stage1_logo_image_pixels_compressed));
+
+   do {
+      result = tux64_boot_stage1_logo_decompress_rle_command(color_transparent, iter_input, iter_output);
+
+      iter_input  += result.words_input;
+      iter_output += result.words_output;
+      
+      bytes_remaining -= (result.words_input * TUX64_LITERAL_UINT32(sizeof(*iter_input)));
+   } while (bytes_remaining != TUX64_LITERAL_UINT32(0u));
+   
+   return;
+}
+
+void
+tux64_boot_stage1_logo_initialize(
+   Tux64BootStage1VideoPixel color_transparent
+) {
+   tux64_boot_stage1_logo_decompress(color_transparent);
+   return;
+}
+
+#define TUX64_BOOT_STAGE1_LOGO_DMA_BLOCK_SIZE \
+   (4096u)
+#define TUX64_BOOT_STAGE1_LOGO_DMA_COPY_ROWS \
+   ( \
+      ( \
+         TUX64_BOOT_STAGE1_LOGO_PIXELS_VERTICAL * \
+         TUX64_BOOT_STAGE1_LOGO_DMA_BLOCK_SIZE \
+      ) / sizeof(tux64_boot_stage1_logo_image_pixels) \
+   )
+#define TUX64_BOOT_STAGE1_LOGO_DMA_COPY_BLOCKS \
+   ( \
+      sizeof(tux64_boot_stage1_logo_image_pixels) / \
+      TUX64_BOOT_STAGE1_LOGO_DMA_BLOCK_SIZE \
+   )
+
+void
+tux64_boot_stage1_logo_render(void) {
+   struct Tux64BootRspDmaTransfer transfer;
+   Tux64UInt32 addr_framebuffer;
+   Tux64UInt32 addr_pixels;
+   Tux64UInt8 blocks;
+
+   /* this is pretty simple.  we just copy each half of the image into the    */
+   /* framebuffer using RSP DMA.  uncompressed, the image is 8KiB, which      */
+   /* requires exactly 2 4KiB transfers, which use RSP IMEM.                  */
+   transfer.addr_rsp_mem   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
+   transfer.row_bytes_copy = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_LOGO_PIXELS_HORIZONTAL * sizeof(Tux64BootStage1VideoPixel)) - 1u);
+   transfer.row_bytes_skip = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X - TUX64_BOOT_STAGE1_LOGO_PIXELS_HORIZONTAL) * sizeof(Tux64BootStage1VideoPixel));
+   transfer.row_count      = TUX64_LITERAL_UINT16(TUX64_BOOT_STAGE1_LOGO_DMA_COPY_ROWS - 1u);
+
+   /* position the start, which is the top-left of the image, relative to the */
+   /* top-right of the framebuffer.                                           */
+   addr_framebuffer = (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_video_render_target_get();
+   addr_framebuffer = addr_framebuffer + TUX64_LITERAL_UINT32(
+      (
+         TUX64_BOOT_STAGE1_LOGO_BORDER_PIXELS
+         * TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X
+      ) * sizeof(Tux64BootStage1VideoPixel)
+   );
+   addr_framebuffer = addr_framebuffer + TUX64_LITERAL_UINT32(
+      (
+         TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X
+         - TUX64_BOOT_STAGE1_LOGO_PIXELS_HORIZONTAL
+         - TUX64_BOOT_STAGE1_LOGO_BORDER_PIXELS
+         - 5u /* same weird hack from fbcon */
+      ) * sizeof(Tux64BootStage1VideoPixel)
+   );
+
+   /* set up start pointer for decompressed pixel data */
+   addr_pixels = (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_logo_image_pixels;
+
+   /* initialize the number of blocks to transfer. */
+   blocks = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_LOGO_DMA_COPY_BLOCKS);
+
+   /* perform the RSP DMA transfers. */
+   do {
+      /* load into RSP IMEM */
+      transfer.addr_rdram     = addr_pixels;
+      transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
+      tux64_boot_rsp_dma_wait_queue();
+      tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
+
+      /* copy into the framebuffer */
+      transfer.addr_rdram     = addr_framebuffer;
+      transfer.row_bytes_skip = TUX64_LITERAL_UINT16((TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X - TUX64_BOOT_STAGE1_LOGO_PIXELS_HORIZONTAL) * sizeof(Tux64BootStage1VideoPixel));
+      tux64_boot_rsp_dma_wait_queue();
+      tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RDRAM);
+
+      /* move to next block */
+      addr_pixels       += TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_LOGO_DMA_BLOCK_SIZE);
+      addr_framebuffer  += TUX64_LITERAL_UINT32(
+         TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X
+         * TUX64_BOOT_STAGE1_LOGO_DMA_COPY_ROWS
+         * sizeof(Tux64BootStage1VideoPixel));
+      blocks--;
+   } while (blocks != TUX64_LITERAL_UINT8(0u));
+
+   /* wait for all copies to finish before returning */
+   tux64_boot_rsp_dma_wait_idle();
+   return;
+}
+

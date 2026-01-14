@@ -69,6 +69,11 @@ AC_ARG_ENABLE([splash],
    [tux64_boot_config_splash=1],
    [tux64_boot_config_splash=0]
 )
+AC_ARG_ENABLE([logo],
+   AS_HELP_STRING([--enable-logo], [Enable drawing the logo image to the background]),
+   [tux64_boot_config_logo=1],
+   [tux64_boot_config_logo=0]
+)
 AC_ARG_ENABLE([checksum],
    AS_HELP_STRING([--enable-checksum], [Enable support for checksum verification]),
    [tux64_boot_config_checksum=1],
@@ -173,6 +178,10 @@ AC_DEFINE_UNQUOTED([CONFIG_STATUS],
 AC_DEFINE_UNQUOTED([CONFIG_SPLASH],
    [$tux64_boot_config_splash],
    [Enable splash text displaying bootloader name and version on startup]
+)
+AC_DEFINE_UNQUOTED([CONFIG_LOGO],
+   [$tux64_boot_config_logo],
+   [Enable drawing the logo image to the background]
 )
 AC_DEFINE_UNQUOTED([CONFIG_CHECKSUM],
    [$tux64_boot_config_checksum],

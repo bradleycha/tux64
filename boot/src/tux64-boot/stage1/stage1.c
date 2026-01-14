@@ -12,6 +12,7 @@
 #include "tux64-boot/stage1/interrupt/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/fbcon.h"
+#include "tux64-boot/stage1/logo.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
 #include "tux64-boot/stage1/boot-header.h"
@@ -256,6 +257,10 @@ tux64_boot_stage1_main(
    );
    tux64_boot_stage1_interrupt_vi_enable();
 
+   if (TUX64_BOOT_CONFIG_LOGO) {
+      tux64_boot_stage1_logo_initialize(video_palette.background);
+   }
+
    tux64_boot_stage1_fbcon_initialize(
       video_palette.foreground,
       video_palette.background
@@ -270,6 +275,11 @@ tux64_boot_stage1_main(
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_video_render_target_clear();
       tux64_boot_stage1_fsm_execute(&fsm);
+
+      if (TUX64_BOOT_CONFIG_LOGO) {
+         tux64_boot_stage1_logo_render();
+      }
+
       tux64_boot_stage1_fbcon_render();
       tux64_boot_stage1_video_vblank_wait();
       tux64_boot_stage1_video_swap_buffers();

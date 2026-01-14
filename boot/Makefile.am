@@ -106,6 +106,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/video.h \
 	src/tux64-boot/stage1/fbcon.c \
 	src/tux64-boot/stage1/fbcon.h \
+	src/tux64-boot/stage1/logo.c \
+	src/tux64-boot/stage1/logo.h \
 	src/tux64-boot/stage1/strings.c \
 	src/tux64-boot/stage1/strings.h \
 	src/tux64-boot/stage1/status.c \
