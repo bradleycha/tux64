@@ -146,15 +146,16 @@
    )
 
 #define TUX64_BOOT_STAGE1_LOGO_COLOR_TABLE_ENTRIES \
-   15u
+   16u
 
 static const Tux64UInt8
 tux64_boot_stage1_logo_image_pixels_compressed [] = {
    TUX64_BOOT_STAGE1_LOGO_IMAGE_PIXELS_COMPRESSED
 };
 
-static const Tux64BootStage1VideoPixel
+static Tux64BootStage1VideoPixel
 tux64_boot_stage1_logo_image_color_table [TUX64_BOOT_STAGE1_LOGO_COLOR_TABLE_ENTRIES] = {
+   TUX64_LITERAL_UINT16(0x0000u), /* this will get replaced with the background color */
    TUX64_BOOT_STAGE1_LOGO_IMAGE_COLOR_TABLE
 };
 
@@ -181,19 +182,13 @@ struct Tux64BootStage1LogoDecompressRleCommandResult {
 
 static Tux64BootStage1VideoPixel
 tux64_boot_stage1_logo_decompress_rle_color(
-   Tux64BootStage1VideoPixel color_transparent,
    Tux64UInt8 idx
 ) {
-   if (idx == TUX64_LITERAL_UINT8(0u)) {
-      return color_transparent;
-   }
-
-   return tux64_boot_stage1_logo_image_color_table[idx - 1u];
+   return tux64_boot_stage1_logo_image_color_table[idx];
 }
 
 static void
 tux64_boot_stage1_logo_decompress_rle_color_tuple(
-   Tux64BootStage1VideoPixel color_transparent,
    volatile Tux64UInt32 * output,
    Tux64UInt8 color_tuple
 ) {
@@ -201,14 +196,8 @@ tux64_boot_stage1_logo_decompress_rle_color_tuple(
    Tux64BootStage1VideoPixel pixel_right;
    Tux64UInt32 color_word;
 
-   pixel_left  = tux64_boot_stage1_logo_decompress_rle_color(
-      color_transparent,
-      (color_tuple & TUX64_LITERAL_UINT8(0x0fu))
-   );
-   pixel_right = tux64_boot_stage1_logo_decompress_rle_color(
-      color_transparent,
-      ((color_tuple >> TUX64_LITERAL_UINT8(4u)) & TUX64_LITERAL_UINT8(0x0fu))
-   );
+   pixel_left  = tux64_boot_stage1_logo_decompress_rle_color(color_tuple & TUX64_LITERAL_UINT8(0x0fu));
+   pixel_right = tux64_boot_stage1_logo_decompress_rle_color((color_tuple >> TUX64_LITERAL_UINT8(4u)) & TUX64_LITERAL_UINT8(0x0fu));
 
    if (TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG) {
       color_word = ((Tux64UInt32)pixel_right << TUX64_LITERAL_UINT8(16u) | (Tux64UInt32)pixel_left);
@@ -222,7 +211,6 @@ tux64_boot_stage1_logo_decompress_rle_color_tuple(
 
 static struct Tux64BootStage1LogoDecompressRleCommandResult
 tux64_boot_stage1_logo_decompress_rle_command_straight(
-   Tux64BootStage1VideoPixel color_transparent,
    const Tux64UInt8 * iter_input,
    volatile Tux64UInt32 * iter_output,
    Tux64UInt8 pixel_tuples
@@ -238,11 +226,7 @@ tux64_boot_stage1_logo_decompress_rle_command_straight(
       color_tuple = *iter_input;
       iter_input++;
 
-      tux64_boot_stage1_logo_decompress_rle_color_tuple(
-         color_transparent,
-         iter_output,
-         color_tuple
-      );
+      tux64_boot_stage1_logo_decompress_rle_color_tuple(iter_output, color_tuple);
       iter_output++;
 
       if (pixel_tuples == TUX64_LITERAL_UINT8(0u)) {
@@ -257,7 +241,6 @@ tux64_boot_stage1_logo_decompress_rle_command_straight(
 
 static struct Tux64BootStage1LogoDecompressRleCommandResult
 tux64_boot_stage1_logo_decompress_rle_command_compressed(
-   Tux64BootStage1VideoPixel color_transparent,
    const Tux64UInt8 * iter_input,
    volatile Tux64UInt32 * iter_output,
    Tux64UInt8 pixel_tuples
@@ -272,11 +255,7 @@ tux64_boot_stage1_logo_decompress_rle_command_compressed(
    iter_input++;
 
    while (TUX64_BOOLEAN_TRUE) {
-      tux64_boot_stage1_logo_decompress_rle_color_tuple(
-         color_transparent,
-         iter_output,
-         color_tuple
-      );
+      tux64_boot_stage1_logo_decompress_rle_color_tuple(iter_output, color_tuple);
       iter_output++;
 
       if (pixel_tuples == TUX64_LITERAL_UINT8(0u)) {
@@ -291,7 +270,6 @@ tux64_boot_stage1_logo_decompress_rle_command_compressed(
 
 static struct Tux64BootStage1LogoDecompressRleCommandResult
 tux64_boot_stage1_logo_decompress_rle_command(
-   Tux64BootStage1VideoPixel color_transparent,
    const Tux64UInt8 * iter_input,
    volatile Tux64UInt32 * iter_output
 ) {
@@ -315,7 +293,6 @@ tux64_boot_stage1_logo_decompress_rle_command(
    switch (type) {
       case TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_TYPE_STRAIGHT:
          result_type = tux64_boot_stage1_logo_decompress_rle_command_straight(
-            color_transparent,
             iter_input,
             iter_output,
             pixel_tuples
@@ -324,7 +301,6 @@ tux64_boot_stage1_logo_decompress_rle_command(
 
       case TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_TYPE_COMPRESSED:
          result_type = tux64_boot_stage1_logo_decompress_rle_command_compressed(
-            color_transparent,
             iter_input,
             iter_output,
             pixel_tuples
@@ -343,9 +319,7 @@ tux64_boot_stage1_logo_decompress_rle_command(
 }
 
 static void
-tux64_boot_stage1_logo_decompress(
-   Tux64BootStage1VideoPixel color_transparent
-) {
+tux64_boot_stage1_logo_decompress(void) {
    const Tux64UInt8 * iter_input;
    volatile Tux64UInt32 * iter_output;
    Tux64UInt32 bytes_remaining;
@@ -357,7 +331,7 @@ tux64_boot_stage1_logo_decompress(
    bytes_remaining   = TUX64_LITERAL_UINT32(sizeof(tux64_boot_stage1_logo_image_pixels_compressed));
 
    do {
-      result = tux64_boot_stage1_logo_decompress_rle_command(color_transparent, iter_input, iter_output);
+      result = tux64_boot_stage1_logo_decompress_rle_command(iter_input, iter_output);
 
       iter_input  += result.words_input;
       iter_output += result.words_output;
@@ -372,7 +346,11 @@ void
 tux64_boot_stage1_logo_initialize(
    Tux64BootStage1VideoPixel color_transparent
 ) {
-   tux64_boot_stage1_logo_decompress(color_transparent);
+   /* replace color 0 in the color table with the transparency color, avoids */
+   /* unnecessary branching in a loop and reduces code size. */
+   tux64_boot_stage1_logo_image_color_table[0u] = color_transparent;
+
+   tux64_boot_stage1_logo_decompress();
    return;
 }
 
