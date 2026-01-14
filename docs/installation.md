@@ -771,6 +771,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       --enable-status \
       --enable-checksum \
       --enable-splash \
+      --enable-logo \
       --enable-memory-display \
       --enable-region-pal \
       --enable-region-ntsc \
