@@ -583,44 +583,18 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
-### Chapter 4.3 - Building tux64-fontcompiler
+### Chapter 4.3 - Building tux64-rescompiler
 
-`tux64-fontcompiler` is a tool used to generate compressed binary data from a font map image for use with `tux64-boot`.  It is a required build tool for `tux64-boot`.
+`tux64-rescompiler` is a collection of tools used to convert resources to embedded binary formats for use with `tux64-boot`.  Tools built by this package are a hard build requirement for `tux64-boot`.
 
 ```
-mkdir ${TUX64_BUILD_ROOT}/builds/tux64-fontcompiler
-cd ${TUX64_BUILD_ROOT}/builds/tux64-fontcompiler
+mkdir ${TUX64_BUILD_ROOT}/builds/tux64-rescompiler
+cd ${TUX64_BUILD_ROOT}/builds/tux64-rescompiler
 
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
-   ../../sources/tux64-*/fontcompiler/configure \
-      --disable-dependency-tracking \
-      --host=${TUX64_TARGET_HOST} \
-      --prefix=${TUX64_BUILD_ROOT}/tools \
-      CFLAGS="${TUX64_CFLAGS_HOST}" \
-      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
-      LDFLAGS="${TUX64_LDFLAGS_HOST}"
-)
-
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
-```
-
-### Chapter 4.4 - Building tux64-textcompiler
-
-`tux64-textcompiler` is another tool required to build `tux64-boot`.  This tool
-converts ASCII text into an embedded format which can be displayed by the
-stage-1 framebuffer console.
-
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/tux64-textcompiler
-cd ${TUX64_BUILD_ROOT}/builds/tux64-textcompiler
-
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
-   ../../sources/tux64-*/textcompiler/configure \
+   ../../sources/tux64-*/rescompiler/configure \
       --disable-dependency-tracking \
       --host=${TUX64_TARGET_HOST} \
       --prefix=${TUX64_BUILD_ROOT}/tools \

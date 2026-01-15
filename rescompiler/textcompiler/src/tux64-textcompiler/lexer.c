@@ -2,8 +2,8 @@
 /*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* textcompiler/src/tux64-textcompiler/lexer.c - Implementations for the text */
-/*    file parser.                                                            */
+/* rescompiler/textcompiler/src/tux64-textcompiler/lexer.c - Implementations  */
+/*    for the text file parser.                                               */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-textcompiler/tux64-textcompiler.h"

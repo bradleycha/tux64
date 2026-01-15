@@ -1,9 +1,9 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* fontcompiler/src/tux64-fontcompiler/arguments.h - Header for arguments     */
-/*    parsing.                                                                */
+/* rescompiler/fontcompiler/src/tux64-fontcompiler/arguments.h - Header for   */
+/*    arguments parsing.                                                      */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_FONTCOMPILER_ARGUMENTS_H

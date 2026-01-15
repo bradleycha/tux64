@@ -1,0 +1,16 @@
+tux64-rescompiler is a collection of command-line tools used by tux64-boot to
+convert binary data into C source code which can be linked with the rest of the
+program.
+
+This contains two subprojects, which get configured, built, and installed
+automatically from the parent working directory.  Thus, you shouldn't have to
+manually configure/make/install these.
+
+   tux64-fontcompiler - Converts a font map image into compressed binary data
+                        used by the stage-1 framebuffer console.
+
+   tux64-textcompiler - Encodes ASCII text into the embedded form for the
+                        stage-1 framebuffer console.
+
+For more information, refer to the above projects' README files.
+

@@ -1,9 +1,9 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* fontcompiler/src/tux64-fontcompiler/generator.c - Implementation for font  */
-/*    map image data C source code generation.                                */
+/* rescompiler/fontcompiler/src/tux64-fontcompiler/generator.c -              */
+/*    Implementation for font map image data C source code generation.        */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-fontcompiler/tux64-fontcompiler.h"

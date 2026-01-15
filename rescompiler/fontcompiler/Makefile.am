@@ -1,8 +1,9 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (C) Tux64 2025, 2026                        #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
-# fontcompiler/Makefile.am - GNU Automake script for tux64-fontcompiler. 	 	 #
+# rescompiler/fontcompiler/Makefile.am - GNU Automake script for					 #
+# tux64-fontcompiler. 	 	 																	 #
 #------------------------------------------------------------------------------#
 
 bin_PROGRAMS = \

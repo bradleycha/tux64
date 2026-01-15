@@ -1,8 +1,9 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (C) Tux64 2025, 2026                        #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
-# fontcompiler/configure.ac - GNU Autoconf script for tux64-fontcompiler.      #
+# rescompiler/fontcompiler/configure.ac - GNU Autoconf script for              #
+#    tux64-fontcompiler.                                                       #
 #------------------------------------------------------------------------------#
 
 m4_include([m4/ax_prefix_config_h.m4])

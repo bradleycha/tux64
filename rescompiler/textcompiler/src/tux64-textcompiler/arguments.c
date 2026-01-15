@@ -2,8 +2,8 @@
 /*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* textcompiler/src/tux64-textcompiler/arguments.c - Implementations for      */
-/*    arguments parsing.                                                      */
+/* rescompiler/textcompiler/src/tux64-textcompiler/arguments.c -              */
+/*    Implementations for arguments parsing.                                  */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-textcompiler/tux64-textcompiler.h"

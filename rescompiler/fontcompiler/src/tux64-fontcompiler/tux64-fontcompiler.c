@@ -1,9 +1,9 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* fontcompiler/src/tux64-fontcompiler/tux64-fontcompiler.c - Main            */
-/*    application entrypoint for tux64-fontcompiler.                          */
+/* rescompiler/fontcompiler/src/tux64-fontcompiler/tux64-fontcompiler.c -     */
+/*    Main application entrypoint for tux64-fontcompiler.                     */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-fontcompiler/tux64-fontcompiler.h"

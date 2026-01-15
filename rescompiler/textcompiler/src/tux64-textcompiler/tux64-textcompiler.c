@@ -2,8 +2,8 @@
 /*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* textcompiler/src/tux64-textcompiler/tux64-textcompiler.c - Main            */
-/*    application entrypoint for tux64-textcompiler.                          */
+/* rescompiler/textcompiler/src/tux64-textcompiler/tux64-textcompiler.c -     */
+/*    Main application entrypoint for tux64-textcompiler.                     */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-textcompiler/tux64-textcompiler.h"

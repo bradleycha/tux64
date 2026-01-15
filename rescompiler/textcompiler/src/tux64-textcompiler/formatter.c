@@ -1,9 +1,10 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* textcompiler/src/tux64-textcompiler/formatter.c - Implementations for      */
-/*    writing a parsed text file as formatted C source code.                  */
+/* rescompiler/textcompiler/src/tux64-textcompiler/formatter.c -              */
+/*    Implementations for writing a parsed text file as formatted C source    */
+/*    code.                                                                   */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-textcompiler/tux64-textcompiler.h"
