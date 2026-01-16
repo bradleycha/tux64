@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ----------------------------------------------------------------------------
-#                          Copyright (c) Tux64 2025
+#                        Copyright (c) Tux64 2025, 2026                   		
 # ----------------------------------------------------------------------------
 # This file is licensed under the GPLv3 license.  For more information, see
 # LICENSE.
@@ -30,7 +30,7 @@ export TUX64_CXXFLAGS_N64_COMMON="${TUX64_CFLAGS_N64_COMMON}"
 export TUX64_ASFLAGS_N64_COMMON="-march=vr4300 -mtune=vr4300"
 export TUX64_LDFLAGS_N64_COMMON="-flto"
 
-export TUX64_CFLAGS_N64_BOOTLOADER="${TUX64_CFLAGS_N64_COMMON} -mabi=o64"
+export TUX64_CFLAGS_N64_BOOTLOADER="${TUX64_CFLAGS_N64_COMMON} -mabi=o64 -G65536 -mno-explicit-relocs -mno-check-zero-division"
 export TUX64_ASFLAGS_N64_BOOTLOADER="${TUX64_ASFLAGS_N64_COMMON}"
 export TUX64_LDFLAGS_N64_BOOTLOADER="${TUX64_LDFLAGS_N64_COMMON}"
 
