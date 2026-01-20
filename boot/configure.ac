@@ -36,6 +36,12 @@ if [[ -z "$TUX64_TEXTCOMPILER" ]]; then
    exit 1
 fi
 
+AC_CHECK_PROG([TUX64_IMAGECOMPILER], [tux64-imagecompiler])
+if [[ -z "$TUX64_IMAGECOMPILER" ]]; then
+   $(tux64_boot_err_log "unable to find tux64-imagecompiler.  please verify the build was configured correctly.")
+   exit 1
+fi
+
 AC_CHECK_TOOL([OBJCOPY], [objcopy])
 if [[ -z "$OBJCOPY" ]]; then
    $(tux64_boot_err_log "unable to find ${host_cpu}-${host_os}-objcopy.  please verify the build was configured correctly.")

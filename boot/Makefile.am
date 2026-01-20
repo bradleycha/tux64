@@ -17,6 +17,8 @@ stage1_FONTMAP = \
 	$(top_builddir)/src/tux64-boot/stage1/fontmap.bin.c
 stage1_STRINGS = \
 	$(top_builddir)/src/tux64-boot/stage1/strings.bin.c
+stage1_LOGO = \
+	$(top_builddir)/src/tux64-boot/stage1/logo.bin.c
 
 stage0_ELF = \
 	$(top_builddir)/stage0
@@ -123,6 +125,7 @@ EXTRA_DIST = \
 	src/tux64-boot/stage1/boot-header.ld \
 	src/tux64-boot/stage1/fontmap.data \
 	src/tux64-boot/stage1/strings.txt \
+	src/tux64-boot/stage1/logo.data \
 	src/tux64-boot/stage2/stage2.ld
 
 stage0_LDFLAGS = \
@@ -141,12 +144,19 @@ pkgdata_DATA = \
 # explicit dependency needed since we're generating the C source code
 $(top_srcdir)/src/tux64-boot/stage1/fbcon.c : $(stage1_FONTMAP)
 $(top_srcdir)/src/tux64-boot/stage1/strings.c : $(stage1_STRINGS)
+$(top_srcdir)/src/tux64-boot/stage1/logo.c : $(stage1_LOGO)
 
 $(stage1_FONTMAP) : $(top_srcdir)/src/tux64-boot/stage1/fontmap.data
-	$(TUX64_FONTCOMPILER) --input $< --output $@ --name TUX64_BOOT_STAGE1_FONTMAP_BIN
+	$(TUX64_FONTCOMPILER) --input $< --output $@ \
+		--name TUX64_BOOT_STAGE1_FONTMAP_BIN
 
 $(stage1_STRINGS) : $(top_srcdir)/src/tux64-boot/stage1/strings.txt
 	$(TUX64_TEXTCOMPILER) --input $< --output $@
+
+$(stage1_LOGO) : $(top_srcdir)/src/tux64-boot/stage1/logo.data
+	$(TUX64_IMAGECOMPILER) --input $< --output $@ \
+		--name-pixels 			TUX64_BOOT_STAGE1_LOGO_IMAGE_PIXELS_COMPRESSED \
+		--name-color-table	TUX64_BOOT_STAGE1_LOGO_IMAGE_COLOR_TABLE
 
 # TODO: something is not right here.  if we configure with dependency tracking
 # enabled this works fine, but if we disable dependency tracking, this breaks
