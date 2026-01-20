@@ -191,5 +191,5 @@ $(stage2_SYM) : $(stage2_ELF)
 all-local : $(BIN_FILES) $(SYM_FILES)
 
 clean-local :
-	rm -f $(BIN_FILES) $(SYM_FILES) $(stage1_FONTMAP)
+	rm -f $(BIN_FILES) $(SYM_FILES) $(stage1_FONTMAP) $(stage1_STRINGS) $(stage1_LOGO)
 
