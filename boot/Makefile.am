@@ -188,6 +188,15 @@ $(stage1_SYM) : $(stage1_ELF)
 $(stage2_SYM) : $(stage2_ELF)
 	$(OBJCOPY) --only-keep-debug $< $@ && chmod -x $@
 
+dump-memory : $(stage0_BIN) $(stage1_BIN) $(stage2_BIN)
+	du -b $(stage0_BIN) $(stage1_BIN) $(stage2_BIN)
+
+dump-code : $(stage0_ELF) $(stage1_ELF) $(stage2_ELF)
+	$(OBJDUMP) \
+	 	-d $(stage0_ELF) -j .rsp_dmem \
+		-d $(stage1_ELF) -j .rdram \
+		-d $(stage2_ELF) -j .rsp_imem
+
 all-local : $(BIN_FILES) $(SYM_FILES)
 
 clean-local :
