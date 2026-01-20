@@ -1,0 +1,5 @@
+tux64-imagecompiler converts an RGBA8888 image into an RLE-compressed CI4 image
+with an RGBA5551 color table.  This is the image format used by the logo in
+tux64-boot.  This tool is required to build tux64-boot, but most people
+shouldn't need to manually invoke it.
+

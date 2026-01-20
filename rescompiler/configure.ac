@@ -11,6 +11,7 @@ AC_CONFIG_AUX_DIR([configdir])
 
 AC_CONFIG_SUBDIRS([fontcompiler])
 AC_CONFIG_SUBDIRS([textcompiler])
+AC_CONFIG_SUBDIRS([imagecompiler])
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])

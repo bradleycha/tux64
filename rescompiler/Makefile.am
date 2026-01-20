@@ -8,5 +8,6 @@
 # all we're doing here is recursively building, so this is it.
 SUBDIRS = \
 	fontcompiler \
-	textcompiler
+	textcompiler \
+	imagecompiler
 
