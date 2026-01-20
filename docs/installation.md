@@ -740,6 +740,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
       TUX64_FONTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-fontcompiler \
       TUX64_TEXTCOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-textcompiler \
+      TUX64_IMAGECOMPILER=${TUX64_BUILD_ROOT}/tools/bin/tux64-imagecompiler \
       CONFIG_COLOR_FOREGROUND=white \
       CONFIG_COLOR_BACKGROUND=black \
       --enable-status \
