@@ -153,7 +153,7 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_CXXFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C++ compilers. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_ASFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's assemblers. | -march=vr4300 -mtune=vr4300 |
 | TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -flto |
-| TUX64_CFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader C compiler. | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 |
+| TUX64_CFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader C compiler. | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 -G65536 -mno-explicit-relocs -mno-check-zero-division |
 | TUX64_ASFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
 | TUX64_LDFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader linker. | ${TUX64_LDFLAGS_N64_COMMON} |
 | TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} -fno-lto |
@@ -174,7 +174,7 @@ TUX64_TARGET_HOST is the target for the host machine.  This needs to be set manu
 
 TUX64_CFLAGS_N64_COMMON includes `-mfix4300`.  This is a flag which patches code to work around hardware bugs in early N64 CPU revisions, at the cost of code size and performance.  We include this flag by default for compatibility with all N64 revisions.  However if you are planning on only running Tux64 on NUS-CPU-04 and later revisions, you should be able to safely remove this flag for improved performance and smaller code size.
 
-TUX64_CFLAGS_N64_BOOTLOADER includes `-mabi=o64`.  This uses GCC's MIPS O64 ABI, which is basically the regular 64-bit ABI but with 32-bit pointers.  Since the VR4300's virtual address space is only 32-bit, there's no purpose to 64-bit pointers.  In the future, the kernel and userspace will also be built with `-mabi=o64`, but currently it's unsupported outside of the bootloader.
+TUX64_CFLAGS_N64_BOOTLOADER includes `-mabi=o64`.  This uses GCC's MIPS O64 ABI, which is basically the regular 64-bit ABI but with 32-bit pointers.  Since the VR4300's virtual address space is only 32-bit, there's no purpose to 64-bit pointers.  In the future, the kernel and userspace will also be built with `-mabi=o64`, but currently it's unsupported outside of the bootloader.  A few other CFLAGS are also included which make the bootloader smaller, but are generally unsafe to use outside of the bootloader.
 
 After reviewing and setting the required environment variables, these can be exported to the current shell with the following command:
 
