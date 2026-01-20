@@ -10,7 +10,8 @@ It's recommended to make the following changes to ```buildconf.sh``` to aid in d
 |------|-------|
 | TUX64_CFLAGS_HOST | -pipe -march=native -O0 -g -fsanitize=undefined |
 | TUX64_LDFLAGS_HOST | -g |
-| TUX64_CFLAGS_N64_COMMON |  -pipe -march=vr4300 -mfix4300 -mabi=o64 -O0 -g |
+| TUX64_CFLAGS_N64_COMMON |  -pipe -march=vr4300 -mfix4300 -mabi=64 -O0 -g |
+| TUX64_CFLAGS_N64_BOOTLOADER | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 |
 | TUX64_LDFLAGS_N64_COMMON | -g |
 
 You may either overwrite ```buildconf.sh```, or save the modified version to a new file, such as ```buildconf-dev.sh``` so you may use the development ```buildconf-dev.sh``` only for Tux64 code.  This may be desirable for compiling external software and libraries with optimized compiler flags, while still retaining enhanced debug support for internal code.
