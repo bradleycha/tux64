@@ -174,11 +174,12 @@ tux64_boot_stage1_logo_decompress_rle_command_straight(
       tux64_boot_stage1_logo_decompress_rle_color_tuple(iter_output, color_tuple);
       iter_output++;
 
-      if (pixel_tuples == TUX64_LITERAL_UINT8(0u)) {
+      /* post-decrement, which allows pixel_tuples to underflow (which is not */
+      /* undefined behavior), which uses slightly less instructions.  this is */
+      /* fine since we aren't using pixel_tuples after this loop. */
+      if (pixel_tuples-- == TUX64_LITERAL_UINT8(0u)) {
          break;
       }
-
-      pixel_tuples--;
    }
 
    return result;
@@ -203,11 +204,9 @@ tux64_boot_stage1_logo_decompress_rle_command_compressed(
       tux64_boot_stage1_logo_decompress_rle_color_tuple(iter_output, color_tuple);
       iter_output++;
 
-      if (pixel_tuples == TUX64_LITERAL_UINT8(0u)) {
+      if (pixel_tuples-- == TUX64_LITERAL_UINT8(0u)) {
          break;
       }
-
-      pixel_tuples--;
    }
 
    return result;
