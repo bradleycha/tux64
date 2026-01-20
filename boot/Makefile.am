@@ -123,9 +123,9 @@ EXTRA_DIST = \
 	src/tux64-boot/stage1/stage1.ld \
 	src/tux64-boot/stage1/stack.ld \
 	src/tux64-boot/stage1/boot-header.ld \
-	src/tux64-boot/stage1/fontmap.data \
+	src/tux64-boot/stage1/fontmap.rgb888.data \
 	src/tux64-boot/stage1/strings.txt \
-	src/tux64-boot/stage1/logo.data \
+	src/tux64-boot/stage1/logo.rgba8888.data \
 	src/tux64-boot/stage2/stage2.ld
 
 stage0_LDFLAGS = \
@@ -146,14 +146,14 @@ $(top_srcdir)/src/tux64-boot/stage1/fbcon.c : $(stage1_FONTMAP)
 $(top_srcdir)/src/tux64-boot/stage1/strings.c : $(stage1_STRINGS)
 $(top_srcdir)/src/tux64-boot/stage1/logo.c : $(stage1_LOGO)
 
-$(stage1_FONTMAP) : $(top_srcdir)/src/tux64-boot/stage1/fontmap.data
+$(stage1_FONTMAP) : $(top_srcdir)/src/tux64-boot/stage1/fontmap.rgb888.data
 	$(TUX64_FONTCOMPILER) --input $< --output $@ \
 		--name TUX64_BOOT_STAGE1_FONTMAP_BIN
 
 $(stage1_STRINGS) : $(top_srcdir)/src/tux64-boot/stage1/strings.txt
 	$(TUX64_TEXTCOMPILER) --input $< --output $@
 
-$(stage1_LOGO) : $(top_srcdir)/src/tux64-boot/stage1/logo.data
+$(stage1_LOGO) : $(top_srcdir)/src/tux64-boot/stage1/logo.rgba8888.data
 	$(TUX64_IMAGECOMPILER) --input $< --output $@ \
 		--name-pixels 			TUX64_BOOT_STAGE1_LOGO_IMAGE_PIXELS_COMPRESSED \
 		--name-color-table	TUX64_BOOT_STAGE1_LOGO_IMAGE_COLOR_TABLE
