@@ -188,6 +188,9 @@ $(stage1_SYM) : $(stage1_ELF)
 $(stage2_SYM) : $(stage2_ELF)
 	$(OBJCOPY) --only-keep-debug $< $@ && chmod -x $@
 
+dump-hash : $(stage0_BIN) $(stage1_BIN) $(stage2_BIN)
+	sha1sum $(stage0_BIN) $(stage1_BIN) $(stage2_BIN)
+
 dump-memory : $(stage0_BIN) $(stage1_BIN) $(stage2_BIN)
 	du -b $(stage0_BIN) $(stage1_BIN) $(stage2_BIN)
 
