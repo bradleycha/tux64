@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/endian.c - Implementations for endian functions.             */
@@ -90,17 +90,11 @@ tux64_endian_convert_uint16(
    Tux64UInt16 value,
    enum Tux64EndianFormat format
 ) {
-   union Tux64Int16 value_bytes;
+   if (format == TUX64_ENDIAN_FORMAT_NATIVE) {
+      return value;
+   }
 
-   value_bytes.uint = value;
-
-   tux64_endian_convert_inplace(
-      value_bytes.bytes,
-      sizeof(value_bytes.bytes),
-      format
-   );
-
-   return value_bytes.uint;
+   return __builtin_bswap16(value);
 }
 
 Tux64UInt32
@@ -108,17 +102,11 @@ tux64_endian_convert_uint32(
    Tux64UInt32 value,
    enum Tux64EndianFormat format
 ) {
-   union Tux64Int32 value_bytes;
+   if (format == TUX64_ENDIAN_FORMAT_NATIVE) {
+      return value;
+   }
 
-   value_bytes.uint = value;
-
-   tux64_endian_convert_inplace(
-      value_bytes.bytes,
-      sizeof(value_bytes.bytes),
-      format
-   );
-
-   return value_bytes.uint;
+   return __builtin_bswap32(value);
 }
 
 Tux64UInt64
@@ -126,16 +114,10 @@ tux64_endian_convert_uint64(
    Tux64UInt64 value,
    enum Tux64EndianFormat format
 ) {
-   union Tux64Int64 value_bytes;
+   if (format == TUX64_ENDIAN_FORMAT_NATIVE) {
+      return value;
+   }
 
-   value_bytes.uint = value;
-
-   tux64_endian_convert_inplace(
-      value_bytes.bytes,
-      sizeof(value_bytes.bytes),
-      format
-   );
-
-   return value_bytes.uint;
+   return __builtin_bswap64(value);
 }
 
