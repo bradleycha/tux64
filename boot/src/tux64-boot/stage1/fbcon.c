@@ -154,7 +154,7 @@ tux64_boot_stage1_fbcon_label_push(
       text
    );
 
-   return (Tux64BootStage1FbconLabel)idx;
+   return &map->lines_buffer[idx];
 }
 
 void
@@ -179,11 +179,9 @@ tux64_boot_stage1_fbcon_label_character_get(
    Tux64BootStage1FbconLabel label,
    Tux64UInt8 idx
 ) {
-   const struct Tux64BootStage1FbconCharacterMap * map;
    const struct Tux64BootStage1FbconCharacterMapLine * line;
 
-   map   = &tux64_boot_stage1_fbcon_character_map;
-   line  = &map->lines_buffer[label];
+   line = (const struct Tux64BootStage1FbconCharacterMapLine *)label;
 
    return line->characters_buffer[idx];
 }
@@ -194,11 +192,9 @@ tux64_boot_stage1_fbcon_label_character_set(
    Tux64UInt8 idx,
    Tux64BootStage1FbconLabelCharacter character
 ) {
-   struct Tux64BootStage1FbconCharacterMap * map;
    struct Tux64BootStage1FbconCharacterMapLine * line;
 
-   map   = &tux64_boot_stage1_fbcon_character_map;
-   line  = &map->lines_buffer[label];
+   line = (struct Tux64BootStage1FbconCharacterMapLine *)label;
 
    line->characters_buffer[idx] = character;
    return;
@@ -208,11 +204,9 @@ Tux64UInt8
 tux64_boot_stage1_fbcon_label_capacity_get(
    Tux64BootStage1FbconLabel label
 ) {
-   struct Tux64BootStage1FbconCharacterMap * map;
-   struct Tux64BootStage1FbconCharacterMapLine * line;
+   const struct Tux64BootStage1FbconCharacterMapLine * line;
 
-   map   = &tux64_boot_stage1_fbcon_character_map;
-   line  = &map->lines_buffer[label];
+   line = (const struct Tux64BootStage1FbconCharacterMapLine *)label;
 
    return line->characters_count;
 }

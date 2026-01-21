@@ -30,7 +30,7 @@ typedef Tux64UInt8 Tux64BootStage1FbconLabelCharacter;
 /* tux64_boot_stage1_fbcon_label_character_get() or                           */
 /* tux64_boot_stage1_fbcon_label_character_set().                             */
 /*----------------------------------------------------------------------------*/
-typedef Tux64UInt8 Tux64BootStage1FbconLabel;
+typedef void * Tux64BootStage1FbconLabel;
 
 /*----------------------------------------------------------------------------*/
 /* A text string used to initialize a label.                                  */
