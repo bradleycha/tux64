@@ -46,7 +46,6 @@
 
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL 4u
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_VERTICAL   8u
-#define TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER          8u
 #define TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS               8u
 #define TUX64_BOOT_STAGE1_FBCON_SEPARATION_PIXELS           3u
 
@@ -61,10 +60,7 @@
       (2u*(TUX64_BOOT_STAGE1_FBCON_BORDER_PIXELS)) \
    ) / TUX64_BOOT_STAGE1_FBCON_CHARACTER_PIXELS_HORIZONTAL)
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS_BYTES \
-   (( \
-      TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS * \
-      TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER \
-   ) / 8u)
+   (TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS)
 
 static const Tux64UInt8
 tux64_boot_stage1_fbcon_fontmap_compressed [] = {
@@ -117,19 +113,17 @@ tux64_boot_stage1_fbcon_character_map_line_initialize_empty(
 }
 
 static void
-tux64_boot_stage1_fbcon_character_map_line_initialize_content(
+tux64_boot_stage1_fbcon_character_map_line_copy_text(
    struct Tux64BootStage1FbconCharacterMapLine * line,
-   const struct Tux64BootStage1FbconText * text
+   const struct Tux64BootStage1FbconText * text,
+   Tux64UInt8 idx_start
 ) {
    Tux64UInt32 bytes;
 
    bytes = (Tux64UInt32)text->length;
-   bytes = bytes * TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FBCON_BITS_PER_CHARACTER);
-   bytes = tux64_math_ceil_divide_uint32(bytes, TUX64_LITERAL_UINT32(8u));
 
-   line->characters_count = text->capacity;
    tux64_memory_copy(
-      line->characters_buffer,
+      line->characters_buffer + idx_start,
       text->ptr,
       bytes
    );
@@ -137,9 +131,24 @@ tux64_boot_stage1_fbcon_character_map_line_initialize_content(
    return;
 }
 
+static void
+tux64_boot_stage1_fbcon_character_map_line_initialize_content(
+   struct Tux64BootStage1FbconCharacterMapLine * line,
+   const struct Tux64BootStage1FbconTextLabel * label
+) {
+   tux64_boot_stage1_fbcon_character_map_line_copy_text(
+      line,
+      &label->text,
+      TUX64_LITERAL_UINT32(0u)
+   );
+   line->characters_count = label->capacity;
+
+   return;
+}
+
 Tux64BootStage1FbconLabel
 tux64_boot_stage1_fbcon_label_push(
-   const struct Tux64BootStage1FbconText * text
+   const struct Tux64BootStage1FbconTextLabel * label
 ) {
    struct Tux64BootStage1FbconCharacterMap * map;
    Tux64UInt8 idx;
@@ -151,7 +160,7 @@ tux64_boot_stage1_fbcon_label_push(
 
    tux64_boot_stage1_fbcon_character_map_line_initialize_content(
       &map->lines_buffer[idx],
-      text
+      label
    );
 
    return &map->lines_buffer[idx];
@@ -197,6 +206,21 @@ tux64_boot_stage1_fbcon_label_character_set(
    line = (struct Tux64BootStage1FbconCharacterMapLine *)label;
 
    line->characters_buffer[idx] = character;
+   return;
+}
+
+void
+tux64_boot_stage1_fbcon_label_copy(
+   Tux64BootStage1FbconLabel label,
+   Tux64UInt8 idx,
+   const struct Tux64BootStage1FbconText * text
+) {
+   struct Tux64BootStage1FbconCharacterMapLine * line;
+
+   line = (struct Tux64BootStage1FbconCharacterMapLine *)label;
+
+   tux64_boot_stage1_fbcon_character_map_line_copy_text(line, text, idx);
+
    return;
 }
 

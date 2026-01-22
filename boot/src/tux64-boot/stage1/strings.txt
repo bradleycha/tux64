@@ -7,6 +7,17 @@
 /*----------------------------------------------------------------------------*/
 
 {
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FORMAT_MIB_STATIC_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FORMAT_MIB_STATIC_LENGTH;
+   .text                = "   X.XXMiB";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FORMAT_PERCENTAGE_STATIC_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FORMAT_PERCENTAGE_STATIC_LENGTH;
+   .text                = "...XXX%";
+}
+
+{
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH;
    .text                = "Tux64 Bootloader version 0.1.0";

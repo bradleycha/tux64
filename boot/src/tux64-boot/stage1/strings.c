@@ -24,6 +24,14 @@
    }
 
 TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_format_mib_static_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_MIB_STATIC_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_format_percentage_static_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_PERCENTAGE_STATIC_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_splash_data,
    TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA
 );
@@ -52,11 +60,19 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA
 );
 
-#define TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(identifier, identifier_ptr, identifier_length, identifier_capacity) \
+#define TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(identifier, identifier_ptr, identifier_length) \
    const struct Tux64BootStage1FbconText \
    identifier = { \
       .ptr        = identifier_ptr , \
-      .length     = TUX64_LITERAL_UINT8( identifier_length ), \
+      .length  = TUX64_LITERAL_UINT8( identifier_length ), \
+   }
+#define TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(identifier, identifier_ptr, identifier_length, identifier_capacity) \
+   const struct Tux64BootStage1FbconTextLabel \
+   identifier = { \
+      .text = { \
+         .ptr        = identifier_ptr , \
+         .length  = TUX64_LITERAL_UINT8( identifier_length ), \
+      }, \
       .capacity   = TUX64_LITERAL_UINT8( identifier_capacity ) \
    }
 
@@ -65,42 +81,52 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
 /* close to each other, so we still get good data locality.  if caching */
 /* becomes a problem, we can just manually place them in a separate section. */
 TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_format_mib_static,
+   tux64_boot_stage1_strings_format_mib_static_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_MIB_STATIC_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_format_percentage_static,
+   tux64_boot_stage1_strings_format_percentage_static_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_PERCENTAGE_STATIC_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_splash,
    tux64_boot_stage1_strings_splash_data,
    TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_SPLASH_LENGTH
 );
-TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_memory_total,
    tux64_boot_stage1_strings_memory_total_data,
    TUX64_BOOT_STAGE1_STRINGS_MEMORY_TOTAL_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_MEMORY_TOTAL_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_MIB
 );
-TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_memory_free,
    tux64_boot_stage1_strings_memory_free_data,
    TUX64_BOOT_STAGE1_STRINGS_MEMORY_FREE_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_MEMORY_FREE_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_MIB
 );
-TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_kernel_image,
    tux64_boot_stage1_strings_kernel_image_data,
    TUX64_BOOT_STAGE1_STRINGS_KERNEL_IMAGE_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_KERNEL_IMAGE_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_MIB
 );
-TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_initramfs_image,
    tux64_boot_stage1_strings_initramfs_image_data,
    TUX64_BOOT_STAGE1_STRINGS_INITRAMFS_IMAGE_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_INITRAMFS_IMAGE_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_MIB
 );
-TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_no_checksum,
    tux64_boot_stage1_strings_no_checksum_data,
    TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_LENGTH
 );
-TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_hello_world,
    tux64_boot_stage1_strings_hello_world_data,
    TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH,

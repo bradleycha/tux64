@@ -10,6 +10,7 @@
 #include "tux64-boot/stage1/format.h"
 
 #include "tux64-boot/stage1/fbcon.h"
+#include "tux64-boot/stage1/strings.h"
 
 static Tux64BootStage1FbconLabelCharacter
 tux64_boot_stage1_format_digit_base10(
@@ -26,59 +27,14 @@ tux64_boot_stage1_format_leading_digit_base10(
 }
 
 static void
-tux64_boot_stage1_format_repeat_character(
-   Tux64BootStage1FbconLabel label,
-   Tux64UInt8 idx_base,
-   Tux64BootStage1FbconLabelCharacter character,
-   Tux64UInt8 count
-) {
-   do {
-      tux64_boot_stage1_fbcon_label_character_set(
-         label,
-         idx_base + count - TUX64_LITERAL_UINT8(1u),
-         character
-      );
-
-      count--;
-   } while(count != TUX64_LITERAL_UINT8(0u));
-
-   return;
-}
-
-static void
 tux64_boot_stage1_format_mib_static(
    Tux64BootStage1FbconLabel label,
    Tux64UInt8 idx_base
 ) {
-   /* leading spaces */
-   tux64_boot_stage1_format_repeat_character(
+   tux64_boot_stage1_fbcon_label_copy(
       label,
       idx_base,
-      tux64_boot_stage1_fbcon_character_encode(' '),
-      TUX64_LITERAL_UINT8(3u)
-   );
-
-   /* decimal separator */
-   tux64_boot_stage1_fbcon_label_character_set(
-      label,
-      idx_base + TUX64_LITERAL_UINT8(4u),
-      tux64_boot_stage1_fbcon_character_encode('.')
-   );
-   
-   tux64_boot_stage1_fbcon_label_character_set(
-      label,
-      idx_base + TUX64_LITERAL_UINT8(7u),
-      tux64_boot_stage1_fbcon_character_encode('M')
-   );
-   tux64_boot_stage1_fbcon_label_character_set(
-      label,
-      idx_base + TUX64_LITERAL_UINT8(8u),
-      tux64_boot_stage1_fbcon_character_encode('i')
-   );
-   tux64_boot_stage1_fbcon_label_character_set(
-      label,
-      idx_base + TUX64_LITERAL_UINT8(9u),
-      tux64_boot_stage1_fbcon_character_encode('B')
+      &tux64_boot_stage1_strings_format_mib_static
    );
 
    return;
@@ -168,19 +124,10 @@ tux64_boot_stage1_format_percentage_static(
    Tux64BootStage1FbconLabel label,
    Tux64UInt8 idx_base
 ) {
-   /* set ellipses */
-   tux64_boot_stage1_format_repeat_character(
+   tux64_boot_stage1_fbcon_label_copy(
       label,
       idx_base,
-      tux64_boot_stage1_fbcon_character_encode('.'),
-      TUX64_LITERAL_UINT8(3u)
-   );
-
-   /* set percentage */
-   tux64_boot_stage1_fbcon_label_character_set(
-      label,
-      idx_base + TUX64_LITERAL_UINT8(6u),
-      tux64_boot_stage1_fbcon_character_encode('%')
+      &tux64_boot_stage1_strings_format_percentage_static
    );
 
    return;

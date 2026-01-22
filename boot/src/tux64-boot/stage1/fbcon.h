@@ -33,7 +33,7 @@ typedef Tux64UInt8 Tux64BootStage1FbconLabelCharacter;
 typedef void * Tux64BootStage1FbconLabel;
 
 /*----------------------------------------------------------------------------*/
-/* A text string used to initialize a label.                                  */
+/* A generic text string.                                                     */
 /*----------------------------------------------------------------------------*/
 /* ptr -                                                                      */
 /*    The pointer to the 8-bit fbcon-encoded text string of length 'length'.  */
@@ -41,14 +41,25 @@ typedef void * Tux64BootStage1FbconLabel;
 /* length -                                                                   */
 /*    The number of characters pointed at by 'ptr'.                           */
 /*                                                                            */
+/*----------------------------------------------------------------------------*/
+struct Tux64BootStage1FbconText {
+   const Tux64BootStage1FbconLabelCharacter * ptr;
+   Tux64UInt8 length;
+};
+
+/*----------------------------------------------------------------------------*/
+/* A text string used to initialize a label.                                  */
+/*----------------------------------------------------------------------------*/
+/* text -                                                                     */
+/*    The text string data.                                                   */
+/*                                                                            */
 /* capacity -                                                                 */
 /*    The size of the allocated string buffer.  This can be useful for        */
 /*    appending text at runtime to a constant string, which can be used for   */
 /*    animating text.                                                         */
 /*----------------------------------------------------------------------------*/
-struct Tux64BootStage1FbconText {
-   const Tux64BootStage1FbconLabelCharacter * ptr;
-   Tux64UInt8 length;
+struct Tux64BootStage1FbconTextLabel {
+   struct Tux64BootStage1FbconText text;
    Tux64UInt8 capacity;
 };
 
@@ -58,7 +69,7 @@ struct Tux64BootStage1FbconText {
 /*----------------------------------------------------------------------------*/
 Tux64BootStage1FbconLabel
 tux64_boot_stage1_fbcon_label_push(
-   const struct Tux64BootStage1FbconText * text
+   const struct Tux64BootStage1FbconTextLabel * label
 );
 
 /*----------------------------------------------------------------------------*/
@@ -85,6 +96,16 @@ tux64_boot_stage1_fbcon_label_character_set(
    Tux64BootStage1FbconLabel label,
    Tux64UInt8 idx,
    Tux64BootStage1FbconLabelCharacter character
+);
+
+/*----------------------------------------------------------------------------*/
+/* Copies a text string into a label at index 'idx'.                          */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_fbcon_label_copy(
+   Tux64BootStage1FbconLabel label,
+   Tux64UInt8 idx,
+   const struct Tux64BootStage1FbconText * text
 );
 
 /*----------------------------------------------------------------------------*/
