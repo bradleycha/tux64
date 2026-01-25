@@ -124,6 +124,20 @@ Every package listed should be stored uncompressed inside of `sources/`, with th
 | [musl](https://musl.libc.org/) | 1.2.5 | |
 | [linux](https://kernel.org/) | 6.12.57 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 
+### Chapter 2.3 - Apply Patches
+
+Some packages have patches which are applied to upstream sources.  This is done so complete package sources do not have to be distributed seperately, as well as make the code changes forward-compatible with future package versions.
+
+To apply patches to required packages, run the following command:
+
+```
+for pkg in gcc; do
+    pushd [TUX64_BUILD_ROOT]/sources/$pkg-*
+    git apply [TUX64_BUILD_ROOT]/sources/tux64-*/patches/$pkg-*.patch
+    popd
+done
+```
+
 ## Chapter 3 - Building the Toolchains
 
 In order to build code for the Nintendo 64, we need to create a toolchain which can build such code.  In fact, we need multiple toolchains, as we are building both binaries to run under Linux and flat code to run without an operating system.  We also want to use the 3-stage bootstrapping process to get a self-compiled compiler to ensure consistent code generation.
