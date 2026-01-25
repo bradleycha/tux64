@@ -16,15 +16,10 @@ __attribute__((noreturn, section(".start"), externally_visible));
 void
 tux64_boot_stage1_start(void) {
    /* we do this so we can read parameters from both IPL2 and stage-0 without */
-   /* having to either move registers around or use a custom calling */
-   /* convention.  unfortunately, we get spurious pushes of the $sN registers */
-   /* because for some reason the compiler is still preserving non-volatiles */
-   /* despite the function being noreturn.  the only solution to this is to */
-   /* define global register variables, which restrict the registers */
-   /* throughout the entire program when LTO is enabled and also causes */
-   /* strange build failures.  it's not worth saving 20 bytes which execute */
-   /* once at startup.  if we really want to fix this properly, we'll need to */
-   /* write compiler patches. */
+   /* having to either move registers around or use a custom calling          */
+   /* convention.  with unmodified GCC sources, we get spurious pushes for    */
+   /* the $sN registers, as well as $ra.  however, with our patched GCC, we   */
+   /* add this optimization.  this saves 24 bytes of useless instructions.    */
    register Tux64UInt32 memory_total      __asm__("$a0");
    register Tux64UInt32 memory_free       __asm__("$a1");
    register Tux64UInt32 running_on_ique   __asm__("$a2");
