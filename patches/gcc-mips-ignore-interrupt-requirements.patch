@@ -1,0 +1,63 @@
+diff --git a/gcc/config/mips/mips.cc b/gcc/config/mips/mips.cc
+index 093b3a90c..bdf877acf 100644
+--- a/gcc/config/mips/mips.cc
++++ b/gcc/config/mips/mips.cc
+@@ -11450,23 +11450,30 @@ mips_compute_frame_info (void)
+   /* Set this function's interrupt properties.  */
+   if (mips_interrupt_type_p (TREE_TYPE (current_function_decl)))
+     {
+-      if (mips_isa_rev < 2)
+-	error ("the %<interrupt%> attribute requires a MIPS32r2 processor or greater");
+-      else if (TARGET_MIPS16)
+-	error ("interrupt handlers cannot be MIPS16 functions");
+-      else
+-	{
+-	  cfun->machine->interrupt_handler_p = true;
+-	  cfun->machine->int_mask =
+-	    mips_interrupt_mask (TREE_TYPE (current_function_decl));
+-	  cfun->machine->use_shadow_register_set =
+-	    mips_use_shadow_register_set (TREE_TYPE (current_function_decl));
+-	  cfun->machine->keep_interrupts_masked_p =
+-	    mips_keep_interrupts_masked_p (TREE_TYPE (current_function_decl));
+-	  cfun->machine->use_debug_exception_return_p =
+-	    mips_use_debug_exception_return_p (TREE_TYPE
++      if (!TARGET_IGNORE_INTERRUPT_REQUIREMENTS)
++        {
++          if (mips_isa_rev < 2)
++            {
++              error ("the %<interrupt%> attribute requires a MIPS32r2 processor or greater");
++              return;
++            }
++          if (TARGET_MIPS16)
++            {
++              error ("interrupt handlers cannot be MIPS16 functions");
++              return;
++            }
++        }
++
++      cfun->machine->interrupt_handler_p = true;
++      cfun->machine->int_mask =
++        mips_interrupt_mask (TREE_TYPE (current_function_decl));
++      cfun->machine->use_shadow_register_set =
++        mips_use_shadow_register_set (TREE_TYPE (current_function_decl));
++      cfun->machine->keep_interrupts_masked_p =
++        mips_keep_interrupts_masked_p (TREE_TYPE (current_function_decl));
++      cfun->machine->use_debug_exception_return_p =
++        mips_use_debug_exception_return_p (TREE_TYPE
+ 					       (current_function_decl));
+-	}
+     }
+ 
+   frame = &cfun->machine->frame;
+diff --git a/gcc/config/mips/mips.opt b/gcc/config/mips/mips.opt
+index e24565469..d884e0935 100644
+--- a/gcc/config/mips/mips.opt
++++ b/gcc/config/mips/mips.opt
+@@ -508,3 +508,7 @@ Use Loongson EXTension (EXT) instructions.
+ mloongson-ext2
+ Target Var(TARGET_LOONGSON_EXT2)
+ Use Loongson EXTension R2 (EXT2) instructions.
++
++mignore-interrupt-requirements
++Target Var(TARGET_IGNORE_INTERRUPT_REQUIREMENTS)
++Ignore usual architecture requirements for functions with the interrupt attribute.
