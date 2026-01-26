@@ -9,7 +9,7 @@
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/status.h"
 #include "tux64-boot/stage1/status.h"
-#include "tux64-boot/stage1/interrupt/interrupt.h"
+#include "tux64-boot/stage1/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/logo.h"

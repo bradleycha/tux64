@@ -2,12 +2,12 @@
 /*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/stage1/interrupt/interrupt.c - Interrupt service       */
-/*    routine implementation.                                                 */
+/* boot/src/tux64-boot/stage1/interrupt.c - Interrupt service routine         */
+/*    implementation.                                                         */
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include "tux64-boot/stage1/interrupt/interrupt.h"
+#include "tux64-boot/stage1/interrupt.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/n64/mmio.h>
@@ -17,26 +17,20 @@
 #include <tux64/endian.h>
 #include <tux64/bitwise.h>
 #include "tux64-boot/halt.h"
-#include "tux64-boot/stage1/interrupt/entry.h"
 #include "tux64-boot/stage1/video.h"
 
 static void
-tux64_boot_stage1_interrupt_handler_vi(
-   struct Tux64BootStage1InterruptContext * context
-) {
+tux64_boot_stage1_interrupt_handler_vi(void) {
    tux64_boot_stage1_video_vblank_handler();
 
    /* clears the VI interrupt */
    tux64_platform_mips_n64_mmio_registers_vi.v_current = TUX64_LITERAL_UINT32(0u);
 
-   (void)context;
    return;
 }
 
 static void
-tux64_boot_stage1_interrupt_handler_mi(
-   struct Tux64BootStage1InterruptContext * context
-) {
+tux64_boot_stage1_interrupt_handler_mi(void) {
    Tux64UInt32 mi_interrupt;
 
    mi_interrupt = tux64_platform_mips_n64_mmio_registers_mi.interrupt;
@@ -45,28 +39,28 @@ tux64_boot_stage1_interrupt_handler_mi(
       mi_interrupt,
       TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_VI
    )) {
-      tux64_boot_stage1_interrupt_handler_vi(context);
+      tux64_boot_stage1_interrupt_handler_vi();
       return;
    }
    
-   (void)context;
    return;
 }
 
 static void
-tux64_boot_stage1_interrupt_handler_unhandled(
-   struct Tux64BootStage1InterruptContext * context
-) {
-   (void)context;
+tux64_boot_stage1_interrupt_handler_unhandled(void) {
    tux64_boot_halt();
    TUX64_UNREACHABLE;
 }
 
-/* this must be public so we can access it from the assembly above */
-void
-tux64_boot_stage1_interrupt_handler(
-   struct Tux64BootStage1InterruptContext * context
-) {
+/* this is the function which is immediately jumped to by the processor. */
+/* thus, we need to tell GCC to generate an appropriate prologue/epilogue. */
+/* also don't re-enable interrupts, we don't want that. */
+static void
+tux64_boot_stage1_interrupt_handler(void)
+__attribute__((interrupt, keep_interrupts_masked));
+
+static void
+tux64_boot_stage1_interrupt_handler(void) {
    Tux64UInt32 cause;
    Tux64Boolean interrupt_handled;
 
@@ -77,12 +71,12 @@ tux64_boot_stage1_interrupt_handler(
       cause,
       TUX64_PLATFORM_MIPS_VR4300_COP0_CAUSE_BIT_IP2
    )) {
-      tux64_boot_stage1_interrupt_handler_mi(context);
+      tux64_boot_stage1_interrupt_handler_mi();
       interrupt_handled = TUX64_BOOLEAN_TRUE;
    }
 
    if (interrupt_handled == TUX64_BOOLEAN_FALSE) {
-      tux64_boot_stage1_interrupt_handler_unhandled(context);
+      tux64_boot_stage1_interrupt_handler_unhandled();
    }
 
    return;
@@ -146,7 +140,7 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
    Tux64UInt64 * service_routine_address;
    Tux64UInt64 service_routine_code;
 
-   jump_target.function = tux64_boot_stage1_interrupt_entry;
+   jump_target.function = tux64_boot_stage1_interrupt_handler;
 
    /* we use the uncached address because we have to invalidate instruction */
    /* cache anyways, so there's no point in caching the write in data cache. */

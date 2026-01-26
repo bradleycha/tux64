@@ -6,6 +6,7 @@
 #------------------------------------------------------------------------------#
 
 m4_include([m4/ax_prefix_config_h.m4])
+m4_include([m4/ax_check_compile_flag.m4])
 
 AC_INIT([tux64-boot], 0.1.0+setup, [bradleycha@proton.me])
 
@@ -53,6 +54,14 @@ if [[ -z "$OBJDUMP" ]]; then
    $(tux64_boot_err_log "unable to find ${host_cpu}-${host_os}-objdump.  please verify the build was configured correctly.")
    exit 1
 fi
+
+# since we have to use a patched compiler, we should make sure the compiler
+# actually has our patches applied.  doing this here can help if people
+# forget to apply patches and give more helpful error messages.
+AX_CHECK_COMPILE_FLAG([-mignore-interrupt-requirements], [], [
+   $(tux64_boot_err_log "C compiler doesn't accept tux64-specific flag -mignore-interrupt-requirements.  please verify all tux64 compiler patches were applied correctly.")
+   exit 1
+])
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])

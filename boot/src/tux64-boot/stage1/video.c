@@ -16,7 +16,7 @@
 #include "tux64-boot/halt.h"
 #include "tux64-boot/sync.h"
 #include "tux64-boot/rsp.h"
-#include "tux64-boot/stage1/interrupt/interrupt.h"
+#include "tux64-boot/stage1/interrupt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION \
    !( \

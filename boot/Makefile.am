@@ -61,6 +61,7 @@ AM_CFLAGS = \
 	-I $(top_srcdir)/src \
 	-std=c99 \
 	-ffreestanding \
+	-mignore-interrupt-requirements \
 	-Wall \
 	-Wextra \
 	-Wpedantic
@@ -96,10 +97,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/stage1.h \
 	src/tux64-boot/stage1/boot-header.c \
 	src/tux64-boot/stage1/boot-header.h \
-	src/tux64-boot/stage1/interrupt/interrupt.c \
-	src/tux64-boot/stage1/interrupt/interrupt.h \
-	src/tux64-boot/stage1/interrupt/entry.s \
-	src/tux64-boot/stage1/interrupt/entry.h \
+	src/tux64-boot/stage1/interrupt.c \
+	src/tux64-boot/stage1/interrupt.h \
 	src/tux64-boot/stage1/preempt.c \
 	src/tux64-boot/stage1/preempt.h \
 	src/tux64-boot/stage1/format.c \
