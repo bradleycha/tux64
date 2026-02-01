@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* mkrom/src/tux64-mkrom/builder.c - Implementations for ROM builder.         */
@@ -199,10 +199,10 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    boot_header->data.files.kernel.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.data, input->files.kernel.bytes);
    boot_header->data.files.kernel.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
 
-   boot_header->data.files.kernel.checksum = tux64_mkrom_builder_calculate_checksum(input->files.initramfs.data, input->files.initramfs.bytes);
+   boot_header->data.files.initramfs.checksum = tux64_mkrom_builder_calculate_checksum(input->files.initramfs.data, input->files.initramfs.bytes);
    boot_header->data.files.initramfs.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
 
-   boot_header->data.files.kernel.checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)input->kernel_command_line.ptr, input->kernel_command_line.characters * TUX64_LITERAL_UINT32(sizeof(char)));
+   boot_header->data.files.command_line.checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)input->kernel_command_line.ptr, input->kernel_command_line.characters * TUX64_LITERAL_UINT32(sizeof(char)));
    boot_header->data.files.command_line.length_words = tux64_mkrom_builder_format_length_item_uint32(cmdline_bytes);
 
    boot_header->checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)&boot_header->data, TUX64_LITERAL_UINT32(sizeof(boot_header->data)));
