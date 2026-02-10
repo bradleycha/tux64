@@ -24,7 +24,10 @@ tux64_boot_halt(void) {
    /* always use a 'ld' instruction instead of potentially using two 'lw'     */
    /* instructions, which could happen with -mabi=32 (why would you do that?) */
    bogus = TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM);
-   __asm__ volatile ("ld $zero,0(%0)" :: "r" (bogus));
+   __asm__ volatile (
+      "ld $zero,%0\n"
+      :: "ZC" (*((const Tux64UInt64 *)(bogus)))
+   );
 
    TUX64_UNREACHABLE;
 }
