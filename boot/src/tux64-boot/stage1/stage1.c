@@ -221,6 +221,13 @@ tux64_boot_stage1_fsm_execute(
    return;
 }
 
+/* we store the FSM in a global variable because its state can be huge (think */
+/* DMA buffers).  if we try to store it on the stack, it will overflow 100%   */
+/* and crash our program.  storing in .bss via a global variable doesn't have */
+/* this issue. */
+static struct Tux64BootStage1Fsm
+tux64_boot_stage1_fsm;
+
 void
 tux64_boot_stage1_main(
    enum Tux64BootIpl2RomType rom_type,
@@ -234,7 +241,6 @@ tux64_boot_stage1_main(
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
    struct Tux64BootStage1Palette video_palette;
-   struct Tux64BootStage1Fsm fsm;
 
    tux64_boot_status_code_initialize();
 
@@ -268,13 +274,13 @@ tux64_boot_stage1_main(
    );
 
    tux64_boot_stage1_fsm_initialize(
-      &fsm,
+      &tux64_boot_stage1_fsm,
       memory_total,
       memory_free
    );
 
    while (TUX64_BOOLEAN_TRUE) {
-      tux64_boot_stage1_fsm_execute(&fsm);
+      tux64_boot_stage1_fsm_execute(&tux64_boot_stage1_fsm);
 
       /* we order all rendering code next to each other not just because   */
       /* it makes sense, but we can also potentially keep the RSP DMA      */
