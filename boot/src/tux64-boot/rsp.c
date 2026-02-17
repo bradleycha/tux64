@@ -89,6 +89,13 @@ tux64_boot_rsp_dma_wait_idle(void) {
 
 void
 tux64_boot_rsp_dma_wait_queue(void) {
+   if (!TUX64_BOOT_CONFIG_RSP_DMA_DOUBLE_BUFFERING) {
+      /* if we're not double buffering, it's sufficient to simply wait for */
+      /* all ongoing DMA transfers to complete. */
+      tux64_boot_rsp_dma_wait_idle();
+      return;
+   }
+   
    tux64_boot_rsp_dma_wait_spinlock(
       &tux64_platform_mips_n64_mmio_registers_sp.dma_full
    );

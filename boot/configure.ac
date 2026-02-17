@@ -84,6 +84,11 @@ AC_ARG_ENABLE([power-management],
    [tux64_boot_config_power_management=1],
    [tux64_boot_config_power_management=0]
 )
+AC_ARG_ENABLE([rsp-dma-double-buffering],
+   AS_HELP_STRING([--enable-rsp-dma-double-buffering], [Enable double-buffering RSP DMA transfers for slightly faster RSP DMA transfers]),
+   [tux64_boot_config_rsp_dma_double_buffering=1],
+   [tux64_boot_config_rsp_dma_double_buffering=0]
+)
 AC_ARG_ENABLE([splash],
    AS_HELP_STRING([--enable-splash], [Enable splash text displaying bootloader name and version on startup]),
    [tux64_boot_config_splash=1],
@@ -198,6 +203,10 @@ AC_DEFINE_UNQUOTED([CONFIG_STATUS],
 AC_DEFINE_UNQUOTED([CONFIG_POWER_MANAGEMENT],
    [$tux64_boot_config_power_management],
    [Enable clock speed control of the VR4300 for slightly more efficient power usage]
+)
+AC_DEFINE_UNQUOTED([CONFIG_RSP_DMA_DOUBLE_BUFFERING],
+   [$tux64_boot_config_rsp_dma_double_buffering],
+   [Enable double-buffering RSP DMA transfers for slightly faster RSP DMA transfers]
 )
 AC_DEFINE_UNQUOTED([CONFIG_SPLASH],
    [$tux64_boot_config_splash],
