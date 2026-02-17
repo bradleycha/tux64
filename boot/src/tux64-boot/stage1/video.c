@@ -271,9 +271,8 @@ tux64_boot_stage1_video_framebuffer_clear(
       tux64_boot_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RDRAM);
    }
 
-   /* wait for the RSP to finish its last copy before we return */
-   tux64_boot_rsp_dma_wait_idle();
-   
+   /* let the final DMA transfer complete in the backround, letting the */
+   /* caller manually sync the RSP. */
    return;
 }
 

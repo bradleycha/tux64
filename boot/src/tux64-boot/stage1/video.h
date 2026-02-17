@@ -118,7 +118,9 @@ tux64_boot_stage1_video_render_target_get(void);
 
 /*----------------------------------------------------------------------------*/
 /* Clear the current render-target framebuffer to the clear color specified   */
-/* on initialization.                                                         */
+/* on initialization.  The RSP DMA engine must be available to queue a DMA    */
+/* transfer when called, and a DMA transfer may still be ongoing in the       */
+/* background.                                                                */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_render_target_clear(void);

@@ -375,8 +375,8 @@ tux64_boot_stage1_logo_render(void) {
       blocks--;
    } while (blocks != TUX64_LITERAL_UINT8(0u));
 
-   /* wait for all copies to finish before returning */
-   tux64_boot_rsp_dma_wait_idle();
+   /* let the final copy complete in the backround, letting the caller */
+   /* manually sync the RSP. */
    return;
 }
 

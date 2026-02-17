@@ -23,6 +23,8 @@ tux64_boot_stage1_logo_initialize(
 
 /*----------------------------------------------------------------------------*/
 /* Renders the logo to the current rendering framebuffer's top-right corner.  */
+/* The RSP DMA engine must be available to queue a DMA transfer when called,  */
+/* and a DMA transfer may still be ongoing in the background.                 */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_logo_render(void);

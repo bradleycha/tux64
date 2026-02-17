@@ -145,7 +145,9 @@ tux64_boot_stage1_fbcon_initialize(
 
 /*----------------------------------------------------------------------------*/
 /* Renders all text labels in the framebuffer console to the current          */
-/* rendering framebuffer.                                                     */
+/* rendering framebuffer.  The RSP DMA engine must be available to queue a    */
+/* DMA transfer when called,  and a DMA transfer may still be ongoing in the  */
+/* background.                                                                */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_fbcon_render(void);

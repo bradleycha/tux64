@@ -450,8 +450,8 @@ skip_rendering:
       );
    }
 
-   /* wait for the final DMA to finish and return */
-   tux64_boot_rsp_dma_wait_idle();
+   /* let the final DMA transfer complete in the backround, letting the */
+   /* caller manually sync the RSP. */
    return;
 }
 

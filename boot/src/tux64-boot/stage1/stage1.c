@@ -8,6 +8,7 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/status.h"
+#include "tux64-boot/rsp.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/interrupt.h"
 #include "tux64-boot/stage1/video.h"
@@ -279,10 +280,18 @@ tux64_boot_stage1_main(
       /* it makes sense, but we can also potentially keep the RSP DMA      */
       /* engine saturated with work as a previous DMA transfer completes.  */
       tux64_boot_stage1_video_render_target_clear();
+      tux64_boot_rsp_dma_wait_queue();
       tux64_boot_stage1_fbcon_render();
       if (TUX64_BOOT_CONFIG_LOGO) {
+         tux64_boot_rsp_dma_wait_queue();
          tux64_boot_stage1_logo_render();
       }
+
+      /* synchronize all RSP DMA operations, otherwise we could end up     */
+      /* swapping buffers in the middle of rendering if the FSM state was  */
+      /* preempted by vblank, thus we swap buffers immediately.  this also */
+      /* ensures correct synchronization for the start of the next render. */
+      tux64_boot_rsp_dma_wait_idle();
 
       /* this only works when we take less than one VI to execute, i.e. we */
       /* don't have a lag frame.  our bootloader is so simple, we have     */
