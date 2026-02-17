@@ -79,6 +79,11 @@ AC_ARG_ENABLE([status],
    [tux64_boot_config_status=1],
    [tux64_boot_config_status=0]
 )
+AC_ARG_ENABLE([power-management],
+   AS_HELP_STRING([--enable-power-management], [Enable clock speed control of the VR4300 for slightly more efficient power usage]),
+   [tux64_boot_config_power_management=1],
+   [tux64_boot_config_power_management=0]
+)
 AC_ARG_ENABLE([splash],
    AS_HELP_STRING([--enable-splash], [Enable splash text displaying bootloader name and version on startup]),
    [tux64_boot_config_splash=1],
@@ -189,6 +194,10 @@ tux64_boot_config_color_background_enum=$(tux64_boot_enumerate_color $CONFIG_COL
 AC_DEFINE_UNQUOTED([CONFIG_STATUS],
    [$tux64_boot_config_status],
    [Write status codes to a fixed memory location during the boot process]
+)
+AC_DEFINE_UNQUOTED([CONFIG_POWER_MANAGEMENT],
+   [$tux64_boot_config_power_management],
+   [Enable clock speed control of the VR4300 for slightly more efficient power usage]
 )
 AC_DEFINE_UNQUOTED([CONFIG_SPLASH],
    [$tux64_boot_config_splash],

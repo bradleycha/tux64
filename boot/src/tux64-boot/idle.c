@@ -35,6 +35,10 @@ tux64_boot_idle_rp_bit_flip(void) {
 
 void
 tux64_boot_idle_enter(void) {
+   if (!TUX64_BOOT_CONFIG_POWER_MANAGEMENT) {
+      return;
+   }
+
    /* normally we would have to configure the memory refresh rate if it were */
    /* based on pclock cycles, but RDRAM refresh, when set to automatic */
    /* refresh, refreshes based on the VI timings, *not* the CPU, so all we */
@@ -47,6 +51,10 @@ tux64_boot_idle_enter(void) {
 
 void
 tux64_boot_idle_exit(void) {
+   if (!TUX64_BOOT_CONFIG_POWER_MANAGEMENT) {
+      return;
+   }
+
    /* see above documentation about memory timings. */
    tux64_boot_idle_rp_bit_flip();
    return;
