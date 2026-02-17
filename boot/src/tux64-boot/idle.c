@@ -24,7 +24,7 @@ tux64_boot_idle_rp_bit_flip(void) {
    );
    (void)(*halt_sysad);
 
-   /* flip the RIP bit in the co-processor 0 status register */
+   /* flip the RP bit in the co-processor 0 status register */
    status = tux64_platform_mips_vr4300_cop0_register_read_status();
    status = tux64_bitwise_flags_flip_uint32(
       status,
