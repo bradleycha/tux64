@@ -273,14 +273,21 @@ tux64_boot_stage1_main(
    );
 
    while (TUX64_BOOLEAN_TRUE) {
-      tux64_boot_stage1_video_render_target_clear();
       tux64_boot_stage1_fsm_execute(&fsm);
 
+      /* we order all rendering code next to each other not just because   */
+      /* it makes sense, but we can also potentially keep the RSP DMA      */
+      /* engine saturated with work as a previous DMA transfer completes.  */
+      tux64_boot_stage1_video_render_target_clear();
+      tux64_boot_stage1_fbcon_render();
       if (TUX64_BOOT_CONFIG_LOGO) {
          tux64_boot_stage1_logo_render();
       }
 
-      tux64_boot_stage1_fbcon_render();
+      /* this only works when we take less than one VI to execute, i.e. we */
+      /* don't have a lag frame.  our bootloader is so simple, we have     */
+      /* full control and can write code that never lags.  that is, the    */
+      /* solution is to just program well, forehead.                       */
       tux64_boot_stage1_video_vblank_wait();
       tux64_boot_stage1_video_swap_buffers();
       tux64_boot_stage1_video_vblank_end();
