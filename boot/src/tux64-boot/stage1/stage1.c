@@ -147,23 +147,14 @@ tux64_boot_stage1_fsm_initialize_splash(void) {
 static void
 tux64_boot_stage1_fsm_initialize_memory_display(
    Tux64UInt32 memory_total,
-   Tux64UInt32 memory_free
+   Tux64UInt32 memory_free,
+   const struct Tux64BootStage1BootHeaderFiles * boot_header_files
 ) {
    Tux64BootStage1FbconLabel label;
-   Tux64UInt32 kernel_image_words;
-   Tux64UInt32 initramfs_image_words;
-   Tux64UInt32 kernel_image;
-   Tux64UInt32 initramfs_image;
 
    if (tux64_boot_stage1_boot_header_flag_memory_display() == TUX64_BOOLEAN_FALSE) {
       return;
    }
-
-   kernel_image_words      = tux64_boot_stage1_boot_header.data.files.kernel.length_words;
-   initramfs_image_words   = tux64_boot_stage1_boot_header.data.files.initramfs.length_words;
-
-   kernel_image      = kernel_image_words    * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD);
-   initramfs_image   = initramfs_image_words * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD);
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_memory_total);
    tux64_boot_stage1_format_mib(label, memory_total);
@@ -172,9 +163,9 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    tux64_boot_stage1_fbcon_skip_line();
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_image);
-   tux64_boot_stage1_format_mib(label, kernel_image);
+   tux64_boot_stage1_format_mib(label, boot_header_files->kernel.bytes);
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_initramfs_image);
-   tux64_boot_stage1_format_mib(label, initramfs_image);
+   tux64_boot_stage1_format_mib(label, boot_header_files->initramfs.bytes);
    tux64_boot_stage1_fbcon_skip_line();
 
    return;
@@ -205,7 +196,11 @@ tux64_boot_stage1_fsm_initialize(
    }
 
    if (TUX64_BOOT_CONFIG_MEMORY_DISPLAY) {
-      tux64_boot_stage1_fsm_initialize_memory_display(memory_total, memory_free);
+      tux64_boot_stage1_fsm_initialize_memory_display(
+         memory_total,
+         memory_free,
+         &fsm->boot_header_files
+      );
    }
 
    if (TUX64_BOOT_CONFIG_CHECKSUM) {
