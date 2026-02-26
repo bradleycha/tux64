@@ -89,6 +89,7 @@ typedef void (*Tux64BootStage1FsmPfnState)(struct Tux64BootStage1Fsm * fsm);
 struct Tux64BootStage1Fsm {
    union Tux64BootStage1FsmMemory memory;
    Tux64BootStage1FsmPfnState state;
+   struct Tux64BootStage1BootHeaderFiles boot_header_files;
 };
 
 #define TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(identifier) \
@@ -196,6 +197,8 @@ tux64_boot_stage1_fsm_initialize(
    Tux64UInt32 memory_free
 ) {
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
+
+   fsm->boot_header_files = tux64_boot_stage1_boot_header_files();
 
    if (TUX64_BOOT_CONFIG_SPLASH) {
       tux64_boot_stage1_fsm_initialize_splash();
