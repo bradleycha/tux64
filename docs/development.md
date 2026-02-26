@@ -44,8 +44,8 @@ The process of obtaining sources is the same as the Installation Guide.
 
 | Package | Version | Notes |
 |---------|---------|-------|
-| [gdb](https://www.sourceware.org/gdb/) | 16.3 | |
-| [ares](https://ares-emu.net/) | v146 | |
+| [gdb](https://www.sourceware.org/gdb/) | 17.1 | |
+| [ares](https://ares-emu.net/) | v147 | |
 
 ### Building GDB
 
@@ -120,7 +120,7 @@ Before attempting to attach GDB, you should do the following:
    * Enable GDB server under Settings > Debug > Enabled
    * Enable GDB IPv4 support under Settings > Debug > Use IPv4
    * Set on-focus-loss behavior to "Block input" under Settings > Drivers > When focus is lost
-   * Launch the GDB server on boot under Settings > Boot Options > Launch Debugger
+   * Launch the GDB server on boot under Settings > Boot Options > Launch Tracer
 
 Additionally, if you're doing stage-0 bootloader development and applied the above boot debugging patch, the following options might be interesting:
    * Disable RDRAM pre-initialization under Settings > Options > Nintendo 64 Settings > Pre-Initialize RDRAM
@@ -171,7 +171,7 @@ The following tools are needed to re-calculate the stage-0 CIC data:
 
 | Package | Version | Notes |
 |---------|---------|-------|
-| [ipl3hasher-new](https://github.com/Polprzewodnikowy/ipl3hasher-new) | 1.2.1 | This requires a Rust toolchain to be installed. |
+| [ipl3hasher-new](https://github.com/Polprzewodnikowy/ipl3hasher-new) | 1.3.0 | This requires a Rust toolchain to be installed. |
 
 ### Building ipl3hasher-new
 

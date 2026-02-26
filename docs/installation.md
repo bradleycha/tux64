@@ -119,10 +119,10 @@ Every package listed should be stored uncompressed inside of `sources/`, with th
 | Package | Version | Notes |
 |---------|---------|-------|
 | [tux64](https://github.com/bradleycha/tux64/) | master | Currently no stable release.  Use `git` to clone the latest version of the 'master' branch.  If cloning directly from GitHub, you must run ```autoreconf -i```  for each sub-project which contains a GNU Autoconf script (```configure.ac```) |
-| [binutils](https://www.gnu.org/software/binutils/) | 2.45 | |
+| [binutils](https://www.gnu.org/software/binutils/) | 2.46 | |
 | [gcc](https://gcc.gnu.org/) | 15.2.0 | |
 | [musl](https://musl.libc.org/) | 1.2.5 | |
-| [linux](https://kernel.org/) | 6.12.57 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
+| [linux](https://kernel.org/) | 6.18.13 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 
 ### Chapter 2.3 - Apply Patches
 
@@ -219,6 +219,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-binutils-stage1
    CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
    ASFLAGS="${TUX64_ASFLAGS_HOST}" \
    LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+   --disable-werror \
    --enable-host-pie \
    --enable-lto
 ```
@@ -259,6 +260,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-gcc
    CXXFLAGS="${TUX64_CXXFLAGS_HOST} -fno-lto" \
    ASFLAGS="${TUX64_ASFLAGS_HOST}" \
    LDFLAGS="${TUX64_LDFLAGS_HOST} -fno-lto" \
+   --disable-werror \
    --enable-host-pie \
    --enable-lto \
    --enable-bootstrap \
@@ -286,6 +288,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-binutils-stage2
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --disable-werror \
       --enable-host-pie \
       --enable-lto
 )
@@ -319,6 +322,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-binutils
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --disable-werror \
       --enable-host-pie \
       --enable-lto \
       --with-cpu=mips64vr4300
@@ -350,6 +354,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
       CXXFLAGS_FOR_TARGET="${TUX64_CXXFLAGS_N64_BOOTLOADER} -fno-lto" \
       ASFLAGS_FOR_TARGET="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
       LDFLAGS_FOR_TARGET="${TUX64_LDFLAGS_N64_BOOTLOADER} -fno-lto" \
+      --disable-werror \
       --enable-host-pie \
       --enable-lto \
       --disable-bootstrap \
@@ -394,6 +399,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-binutils
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --disable-werror \
       --enable-host-pie \
       --enable-lto \
       --with-cpu=mips64vr4300
@@ -425,6 +431,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-stage1
       CXXFLAGS_FOR_TARGET="${TUX64_CXXFLAGS_N64_LINUX} -fno-lto" \
       ASFLAGS_FOR_TARGET="${TUX64_ASFLAGS_N64_LINUX}" \
       LDFLAGS_FOR_TARGET="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
+      --disable-werror \
       --enable-host-pie \
       --enable-lto \
       --disable-bootstrap \
