@@ -117,6 +117,7 @@ stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.c
 
 EXTRA_DIST = \
+	src/tux64-boot/tux64-boot.ld \
 	src/tux64-boot/status.ld \
 	src/tux64-boot/stage0/stage0.ld \
 	src/tux64-boot/stage1/stage1.ld \
