@@ -162,11 +162,11 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_CFLAGS_HOST | Flags to pass to the host's C compiler. | -pipe -march=native -O2 -flto |
 | TUX64_CXXFLAGS_HOST | Flags to pass to the host's C++ compiler. | ${TUX64_CFLAGS_HOST} |
 | TUX64_ASFLAGS_HOST | Flags to pass to the host's assembler. | |
-| TUX64_LDFLAGS_HOST | Flags to pass to the host's linker. | -flto |
+| TUX64_LDFLAGS_HOST | Flags to pass to the host's linker. | -Wl,--gc-sections -flto |
 | TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -mabi=64 -Oz -flto -fno-stack-protector |
 | TUX64_CXXFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C++ compilers. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_ASFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's assemblers. | -march=vr4300 -mtune=vr4300 |
-| TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -flto |
+| TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -Wl,--gc-sections -flto |
 | TUX64_CFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader C compiler. | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 -G65536 -mexplicit-relocs=none -mno-check-zero-division |
 | TUX64_ASFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
 | TUX64_LDFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader linker. | ${TUX64_LDFLAGS_N64_COMMON} |
@@ -185,6 +185,8 @@ TUX64_MAKEOPTS is the number of parallel jobs to run when building software.  Th
 
 TUX64_TARGET_HOST is the target for the host machine.  This needs to be set manually as there's no easy way to detect this automatically in a simple shell script.  This follows the format `[arch][sub]-[vendor]-[sys]-[env]`.  For example, Linux running glibc on a 64-bit Intel or AMD processor would have the target triple
 `x86_64-pc-linux-gnu`.  For more information, refer to [this website](https://clang.llvm.org/docs/CrossCompilation.html).
+
+TUX64_LDFLAGS_HOST and TUX64_LDFLAGS_N64_COMMON include `-Wl,--gc-sections`.  This is a flag which removes unused sections when linking programs.  This can help with dead code elimination, thus producing smaller binaries.
 
 TUX64_CFLAGS_N64_COMMON includes `-mfix4300`.  This is a flag which patches code to work around hardware bugs in early N64 CPU revisions, at the cost of code size and performance.  We include this flag by default for compatibility with all N64 revisions.  However if you are planning on only running Tux64 on NUS-CPU-04 and later revisions, you should be able to safely remove this flag for improved performance and smaller code size.
 
