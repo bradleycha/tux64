@@ -5,6 +5,8 @@
 /* boot/src/tux64-boot/stage0/stage0.ld - Stage-0 bootloader linker script.   */
 /*----------------------------------------------------------------------------*/
 
+INCLUDE tux64-boot/tux64-boot.ld
+
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
 INCLUDE tux64-boot/status.ld
