@@ -23,12 +23,12 @@ export TUX64_TARGET_N64_LINUX=mips64-linux-musl
 export TUX64_CFLAGS_HOST="-pipe -march=native -O2 -flto"
 export TUX64_CXXFLAGS_HOST="${TUX64_CFLAGS_HOST}"
 export TUX64_ASFLAGS_HOST=""
-export TUX64_LDFLAGS_HOST="-flto"
+export TUX64_LDFLAGS_HOST="-Wl,--gc-sections -flto"
 
 export TUX64_CFLAGS_N64_COMMON="-pipe -march=vr4300 -mfix4300 -mabi=64 -Oz -flto -fno-stack-protector"
 export TUX64_CXXFLAGS_N64_COMMON="${TUX64_CFLAGS_N64_COMMON}"
 export TUX64_ASFLAGS_N64_COMMON="-march=vr4300 -mtune=vr4300"
-export TUX64_LDFLAGS_N64_COMMON="-flto"
+export TUX64_LDFLAGS_N64_COMMON="-Wl,--gc-sections -flto"
 
 export TUX64_CFLAGS_N64_BOOTLOADER="${TUX64_CFLAGS_N64_COMMON} -mabi=o64 -G65536 -mexplicit-relocs=none -mno-check-zero-division"
 export TUX64_ASFLAGS_N64_BOOTLOADER="${TUX64_ASFLAGS_N64_COMMON}"
