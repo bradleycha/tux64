@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/math.h - Header for math functions.                          */
@@ -72,6 +72,30 @@ Tux64UInt64
 tux64_math_align_forward_uint64(
    Tux64UInt64 value,
    Tux64UInt64 alignment
+);
+
+/*----------------------------------------------------------------------------*/
+/* Compute the absolute difference between two unsigned integers.             */
+/*----------------------------------------------------------------------------*/
+Tux64UInt8
+tux64_math_absolute_difference_uint8(
+   Tux64UInt8 lhs,
+   Tux64UInt8 rhs
+);
+Tux64UInt16
+tux64_math_absolute_difference_uint16(
+   Tux64UInt16 lhs,
+   Tux64UInt16 rhs
+);
+Tux64UInt32
+tux64_math_absolute_difference_uint32(
+   Tux64UInt32 lhs,
+   Tux64UInt32 rhs
+);
+Tux64UInt64
+tux64_math_absolute_difference_uint64(
+   Tux64UInt64 lhs,
+   Tux64UInt64 rhs
 );
 
 /*----------------------------------------------------------------------------*/
