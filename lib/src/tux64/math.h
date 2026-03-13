@@ -41,6 +41,11 @@ tux64_math_ceil_divide_uint64(
    Tux64UInt64 dividend,
    Tux64UInt64 divisor
 );
+Tux64UIntPtr
+tux64_math_ceil_divide_uintptr(
+   Tux64UIntPtr dividend,
+   Tux64UIntPtr divisor
+);
 
 /*----------------------------------------------------------------------------*/
 /* Aligns a value forward to a boundary on literals.  Only use this if you    */
@@ -73,6 +78,11 @@ tux64_math_align_forward_uint64(
    Tux64UInt64 value,
    Tux64UInt64 alignment
 );
+Tux64UIntPtr
+tux64_math_align_forward_uintptr(
+   Tux64UIntPtr value,
+   Tux64UIntPtr alignment
+);
 
 /*----------------------------------------------------------------------------*/
 /* Compute the absolute difference between two unsigned integers.             */
@@ -96,6 +106,11 @@ Tux64UInt64
 tux64_math_absolute_difference_uint64(
    Tux64UInt64 lhs,
    Tux64UInt64 rhs
+);
+Tux64UIntPtr
+tux64_math_absolute_difference_uintptr(
+   Tux64UIntPtr lhs,
+   Tux64UIntPtr rhs
 );
 
 /*----------------------------------------------------------------------------*/

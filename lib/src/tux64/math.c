@@ -53,6 +53,17 @@ tux64_math_ceil_divide_uint64(
    return TUX64_LITERAL_UINT64(1llu) + ((dividend - 1) / divisor);
 }
 
+Tux64UIntPtr
+tux64_math_ceil_divide_uintptr(
+   Tux64UIntPtr dividend,
+   Tux64UIntPtr divisor
+) {
+   return (Tux64UIntPtr)tux64_math_ceil_divide_uint64(
+      (Tux64UInt64)dividend,
+      (Tux64UInt64)divisor
+   );
+}
+
 Tux64UInt8
 tux64_math_align_forward_uint8(
    Tux64UInt8 value,
@@ -92,6 +103,17 @@ tux64_math_align_forward_uint64(
    Tux64UInt64 alignment
 ) {
    return tux64_math_ceil_divide_uint64(value, alignment) * alignment;
+}
+
+Tux64UIntPtr
+tux64_math_align_forward_uintptr(
+   Tux64UIntPtr value,
+   Tux64UIntPtr alignment
+) {
+   return (Tux64UIntPtr)tux64_math_align_forward_uint64(
+      (Tux64UInt64)value,
+      (Tux64UInt64)alignment
+   );
 }
 
 Tux64UInt8
@@ -137,5 +159,16 @@ tux64_math_absolute_difference_uint64(
    }
 
    return lhs - rhs;
+}
+
+Tux64UIntPtr
+tux64_math_absolute_difference_uintptr(
+   Tux64UIntPtr lhs,
+   Tux64UIntPtr rhs
+) {
+   return (Tux64UIntPtr)tux64_math_absolute_difference_uint64(
+      (Tux64UInt64)lhs,
+      (Tux64UInt64)rhs
+   );
 }
 
