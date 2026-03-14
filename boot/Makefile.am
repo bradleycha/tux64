@@ -66,16 +66,20 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic
 AM_LDFLAGS = \
-	-nostartfiles
+	-nostartfiles \
+	-nostdlib
 
 LDADD = \
 	-L $(top_srcdir)/src \
 	-L $(datadir) \
+	-lgcc \
 	$(libdir)/libtux64.a \
 	$(top_builddir)/libtux64-boot.a
 
 libtux64_boot_a_SOURCES = \
 	src/tux64-boot/tux64-boot.h \
+	src/tux64-boot/builtin.c \
+	src/tux64-boot/builtin.h \
 	src/tux64-boot/ipl2.h \
 	src/tux64-boot/status.c \
 	src/tux64-boot/status.h \
