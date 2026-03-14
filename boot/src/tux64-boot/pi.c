@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2026                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/pi.h - Implementations for controlling the Peripheral  */
+/* boot/src/tux64-boot/pi.c - Implementations for controlling the Peripheral  */
 /*    Interface (PI).                                                         */
 /*----------------------------------------------------------------------------*/
 
