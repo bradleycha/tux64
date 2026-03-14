@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/memory.h - Header for memory functions.                      */
@@ -12,12 +12,24 @@
 #include "tux64/tux64.h"
 
 /*----------------------------------------------------------------------------*/
-/* Copy 'bytes' number of bytes from 'src' to 'dest'.                         */
+/* Copy 'bytes' number of bytes from 'src' to 'dest', forbidding overlapping  */
+/* regions.                                                                   */
 /*----------------------------------------------------------------------------*/
 void
 tux64_memory_copy(
    void * restrict dest,
    const void * restrict src,
+   Tux64UInt32 bytes
+);
+
+/*----------------------------------------------------------------------------*/
+/* Copy 'bytes' number of bytes from 'src' to 'dest', allowing overlapping    */
+/* regions.                                                                   */
+/*----------------------------------------------------------------------------*/
+void
+tux64_memory_move(
+   void * dest,
+   const void * src,
    Tux64UInt32 bytes
 );
 

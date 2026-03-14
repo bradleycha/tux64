@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/memory.c - Implementations for memory functions.             */
@@ -7,6 +7,8 @@
 
 #include "tux64/tux64.h"
 #include "tux64/memory.h"
+
+#include "tux64/math.h"
 
 #if TUX64_HAVE_STRING_H
 /*----------------------------------------------------------------------------*/
@@ -22,6 +24,55 @@
 #endif /* SIZE_MAX < TUX64_UINT32_MAX_LITERAL */
 
 #define TUX64_MEMORY_SIZE_T_MAX TUX64_LITERAL_UINT32(SIZE_MAX)
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_HAVE_STRING_H */
+
+#if TUX64_HAVE_STRING_H
+/*----------------------------------------------------------------------------*/
+
+typedef void * (*Tux64MemoryLibcMoveFunctionCopy)(
+   void * restrict dest,
+   const void * restrict src,
+   size_t n
+);
+typedef void * (*Tux64MemoryLibcMoveFunctionMove)(
+   void * dest,
+   const void * src,
+   size_t n
+);
+
+union Tux64MemoryMoveLibcFunction {
+   Tux64MemoryLibcMoveFunctionCopy copy;
+   Tux64MemoryLibcMoveFunctionCopy move;
+};
+
+static void
+tux64_memory_libc_move_wrapper(
+   void * dest,
+   const void * src,
+   Tux64UInt32 bytes,
+   union Tux64MemoryMoveLibcFunction function
+) {
+   Tux64UInt8 * iter_dest;
+   const Tux64UInt8 * iter_src;
+
+   iter_dest = dest;
+   iter_src = src;
+
+#if TUX64_MEMORY_LIBC_SIZE_T_IS_SMALL
+   while (bytes > TUX64_MEMORY_SIZE_T_MAX) {
+      (void)function.move(iter_dest, iter_src, TUX64_MEMORY_SIZE_T_MAX);
+      iter_dest += TUX64_MEMORY_SIZE_T_MAX;
+      iter_src += TUX64_MEMORY_SIZE_T_MAX;
+      bytes -= TUX64_MEMORY_SIZE_T_MAX;
+   }
+#endif /* TUX64_MEMORY_LIBC_SIZE_T_IS_SMALL */
+
+   (void)function.move(iter_dest, iter_src, bytes);
+
+   return;
+}
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_HAVE_STRING_H */
@@ -57,23 +108,10 @@ tux64_memory_copy_libc(
    const void * restrict src,
    Tux64UInt32 bytes
 ) {
-   Tux64UInt8 * restrict iter_dest;
-   const Tux64UInt8 * restrict iter_src;
-
-   iter_dest = dest;
-   iter_src = src;
-
-#if TUX64_MEMORY_LIBC_SIZE_T_IS_SMALL
-   while (bytes > TUX64_MEMORY_SIZE_T_MAX) {
-      (void)memcpy(iter_dest, iter_src, TUX64_MEMORY_SIZE_T_MAX);
-      iter_dest += TUX64_MEMORY_SIZE_T_MAX;
-      iter_src += TUX64_MEMORY_SIZE_T_MAX;
-      bytes -= TUX64_MEMORY_SIZE_T_MAX;
-   }
-#endif /* TUX64_MEMORY_LIBC_SIZE_T_IS_SMALL */
-
-   (void)memcpy(iter_dest, iter_src, bytes);
-
+   union Tux64MemoryMoveLibcFunction function;
+   
+   function.copy = memcpy;
+   tux64_memory_libc_move_wrapper(dest, src, bytes, function);
    return;
 }
 
@@ -91,6 +129,162 @@ tux64_memory_copy(
    (void)tux64_memory_copy_fallback;
 #else /* TUX64_HAVE_STRING_H */
    tux64_memory_copy_fallback(dest, src, bytes);
+#endif /* TUX64_HAVE_STRING_H */
+
+   return;
+}
+
+static void
+tux64_memory_move_fallback_leftward(
+   void * dest,
+   const void * src,
+   Tux64UInt32 bytes,
+   Tux64UInt32 bytes_overlap
+) {
+   Tux64UInt8 * iter_dest;
+   const Tux64UInt8 * iter_src;
+
+   /*----------------------------------------------------*/
+   /*                                                    */
+   /*   dest             src                             */
+   /*    |                |                              */
+   /*    x----------------|xxxx|----------------x        */
+   /*    |                |xxxx|                |        */
+   /*    x----------------|xxxx|----------------x        */
+   /*    \____________________/                          */
+   /*               |                                    */
+   /*               n                                    */
+   /*                                                    */
+   /*----------------------------------------------------*/
+
+   iter_dest = dest;
+   iter_src = src;
+
+   /* we have to do a byte-for-byte copy here because it's not a guarantee */
+   /* that we have enough memory between dest and src for a straight memcpy. */
+   do {
+      *iter_dest++ = *iter_src++;
+      bytes_overlap--;
+      bytes--;
+   } while (bytes_overlap != TUX64_LITERAL_UINT32(0u));
+
+   /* overlapping region is taken care of, we can now memcpy. */
+   tux64_memory_copy(iter_dest, iter_src, bytes);
+
+   return;
+}
+
+static void
+tux64_memory_move_fallback_rightward(
+   void * dest,
+   const void * src,
+   Tux64UInt32 bytes,
+   Tux64UInt32 bytes_overlap
+) {
+   Tux64UInt8 * iter_dest;
+   const Tux64UInt8 * iter_src;
+
+   /*----------------------------------------------------*/
+   /*                                                    */
+   /*   src             dest                             */
+   /*    |                |                              */
+   /*    x----------------|xxxx|----------------x        */
+   /*    |                |xxxx|                |        */
+   /*    x----------------|xxxx|----------------x        */
+   /*    \____________________/                          */
+   /*               |                                    */
+   /*               n                                    */
+   /*                                                    */
+   /*----------------------------------------------------*/
+
+   iter_dest = dest;
+   iter_src = src;
+
+   /* byte-for-byte copy same as above, but reverse loops since src has the */
+   /* overlapping region at the end of its buffer now. */
+   iter_dest = &iter_dest[bytes - 1u];
+   iter_src = &iter_src[bytes - 1u];
+   do {
+      *iter_dest-- = *iter_src--;
+      bytes_overlap--;
+      bytes--;
+   } while (bytes_overlap != TUX64_LITERAL_UINT32(0u));
+
+   /* memcpy without the use of the iterators since we set them up for */
+   /* reverse loops instead of forward loops. */
+   tux64_memory_copy(dest, src, bytes);
+   
+   return;
+}
+
+static void
+tux64_memory_move_fallback(
+   void * dest,
+   const void * src,
+   Tux64UInt32 bytes
+) {
+   Tux64UInt32 distance;
+   Tux64UInt32 bytes_overlap;
+
+   if (dest == src) {
+      return;
+   }
+
+   /* cast to uint32 because if your pointers are over 2^32 bytes away, i */
+   /* think pointer aliasing is the least of your worries... */
+   distance = (Tux64UInt32)tux64_math_absolute_difference_uintptr(
+      (Tux64UIntPtr)dest,
+      (Tux64UIntPtr)src
+   );
+
+   if (distance >= bytes) {
+      tux64_memory_copy(dest, src, bytes);
+      return;
+   }
+
+   /* important to do this after the above check to prevent weird behavior */
+   /* with wrapping subtraction. */
+   bytes_overlap = (bytes - distance);
+
+   if (src < dest) {
+      tux64_memory_move_fallback_rightward(dest, src, bytes, bytes_overlap);
+      return;
+   }
+
+   tux64_memory_move_fallback_leftward(dest, src, bytes, bytes_overlap);
+   return;
+}
+
+#if TUX64_HAVE_STRING_H
+/*----------------------------------------------------------------------------*/
+
+static void
+tux64_memory_move_libc(
+   void * dest,
+   const void * src,
+   Tux64UInt32 bytes
+) {
+   union Tux64MemoryMoveLibcFunction function;
+   
+   function.move = memmove;
+   tux64_memory_libc_move_wrapper(dest, src, bytes, function);
+   return;
+}
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_HAVE_STRING_H */
+
+void
+tux64_memory_move(
+   void * dest,
+   const void * src,
+   Tux64UInt32 bytes
+) {
+#if TUX64_HAVE_STRING_H
+   tux64_memory_move_libc(dest, src, bytes);
+   (void)tux64_memory_move_fallback;
+#else /* TUX64_HAVE_STRING_H */
+   tux64_memory_move_fallback(dest, src, bytes);
 #endif /* TUX64_HAVE_STRING_H */
 
    return;
