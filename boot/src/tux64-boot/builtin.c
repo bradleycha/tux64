@@ -6,6 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
+#include "tux64-boot/builtin.h"
 
 #include <tux64/memory.h>
 #include "tux64-boot/halt.h"
