@@ -6,8 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include "tux64-boot/builtin.h"
-#include "tux64-boot/gp.h"
+#include "tux64-boot/prelude.h"
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/stage1/stage1.h"
 
@@ -31,8 +30,7 @@ tux64_boot_stage1_start(void) {
    register Tux64UInt8     rom_cic_seed      __asm__("$s6");
    register Tux64UInt8     pif_rom_version   __asm__("$s7");
 
-   tux64_boot_builtin_link();
-   tux64_boot_gp_load();
+   tux64_boot_prelude();
 
    tux64_boot_stage1_main(
       (enum Tux64BootIpl2RomType)rom_type,
