@@ -6,9 +6,8 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include "tux64-boot/prelude.h"
-#include "tux64-boot/ipl2.h"
 #include "tux64-boot/stage1/stage1.h"
+#include "tux64-boot/ipl2.h"
 
 void
 tux64_boot_stage1_start(void)
@@ -30,8 +29,6 @@ tux64_boot_stage1_start(void) {
    register Tux64UInt8     rom_cic_seed      __asm__("$s6");
    register Tux64UInt8     pif_rom_version   __asm__("$s7");
 
-   tux64_boot_prelude();
-
    tux64_boot_stage1_main(
       (enum Tux64BootIpl2RomType)rom_type,
       (enum Tux64BootIpl2VideoStandard)video_standard,
@@ -44,7 +41,6 @@ tux64_boot_stage1_start(void) {
          ? TUX64_BOOLEAN_FALSE
          : TUX64_BOOLEAN_TRUE
    );
-
    TUX64_UNREACHABLE;
 }
 
