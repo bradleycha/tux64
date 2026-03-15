@@ -73,8 +73,8 @@ LDADD = \
 	-L $(top_srcdir)/src \
 	-L $(datadir) \
 	-lgcc \
-	$(libdir)/libtux64.a \
-	$(top_builddir)/libtux64-boot.a
+	$(top_builddir)/libtux64-boot.a \
+	$(libdir)/libtux64.a
 
 libtux64_boot_a_SOURCES = \
 	src/tux64-boot/tux64-boot.h \
@@ -122,7 +122,9 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/status.c \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
-	src/tux64-boot/stage2/stage2.c
+	src/tux64-boot/stage2/start.c \
+	src/tux64-boot/stage2/stage2.c \
+	src/tux64-boot/stage2/stage2.h
 
 EXTRA_DIST = \
 	src/tux64-boot/tux64-boot.ld \

@@ -9,6 +9,8 @@ INCLUDE tux64-boot/tux64-boot.ld
 
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
+INCLUDE tux64-boot/status.ld
+
 ENTRY(tux64_boot_stage2_start)
 
 SECTIONS
@@ -17,10 +19,18 @@ SECTIONS
    .rsp_imem : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
+
+      /* same trick with $gp from stage-1 */
+      _gp = ALIGN(8) + 0x8000;
+
+      *(.sdata*);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
 
    /* place the stage-2 uninitialized variables into RSP DMEM */
    .rsp_dmem.bss : {
+      /* same trick with $gp from stage-1 */
+      *(.sbss*);
+
       *(.bss*);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 }
