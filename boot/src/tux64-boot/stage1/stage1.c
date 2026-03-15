@@ -7,7 +7,6 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/ipl2.h"
-#include "tux64-boot/status.h"
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/interrupt.h"
@@ -239,8 +238,6 @@ tux64_boot_stage1_main(
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
    struct Tux64BootStage1Palette video_palette;
-
-   tux64_boot_status_code_initialize();
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_BEGIN);
 

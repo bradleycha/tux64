@@ -11,6 +11,7 @@
 
 #include "tux64-boot/builtin.h"
 #include "tux64-boot/gp.h"
+#include "tux64-boot/status.h"
 
 void
 tux64_boot_prelude(void) {
@@ -19,6 +20,7 @@ tux64_boot_prelude(void) {
    /* the rest of the init code.                                              */
    tux64_boot_builtin_link();
    tux64_boot_gp_load();
+   tux64_boot_status_code_initialize();
    return;
 }
 
