@@ -2,19 +2,20 @@
 /*                          Copyright (C) Tux64 2026                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/prelude.h - Header for common initialization routines. */
+/* boot/src/tux64-boot/initialize.h - Header for common initialization        */
+/*    routines.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#ifndef _TUX64_BOOT_PRELUDE_H
-#define _TUX64_BOOT_PRELUDE_H
+#ifndef _TUX64_BOOT_INITIALIZE_H
+#define _TUX64_BOOT_INITIALIZE_H
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* Runs common initialization routines shared across bootloader stages.       */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_prelude(void);
+tux64_boot_initialize(void);
 
 /*----------------------------------------------------------------------------*/
-#endif /* _TUX64_BOOT_PRELUDE_H */
+#endif /* _TUX64_BOOT_INITIALIZE_H */
 
