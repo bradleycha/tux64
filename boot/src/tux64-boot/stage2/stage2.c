@@ -8,7 +8,6 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/initialize.h"
 #include "tux64-boot/halt.h"
-
 #include "tux64-boot/stage2/status.h"
 
 void
