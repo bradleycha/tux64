@@ -60,13 +60,19 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA
 );
 
+/* alignment manually set for same reason as above.  this time the size of a */
+/* pointer since one of our fields is a pointer, with the rest of the fields */
+/* being 32-bit, thus our minimum required alignment has to be either 32-bit */
+/* or 64-bit, depending on the ABI. */
 #define TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(identifier, identifier_ptr, identifier_length) \
+   __attribute__((aligned(sizeof(Tux64UIntPtr)))) \
    const struct Tux64BootStage1FbconText \
    identifier = { \
       .ptr        = identifier_ptr , \
       .length  = TUX64_LITERAL_UINT8( identifier_length ), \
    }
 #define TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(identifier, identifier_ptr, identifier_length, identifier_capacity) \
+   __attribute__((aligned(sizeof(Tux64UIntPtr)))) \
    const struct Tux64BootStage1FbconTextLabel \
    identifier = { \
       .text = { \
