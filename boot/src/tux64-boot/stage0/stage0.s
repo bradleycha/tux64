@@ -324,16 +324,16 @@ tux64_boot_stage0_start:
 
    # detect the hardware revision, which is used in RDRAM initialization and to
    # detect ique support.  we then reserve $s0 for the hardware revision until
-   # we detect HW1/HW2 RDRAM and $a2 for the boolean if we're on ique or not.
+   # we detect HW1/HW2 RDRAM and $s2 for the boolean if we're on ique or not.
    # we then skip RDRAM initialization if we're on ique, as there's no RDRAM to
    # initialize.
    lui   $t0,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI
    lw    $t1,TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO($fp)
    ori   $t0,$t0,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO
-   xor   $a2,$t0,$t1
-   andi  $s0,$t2,0x00ff
+   xor   $s2,$t0,$t1
+   andi  $s0,$t1,0x00ff
    beq   $t0,$t1,tux64_boot_stage0_start.skip_rdram_initialization
-   sltiu $a2,$a2,1 # branch delay slot
+   sltiu $s2,$s2,1 # branch delay slot
 
    # begin initializing RDRAM
    jal   tux64_boot_stage0_status_code_write
@@ -367,13 +367,13 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_rdram_wait
    sw    $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_MODE_LO($s1) # branch delay slot
 
-   # reserve $s2 for the spacing between RDRAM registers.  HW1 RDRAM, found on
+   # reserve $a2 for the spacing between RDRAM registers.  HW1 RDRAM, found on
    # early development boards, is spaced out 0x200 bytes.  Everything else is
    # spaced out 0x400 bytes.  also frees $s0.
    addiu $t0,$zero,1
    beq   $t0,$s0,tux64_boot_stage0_start.rdram_hw1
-   addiu $s2,$zero,0x200 # branch delay slot
-   addiu $s2,$s2,0x200
+   addiu $a2,$zero,0x200 # branch delay slot
+   addiu $a2,$a2,0x200
    tux64_boot_stage0_start.rdram_hw1:
 
    # initialize Delay register.  see libdragon/boot/rdram.c:142 for more
@@ -413,30 +413,30 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY
 
-   addiu $a0,$zero,0
-   lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI
+   lui   $a0,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI
+   addiu $s0,$zero,0
    lui   $s1,TUX64_BOOT_STAGE0_1MIB_HI
-   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI + (TUX64_BOOT_STAGE0_1MIB_HI * 8)
+   lui   $a2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI + (TUX64_BOOT_STAGE0_1MIB_HI * 8)
    tux64_boot_stage0_start.detect_total_memory:
-      ld    $t3,0($s0)     # load current value
+      ld    $t3,0($a0)     # load current value
       nor   $t4,$t3,$zero  # flips all bits
-      sd    $t4,0($s0)     # store the flipped bits
-      ld    $t5,0($s0)     # reload to see what was stored
-      sd    $t3,0($s0)     # restore the old value
+      sd    $t4,0($a0)     # store the flipped bits
+      ld    $t5,0($a0)     # reload to see what was stored
+      sd    $t3,0($a0)     # restore the old value
 
       # if the values differ, then either the memory chip is bad or we're at the
       # end of available memory.  exit the loop.
       bne   $t4,$t5,tux64_boot_stage0_start.detect_total_memory.exit
 
       # advance the memory pointer using the branch delay slot
-      addu  $s0,$s0,$s1
+      addu  $a0,$a0,$s1
 
       # the maximum amount of possible memory is 8MiB.  if we're not past 8MiB
       # of memory, continue looping
-      bne   $s0,$s2,tux64_boot_stage0_start.detect_total_memory
+      bne   $a0,$a2,tux64_boot_stage0_start.detect_total_memory
 
       # increment the total detected memory using the branch delay slot
-      addu  $a0,$a0,$s1
+      addu  $s0,$s0,$s1
    #tux64_boot_stage0_start.detect_total_memory
    tux64_boot_stage0_start.detect_total_memory.exit:
 
@@ -448,25 +448,25 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER
 
-   # reserve $s0 for the PI base address and $s1 for the high-order cartridge
+   # reserve $a0 for the PI base address and $a1 for the high-order cartridge
    # ROM offset
-   lui   $s0,TUX64_BOOT_STAGE0_ADDRESS_PI_HI
-   lui   $s1,TUX64_BOOT_STAGE0_PI_DMA_CARTRIDGE_ROM_ADDRESS_HI
+   lui   $a0,TUX64_BOOT_STAGE0_ADDRESS_PI_HI
+   lui   $a1,TUX64_BOOT_STAGE0_PI_DMA_CARTRIDGE_ROM_ADDRESS_HI
 
    # halt any active PI DMA operations.  this needs to be done because we could
    # be coming from a reset in the middle if a PI DMA operation.
    addiu $t2,$zero,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
-   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($s0)
+   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
 
    # initiate the transfer in the background, we don't need to invalidate cache
    # as we're initializing it below anyways.  also note we don't need to wait on
    # any previous PI DMA operations since we halted them above
    addiu $t3,$zero,%lo(tux64_boot_stage1_boot_header)
    addiu $t4,$zero,(TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES - 1)
-   ori   $t5,$s1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
-   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($s0)
-   sw    $t5,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($s0)
-   sw    $t4,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($s0)
+   ori   $t5,$a1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
+   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($a0)
+   sw    $t5,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($a0)
+   sw    $t4,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
 
    # initialize the CPU caches, setting each line to 'invalid', continue
    # loading the boot header in the background
@@ -474,7 +474,7 @@ tux64_boot_stage0_start:
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
    lui   $t2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
    lui   $t3,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
-   lui   $s2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
+   lui   $a2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO # write 'invalid' tag
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI # must be zero, undefined on boot
    addiu $t2,$t2,(TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_ICACHE_LINE_COUNT)
@@ -483,17 +483,17 @@ tux64_boot_stage0_start:
       addiu $t2,$t2,-TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE
       addiu $t3,$t3,-TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE
       cache (TUX64_BOOT_STAGE0_CACHE_TYPE_ICACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($t2)
-      bne   $s2,$t2,tux64_boot_stage0_start.initialize_cache
+      bne   $a2,$t2,tux64_boot_stage0_start.initialize_cache
       cache (TUX64_BOOT_STAGE0_CACHE_TYPE_DCACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($t3)
    #tux64_boot_stage0_start.initialize_cache
 
-   # we will now reserve $s2 for the cached RDRAM base address. here are the
+   # we will now reserve $a2 for the cached RDRAM base address. here are the
    # current reserved registers:
-   # $a0       - total memory
-   # $a2       - ique boolean
-   # $s0       - PI MMIO registers base address
-   # $s1       - cartridge ROM base address (physical address)
-   # $s2       - cached RDRAM base address
+   # $a0       - PI MMIO registers base address
+   # $a1       - cartridge ROM base address (physical address)
+   # $a2       - cached RDRAM base address
+   # $s0       - total memory
+   # $s2       - ique boolean
    # $s3-$s7   - IPL2 arguments
 
    # calculate the checksum of the boot header and verify it matches what's
@@ -503,32 +503,32 @@ tux64_boot_stage0_start:
 
    # wait for the boot header to have finished loading
    tux64_boot_stage0_start.pi_io_dma_spinlock.boot_header:
-      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($s0)
+      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
       andi  $at,$at,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.boot_header
    #tux64_boot_stage0_start.pi_io_dma_spinlock.boot_header
 
    # verify the boot header magic is present
    lui   $t0,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI # branch delay slot
-   lw    $t1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($s2)
+   lw    $t1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($a2)
    ori   $t0,$t0,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO
    bne   $t0,$t1,tux64_boot_stage0_halt
    
    # calculate the header's checksum and verify it, this also gets the boot
    # header into cache so that rambus goes vroom vroom, also the next
    # instruction executes in the above branch delay slot
-   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($s2)
-   addiu $t0,$s2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
+   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($a2)
+   addiu $t0,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
    jal   tux64_boot_stage0_checksum_calculate_and_verify
-   addiu $t1,$s2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
+   addiu $t1,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
 
    # begin loading the stage-1 binary into memory
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
 
    # read the stage-1 required memory and length
-   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY_WORDS($s2)
-   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($s2)
+   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY_WORDS($a2)
+   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($a2)
 
    # check if we have enough memory to load the stage-1 binary, done in terms of
    # words to avoid potential overflow
@@ -547,25 +547,25 @@ tux64_boot_stage0_start:
    # line as the header.  note that this concerns data cache.  if we were in
    # instruction cache, we would need to align to a 32-byte boundary.
    addiu $t2,$zero,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO
-   ori   $t3,$s1,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
+   ori   $t3,$a1,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
    addiu $t4,$k1,-1
-   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($s0)
-   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($s0)
-   sw    $t4,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($s0)
+   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($a0)
+   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($a0)
+   sw    $t4,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
 
-   # calculate the total available memory for stage-1, reserving $a1
-   subu  $a1,$a0,$k0
+   # calculate the total available memory for stage-1, reserving $s1
+   subu  $s1,$s0,$k0
 
    # load the boot flags and stage-1 checksum, reserving $fp
-   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($s2)
+   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($a2)
 
    # as a reminder, here are the current registers we care about:
-   # $a0       - total memory
-   # $a1       - available memory
-   # $a2       - ique boolean
-   # $s0       - PI MMIO registers base address
-   # $s1       - cartridge ROM base address (physical address)
-   # $s2       - cached RDRAM base address
+   # $a0       - PI MMIO registers base address
+   # $a1       - cartridge ROM base address (physical address)
+   # $a2       - cached RDRAM base address
+   # $s0       - total memory
+   # $s1       - available memory
+   # $s2       - ique boolean
    # $s3-$s7   - IPL2 arguments
    # $k1       - stage-1 length
    # $fp       - boot flags
@@ -581,27 +581,27 @@ tux64_boot_stage0_start:
 
    # wait for the PI DMA operation to complete, then verify the checksum
    # branch delay slot.  we now free $k1.
-   addiu $t0,$s2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   addiu $t0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
 
    tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum:
-      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($s0)
+      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
       andi  $at,$at,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum
    #tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum
 
    addu  $t1,$t0,$k1 # branch delay slot
-   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($s2)
+   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($a2)
    jal   tux64_boot_stage0_checksum_calculate_and_verify
 
    tux64_boot_stage0_start.skip_checksum_stage1:
 
    # this is now our current register allocation:
-   # $a0       - total memory
-   # $a1       - available memory
-   # $a2       - ique boolean
-   # $s0       - PI MMIO registers base address
-   # $s1       - cartridge ROM base address (physical address)
-   # $s2       - cached RDRAM base address
+   # $a0       - PI MMIO registers base address
+   # $a1       - cartridge ROM base address (physical address)
+   # $a2       - cached RDRAM base address
+   # $s0       - total memory
+   # $s1       - available memory
+   # $s2       - ique boolean
    # $s3-$s7   - IPL2 arguments
    # $fp       - boot flags
 
@@ -621,22 +621,22 @@ tux64_boot_stage0_start:
    # wait for PI DMA, as we could reach here if we skipped the stage-1 checksum
    # without waiting on PI DMA to complete.
    tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start:
-      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($s0)
+      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
       andi  $at,$at,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
    #tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
 
    # initialize the stack and start stage-1
-   addiu $k0,$s2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   addiu $k0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
    jr    $k0
-   addiu $sp,$s2,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
+   addiu $sp,$a2,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 #tux64_boot_stage0_start
 
    # TODO: add multiple of these, one for each CIC revision.  only do this when
    # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x00006d90
-   .word 0x9da70a74
+   .word 0x00003dd2
+   .word 0xa36e5738
 #tux64_boot_stage0_cic
 

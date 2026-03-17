@@ -20,9 +20,9 @@ tux64_boot_stage1_start(void) {
    /* convention.  with unmodified GCC sources, we get spurious pushes for    */
    /* the $sN registers, as well as $ra.  however, with our patched GCC, we   */
    /* add this optimization.  this saves 24 bytes of useless instructions.    */
-   register Tux64UInt32    memory_total      __asm__("$a0");
-   register Tux64UInt32    memory_free       __asm__("$a1");
-   register Tux64UInt32    running_on_ique   __asm__("$a2");
+   register Tux64UInt32    memory_total      __asm__("$s0");
+   register Tux64UInt32    memory_free       __asm__("$s1");
+   register Tux64UInt32    running_on_ique   __asm__("$s2");
    register Tux64UInt32    rom_type          __asm__("$s3");
    register Tux64UInt32    video_standard    __asm__("$s4");
    register Tux64UInt32    reset_type        __asm__("$s5");
