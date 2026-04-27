@@ -22,7 +22,7 @@ tux64_boot_stage1_memory_statistics;
 /* this does lead to redundant data, where we both calculate free memory at */
 /* runtime and the start of free memory at compile-time, but it saves a few */
 /* instructions so what-evs. */
-extern Tux64UInt8 tux64_boot_stage1_memory_top_initial [];
+TUX64_LINKER_SYMBOL(tux64_boot_stage1_memory_top_initial);
 
 void
 tux64_boot_stage1_memory_initialize(
