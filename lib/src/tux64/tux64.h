@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/tux64.h - Main global header for Tux64.                      */
@@ -40,6 +40,15 @@
 
 #define TUX64_OFFSET_OF(type, member)\
    ((Tux64UIntPtr)(&((const type *)(TUX64_NULLPTR))->member))
+
+/* this macro is used to declare a typeless address which is defined by the   */
+/* linker.  we can't just use "void *" because it can result in weird,        */
+/* incorrect, and unexplainable behavior.  we also can't just use "void"      */
+/* because it's technically undefined behavior.  gcc will eat it (and usually */
+/* generate correct code), but it will emit a warning and it's unreliable.    */
+/* this is the only way i've found to reliably declare such symbols.          */
+#define TUX64_LINKER_SYMBOL(identifier) \
+   extern Tux64UInt8 identifier []
 
 /*------------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
