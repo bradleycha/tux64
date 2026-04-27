@@ -107,6 +107,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/boot-header.h \
 	src/tux64-boot/stage1/interrupt.c \
 	src/tux64-boot/stage1/interrupt.h \
+	src/tux64-boot/stage1/memory.c \
+	src/tux64-boot/stage1/memory.h \
 	src/tux64-boot/stage1/preempt.c \
 	src/tux64-boot/stage1/preempt.h \
 	src/tux64-boot/stage1/format.c \

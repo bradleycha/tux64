@@ -10,6 +10,7 @@
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/stage1/status.h"
+#include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/fbcon.h"
@@ -183,9 +184,7 @@ tux64_boot_stage1_fsm_initialize_checksum(void) {
 
 static void
 tux64_boot_stage1_fsm_initialize(
-   struct Tux64BootStage1Fsm * fsm,
-   Tux64UInt32 memory_total,
-   Tux64UInt32 memory_free
+   struct Tux64BootStage1Fsm * fsm
 ) {
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
 
@@ -197,8 +196,8 @@ tux64_boot_stage1_fsm_initialize(
 
    if (TUX64_BOOT_CONFIG_MEMORY_DISPLAY) {
       tux64_boot_stage1_fsm_initialize_memory_display(
-         memory_total,
-         memory_free,
+         tux64_boot_stage1_memory_total(),
+         tux64_boot_stage1_memory_free(),
          &fsm->boot_header_files
       );
    }
@@ -244,6 +243,9 @@ tux64_boot_stage1_main(
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_BEGIN);
 
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_MEMORY);
+   tux64_boot_stage1_memory_initialize(memory_total, memory_free);
+
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT);
    tux64_boot_stage1_interrupt_initialize();
 
@@ -271,11 +273,7 @@ tux64_boot_stage1_main(
       video_palette.background
    );
 
-   tux64_boot_stage1_fsm_initialize(
-      &tux64_boot_stage1_fsm,
-      memory_total,
-      memory_free
-   );
+   tux64_boot_stage1_fsm_initialize(&tux64_boot_stage1_fsm);
 
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_fsm_execute(&tux64_boot_stage1_fsm);
