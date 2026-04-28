@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (c) Tux64 2025, 2026                        #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
 # lib/Makefile.am - GNU Automake script for tux64-lib.			 			 		 #
@@ -53,7 +53,8 @@ libtux64_include_HEADERS = \
 	src/tux64/fs.h \
 	src/tux64/string.h \
 	src/tux64/math.h \
-	src/tux64/checksum.h
+	src/tux64/checksum.h \
+	src/tux64/elf.h
 libtux64_parse_include_HEADERS = \
 	src/tux64/parse/string-integer.h
 libtux64_platform_mips_n64_include_HEADERS = \
