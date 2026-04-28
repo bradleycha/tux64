@@ -23,7 +23,5 @@ tux64_mkrom_SOURCES = \
 	src/tux64-mkrom/arguments.c \
 	src/tux64-mkrom/arguments.h \
 	src/tux64-mkrom/builder.c \
-	src/tux64-mkrom/builder.h \
-	src/tux64-mkrom/kernel.c \
-	src/tux64-mkrom/kernel.h
+	src/tux64-mkrom/builder.h
 
