@@ -26,6 +26,8 @@ tux64_boot_stage1_strings_memory_free;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_kernel_image;
 extern const struct Tux64BootStage1FbconTextLabel
+tux64_boot_stage1_strings_kernel_memory;
+extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_initramfs_image;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_no_checksum;

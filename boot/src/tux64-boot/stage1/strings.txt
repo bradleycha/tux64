@@ -45,6 +45,12 @@
 }
 {
    
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_KERNEL_MEMORY_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_KERNEL_MEMORY_LENGTH;
+   .text                = "Kernel memory  ";
+}
+{
+   
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_INITRAMFS_IMAGE_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_INITRAMFS_IMAGE_LENGTH;
    .text                = "Initramfs image";

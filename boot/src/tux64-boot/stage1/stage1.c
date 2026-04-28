@@ -164,7 +164,9 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    tux64_boot_stage1_fbcon_skip_line();
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_image);
-   tux64_boot_stage1_format_mib(label, boot_header_files->kernel.bytes);
+   tux64_boot_stage1_format_mib(label, boot_header_files->kernel.file.bytes);
+   label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_memory);
+   tux64_boot_stage1_format_mib(label, boot_header_files->kernel.memory);
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_initramfs_image);
    tux64_boot_stage1_format_mib(label, boot_header_files->initramfs.bytes);
    tux64_boot_stage1_fbcon_skip_line();
