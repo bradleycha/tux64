@@ -13,12 +13,11 @@
 #include <tux64/fs.h>
 #include <tux64/arguments.h>
 #include <tux64/string.h>
-#include <tux64/elf.h>
 #include <tux64/parse/string-integer.h>
 #include <tux64/platform/mips/n64/rom.h>
+#include <tux64/platform/mips/n64/kernel.h>
 #include "tux64-mkrom/arguments.h"
 #include "tux64-mkrom/builder.h"
-#include "tux64-mkrom/kernel.h"
 
 #include <stdlib.h>
 #include <inttypes.h>
@@ -54,7 +53,7 @@ struct Tux64MkromExitPayloadParseStringIntegerError {
 };
 
 struct Tux64MkromExitPayloadParseKernelError {
-   struct Tux64MkromKernelParseResult reason;
+   struct Tux64PlatformMipsN64KernelParseResult reason;
 };
 
 struct Tux64MkromExitPayloadBuilderError {
@@ -212,27 +211,27 @@ tux64_mkrom_exit_result_display_parse_kernel_error(
    const struct Tux64MkromExitPayloadParseKernelError * self
 ) {
    switch (self->reason.status) {
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_OK:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK:
          TUX64_UNREACHABLE;
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_CORRUPT_IMAGE:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE:
          TUX64_LOG_ERROR("kernel image is invalid or corrupt");
          break;
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_BAD_VERSION:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_BAD_VERSION:
          TUX64_LOG_ERROR_FMT("kernel image is the wrong ELF version (0x%08x)", self->reason.payload.bad_version.version);
          break;
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_INVALID_ENDIANESS:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_ENDIANESS:
          TUX64_LOG_ERROR("kernel image must be big-endian");
          break;
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_INVALID_TYPE:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_TYPE:
          TUX64_LOG_ERROR_FMT("kernel image is not an executable, instead it's type 0x%08x", self->reason.payload.invalid_type.type);
          break;
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_INVALID_MACHINE:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_MACHINE:
          TUX64_LOG_ERROR_FMT("kernel image is not for a MIPS processor, instead it's for machine 0x%08x", self->reason.payload.invalid_machine.machine);
          break;
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_MAIN_SEGMENT_MISSING:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_MAIN_SEGMENT_MISSING:
          TUX64_LOG_ERROR("kernel image does not contain any loadable segments");
          break;
-      case TUX64_MKROM_KERNEL_PARSE_STATUS_MAIN_SEGMENT_DUPLICATE:
+      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_MAIN_SEGMENT_DUPLICATE:
          TUX64_LOG_ERROR("kernel image has more than one loadable segment, unable to choose the main segment");
          break;
       default:
@@ -615,9 +614,22 @@ struct Tux64MkromInputFilesBootloader {
    struct Tux64FsLoadedFile stage2;
 };
 
+struct Tux64MkromInputFilesKernelImage {
+   const Tux64UInt8 * data;
+   Tux64UInt32 bytes;
+};
+
+struct Tux64MkromInputFilesKernel {
+   struct Tux64MkromInputFilesKernelImage image;  
+   Tux64UInt32 memory;
+   Tux64UInt32 addr_load;
+   Tux64UInt32 addr_entry;
+   Tux64UInt32 alignment;
+};
+
 struct Tux64MkromInputFiles {
    struct Tux64MkromInputFilesBootloader bootloader;
-   struct Tux64MkromKernel kernel;
+   struct Tux64MkromInputFilesKernel kernel;
    struct Tux64FsLoadedFile initramfs;
 };
 
@@ -650,9 +662,9 @@ tux64_mkrom_run_parsed_input(
    builder_input.files.bootloader.stage1.bytes = input->files.bootloader.stage1.bytes;
    builder_input.files.bootloader.stage2.data = input->files.bootloader.stage2.data;
    builder_input.files.bootloader.stage2.bytes = input->files.bootloader.stage2.bytes;
-   builder_input.files.kernel.image.file.data = input->files.kernel.image.data;
-   builder_input.files.kernel.image.file.bytes = input->files.kernel.image.bytes;
-   builder_input.files.kernel.image.memory = input->files.kernel.image.memory;
+   builder_input.files.kernel.image.data = input->files.kernel.image.data;
+   builder_input.files.kernel.image.bytes = input->files.kernel.image.bytes;
+   builder_input.files.kernel.memory = input->files.kernel.memory;
    builder_input.files.kernel.addr_load = input->files.kernel.addr_load;
    builder_input.files.kernel.addr_entry = input->files.kernel.addr_entry;
    builder_input.files.kernel.alignment = input->files.kernel.alignment;
@@ -715,7 +727,8 @@ tux64_mkrom_run_parsed_cmdline(
    struct Tux64FsLoadedFile kernel_elf_file;
    struct Tux64String stage1_bss_string;
    struct Tux64ParseStringIntegerResult stage1_bss_parse_result;
-   struct Tux64MkromKernelParseResult kernel_elf_parse_result;
+   struct Tux64PlatformMipsN64KernelParseResult kernel_elf_parse_result;
+   struct Tux64PlatformMipsN64Kernel * kernel;
    char * kernel_command_line_ptr;
    Tux64Boolean config_file_loaded;
    Tux64Boolean stage1_bss_file_loaded;
@@ -863,16 +876,25 @@ tux64_mkrom_run_parsed_cmdline(
    }
 
    /* attempt to parse the kernel elf into its main segment and load metadata */
-   kernel_elf_parse_result = tux64_mkrom_kernel_parse(
+   kernel_elf_parse_result = tux64_platform_mips_n64_kernel_parse(
       kernel_elf_file.data,
       kernel_elf_file.bytes
    );
-   if (kernel_elf_parse_result.status != TUX64_MKROM_KERNEL_PARSE_STATUS_OK) {
+   if (kernel_elf_parse_result.status != TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK) {
       result.status = TUX64_MKROM_EXIT_STATUS_PARSE_KERNEL_ERROR;
       result.payload.parse_kernel_error.reason = kernel_elf_parse_result;
       goto load_err_exit8;
    }
-   input.files.kernel = kernel_elf_parse_result.payload.ok;
+   kernel = &kernel_elf_parse_result.payload.ok;
+
+   /* unwrap the parsed kernel image since we pass a straight pointer instead */
+   /* of a file offset.*/
+   input.files.kernel.image.data = &kernel_elf_file.data[kernel->image.offset];
+   input.files.kernel.image.bytes = kernel->image.bytes;
+   input.files.kernel.memory = kernel->memory;
+   input.files.kernel.addr_load = kernel->addr_load;
+   input.files.kernel.addr_entry = kernel->addr_entry;
+   input.files.kernel.alignment = kernel->alignment;
 
    /* initialize the rest of the fields for the input */
    input.rom_header = &config_file_parsed.rom_header;

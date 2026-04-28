@@ -51,13 +51,9 @@ struct Tux64MkromBuilderInputFilesBootloader {
    struct Tux64MkromBuilderInputFile stage2;
 };
 
-struct Tux64MkromBuilderInputFileKernelImage {
-   struct Tux64MkromBuilderInputFile file;
-   Tux64UInt32 memory;
-};
-
 struct Tux64MkromBuilderInputFileKernel {
-   struct Tux64MkromBuilderInputFileKernelImage image;
+   struct Tux64MkromBuilderInputFile image;
+   Tux64UInt32 memory;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
    Tux64UInt32 alignment;
