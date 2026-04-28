@@ -53,11 +53,11 @@ struct Tux64PlatformMipsN64BootHeaderFileBootloader {
 struct Tux64PlatformMipsN64BootHeaderFileKernelImage {
    Tux64UInt32 checksum;
    Tux64UInt32 length_words;
-   Tux64UInt32 memory_words;
 };
 
 struct Tux64PlatformMipsN64BootHeaderFileKernel {
-   struct Tux64PlatformMipsN64BootHeaderFileKernelImage image;
+   struct Tux64PlatformMipsN64BootHeaderFile image;
+   Tux64UInt32 memory;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
    Tux64UInt32 alignment;
