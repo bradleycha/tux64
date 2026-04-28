@@ -147,7 +147,7 @@
 
 .equ TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE,0x1000
 
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0044
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0048
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16,0x0050
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
@@ -636,7 +636,7 @@ tux64_boot_stage0_start:
    # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x00005617
-   .word 0x6301a0e1
+   .word 0x00006946
+   .word 0x6c17aa2a
 #tux64_boot_stage0_cic
 
