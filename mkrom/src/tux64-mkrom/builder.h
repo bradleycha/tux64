@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* mkrom/src/tux64-mkrom/builder.h - Header for ROM builder.                  */
@@ -51,9 +51,21 @@ struct Tux64MkromBuilderInputFilesBootloader {
    struct Tux64MkromBuilderInputFile stage2;
 };
 
+struct Tux64MkromBuilderInputFileKernelImage {
+   struct Tux64MkromBuilderInputFile file;
+   Tux64UInt32 memory;
+};
+
+struct Tux64MkromBuilderInputFileKernel {
+   struct Tux64MkromBuilderInputFileKernelImage image;
+   Tux64UInt32 addr_load;
+   Tux64UInt32 addr_entry;
+   Tux64UInt32 alignment;
+};
+
 struct Tux64MkromBuilderInputFiles {
    struct Tux64MkromBuilderInputFilesBootloader bootloader;
-   struct Tux64MkromBuilderInputFile kernel;
+   struct Tux64MkromBuilderInputFileKernel kernel;
    struct Tux64MkromBuilderInputFile initramfs;
 };
 

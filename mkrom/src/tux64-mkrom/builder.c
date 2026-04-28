@@ -108,11 +108,11 @@ tux64_mkrom_builder_measure_and_verify_overflow(
    }
    marker = tux64_mkrom_builder_align_value(marker + input->files.bootloader.stage2.bytes);
 
-   if (marker > TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE - input->files.kernel.bytes) {
+   if (marker > TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE - input->files.kernel.image.file.bytes) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_KERNEL;
       return result;
    }
-   marker = tux64_mkrom_builder_align_value(marker + input->files.kernel.bytes);
+   marker = tux64_mkrom_builder_align_value(marker + input->files.kernel.image.file.bytes);
 
    if (marker > TUX64_MKROM_BUILDER_ALIGNMENT_MAX_VALUE - input->files.initramfs.bytes) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_INITRAMFS;
@@ -196,12 +196,12 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    boot_header->data.files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage2.data, input->files.bootloader.stage2.bytes);
    boot_header->data.files.bootloader.stage2.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
 
-   /* TODO: parse out the main PT_LOAD segment and read the entrypoint, required alignment, and base address. */
-   boot_header->data.files.kernel.image.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.data, input->files.kernel.bytes);
-   boot_header->data.files.kernel.image.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.bytes);
-   boot_header->data.files.kernel.addr_load = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(0x80231000u), TUX64_ENDIAN_FORMAT_BIG);
-   boot_header->data.files.kernel.addr_entry = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(0x80231000u), TUX64_ENDIAN_FORMAT_BIG);
-   boot_header->data.files.kernel.alignment = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(0x10000u), TUX64_ENDIAN_FORMAT_BIG);
+   /* TODO: add kernel.image.memory so we know how much memory will be used by the kernel. */
+   boot_header->data.files.kernel.image.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.image.file.data, input->files.kernel.image.file.bytes);
+   boot_header->data.files.kernel.image.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.image.file.bytes);
+   boot_header->data.files.kernel.addr_load = tux64_endian_convert_uint32(input->files.kernel.addr_load, TUX64_ENDIAN_FORMAT_BIG);
+   boot_header->data.files.kernel.addr_entry = tux64_endian_convert_uint32(input->files.kernel.addr_entry, TUX64_ENDIAN_FORMAT_BIG);
+   boot_header->data.files.kernel.alignment = tux64_endian_convert_uint32(input->files.kernel.alignment, TUX64_ENDIAN_FORMAT_BIG);
 
    boot_header->data.files.initramfs.checksum = tux64_mkrom_builder_calculate_checksum(input->files.initramfs.data, input->files.initramfs.bytes);
    boot_header->data.files.initramfs.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
@@ -267,7 +267,7 @@ tux64_mkrom_builder_measure_and_verify(
       return result;
    }
 
-   marker += tux64_mkrom_builder_align_value(input->files.kernel.bytes);
+   marker += tux64_mkrom_builder_align_value(input->files.kernel.image.file.bytes);
    if (marker > TUX64_MKROM_BUILDER_MAX_ROM_BYTES) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_KERNEL;
       return result;
@@ -364,10 +364,10 @@ tux64_mkrom_builder_construct(
    /* kernel image */
    tux64_memory_copy(
       pen,
-      input->files.kernel.data,
-      input->files.kernel.bytes
+      input->files.kernel.image.file.data,
+      input->files.kernel.image.file.bytes
    );
-   pen += tux64_mkrom_builder_align_value(input->files.kernel.bytes);
+   pen += tux64_mkrom_builder_align_value(input->files.kernel.image.file.bytes);
 
    /* initramfs */
    tux64_memory_copy(

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* mkrom/src/tux64-mkrom/tux64-mkrom.c - Main application entrypoint for      */
@@ -13,10 +13,12 @@
 #include <tux64/fs.h>
 #include <tux64/arguments.h>
 #include <tux64/string.h>
+#include <tux64/elf.h>
 #include <tux64/parse/string-integer.h>
 #include <tux64/platform/mips/n64/rom.h>
 #include "tux64-mkrom/arguments.h"
 #include "tux64-mkrom/builder.h"
+#include "tux64-mkrom/kernel.h"
 
 #include <stdlib.h>
 #include <inttypes.h>
@@ -30,6 +32,7 @@ enum Tux64MkromExitStatus {
    TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS,
    TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR,
    TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR,
+   TUX64_MKROM_EXIT_STATUS_PARSE_KERNEL_ERROR,
    TUX64_MKROM_EXIT_STATUS_BUILDER_ERROR
 };
 
@@ -50,6 +53,10 @@ struct Tux64MkromExitPayloadParseStringIntegerError {
    struct Tux64ParseStringIntegerResult reason;
 };
 
+struct Tux64MkromExitPayloadParseKernelError {
+   struct Tux64MkromKernelParseResult reason;
+};
+
 struct Tux64MkromExitPayloadBuilderError {
    struct Tux64MkromBuilderMeasureResult reason;
 };
@@ -59,6 +66,7 @@ union Tux64MkromExitPayload {
    struct Tux64MkromExitPayloadFsError fs_error;
    struct Tux64MkromExitPayloadArgumentsParseError arguments_parse_error;
    struct Tux64MkromExitPayloadParseStringIntegerError parse_string_integer_error;
+   struct Tux64MkromExitPayloadParseKernelError parse_kernel_error;
    struct Tux64MkromExitPayloadBuilderError builder_error;
 };
 
@@ -183,14 +191,49 @@ tux64_mkrom_exit_result_display_parse_string_integer_error(
       case TUX64_PARSE_STRING_INTEGER_STATUS_OK:
          TUX64_UNREACHABLE;
       case TUX64_PARSE_STRING_INTEGER_STATUS_INVALID_DIGIT:
-         TUX64_LOG_INFO_FMT(
+         TUX64_LOG_ERROR_FMT(
             "invalid string integer digit \'%c\' (hex: 0x%02x)",
             self->reason.payload.invalid_digit.character,
             (Tux64UInt32)self->reason.payload.invalid_digit.character
          );
          break;
       case TUX64_PARSE_STRING_INTEGER_STATUS_OUT_OF_RANGE:
-         TUX64_LOG_INFO("string integer out of range");
+         TUX64_LOG_ERROR("string integer out of range");
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   return;
+}
+
+static void
+tux64_mkrom_exit_result_display_parse_kernel_error(
+   const struct Tux64MkromExitPayloadParseKernelError * self
+) {
+   switch (self->reason.status) {
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_OK:
+         TUX64_UNREACHABLE;
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_CORRUPT_IMAGE:
+         TUX64_LOG_ERROR("kernel image is invalid or corrupt");
+         break;
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_BAD_VERSION:
+         TUX64_LOG_ERROR_FMT("kernel image is the wrong ELF version (0x%08x)", self->reason.payload.bad_version.version);
+         break;
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_INVALID_ENDIANESS:
+         TUX64_LOG_ERROR("kernel image must be big-endian");
+         break;
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_INVALID_TYPE:
+         TUX64_LOG_ERROR_FMT("kernel image is not an executable, instead it's type 0x%08x", self->reason.payload.invalid_type.type);
+         break;
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_INVALID_MACHINE:
+         TUX64_LOG_ERROR_FMT("kernel image is not for a MIPS processor, instead it's for machine 0x%08x", self->reason.payload.invalid_machine.machine);
+         break;
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_MAIN_SEGMENT_MISSING:
+         TUX64_LOG_ERROR("kernel image does not contain any loadable segments");
+         break;
+      case TUX64_MKROM_KERNEL_PARSE_STATUS_MAIN_SEGMENT_DUPLICATE:
+         TUX64_LOG_ERROR("kernel image has more than one loadable segment, unable to choose the main segment");
          break;
       default:
          TUX64_UNREACHABLE;
@@ -249,6 +292,9 @@ tux64_mkrom_exit_result_display(
          break;
       case TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR:
          tux64_mkrom_exit_result_display_parse_string_integer_error(&self->payload.parse_string_integer_error);
+         break;
+      case TUX64_MKROM_EXIT_STATUS_PARSE_KERNEL_ERROR:
+         tux64_mkrom_exit_result_display_parse_kernel_error(&self->payload.parse_kernel_error);
          break;
       case TUX64_MKROM_EXIT_STATUS_BUILDER_ERROR:
          tux64_mkrom_exit_result_display_builder_error(&self->payload.builder_error);
@@ -571,7 +617,7 @@ struct Tux64MkromInputFilesBootloader {
 
 struct Tux64MkromInputFiles {
    struct Tux64MkromInputFilesBootloader bootloader;
-   struct Tux64FsLoadedFile kernel;
+   struct Tux64MkromKernel kernel;
    struct Tux64FsLoadedFile initramfs;
 };
 
@@ -604,8 +650,12 @@ tux64_mkrom_run_parsed_input(
    builder_input.files.bootloader.stage1.bytes = input->files.bootloader.stage1.bytes;
    builder_input.files.bootloader.stage2.data = input->files.bootloader.stage2.data;
    builder_input.files.bootloader.stage2.bytes = input->files.bootloader.stage2.bytes;
-   builder_input.files.kernel.data = input->files.kernel.data;
-   builder_input.files.kernel.bytes = input->files.kernel.bytes;
+   builder_input.files.kernel.image.file.data = input->files.kernel.image.data;
+   builder_input.files.kernel.image.file.bytes = input->files.kernel.image.bytes;
+   builder_input.files.kernel.image.memory = input->files.kernel.image.memory;
+   builder_input.files.kernel.addr_load = input->files.kernel.addr_load;
+   builder_input.files.kernel.addr_entry = input->files.kernel.addr_entry;
+   builder_input.files.kernel.alignment = input->files.kernel.alignment;
    builder_input.files.initramfs.data = input->files.initramfs.data;
    builder_input.files.initramfs.bytes = input->files.initramfs.bytes;
    tux64_memory_copy(&builder_input.rom_header, input->rom_header, TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader)));
@@ -662,8 +712,10 @@ tux64_mkrom_run_parsed_cmdline(
    struct Tux64MkromArgumentsConfigFile config_file_parsed;
    struct Tux64MkromInput input;
    struct Tux64FsLoadedFile stage1_bss_file;
+   struct Tux64FsLoadedFile kernel_elf_file;
    struct Tux64String stage1_bss_string;
    struct Tux64ParseStringIntegerResult stage1_bss_parse_result;
+   struct Tux64MkromKernelParseResult kernel_elf_parse_result;
    char * kernel_command_line_ptr;
    Tux64Boolean config_file_loaded;
    Tux64Boolean stage1_bss_file_loaded;
@@ -763,7 +815,7 @@ tux64_mkrom_run_parsed_cmdline(
       &cmdline->path_prefix,
       &config_file_parsed.path_kernel,
       "kernel image",
-      &input.files.kernel
+      &kernel_elf_file
    );
    if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
       goto load_err_exit5;
@@ -807,8 +859,20 @@ tux64_mkrom_run_parsed_cmdline(
    if (stage1_bss_parse_result.status != TUX64_PARSE_STRING_INTEGER_STATUS_OK) {
       result.status = TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR;
       result.payload.parse_string_integer_error.reason = stage1_bss_parse_result;
-      return result;
+      goto load_err_exit8;
    }
+
+   /* attempt to parse the kernel elf into its main segment and load metadata */
+   kernel_elf_parse_result = tux64_mkrom_kernel_parse(
+      kernel_elf_file.data,
+      kernel_elf_file.bytes
+   );
+   if (kernel_elf_parse_result.status != TUX64_MKROM_KERNEL_PARSE_STATUS_OK) {
+      result.status = TUX64_MKROM_EXIT_STATUS_PARSE_KERNEL_ERROR;
+      result.payload.parse_kernel_error.reason = kernel_elf_parse_result;
+      goto load_err_exit8;
+   }
+   input.files.kernel = kernel_elf_parse_result.payload.ok;
 
    /* initialize the rest of the fields for the input */
    input.rom_header = &config_file_parsed.rom_header;
@@ -825,11 +889,12 @@ tux64_mkrom_run_parsed_cmdline(
    result = tux64_mkrom_run_parsed_input(&input);
 
    /* ...but don't forget to clean up after ourselves! */
+load_err_exit8:
    free(kernel_command_line_ptr);
 load_err_exit7:
    tux64_fs_file_unload(&input.files.initramfs);
 load_err_exit6:
-   tux64_fs_file_unload(&input.files.kernel);
+   tux64_fs_file_unload(&kernel_elf_file);
 load_err_exit5:
    tux64_fs_file_unload(&input.files.bootloader.stage2);
 load_err_exit4:

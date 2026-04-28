@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (c) Tux64 2025, 2026                        #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
 # mkrom/Makefile.am - GNU Automake script for tux64-mkrom.			 			 	 #
@@ -23,5 +23,7 @@ tux64_mkrom_SOURCES = \
 	src/tux64-mkrom/arguments.c \
 	src/tux64-mkrom/arguments.h \
 	src/tux64-mkrom/builder.c \
-	src/tux64-mkrom/builder.h
+	src/tux64-mkrom/builder.h \
+	src/tux64-mkrom/kernel.c \
+	src/tux64-mkrom/kernel.h
 
