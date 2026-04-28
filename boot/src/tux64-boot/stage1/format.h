@@ -26,6 +26,18 @@ tux64_boot_stage1_format_mib(
    Tux64UInt32 value
 );
 
+#define TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_ADDRESS \
+   TUX64_STRING_CHARACTERS("fee1dead")
+
+/*----------------------------------------------------------------------------*/
+/* Formats a 32-bit address as lowercase hexadecimal.                         */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_format_address(
+   Tux64BootStage1FbconLabel label,
+   Tux64UInt32 address
+);
+
 #define TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_PERCENTAGE \
    TUX64_STRING_CHARACTERS("...XXX%")
 

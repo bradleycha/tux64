@@ -56,6 +56,18 @@
    .text                = "Initramfs image";
 }
 {
+   
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_KERNEL_ADDRESS_LOAD_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_KERNEL_ADDRESS_LOAD_LENGTH;
+   .text                = "Kernel load address  0x";
+}
+{
+   
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_KERNEL_ADDRESS_ENTRY_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_KERNEL_ADDRESS_ENTRY_LENGTH;
+   .text                = "Kernel start address 0x";
+}
+{
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_LENGTH;
    .text                = "Checksum verification DISABLED";

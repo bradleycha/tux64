@@ -20,6 +20,17 @@ tux64_boot_stage1_format_digit_base10(
 }
 
 static Tux64BootStage1FbconLabelCharacter
+tux64_boot_stage1_format_digit_base16(
+   Tux64UInt8 digit
+) {
+   if (digit >= TUX64_LITERAL_UINT8(0x0au)) {
+      return tux64_boot_stage1_fbcon_character_encode('a') + digit - TUX64_LITERAL_UINT8(0x0au);
+   }
+
+   return tux64_boot_stage1_fbcon_character_encode('0') + digit;
+}
+
+static Tux64BootStage1FbconLabelCharacter
 tux64_boot_stage1_format_leading_digit_base10(
    Tux64UInt8 value
 ) {
@@ -90,6 +101,35 @@ tux64_boot_stage1_format_mib(
 
    tux64_boot_stage1_format_mib_static(label, idx_base);
    tux64_boot_stage1_format_mib_dynamic(label, idx_base, value);
+
+   return;
+}
+
+void
+tux64_boot_stage1_format_address(
+   Tux64BootStage1FbconLabel label,
+   Tux64UInt32 address
+) {
+   Tux64UInt8 characters;
+   Tux64UInt8 i;
+   Tux64UInt8 digit;
+
+   characters = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_ADDRESS);
+   i = tux64_boot_stage1_fbcon_label_capacity_get(label);
+
+   do {
+      characters--;
+      i--;
+
+      digit = (Tux64UInt8)(address & TUX64_LITERAL_UINT32(0x0000000fu));
+      address = address >> TUX64_LITERAL_UINT8(4u);
+
+      tux64_boot_stage1_fbcon_label_character_set(
+         label,
+         i,
+         tux64_boot_stage1_format_digit_base16(digit)
+      );
+   } while (characters != TUX64_LITERAL_UINT8(0u));
 
    return;
 }

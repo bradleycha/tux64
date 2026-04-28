@@ -30,6 +30,10 @@ tux64_boot_stage1_strings_kernel_memory;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_initramfs_image;
 extern const struct Tux64BootStage1FbconTextLabel
+tux64_boot_stage1_strings_kernel_address_load;
+extern const struct Tux64BootStage1FbconTextLabel
+tux64_boot_stage1_strings_kernel_address_entry;
+extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_no_checksum;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_hello_world;
