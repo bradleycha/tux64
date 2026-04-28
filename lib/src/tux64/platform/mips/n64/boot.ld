@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/n64/boot.ld - Linker script constants for the  */
@@ -8,10 +8,10 @@
 
 /* the length of the bootloader header, in bytes */
 TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES
-   = 0x00000038;
+   = 0x00000044;
 
 /* the length of the bootloader header, in bytes, aligned forward to a */
 /* 16-byte boundary. */
 TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES_ALIGN16
-   = 0x00000040;
+   = 0x00000050;
 

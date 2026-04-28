@@ -50,9 +50,16 @@ struct Tux64PlatformMipsN64BootHeaderFileBootloader {
    struct Tux64PlatformMipsN64BootHeaderFile stage2;
 };
 
+struct Tux64PlatformMipsN64BootHeaderFileKernel {
+   struct Tux64PlatformMipsN64BootHeaderFile image;
+   Tux64UInt32 addr_load;
+   Tux64UInt32 addr_entry;
+   Tux64UInt32 alignment;
+};
+
 struct Tux64PlatformMipsN64BootHeaderFiles {
    struct Tux64PlatformMipsN64BootHeaderFileBootloader bootloader;
-   struct Tux64PlatformMipsN64BootHeaderFile kernel;
+   struct Tux64PlatformMipsN64BootHeaderFileKernel kernel;
    struct Tux64PlatformMipsN64BootHeaderFile initramfs;
    struct Tux64PlatformMipsN64BootHeaderFile command_line;
 };
