@@ -196,9 +196,9 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    boot_header->data.files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage2.data, input->files.bootloader.stage2.bytes);
    boot_header->data.files.bootloader.stage2.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
 
-   /* TODO: add kernel.image.memory so we know how much memory will be used by the kernel. */
    boot_header->data.files.kernel.image.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.image.file.data, input->files.kernel.image.file.bytes);
    boot_header->data.files.kernel.image.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.image.file.bytes);
+   boot_header->data.files.kernel.image.memory_words = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.image.memory);
    boot_header->data.files.kernel.addr_load = tux64_endian_convert_uint32(input->files.kernel.addr_load, TUX64_ENDIAN_FORMAT_BIG);
    boot_header->data.files.kernel.addr_entry = tux64_endian_convert_uint32(input->files.kernel.addr_entry, TUX64_ENDIAN_FORMAT_BIG);
    boot_header->data.files.kernel.alignment = tux64_endian_convert_uint32(input->files.kernel.alignment, TUX64_ENDIAN_FORMAT_BIG);
