@@ -8,7 +8,7 @@
 
 /* the length of the bootloader header, in bytes */
 TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES
-   = 0x00000044;
+   = 0x00000048;
 
 /* the length of the bootloader header, in bytes, aligned forward to a */
 /* 16-byte boundary. */
