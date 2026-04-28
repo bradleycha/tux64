@@ -50,8 +50,7 @@ tux64_boot_stage1_boot_header_files(void) {
    const struct Tux64PlatformMipsN64BootHeaderFiles * header;
    Tux64UInt32 bytes_bootloader_stage1;
    Tux64UInt32 bytes_bootloader_stage2;
-   Tux64UInt32 bytes_kernel_image;
-   Tux64UInt32 bytes_kernel_memory;
+   Tux64UInt32 bytes_kernel;
    Tux64UInt32 bytes_initramfs;
    Tux64UInt32 bytes_command_line;
    struct Tux64BootStage1BootHeaderFiles files;
@@ -61,8 +60,7 @@ tux64_boot_stage1_boot_header_files(void) {
 
    bytes_bootloader_stage1 = (header->bootloader.stage1.length_words * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
    bytes_bootloader_stage2 = (header->bootloader.stage2.length_words * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
-   bytes_kernel_image      = (header->kernel.image.length_words      * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
-   bytes_kernel_memory     = (header->kernel.image.memory_words      * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
+   bytes_kernel            = (header->kernel.image.length_words      * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
    bytes_initramfs         = (header->initramfs.length_words         * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
    bytes_command_line      = (header->command_line.length_words      * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
 
@@ -75,11 +73,10 @@ tux64_boot_stage1_boot_header_files(void) {
    files.bootloader_stage2.checksum = header->bootloader.stage2.checksum;
    address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_bootloader_stage2);
 
-   files.kernel.file.address  = address;
-   files.kernel.file.bytes    = bytes_kernel_image;
-   files.kernel.file.checksum = header->kernel.image.checksum;
-   files.kernel.memory        = bytes_kernel_memory;
-   address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_kernel_image);
+   files.kernel.address    = address;
+   files.kernel.bytes      = bytes_kernel;
+   files.kernel.checksum   = header->kernel.image.checksum;
+   address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_kernel);
 
    files.initramfs.address    = address;
    files.initramfs.bytes      = bytes_initramfs;

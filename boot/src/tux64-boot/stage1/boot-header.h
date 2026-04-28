@@ -36,14 +36,9 @@ struct Tux64BootStage1BootHeaderFile {
    Tux64UInt32 checksum;
 };
 
-struct Tux64BootStage1BootHeaderFileKernel {
-   struct Tux64BootStage1BootHeaderFile file;
-   Tux64UInt32 memory;
-};
-
 struct Tux64BootStage1BootHeaderFiles {
    struct Tux64BootStage1BootHeaderFile bootloader_stage2;
-   struct Tux64BootStage1BootHeaderFileKernel kernel;
+   struct Tux64BootStage1BootHeaderFile kernel;
    struct Tux64BootStage1BootHeaderFile initramfs;
    struct Tux64BootStage1BootHeaderFile command_line;
 };
