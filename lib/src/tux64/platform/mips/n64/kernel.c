@@ -16,6 +16,27 @@
 #define TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT \
    TUX64_ENDIAN_FORMAT_BIG
 
+static Tux64UInt16
+tux64_platform_mips_n64_kernel_read_uint16(
+   Tux64UInt16 value
+) {
+   return tux64_endian_convert_uint16(value, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+}
+
+static Tux64UInt32
+tux64_platform_mips_n64_kernel_read_uint32(
+   Tux64UInt32 value
+) {
+   return tux64_endian_convert_uint32(value, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+}
+
+static Tux64UInt64
+tux64_platform_mips_n64_kernel_read_uint64(
+   Tux64UInt64 value
+) {
+   return tux64_endian_convert_uint64(value, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+}
+
 static struct Tux64PlatformMipsN64KernelParseResult
 tux64_platform_mips_n64_kernel_parse_elf_header_common(
    const union Tux64ElfHeader * elf_header
@@ -25,9 +46,9 @@ tux64_platform_mips_n64_kernel_parse_elf_header_common(
    Tux64UInt16 machine;
    Tux64UInt32 version;
 
-   type = tux64_endian_convert_uint16(elf_header->elf32.e_type, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-   machine = tux64_endian_convert_uint16(elf_header->elf32.e_machine, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-   version = tux64_endian_convert_uint32(elf_header->elf32.e_version, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   type = tux64_platform_mips_n64_kernel_read_uint16(elf_header->elf32.e_type);
+   machine = tux64_platform_mips_n64_kernel_read_uint16(elf_header->elf32.e_machine);
+   version = tux64_platform_mips_n64_kernel_read_uint32(elf_header->elf32.e_version);
 
    /* here, we can take a pointer from either a 32-bit or 64-bit ELF header */
    /* because for everything in this function, the definitions match. */
@@ -108,7 +129,7 @@ tux64_platform_mips_n64_kernel_parse_program_headers_32(
       iter_program_headers += sizeof(program_header);
       phnum--;
 
-      segment_type = tux64_endian_convert_uint32(program_header.p_type, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+      segment_type = tux64_platform_mips_n64_kernel_read_uint32(program_header.p_type);
 
       /* we only care if this is a load segment */
       if (segment_type != TUX64_ELF_PROGRAM_HEADER_TYPE_LOAD) {
@@ -123,11 +144,11 @@ tux64_platform_mips_n64_kernel_parse_program_headers_32(
       main_segment_found = TUX64_BOOLEAN_TRUE;
 
       /* load the relevant information about the segment */
-      segment_file_offset = tux64_endian_convert_uint32(program_header.p_offset, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      image_bytes = tux64_endian_convert_uint32(program_header.p_filesz, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      image_memory = tux64_endian_convert_uint32(program_header.p_memsz, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      addr_load = tux64_endian_convert_uint32(program_header.p_vaddr, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      alignment = tux64_endian_convert_uint32(program_header.p_align, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+      segment_file_offset = tux64_platform_mips_n64_kernel_read_uint32(program_header.p_offset);
+      image_bytes = tux64_platform_mips_n64_kernel_read_uint32(program_header.p_filesz);
+      image_memory = tux64_platform_mips_n64_kernel_read_uint32(program_header.p_memsz);
+      addr_load = tux64_platform_mips_n64_kernel_read_uint32(program_header.p_vaddr);
+      alignment = tux64_platform_mips_n64_kernel_read_uint32(program_header.p_align);
 
       /* verify the segment data offset/length */
       if (segment_file_offset + image_bytes > elf_bytes) {
@@ -184,8 +205,8 @@ tux64_platform_mips_n64_kernel_parse_32(
       return result;
    }
 
-   ehsize = tux64_endian_convert_uint16(elf_header.e_ehsize, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-   phsize = tux64_endian_convert_uint16(elf_header.e_phentsize, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   ehsize = tux64_platform_mips_n64_kernel_read_uint16(elf_header.e_ehsize);
+   phsize = tux64_platform_mips_n64_kernel_read_uint16(elf_header.e_phentsize);
 
    /* verify the provided ELF header size and program header size is correct */
    if (ehsize != TUX64_LITERAL_UINT16(sizeof(elf_header))) {
@@ -198,9 +219,9 @@ tux64_platform_mips_n64_kernel_parse_32(
    }
 
    /* get the entrypoint, program headers count, and program headers offset */
-   addr_entry = tux64_endian_convert_uint32(elf_header.e_entry, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-   phoff = tux64_endian_convert_uint32(elf_header.e_phoff, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-   phnum = tux64_endian_convert_uint16(elf_header.e_phnum, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   addr_entry = tux64_platform_mips_n64_kernel_read_uint32(elf_header.e_entry);
+   phoff = tux64_platform_mips_n64_kernel_read_uint32(elf_header.e_phoff);
+   phnum = tux64_platform_mips_n64_kernel_read_uint16(elf_header.e_phnum);
 
    /* verify the program headers don't run off the end of the file */
    if (tux64_platform_mips_n64_kernel_program_headers_present(
@@ -257,7 +278,7 @@ tux64_platform_mips_n64_kernel_parse_program_headers_64(
       iter_program_headers += sizeof(program_header);
       phnum--;
 
-      segment_type = tux64_endian_convert_uint32(program_header.p_type, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+      segment_type = tux64_platform_mips_n64_kernel_read_uint32(program_header.p_type);
 
       if (segment_type != TUX64_ELF_PROGRAM_HEADER_TYPE_LOAD) {
          continue;
@@ -269,11 +290,11 @@ tux64_platform_mips_n64_kernel_parse_program_headers_64(
       }
       main_segment_found = TUX64_BOOLEAN_TRUE;
 
-      segment_file_offset = tux64_endian_convert_uint64(program_header.p_offset, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      image_bytes = tux64_endian_convert_uint64(program_header.p_filesz, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      image_memory = tux64_endian_convert_uint64(program_header.p_memsz, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      addr_load = tux64_endian_convert_uint64(program_header.p_vaddr, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-      alignment = tux64_endian_convert_uint64(program_header.p_align, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+      segment_file_offset = tux64_platform_mips_n64_kernel_read_uint64(program_header.p_offset);
+      image_bytes = tux64_platform_mips_n64_kernel_read_uint64(program_header.p_filesz);
+      image_memory = tux64_platform_mips_n64_kernel_read_uint64(program_header.p_memsz);
+      addr_load = tux64_platform_mips_n64_kernel_read_uint64(program_header.p_vaddr);
+      alignment = tux64_platform_mips_n64_kernel_read_uint64(program_header.p_align);
 
       /* since we're now in 64-bit, we make sure to...not be in 64-bit! */
       /* skips addr_load since that's relative to the N64's address space, */
@@ -348,8 +369,8 @@ tux64_platform_mips_n64_kernel_parse_64(
       return result;
    }
 
-   ehsize = tux64_endian_convert_uint16(elf_header.e_ehsize, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-   phsize = tux64_endian_convert_uint16(elf_header.e_phentsize, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   ehsize = tux64_platform_mips_n64_kernel_read_uint16(elf_header.e_ehsize);
+   phsize = tux64_platform_mips_n64_kernel_read_uint16(elf_header.e_phentsize);
 
    if (ehsize != TUX64_LITERAL_UINT16(sizeof(elf_header))) {
       result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE;
@@ -361,11 +382,11 @@ tux64_platform_mips_n64_kernel_parse_64(
    }
 
    /* it's fine to truncate here, because the N64 does the same thing. */
-   addr_entry = (Tux64UInt32)tux64_endian_convert_uint64(elf_header.e_entry, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   addr_entry = (Tux64UInt32)tux64_platform_mips_n64_kernel_read_uint64(elf_header.e_entry);
 
    /* however, it's NOT fine to truncate here, as it could be due to either file limitations or bad data. */
-   phoff64 = tux64_endian_convert_uint64(elf_header.e_phoff, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
-   phnum = tux64_endian_convert_uint16(elf_header.e_phnum, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   phoff64 = tux64_platform_mips_n64_kernel_read_uint64(elf_header.e_phoff);
+   phnum = tux64_platform_mips_n64_kernel_read_uint16(elf_header.e_phnum);
    if (phoff64 > TUX64_LITERAL_UINT64(TUX64_UINT32_MAX)) {
       result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE;
       return result;
