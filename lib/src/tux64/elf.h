@@ -11,7 +11,7 @@
 
 #include "tux64/tux64.h"
 
-#define TUX64_ELF_HEADER_IDENT_INDEX_MAGIC0 \
+#define TUX64_ELF_HEADER_IDENT_INDEX_MAGIC \
    0u
 #define TUX64_ELF_HEADER_IDENT_INDEX_CLASS \
    4u
