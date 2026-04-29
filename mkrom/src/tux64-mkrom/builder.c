@@ -10,6 +10,7 @@
 
 #include <tux64/platform/mips/n64/boot.h>
 #include <tux64/platform/mips/n64/rom.h>
+#include <tux64/platform/mips/n64/pi.h>
 #include <tux64/memory.h>
 #include <tux64/endian.h>
 #include <tux64/math.h>
@@ -195,22 +196,27 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    boot_header->data.flags = tux64_mkrom_builder_store_item_uint32(input->boot_header_flags);
 
    boot_header->data.files.bootloader.stage1.file.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage1.data, input->files.bootloader.stage1.bytes);
+   boot_header->data.files.bootloader.stage1.file.addr_cart = tux64_mkrom_builder_store_item_uint32(tux64_platform_mips_n64_pi_bus_address_dom1_rom(TUX64_LITERAL_UINT32(0u))); /* TODO */
    boot_header->data.files.bootloader.stage1.file.length = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage1.bytes);
    boot_header->data.files.bootloader.stage1.memory = tux64_mkrom_builder_store_item_uint32(input->files.bootloader.stage1.bytes + input->stage1_bss_length);
 
    boot_header->data.files.bootloader.stage2.checksum = tux64_mkrom_builder_calculate_checksum(input->files.bootloader.stage2.data, input->files.bootloader.stage2.bytes);
+   boot_header->data.files.bootloader.stage2.addr_cart = tux64_mkrom_builder_store_item_uint32(tux64_platform_mips_n64_pi_bus_address_dom1_rom(TUX64_LITERAL_UINT32(0u))); /* TODO */
    boot_header->data.files.bootloader.stage2.length = tux64_mkrom_builder_format_length_item_uint32(input->files.bootloader.stage2.bytes);
 
    boot_header->data.files.kernel.image.file.checksum = tux64_mkrom_builder_calculate_checksum(input->files.kernel.image.data, input->files.kernel.image.bytes);
+   boot_header->data.files.kernel.image.file.addr_cart = tux64_mkrom_builder_store_item_uint32(tux64_platform_mips_n64_pi_bus_address_dom1_rom(TUX64_LITERAL_UINT32(0u))); /* TODO */
    boot_header->data.files.kernel.image.file.length = tux64_mkrom_builder_format_length_item_uint32(input->files.kernel.image.bytes);
    boot_header->data.files.kernel.image.memory = tux64_mkrom_builder_store_item_uint32(input->files.kernel.memory);
    boot_header->data.files.kernel.addr_load = tux64_endian_convert_uint32(input->files.kernel.addr_load, TUX64_ENDIAN_FORMAT_BIG);
    boot_header->data.files.kernel.addr_entry = tux64_endian_convert_uint32(input->files.kernel.addr_entry, TUX64_ENDIAN_FORMAT_BIG);
 
    boot_header->data.files.initramfs.checksum = tux64_mkrom_builder_calculate_checksum(input->files.initramfs.data, input->files.initramfs.bytes);
+   boot_header->data.files.initramfs.addr_cart = tux64_mkrom_builder_store_item_uint32(tux64_platform_mips_n64_pi_bus_address_dom1_rom(TUX64_LITERAL_UINT32(0u))); /* TODO */
    boot_header->data.files.initramfs.length = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);
 
    boot_header->data.files.command_line.checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)input->kernel_command_line.ptr, input->kernel_command_line.characters * TUX64_LITERAL_UINT32(sizeof(char)));
+   boot_header->data.files.command_line.addr_cart = tux64_mkrom_builder_store_item_uint32(tux64_platform_mips_n64_pi_bus_address_dom1_rom(TUX64_LITERAL_UINT32(0u))); /* TODO */
    boot_header->data.files.command_line.length = tux64_mkrom_builder_format_length_item_uint32(cmdline_bytes);
 
    boot_header->checksum = tux64_mkrom_builder_calculate_checksum((const Tux64UInt8 *)&boot_header->data, TUX64_LITERAL_UINT32(sizeof(boot_header->data)));
