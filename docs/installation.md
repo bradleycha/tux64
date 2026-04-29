@@ -683,7 +683,7 @@ Building the kernel should be as simple as a single `make` command:
 ${TUX64_BUILD_ROOT}/scripts/kernel-make.sh
 ```
 
-The kernel image will be named `vmlinuz` in the build directory.
+The kernel image will be named `vmlinux` in the build directory.  Note that there is also a `vmlinuz`, with a `z`.  This is a compressed kernel image which decompresses itself at runtime.  While this may sound good, the decompression code uses a (relatively) huge amount of memory, and is not recommended to use over the standard kernel image.
 
 ### Chapter 5.3 - Installing the kernel
 
@@ -693,7 +693,7 @@ We first install the kernel image to the bootloader tools directory with the fol
 
 ```
 mkdir ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot
-cp vmlinuz ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot/
+cp vmlinux ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot/
 ```
 
 We then install kernel modules to the Nintendo 64's root filesystem with the following:
@@ -818,7 +818,7 @@ If you'd like a nice sample configuration, the following should work for most pe
 /share/tux64-boot/stage2.bin
 
 --kernel
-/boot/vmlinuz
+/boot/vmlinux
 
 --initramfs
 /boot/initramfs.cpio
