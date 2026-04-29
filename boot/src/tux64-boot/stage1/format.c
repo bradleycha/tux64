@@ -24,7 +24,7 @@ tux64_boot_stage1_format_digit_base16(
    Tux64UInt8 digit
 ) {
    if (digit >= TUX64_LITERAL_UINT8(0x0au)) {
-      return tux64_boot_stage1_fbcon_character_encode('a') + digit - TUX64_LITERAL_UINT8(0x0au);
+      return tux64_boot_stage1_fbcon_character_encode('A') + digit - TUX64_LITERAL_UINT8(0x0au);
    }
 
    return tux64_boot_stage1_fbcon_character_encode('0') + digit;
