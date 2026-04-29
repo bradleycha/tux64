@@ -20,6 +20,8 @@
 #include "tux64-boot/stage1/boot-header.h"
 #include "tux64-boot/stage1/preempt.h"
 
+#include <tux64/platform/mips/n64/boot.h>
+
 static Tux64Boolean
 tux64_boot_stage1_checksum_enable(void) {
    if (!TUX64_BOOT_CONFIG_CHECKSUM) {
@@ -90,7 +92,6 @@ typedef void (*Tux64BootStage1FsmPfnState)(struct Tux64BootStage1Fsm * fsm);
 struct Tux64BootStage1Fsm {
    union Tux64BootStage1FsmMemory memory;
    Tux64BootStage1FsmPfnState state;
-   struct Tux64BootStage1BootHeaderFiles boot_header_files;
 };
 
 #define TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(identifier) \
@@ -148,14 +149,29 @@ tux64_boot_stage1_fsm_initialize_splash(void) {
 static void
 tux64_boot_stage1_fsm_initialize_memory_display(
    Tux64UInt32 memory_total,
-   Tux64UInt32 memory_free,
-   const struct Tux64BootStage1BootHeaderFiles * boot_header_files
+   Tux64UInt32 memory_free
 ) {
    Tux64BootStage1FbconLabel label;
+   const struct Tux64PlatformMipsN64BootHeaderFileKernel * kernel;
+   const struct Tux64PlatformMipsN64BootHeaderFile * initramfs;
+   Tux64UInt32 kernel_length;
+   Tux64UInt32 kernel_memory;
+   Tux64UInt32 initramfs_length;
+   Tux64UInt32 kernel_addr_load;
+   Tux64UInt32 kernel_addr_entry;
 
    if (tux64_boot_stage1_boot_header_flag_memory_display() == TUX64_BOOLEAN_FALSE) {
       return;
    }
+
+   kernel      = tux64_boot_stage1_boot_header_file_kernel();
+   initramfs   = tux64_boot_stage1_boot_header_file_initramfs();
+
+   kernel_length     = kernel->image.file.length + TUX64_LITERAL_UINT32(1u);
+   kernel_memory     = kernel->image.memory;
+   initramfs_length  = initramfs->length + TUX64_LITERAL_UINT32(1u);
+   kernel_addr_load  = kernel->addr_load;
+   kernel_addr_entry = kernel->addr_entry;
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_memory_total);
    tux64_boot_stage1_format_mib(label, memory_total);
@@ -164,17 +180,17 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    tux64_boot_stage1_fbcon_skip_line();
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_image);
-   tux64_boot_stage1_format_mib(label, boot_header_files->kernel.bytes);
+   tux64_boot_stage1_format_mib(label, kernel_length);
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_memory);
-   tux64_boot_stage1_format_mib(label, tux64_boot_stage1_boot_header.data.files.kernel.image.memory);
+   tux64_boot_stage1_format_mib(label, kernel_memory);
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_initramfs_image);
-   tux64_boot_stage1_format_mib(label, boot_header_files->initramfs.bytes);
+   tux64_boot_stage1_format_mib(label, initramfs_length);
    tux64_boot_stage1_fbcon_skip_line();
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_address_load);
-   tux64_boot_stage1_format_address(label, tux64_boot_stage1_boot_header.data.files.kernel.addr_load);
+   tux64_boot_stage1_format_address(label, kernel_addr_load);
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_address_entry);
-   tux64_boot_stage1_format_address(label, tux64_boot_stage1_boot_header.data.files.kernel.addr_entry);
+   tux64_boot_stage1_format_address(label, kernel_addr_entry);
    tux64_boot_stage1_fbcon_skip_line();
 
    return;
@@ -196,8 +212,6 @@ tux64_boot_stage1_fsm_initialize(
 ) {
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
 
-   fsm->boot_header_files = tux64_boot_stage1_boot_header_files();
-
    if (TUX64_BOOT_CONFIG_SPLASH) {
       tux64_boot_stage1_fsm_initialize_splash();
    }
@@ -205,8 +219,7 @@ tux64_boot_stage1_fsm_initialize(
    if (TUX64_BOOT_CONFIG_MEMORY_DISPLAY) {
       tux64_boot_stage1_fsm_initialize_memory_display(
          tux64_boot_stage1_memory_total(),
-         tux64_boot_stage1_memory_free(),
-         &fsm->boot_header_files
+         tux64_boot_stage1_memory_free()
       );
    }
 

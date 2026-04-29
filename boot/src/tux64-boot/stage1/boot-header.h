@@ -12,15 +12,6 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/boot.h>
-#include <tux64/platform/mips/n64/pi.h>
-
-/*----------------------------------------------------------------------------*/
-/* The global boot header loaded into RDRAM, which had its checksum verified  */
-/* in stage-0.                                                                */
-/*----------------------------------------------------------------------------*/
-extern const struct Tux64PlatformMipsN64BootHeader
-tux64_boot_stage1_boot_header
-__attribute__((section(".boot_header")));
 
 /*----------------------------------------------------------------------------*/
 /* Checks if various boot flags are set.                                      */
@@ -30,25 +21,17 @@ tux64_boot_stage1_boot_header_flag_no_checksum(void);
 Tux64Boolean
 tux64_boot_stage1_boot_header_flag_memory_display(void);
 
-struct Tux64BootStage1BootHeaderFile {
-   Tux64PlatformMipsN64PiBusAddress address;
-   Tux64UInt32 bytes;
-   Tux64UInt32 checksum;
-};
-
-struct Tux64BootStage1BootHeaderFiles {
-   struct Tux64BootStage1BootHeaderFile bootloader_stage2;
-   struct Tux64BootStage1BootHeaderFile kernel;
-   struct Tux64BootStage1BootHeaderFile initramfs;
-   struct Tux64BootStage1BootHeaderFile command_line;
-};
-
 /*----------------------------------------------------------------------------*/
-/* Gets the address, length, and checksum of various boot files with respect  */
-/* to the PI bus.                                                             */
+/* Gets the information of various boot files.                                */
 /*----------------------------------------------------------------------------*/
-struct Tux64BootStage1BootHeaderFiles
-tux64_boot_stage1_boot_header_files(void);
+const struct Tux64PlatformMipsN64BootHeaderFile *
+tux64_boot_stage1_boot_header_file_bootloader_stage2(void);
+const struct Tux64PlatformMipsN64BootHeaderFileKernel *
+tux64_boot_stage1_boot_header_file_kernel(void);
+const struct Tux64PlatformMipsN64BootHeaderFile *
+tux64_boot_stage1_boot_header_file_initramfs(void);
+const struct Tux64PlatformMipsN64BootHeaderFile *
+tux64_boot_stage1_boot_header_file_command_line(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_BOOT_HEADER_H */

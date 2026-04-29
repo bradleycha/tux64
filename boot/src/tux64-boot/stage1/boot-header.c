@@ -15,6 +15,10 @@
 #include <tux64/bitwise.h>
 #include <tux64/math.h>
 
+extern const struct Tux64PlatformMipsN64BootHeader
+tux64_boot_stage1_boot_header
+__attribute__((section(".boot_header")));
+
 static Tux64Boolean
 tux64_boot_stage1_boot_header_flag(
    Tux64UInt32 bit
@@ -35,59 +39,23 @@ tux64_boot_stage1_boot_header_flag_memory_display(void) {
    return tux64_boot_stage1_boot_header_flag(TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY);
 }
 
-static Tux64PlatformMipsN64PiBusAddress
-tux64_boot_stage1_boot_header_align_pi_address(
-   Tux64PlatformMipsN64PiBusAddress address
-) {
-   return tux64_math_align_forward_uint32(
-      address,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD)
-   );
+const struct Tux64PlatformMipsN64BootHeaderFile *
+tux64_boot_stage1_boot_header_file_bootloader_stage2(void) {
+   return &tux64_boot_stage1_boot_header.data.files.bootloader.stage2;
 }
 
-struct Tux64BootStage1BootHeaderFiles
-tux64_boot_stage1_boot_header_files(void) {
-   const struct Tux64PlatformMipsN64BootHeaderFiles * header;
-   Tux64UInt32 bytes_bootloader_stage1;
-   Tux64UInt32 bytes_bootloader_stage2;
-   Tux64UInt32 bytes_kernel;
-   Tux64UInt32 bytes_initramfs;
-   Tux64UInt32 bytes_command_line;
-   struct Tux64BootStage1BootHeaderFiles files;
-   Tux64PlatformMipsN64PiBusAddress address;
+const struct Tux64PlatformMipsN64BootHeaderFileKernel *
+tux64_boot_stage1_boot_header_file_kernel(void) {
+   return &tux64_boot_stage1_boot_header.data.files.kernel;
+}
 
-   header = &tux64_boot_stage1_boot_header.data.files;
+const struct Tux64PlatformMipsN64BootHeaderFile *
+tux64_boot_stage1_boot_header_file_initramfs(void) {
+   return &tux64_boot_stage1_boot_header.data.files.initramfs;
+}
 
-   bytes_bootloader_stage1 = (header->bootloader.stage1.file.length  + TUX64_LITERAL_UINT32(1u));
-   bytes_bootloader_stage2 = (header->bootloader.stage2.length       + TUX64_LITERAL_UINT32(1u));
-   bytes_kernel            = (header->kernel.image.file.length       + TUX64_LITERAL_UINT32(1u));
-   bytes_initramfs         = (header->initramfs.length               + TUX64_LITERAL_UINT32(1u));
-   bytes_command_line      = (header->command_line.length            + TUX64_LITERAL_UINT32(1u));
-
-   address = tux64_platform_mips_n64_pi_bus_address_dom1_rom(TUX64_LITERAL_UINT32(0x00001000u));
-   address = tux64_boot_stage1_boot_header_align_pi_address(address + TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader)));
-   address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_bootloader_stage1);
-
-   files.bootloader_stage2.address  = address;
-   files.bootloader_stage2.bytes    = bytes_bootloader_stage2;
-   files.bootloader_stage2.checksum = header->bootloader.stage2.checksum;
-   address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_bootloader_stage2);
-
-   files.kernel.address    = address;
-   files.kernel.bytes      = bytes_kernel;
-   files.kernel.checksum   = header->kernel.image.file.checksum;
-   address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_kernel);
-
-   files.initramfs.address    = address;
-   files.initramfs.bytes      = bytes_initramfs;
-   files.initramfs.checksum   = header->initramfs.checksum;
-   address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_initramfs);
-
-   files.command_line.address    = address;
-   files.command_line.bytes      = bytes_command_line;
-   files.command_line.checksum   = header->command_line.checksum;
-   address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_command_line);
-
-   return files;
+const struct Tux64PlatformMipsN64BootHeaderFile *
+tux64_boot_stage1_boot_header_file_command_line(void) {
+   return &tux64_boot_stage1_boot_header.data.files.command_line;
 }
 
