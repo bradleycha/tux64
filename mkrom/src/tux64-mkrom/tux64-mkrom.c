@@ -624,7 +624,6 @@ struct Tux64MkromInputFilesKernel {
    Tux64UInt32 memory;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
-   Tux64UInt32 alignment;
 };
 
 struct Tux64MkromInputFiles {
@@ -667,7 +666,6 @@ tux64_mkrom_run_parsed_input(
    builder_input.files.kernel.memory = input->files.kernel.memory;
    builder_input.files.kernel.addr_load = input->files.kernel.addr_load;
    builder_input.files.kernel.addr_entry = input->files.kernel.addr_entry;
-   builder_input.files.kernel.alignment = input->files.kernel.alignment;
    builder_input.files.initramfs.data = input->files.initramfs.data;
    builder_input.files.initramfs.bytes = input->files.initramfs.bytes;
    tux64_memory_copy(&builder_input.rom_header, input->rom_header, TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader)));
@@ -894,7 +892,6 @@ tux64_mkrom_run_parsed_cmdline(
    input.files.kernel.memory = kernel->memory;
    input.files.kernel.addr_load = kernel->addr_load;
    input.files.kernel.addr_entry = kernel->addr_entry;
-   input.files.kernel.alignment = kernel->alignment;
 
    /* initialize the rest of the fields for the input */
    input.rom_header = &config_file_parsed.rom_header;

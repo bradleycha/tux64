@@ -201,7 +201,7 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    boot_header->data.files.kernel.memory = tux64_mkrom_builder_store_item_uint32(input->files.kernel.memory);
    boot_header->data.files.kernel.addr_load = tux64_endian_convert_uint32(input->files.kernel.addr_load, TUX64_ENDIAN_FORMAT_BIG);
    boot_header->data.files.kernel.addr_entry = tux64_endian_convert_uint32(input->files.kernel.addr_entry, TUX64_ENDIAN_FORMAT_BIG);
-   boot_header->data.files.kernel.alignment = tux64_endian_convert_uint32(input->files.kernel.alignment, TUX64_ENDIAN_FORMAT_BIG);
+   boot_header->data.files.kernel.alignment = TUX64_LITERAL_UINT32(0u); /* TODO: remove this from the boot header */
 
    boot_header->data.files.initramfs.checksum = tux64_mkrom_builder_calculate_checksum(input->files.initramfs.data, input->files.initramfs.bytes);
    boot_header->data.files.initramfs.length_words = tux64_mkrom_builder_format_length_item_uint32(input->files.initramfs.bytes);

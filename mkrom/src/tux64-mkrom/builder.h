@@ -56,7 +56,6 @@ struct Tux64MkromBuilderInputFileKernel {
    Tux64UInt32 memory;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
-   Tux64UInt32 alignment;
 };
 
 struct Tux64MkromBuilderInputFiles {
