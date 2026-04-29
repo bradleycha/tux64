@@ -37,15 +37,12 @@ struct Tux64PlatformMipsN64KernelImage {
 /* addr_load - Where in memory the kernel image must be loaded.               */
 /*                                                                            */
 /* addr_entry - The address which contains the start of executable code.      */
-/*                                                                            */
-/* alignment - The necessary alignment for the kernel image.                  */
 /*----------------------------------------------------------------------------*/
 struct Tux64PlatformMipsN64Kernel {
    struct Tux64PlatformMipsN64KernelImage image;
    Tux64UInt32 memory;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
-   Tux64UInt32 alignment;
 };
 
 #define TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_FIELD_COUNT 8u

@@ -208,7 +208,6 @@ tux64_platform_mips_n64_kernel_parse_program_headers_32(
    result.payload.ok.memory = image_memory;
    result.payload.ok.addr_load = addr_load;
    result.payload.ok.addr_entry = addr_entry;
-   result.payload.ok.alignment = alignment;
    return result;
 }
 
@@ -383,7 +382,6 @@ tux64_platform_mips_n64_kernel_parse_program_headers_64(
    result.payload.ok.memory = (Tux64UInt32)image_memory;
    result.payload.ok.addr_load = (Tux64UInt32)addr_load;
    result.payload.ok.addr_entry = (Tux64UInt32)addr_entry;
-   result.payload.ok.alignment = (Tux64UInt32)alignment;
    return result;
 }
 
