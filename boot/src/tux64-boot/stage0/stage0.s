@@ -152,9 +152,6 @@
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT,1
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE,(2 << TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT)
-
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI,0x5442 /* TB */
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO,0x484d /* HM */
 
@@ -163,8 +160,8 @@
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA,0x0008
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS,0x0008
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM,0x000c
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS,0x0010
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY_WORDS,0x0014
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH,0x0010
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY,0x0014
 
 .equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
 .equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16
@@ -440,7 +437,7 @@ tux64_boot_stage0_start:
    #tux64_boot_stage0_start.detect_total_memory
    tux64_boot_stage0_start.detect_total_memory.exit:
 
-   # from this point forward, $a0 is reserved for the total system memory, in
+   # from this point forward, $s0 is reserved for the total system memory, in
    # bytes until stage-1 begins.  this will be passed as an argument to stage-1
    # to avoid using memory unnecessarily.
 
@@ -527,31 +524,27 @@ tux64_boot_stage0_start:
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
 
    # read the stage-1 required memory and length
-   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY_WORDS($a2)
-   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH_WORDS($a2)
+   test:
+   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY($a2)
+   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH($a2)
 
-   # check if we have enough memory to load the stage-1 binary, done in terms of
-   # words to avoid potential overflow
-   srl   $t0,$a0,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT
-   addiu $t0,$t0,-(TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY/TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE)
-   slt   $t1,$t0,$k0
-   bne   $t1,$zero,tux64_boot_stage0_halt
-
-   # convert the data word count and memory word count into byte counts
-   sll   $k0,$k0,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT # branch delay slot
-   sll   $k1,$k1,TUX64_BOOT_STAGE0_BOOT_HEADER_WORD_SIZE_POW2_EXPONENT
+   # check if we have enough memory to load the stage-1 binary.
+   addiu $t0,$k0,-TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY
+   slt   $t0,$s0,$t0
+   bne   $t0,$zero,tux64_boot_stage0_halt
 
    # copy the stage-1 bootloader into memory via PI DMA, no need to invalidate
    # cache since we only have the header in data cache, and since a data cache
    # line is 16 bytes, we will never have the stage-1 payload on the same cache
    # line as the header.  note that this concerns data cache.  if we were in
-   # instruction cache, we would need to align to a 32-byte boundary.
-   addiu $t2,$zero,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO
-   ori   $t3,$a1,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
-   addiu $t4,$k1,-1
-   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($a0)
-   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($a0)
-   sw    $t4,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
+   # instruction cache, we would need to align to a 32-byte boundary. also note
+   # that we don't have to subtract one from the length, as that was done for us
+   # in mkrom.
+   addiu $t1,$zero,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   ori   $t2,$a1,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
+   sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($a0)
+   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($a0)
+   sw    $k1,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
 
    # calculate the total available memory for stage-1, reserving $s1
    subu  $s1,$s0,$k0

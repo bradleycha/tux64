@@ -58,11 +58,11 @@ tux64_boot_stage1_boot_header_files(void) {
 
    header = &tux64_boot_stage1_boot_header.data.files;
 
-   bytes_bootloader_stage1 = (header->bootloader.stage1.length_words * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
-   bytes_bootloader_stage2 = (header->bootloader.stage2.length_words * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
-   bytes_kernel            = (header->kernel.image.length_words      * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
-   bytes_initramfs         = (header->initramfs.length_words         * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
-   bytes_command_line      = (header->command_line.length_words      * TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD));
+   bytes_bootloader_stage1 = (header->bootloader.stage1.file.length  + TUX64_LITERAL_UINT32(1u));
+   bytes_bootloader_stage2 = (header->bootloader.stage2.length       + TUX64_LITERAL_UINT32(1u));
+   bytes_kernel            = (header->kernel.image.file.length       + TUX64_LITERAL_UINT32(1u));
+   bytes_initramfs         = (header->initramfs.length               + TUX64_LITERAL_UINT32(1u));
+   bytes_command_line      = (header->command_line.length            + TUX64_LITERAL_UINT32(1u));
 
    address = tux64_platform_mips_n64_pi_bus_address_dom1_rom(TUX64_LITERAL_UINT32(0x00001000u));
    address = tux64_boot_stage1_boot_header_align_pi_address(address + TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader)));
@@ -75,7 +75,7 @@ tux64_boot_stage1_boot_header_files(void) {
 
    files.kernel.address    = address;
    files.kernel.bytes      = bytes_kernel;
-   files.kernel.checksum   = header->kernel.image.checksum;
+   files.kernel.checksum   = header->kernel.image.file.checksum;
    address = tux64_boot_stage1_boot_header_align_pi_address(address + bytes_kernel);
 
    files.initramfs.address    = address;
