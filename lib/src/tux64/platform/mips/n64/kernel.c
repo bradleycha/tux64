@@ -37,6 +37,35 @@ tux64_platform_mips_n64_kernel_read_uint64(
    return tux64_endian_convert_uint64(value, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
 }
 
+static Tux64Boolean
+tux64_platform_mips_n64_kernel_segment_alignment_verify(
+   Tux64UInt32 offset,
+   Tux64UInt32 addr_load,
+   Tux64UInt32 alignment
+) {
+   Tux64UInt32 alignment_mask;
+
+   /* if the alignment is 0 or 1, then we don't care about alignment. */
+   if (alignment <= TUX64_LITERAL_UINT32(1u)) {
+      return TUX64_BOOLEAN_TRUE;
+   }
+
+   alignment_mask = alignment - TUX64_LITERAL_UINT32(1u);
+
+   /* verify the alignment is a power of two */
+   if (alignment & alignment_mask != TUX64_LITERAL_UINT32(0u)) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   /* verify the load address is at the aligned offset as specified by the */
+   /* ELF header spec. */
+   if ((addr_load & alignment_mask) != offset) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   return TUX64_BOOLEAN_TRUE;
+}
+
 static struct Tux64PlatformMipsN64KernelParseResult
 tux64_platform_mips_n64_kernel_parse_elf_header_common(
    const union Tux64ElfHeader * elf_header
@@ -160,6 +189,15 @@ tux64_platform_mips_n64_kernel_parse_program_headers_32(
    /* done like this so we can both detect duplicate and missing main segments. */
    if (main_segment_found == TUX64_BOOLEAN_FALSE) {
       result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_MAIN_SEGMENT_MISSING;
+      return result;
+   }
+
+   if (tux64_platform_mips_n64_kernel_segment_alignment_verify(
+      segment_file_offset,
+      addr_load,
+      alignment
+   ) == TUX64_BOOLEAN_FALSE) {
+      result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE;
       return result;
    }
 
@@ -329,6 +367,15 @@ tux64_platform_mips_n64_kernel_parse_program_headers_64(
       return result;
    }
 
+   if (tux64_platform_mips_n64_kernel_segment_alignment_verify(
+      segment_file_offset,
+      addr_load,
+      alignment
+   ) == TUX64_BOOLEAN_FALSE) {
+      result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE;
+      return result;
+   }
+
    /* great success! */
    result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK;
    result.payload.ok.image.offset = (Tux64UInt32)segment_file_offset;
@@ -412,17 +459,6 @@ tux64_platform_mips_n64_kernel_parse_64(
    );
 }
 
-static Tux64Boolean
-tux64_platform_mips_n64_kernel_validate_alignment(
-   Tux64UInt32 alignment
-) {
-   /* we simply have to make sure the alignment is a power of two. */
-   /* oh, and by the way, i stole this code.  hah. */
-   return ((alignment & (alignment - TUX64_LITERAL_UINT32(1u))) == 0u)
-      ? TUX64_BOOLEAN_TRUE
-      : TUX64_BOOLEAN_FALSE;
-}
-
 struct Tux64PlatformMipsN64KernelParseResult
 tux64_platform_mips_n64_kernel_parse(
    const Tux64UInt8 * elf_data,
@@ -492,10 +528,6 @@ tux64_platform_mips_n64_kernel_parse(
       return result;
    }
    if (kernel->memory < kernel->image.bytes) {
-      result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE;
-      return result;
-   }
-   if (tux64_platform_mips_n64_kernel_validate_alignment(kernel->alignment) == TUX64_BOOLEAN_FALSE) {
       result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE;
       return result;
    }
