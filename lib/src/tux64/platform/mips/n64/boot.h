@@ -39,6 +39,7 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
 /* additional computation. */
 struct Tux64PlatformMipsN64BootHeaderFile {
    Tux64UInt32 checksum;
+   Tux64UInt32 addr_cart;
    Tux64UInt32 length;
 };
 
