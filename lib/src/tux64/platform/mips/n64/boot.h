@@ -34,30 +34,31 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
 #define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY\
    (1u << 1u)
 
-struct Tux64PlatformMipsN64BootHeaderFileStage1 {
-   Tux64UInt32 checksum;
-   Tux64UInt32 length_words;
-   Tux64UInt32 memory_words;
-};
-
+/* !!! WARNING !!! the 'length' field is the byte length of the file, minus */
+/* one.  this is done so it can be used directly with PI DMA, without any */
+/* additional computation. */
 struct Tux64PlatformMipsN64BootHeaderFile {
    Tux64UInt32 checksum;
-   Tux64UInt32 length_words;
+   Tux64UInt32 length;
+};
+
+/* since we compute length minus one, a file of zero length underflows, so we */
+/* represent it explicitly. */
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_FILE_EMPTY_LENGTH \
+   TUX64_UINT32_MAX
+
+struct Tux64PlatformMipsN64BootHeaderExecutable {
+   struct Tux64PlatformMipsN64BootHeaderFile file;
+   Tux64UInt32 memory;
 };
 
 struct Tux64PlatformMipsN64BootHeaderFileBootloader {
-   struct Tux64PlatformMipsN64BootHeaderFileStage1 stage1;
+   struct Tux64PlatformMipsN64BootHeaderExecutable stage1;
    struct Tux64PlatformMipsN64BootHeaderFile stage2;
 };
 
-struct Tux64PlatformMipsN64BootHeaderFileKernelImage {
-   Tux64UInt32 checksum;
-   Tux64UInt32 length_words;
-};
-
 struct Tux64PlatformMipsN64BootHeaderFileKernel {
-   struct Tux64PlatformMipsN64BootHeaderFile image;
-   Tux64UInt32 memory;
+   struct Tux64PlatformMipsN64BootHeaderExecutable image;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
 };
