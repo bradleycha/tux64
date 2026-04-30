@@ -22,8 +22,15 @@
    static void identifier (struct Tux64BootStage1Fsm *)
 #define TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(identifier) \
    static void identifier (struct Tux64BootStage1Fsm * fsm)
+#define TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(identifier) \
+   static void identifier (struct Tux64BootStage1Fsm *)
+#define TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(identifier) \
+   static void identifier (struct Tux64BootStage1Fsm * fsm)
 
+TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_delay);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_test);
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_test);
 
 static Tux64Boolean
 tux64_boot_stage1_fsm_checksum_enable(void) {
@@ -43,19 +50,40 @@ tux64_boot_stage1_fsm_delay_enable(void) {
    return (tux64_boot_stage1_boot_header_flag_no_delay() == TUX64_BOOLEAN_FALSE);
 }
 
-static Tux64UInt32
-tux64_boot_stage1_fsm_delay_ticks(void) {
+static void
+tux64_boot_stage1_fsm_transition(
+   struct Tux64BootStage1Fsm * fsm,
+   Tux64BootStage1FsmPfnTransition transition
+) {
+   struct Tux64BootStage1FsmMemoryDelay * mem_delay;
+
    if (tux64_boot_stage1_fsm_delay_enable() == TUX64_BOOLEAN_FALSE) {
-      return TUX64_LITERAL_UINT32(0u);
+      transition(fsm);
+      return;
    }
 
-   return TUX64_LITERAL_UINT32(TUX64_BOOT_CONFIG_DELAY_TICKS);
+   mem_delay = &fsm->memory.delay;
+   mem_delay->transition = transition;
+   mem_delay->ticks_remaining = TUX64_LITERAL_UINT32(TUX64_BOOT_CONFIG_DELAY_TICKS);
+
+   fsm->state = tux64_boot_stage1_fsm_state_delay;
+   return;
 }
 
-static void
-tux64_boot_stage1_fsm_state_set_test(
-   struct Tux64BootStage1Fsm * fsm
-) {
+TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_delay) {
+   struct Tux64BootStage1FsmMemoryDelay * mem;
+
+   mem = &fsm->memory.delay;
+
+   if (--mem->ticks_remaining != TUX64_LITERAL_UINT32(0u)) {
+      return;
+   }
+
+   mem->transition(fsm);
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_test) {
    struct Tux64BootStage1FsmMemoryTest * mem;
 
    mem = &fsm->memory.test;
@@ -178,7 +206,7 @@ tux64_boot_stage1_fsm_initialize(
       tux64_boot_stage1_fsm_initialize_checksum();
    }
 
-   tux64_boot_stage1_fsm_state_set_test(fsm);
+   tux64_boot_stage1_fsm_transition(fsm, tux64_boot_stage1_fsm_transition_test);
    return;
 }
 

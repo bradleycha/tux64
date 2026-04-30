@@ -16,6 +16,12 @@
 struct Tux64BootStage1Fsm;
 
 typedef void (*Tux64BootStage1FsmPfnState)(struct Tux64BootStage1Fsm * fsm);
+typedef void (*Tux64BootStage1FsmPfnTransition)(struct Tux64BootStage1Fsm * fsm);
+
+struct Tux64BootStage1FsmMemoryDelay {
+   Tux64BootStage1FsmPfnTransition transition;
+   Tux64UInt32 ticks_remaining;
+};
 
 struct Tux64BootStage1FsmMemoryTest {
    struct Tux64BootStage1FormatPercentageContext percentage;
@@ -23,6 +29,7 @@ struct Tux64BootStage1FsmMemoryTest {
 };
 
 union Tux64BootStage1FsmMemory {
+   struct Tux64BootStage1FsmMemoryDelay delay;
    struct Tux64BootStage1FsmMemoryTest test;
 };
 
