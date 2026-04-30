@@ -33,6 +33,8 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
    (1u << 0u)
 #define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY\
    (1u << 1u)
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_DELAY\
+   (1u << 2u)
 
 /* !!! WARNING !!! the 'length' field is the byte length of the file, minus */
 /* one.  this is done so it can be used directly with PI DMA, without any */
