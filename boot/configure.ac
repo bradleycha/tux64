@@ -105,6 +105,11 @@ AC_ARG_ENABLE([checksum],
    [tux64_boot_config_checksum=1],
    [tux64_boot_config_checksum=0]
 )
+AC_ARG_ENABLE([delay],
+   AS_HELP_STRING([--enable-delay], [Enable delays to allow time to read on-screen information]),
+   [tux64_boot_config_delay=1],
+   [tux64_boot_config_delay=0]
+)
 AC_ARG_ENABLE([memory-display],
    AS_HELP_STRING([--enable-memory-display], [Enable support for the display of memory information on startup]),
    [tux64_boot_config_memory_display=1],
@@ -136,6 +141,9 @@ if [[ -z "$CONFIG_COLOR_FOREGROUND" ]]; then
 fi
 if [[ -z "$CONFIG_COLOR_BACKGROUND" ]]; then
    CONFIG_COLOR_BACKGROUND="black"
+fi
+if [[ -z "$CONFIG_DELAY_TICKS" ]]; then
+   CONFIG_DELAY_TICKS="45"
 fi
 
 tux64_boot_enumerate_color() {
@@ -196,6 +204,7 @@ tux64_boot_enumerate_color() {
 
 tux64_boot_config_color_foreground_enum=$(tux64_boot_enumerate_color $CONFIG_COLOR_FOREGROUND "foreground") || exit $?
 tux64_boot_config_color_background_enum=$(tux64_boot_enumerate_color $CONFIG_COLOR_BACKGROUND "background") || exit $?
+tux64_boot_config_delay_ticks=$CONFIG_DELAY_TICKS
 
 AC_DEFINE_UNQUOTED([CONFIG_STATUS],
    [$tux64_boot_config_status],
@@ -220,6 +229,10 @@ AC_DEFINE_UNQUOTED([CONFIG_LOGO],
 AC_DEFINE_UNQUOTED([CONFIG_CHECKSUM],
    [$tux64_boot_config_checksum],
    [Enable support for checksum verification]
+)
+AC_DEFINE_UNQUOTED([CONFIG_DELAY],
+   [$tux64_boot_config_delay],
+   [Enable delays to allow time to read on-screen information]
 )
 AC_DEFINE_UNQUOTED([CONFIG_MEMORY_DISPLAY],
    [$tux64_boot_config_memory_display],
@@ -248,6 +261,10 @@ AC_DEFINE_UNQUOTED([CONFIG_COLOR_FOREGROUND],
 AC_DEFINE_UNQUOTED([CONFIG_COLOR_BACKGROUND],
    [$tux64_boot_config_color_background_enum],
    [The foreground color for the console]
+)
+AC_DEFINE_UNQUOTED([CONFIG_DELAY_TICKS],
+   [$tux64_boot_config_delay_ticks],
+   [The number of ticks to wait during delays]
 )
 
 AC_OUTPUT
