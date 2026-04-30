@@ -10,6 +10,7 @@
 #include "tux64-boot/stage1/fsm.h"
 
 #include <tux64/platform/mips/n64/boot.h>
+#include "tux64-boot/halt.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/preempt.h"
@@ -28,6 +29,7 @@
    static void identifier (struct Tux64BootStage1Fsm * fsm)
 
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_delay);
+TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_halt);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_test);
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_test);
@@ -83,6 +85,15 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_delay) {
    return;
 }
 
+TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_halt) {
+   /* halting is its own dedicated state so that we have time to render error */
+   /* messages or other diagnostic information before halting the CPU.  this  */
+   /* is preferable to directly calling tux64_boot_halt() wherever possible.  */
+   (void)fsm;
+   tux64_boot_halt();
+   TUX64_UNREACHABLE;
+}
+
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_test) {
    struct Tux64BootStage1FsmMemoryTest * mem;
 
@@ -114,6 +125,13 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_test) {
    } while (tux64_boot_stage1_preempt_yield() == TUX64_BOOLEAN_FALSE);
 
    tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
+
+   if (mem->percentage.progress == mem->percentage.maximum) {
+      /* setting state directly because we don't care to delay halting by */
+      /* more than one frame. */
+      fsm->state = tux64_boot_stage1_fsm_state_halt;
+   }
+
    return;
 }
 
