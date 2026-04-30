@@ -77,6 +77,15 @@ tux64_boot_stage1_format_percentage(
    Tux64BootStage1FbconLabel label
 );
 
+#define TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_ERROR \
+   TUX64_STRING_CHARACTERS("%ERROR% ")
+
+void
+tux64_boot_stage1_format_error(
+   Tux64BootStage1FbconLabel label,
+   const struct Tux64BootStage1FbconText * reason
+);
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_FORMAT_H */
 

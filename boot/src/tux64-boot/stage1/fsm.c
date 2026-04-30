@@ -53,6 +53,26 @@ tux64_boot_stage1_fsm_delay_enable(void) {
 }
 
 static void
+tux64_boot_stage1_fsm_halt(
+   struct Tux64BootStage1Fsm * fsm,
+   const struct Tux64BootStage1FbconText * reason
+) {
+   Tux64BootStage1FbconLabel label;
+   Tux64UInt8 characters;
+
+   characters = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_ERROR) + reason->length;
+   label = tux64_boot_stage1_fbcon_label_allocate(characters);
+   tux64_boot_stage1_format_error(label, reason);
+
+   /* we set the state directly because we want to always delay for exactly */
+   /* one frame.  the one frame of delay comes from returning from the */
+   /* current state, rendering, then executing the halt state on the next */
+   /* tick. */
+   fsm->state = tux64_boot_stage1_fsm_state_halt;
+   return;
+}
+
+static void
 tux64_boot_stage1_fsm_transition(
    struct Tux64BootStage1Fsm * fsm,
    Tux64BootStage1FsmPfnTransition transition
@@ -127,9 +147,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_test) {
    tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
 
    if (mem->percentage.progress == mem->percentage.maximum) {
-      /* setting state directly because we don't care to delay halting by */
-      /* more than one frame. */
-      fsm->state = tux64_boot_stage1_fsm_state_halt;
+      tux64_boot_stage1_fsm_halt(fsm, &tux64_boot_stage1_strings_error_test);
    }
 
    return;

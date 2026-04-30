@@ -16,6 +16,11 @@
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FORMAT_PERCENTAGE_STATIC_LENGTH;
    .text                = "...XXX%";
 }
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FORMAT_ERROR_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FORMAT_ERROR_LENGTH;
+   .text                = "%ERROR% ";
+}
 
 {
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA;
@@ -76,5 +81,10 @@
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH;
    .text                = "Hello world";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_LENGTH;
+   .text                = "End of the line";
 }
 

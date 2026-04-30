@@ -263,3 +263,22 @@ tux64_boot_stage1_format_percentage(
    return;
 }
 
+void
+tux64_boot_stage1_format_error(
+   Tux64BootStage1FbconLabel label,
+   const struct Tux64BootStage1FbconText * reason
+) {
+   tux64_boot_stage1_fbcon_label_copy(
+      label,
+      TUX64_LITERAL_UINT8(0u),
+      &tux64_boot_stage1_strings_format_error
+   );
+   tux64_boot_stage1_fbcon_label_copy(
+      label,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_ERROR),
+      reason
+   );
+
+   return;
+}
+

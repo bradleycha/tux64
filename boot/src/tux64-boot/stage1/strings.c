@@ -32,6 +32,10 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    TUX64_BOOT_STAGE1_STRINGS_FORMAT_PERCENTAGE_STATIC_DATA
 );
 TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_format_error_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_ERROR_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_splash_data,
    TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA
 );
@@ -71,6 +75,10 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_hello_world_data,
    TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA
 );
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_error_test_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_DATA
+);
 
 /* alignment manually set for same reason as above.  this time the size of a */
 /* pointer since one of our fields is a pointer, with the rest of the fields */
@@ -107,6 +115,11 @@ TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
    tux64_boot_stage1_strings_format_percentage_static,
    tux64_boot_stage1_strings_format_percentage_static_data,
    TUX64_BOOT_STAGE1_STRINGS_FORMAT_PERCENTAGE_STATIC_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_format_error,
+   tux64_boot_stage1_strings_format_error_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_ERROR_LENGTH
 );
 TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_splash,
@@ -167,5 +180,10 @@ TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_hello_world_data,
    TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_PERCENTAGE
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_error_test,
+   tux64_boot_stage1_strings_error_test_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_LENGTH
 );
 
