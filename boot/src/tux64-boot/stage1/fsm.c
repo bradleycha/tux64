@@ -182,9 +182,9 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    kernel      = tux64_boot_stage1_boot_header_file_kernel();
    initramfs   = tux64_boot_stage1_boot_header_file_initramfs();
 
-   kernel_length     = kernel->image.file.length + TUX64_LITERAL_UINT32(1u);
+   kernel_length     = kernel->image.file.length;
    kernel_memory     = kernel->image.memory;
-   initramfs_length  = initramfs->length + TUX64_LITERAL_UINT32(1u);
+   initramfs_length  = initramfs->length;
    kernel_addr_load  = kernel->addr_load;
    kernel_addr_entry = kernel->addr_entry;
 

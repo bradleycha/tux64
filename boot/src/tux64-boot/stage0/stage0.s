@@ -147,7 +147,7 @@
 
 .equ TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE,0x1000
 
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0058
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0054
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16,0x0060
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
@@ -160,8 +160,8 @@
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA,0x0008
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS,0x0008
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM,0x000c
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH,0x0014
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY,0x0018
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH,0x0010
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY,0x0014
 
 .equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
 .equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16
@@ -536,14 +536,13 @@ tux64_boot_stage0_start:
    # cache since we only have the header in data cache, and since a data cache
    # line is 16 bytes, we will never have the stage-1 payload on the same cache
    # line as the header.  note that this concerns data cache.  if we were in
-   # instruction cache, we would need to align to a 32-byte boundary. also note
-   # that we don't have to subtract one from the length, as that was done for us
-   # in mkrom.
+   # instruction cache, we would need to align to a 32-byte boundary.
    addiu $t1,$zero,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
    ori   $t2,$a1,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
+   addiu $t3,$k1,-1
    sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($a0)
    sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($a0)
-   sw    $k1,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
+   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
 
    # calculate the total available memory for stage-1, reserving $s1
    subu  $s1,$s0,$k0
@@ -628,7 +627,7 @@ tux64_boot_stage0_start:
    # this code is finalized, as it takes long enough just to find one.
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x000038fc
-   .word 0x0637c47a
+   .word 0x0000ab87
+   .word 0xee603c65
 #tux64_boot_stage0_cic
 
