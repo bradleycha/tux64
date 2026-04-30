@@ -105,6 +105,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/stage1.h \
 	src/tux64-boot/stage1/boot-header.c \
 	src/tux64-boot/stage1/boot-header.h \
+	src/tux64-boot/stage1/fsm.c \
+	src/tux64-boot/stage1/fsm.h \
 	src/tux64-boot/stage1/interrupt.c \
 	src/tux64-boot/stage1/interrupt.h \
 	src/tux64-boot/stage1/memory.c \
