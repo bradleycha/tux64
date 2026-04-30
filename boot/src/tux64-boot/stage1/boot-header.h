@@ -20,6 +20,8 @@ Tux64Boolean
 tux64_boot_stage1_boot_header_flag_no_checksum(void);
 Tux64Boolean
 tux64_boot_stage1_boot_header_flag_memory_display(void);
+Tux64Boolean
+tux64_boot_stage1_boot_header_flag_no_delay(void);
 
 /*----------------------------------------------------------------------------*/
 /* Gets the information of various boot files.                                */

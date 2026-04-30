@@ -34,6 +34,24 @@ tux64_boot_stage1_fsm_checksum_enable(void) {
    return (tux64_boot_stage1_boot_header_flag_no_checksum() == TUX64_BOOLEAN_FALSE);
 }
 
+static Tux64Boolean
+tux64_boot_stage1_fsm_delay_enable(void) {
+   if (!TUX64_BOOT_CONFIG_DELAY) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   return (tux64_boot_stage1_boot_header_flag_no_delay() == TUX64_BOOLEAN_FALSE);
+}
+
+static Tux64UInt32
+tux64_boot_stage1_fsm_delay_ticks(void) {
+   if (tux64_boot_stage1_fsm_delay_enable() == TUX64_BOOLEAN_FALSE) {
+      return TUX64_LITERAL_UINT32(0u);
+   }
+
+   return TUX64_LITERAL_UINT32(TUX64_BOOT_CONFIG_DELAY_TICKS);
+}
+
 static void
 tux64_boot_stage1_fsm_state_set_test(
    struct Tux64BootStage1Fsm * fsm
