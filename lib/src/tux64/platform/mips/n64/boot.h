@@ -14,8 +14,11 @@
 
 /* the number of bytes per word. we choose this so all data will be 2-byte */
 /* aligned, which is the smallest required alignment to work with PI DMA. */
+/* in addition, being 4-byte aligned means we don't have to deal with */
+/* unaligned or residual data when checksumming on the console, which */
+/* massively simplifies the code there. */
 #define TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD\
-   2u
+   4u
 
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC\
    "TBHM" /* Tux64 Boot Header Magic */
@@ -36,27 +39,27 @@ struct Tux64PlatformMipsN64BootHeaderVersion {
 #define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_DELAY\
    (1u << 2u)
 
-/* !!! WARNING !!! the 'length' field is the byte length of the file, minus */
-/* one.  this is done so it can be used directly with PI DMA, without any */
-/* additional computation. */
 struct Tux64PlatformMipsN64BootHeaderFile {
    Tux64UInt32 checksum;
    Tux64UInt32 addr_cart;
    Tux64UInt32 length;
 };
 
-/* since we compute length minus one, a file of zero length underflows, so we */
-/* represent it explicitly. */
-#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_FILE_EMPTY_LENGTH \
-   TUX64_UINT32_MAX
-
 struct Tux64PlatformMipsN64BootHeaderExecutable {
    struct Tux64PlatformMipsN64BootHeaderFile file;
    Tux64UInt32 memory;
 };
 
+/* we need an exception here because we get 4 bytes of bloat from addr_cart,  */
+/* which is always cart_addr+0x1000+sizeof(boot header). */
+struct Tux64PlatformMipsN64BootHeaderFileStage1 {
+   Tux64UInt32 checksum;
+   Tux64UInt32 length;
+   Tux64UInt32 memory;
+};
+
 struct Tux64PlatformMipsN64BootHeaderFileBootloader {
-   struct Tux64PlatformMipsN64BootHeaderExecutable stage1;
+   struct Tux64PlatformMipsN64BootHeaderFileStage1 stage1;
    struct Tux64PlatformMipsN64BootHeaderFile stage2;
 };
 
