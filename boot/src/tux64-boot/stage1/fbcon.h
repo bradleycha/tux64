@@ -64,6 +64,15 @@ struct Tux64BootStage1FbconTextLabel {
 };
 
 /*----------------------------------------------------------------------------*/
+/* Allocates a buffer for a new line of text, placed on the next line after   */
+/* the last text label.                                                       */
+/*----------------------------------------------------------------------------*/
+Tux64BootStage1FbconLabel
+tux64_boot_stage1_fbcon_label_allocate(
+   Tux64UInt8 characters
+);
+
+/*----------------------------------------------------------------------------*/
 /* Pushes a new line of text to the fbcon, placed on the next line after the  */
 /* last text label.                                                           */
 /*----------------------------------------------------------------------------*/

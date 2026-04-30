@@ -105,10 +105,11 @@ static struct Tux64BootStage1FbconCharacterMap
 tux64_boot_stage1_fbcon_character_map;
 
 static void
-tux64_boot_stage1_fbcon_character_map_line_initialize_empty(
-   struct Tux64BootStage1FbconCharacterMapLine * line
+tux64_boot_stage1_fbcon_character_map_line_initialize(
+   struct Tux64BootStage1FbconCharacterMapLine * line,
+   Tux64UInt8 capacity
 ) {
-   line->characters_count = TUX64_LITERAL_UINT8(0u);
+   line->characters_count = capacity;
    return;
 }
 
@@ -131,55 +132,45 @@ tux64_boot_stage1_fbcon_character_map_line_copy_text(
    return;
 }
 
-static void
-tux64_boot_stage1_fbcon_character_map_line_initialize_content(
-   struct Tux64BootStage1FbconCharacterMapLine * line,
-   const struct Tux64BootStage1FbconTextLabel * label
+Tux64BootStage1FbconLabel
+tux64_boot_stage1_fbcon_label_allocate(
+   Tux64UInt8 characters
 ) {
-   tux64_boot_stage1_fbcon_character_map_line_copy_text(
-      line,
-      &label->text,
-      TUX64_LITERAL_UINT32(0u)
-   );
-   line->characters_count = label->capacity;
+   struct Tux64BootStage1FbconCharacterMap * map;
+   Tux64UInt8 idx;
 
-   return;
+   map = &tux64_boot_stage1_fbcon_character_map;
+
+   idx = map->lines_count;
+   map->lines_count++;
+
+   tux64_boot_stage1_fbcon_character_map_line_initialize(
+      &map->lines_buffer[idx],
+      characters
+   );
+
+   return &map->lines_buffer[idx];
 }
 
 Tux64BootStage1FbconLabel
 tux64_boot_stage1_fbcon_label_push(
    const struct Tux64BootStage1FbconTextLabel * label
 ) {
-   struct Tux64BootStage1FbconCharacterMap * map;
-   Tux64UInt8 idx;
+   struct Tux64BootStage1FbconCharacterMapLine * line;
 
-   map = &tux64_boot_stage1_fbcon_character_map;
-
-   idx = map->lines_count;
-   map->lines_count++;
-
-   tux64_boot_stage1_fbcon_character_map_line_initialize_content(
-      &map->lines_buffer[idx],
-      label
+   line = tux64_boot_stage1_fbcon_label_allocate(label->capacity);
+   tux64_boot_stage1_fbcon_character_map_line_copy_text(
+      line,
+      &label->text,
+      TUX64_LITERAL_UINT8(0u)
    );
 
-   return &map->lines_buffer[idx];
+   return line;
 }
 
 void
 tux64_boot_stage1_fbcon_skip_line(void) {
-   struct Tux64BootStage1FbconCharacterMap * map;
-   Tux64UInt8 idx;
-
-   map = &tux64_boot_stage1_fbcon_character_map;
-
-   idx = map->lines_count;
-   map->lines_count++;
-
-   tux64_boot_stage1_fbcon_character_map_line_initialize_empty(
-      &map->lines_buffer[idx]
-   );
-
+   (void)tux64_boot_stage1_fbcon_label_allocate(TUX64_LITERAL_UINT8(0u));
    return;
 }
 
