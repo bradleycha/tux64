@@ -54,9 +54,7 @@ tux64_boot_stage1_strings_error_io;
 extern const struct Tux64BootStage1FbconText
 tux64_boot_stage1_strings_error_checksum;
 extern const struct Tux64BootStage1FbconTextLabel
-tux64_boot_stage1_strings_hello_world;
-extern const struct Tux64BootStage1FbconText
-tux64_boot_stage1_strings_error_test;
+tux64_boot_stage1_strings_boot_kernel;
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_STRINGS_H */

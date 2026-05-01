@@ -118,13 +118,8 @@
    .text                = "Corrupt file";
 }
 {
-   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA;
-   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH;
-   .text                = "Hello world";
-}
-{
-   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_DATA;
-   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_LENGTH;
-   .text                = "End of the line";
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_LENGTH;
+   .text                = "Starting linux";
 }
 

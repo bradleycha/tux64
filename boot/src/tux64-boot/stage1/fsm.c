@@ -13,10 +13,13 @@
 #include "tux64-boot/pi.h"
 #include "tux64-boot/checksum.h"
 #include "tux64-boot/cache.h"
+#include "tux64-boot/kernel.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/preempt.h"
+#include "tux64-boot/stage1/video.h"
+#include "tux64-boot/stage1/interrupt.h"
 #include "tux64-boot/stage1/boot-header.h"
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
@@ -34,12 +37,13 @@
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_delay);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_halt);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_load_file);
-TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_test);
+TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_boot_kernel);
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_halt);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_start);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_kernel);
-TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_test);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel_wait);
 
 static Tux64Boolean
 tux64_boot_stage1_fsm_checksum_enable(void) {
@@ -169,7 +173,8 @@ tux64_boot_stage1_fsm_enough_memory_to_boot(void) {
 
    required_memory = kernel->image.memory
       + initramfs->length
-      + command_line->length;
+      + command_line->length
+      + TUX64_LITERAL_UINT32(sizeof(struct Tux64BootKernelArguments));
 
    if (required_memory > tux64_boot_stage1_memory_total()) {
       return TUX64_BOOLEAN_FALSE;
@@ -241,14 +246,15 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
    /* TODO: transition to loading initramfs and command-line (or deferring to */
    /* stage-2 if we are fighting for memory) instead of the test state.  also */
    /* create a contingency to defer to stage-2 if we can't allocate the */
-   /* memory with stage-1 loaded. */
+   /* memory with stage-1 loaded.  for now, we just directly boot the kernel */
+   /* with no initramfs/command-line. */
 
    tux64_boot_stage1_fsm_transition_load_file(
       fsm,
       &kernel->image.file,
       kernel->addr_load,
       &tux64_boot_stage1_strings_file_kernel,
-      tux64_boot_stage1_fsm_transition_test
+      tux64_boot_stage1_fsm_transition_boot_kernel
    );
    return;
 }
@@ -387,43 +393,54 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_load_file) {
    return;
 }
 
-TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_test) {
-   struct Tux64BootStage1FsmMemoryTest * mem;
-
-   mem = &fsm->memory.test;
-
-   tux64_boot_stage1_format_percentage_initialize(
-      &mem->percentage,
-      TUX64_LITERAL_UINT32(30000000u)
-   );
-
-   mem->label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_hello_world);
-   tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
-
-   fsm->state = tux64_boot_stage1_fsm_state_test;
-   return;
-}
-
-TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_test) {
-   struct Tux64BootStage1FsmMemoryTest * mem;
-   volatile Tux64UInt32 value;
-
-   mem = &fsm->memory.test;
-
-   /* volatile so compiler optimizations can't remove the loop */
-   value = TUX64_LITERAL_UINT32(1u);
-
-   do {
-      tux64_boot_stage1_format_percentage_accumulate(&mem->percentage, value);
-   } while (tux64_boot_stage1_preempt_yield() == TUX64_BOOLEAN_FALSE);
-
-   tux64_boot_stage1_format_percentage(&mem->percentage, mem->label);
-
-   if (mem->percentage.progress == mem->percentage.maximum) {
-      tux64_boot_stage1_fsm_halt(fsm, &tux64_boot_stage1_strings_error_test);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boot_kernel) {
+   (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_boot_kernel);
+   
+   /* for the same reason as we have in tux64_boot_stage1_fsm_halt(), we need */
+   /* to delay for 1 frame so that the message below displays. */
+   if (TUX64_BOOT_CONFIG_DELAY) {
+      tux64_boot_stage1_fsm_delay(
+         fsm,
+         tux64_boot_stage1_fsm_transition_boot_kernel_wait,
+         TUX64_LITERAL_UINT32(1u)
+      );
+   } else {
+      /* execute directly to eliminate any delay. */
+      tux64_boot_stage1_fsm_transition_boot_kernel_wait(fsm);
    }
 
    return;
+}
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boot_kernel_wait) {
+   fsm->state = tux64_boot_stage1_fsm_state_boot_kernel;
+   return;
+}
+
+static void
+tux64_boot_stage1_fsm_reset_hardware(void) {
+   /* since we're coming from either the start of a new frame or after */
+   /* loading a file, no DMA engines should be active.  thus, all we need to */
+   /* do is disable video output and disable interrupts. */
+   tux64_boot_stage1_video_display_output(TUX64_BOOLEAN_FALSE);
+   tux64_boot_stage1_interrupt_disable();
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) {
+   const void * entrypoint;
+   const struct Tux64BootKernelArguments * arguments;
+
+   entrypoint = (const void *)tux64_boot_stage1_boot_header_file_kernel()->addr_entry;
+
+   /* TODO: once we implement initramfs/command-line loading, allocate the */
+   /* boot arguments struct and set its arguments accordingly. */
+   (void)fsm;
+   arguments = TUX64_NULLPTR;
+
+   tux64_boot_stage1_fsm_reset_hardware();
+   tux64_boot_kernel_start(entrypoint, arguments);
+   TUX64_UNREACHABLE;
 }
 
 static void

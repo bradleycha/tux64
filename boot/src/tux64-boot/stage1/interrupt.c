@@ -172,32 +172,68 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
    return;
 }
 
+#define TUX64_BOOT_STAGE1_INTERRUPT_STATUS_BITS \
+   ( \
+      TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE | \
+      TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IM2 \
+   )
+
+static void
+tux64_boot_stage1_interrupt_disable_status(
+   Tux64UInt32 status
+) {
+   tux64_platform_mips_vr4300_cop0_register_write_status(
+      tux64_bitwise_flags_clear_uint32(
+         status,
+         TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_INTERRUPT_STATUS_BITS)
+      )
+   );
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_enable_status(
+   Tux64UInt32 status
+) {
+   tux64_platform_mips_vr4300_cop0_register_write_status(
+      tux64_bitwise_flags_set_uint32(
+         status,
+         TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_INTERRUPT_STATUS_BITS)
+      )
+   );
+   return;
+}
+
 void
 tux64_boot_stage1_interrupt_initialize(void) {
    Tux64UInt32 status;
 
    status = tux64_platform_mips_vr4300_cop0_register_read_status();
    
-   /* disable interrupts while we initialize */
-   tux64_platform_mips_vr4300_cop0_register_write_status(
-      tux64_bitwise_flags_clear_uint32(
-         status,
-         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE
-      )
-   );
-
+   tux64_boot_stage1_interrupt_disable_status(status);
    tux64_boot_stage1_interrupt_initialize_handler();
+   tux64_boot_stage1_interrupt_enable_status(status);
 
-   /* enable interrupts now that we have the handler initialized.  note that */
-   /* individual sub-systems, like the VI, may need to be enabled manually. */
-   tux64_platform_mips_vr4300_cop0_register_write_status(
-      tux64_bitwise_flags_set_uint32(
-         status,
-         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IE |
-         TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_IM2
-      )
-   );
+   return;
+}
 
+void
+tux64_boot_stage1_interrupt_enable(void) {
+   Tux64UInt32 status;
+
+   status = tux64_platform_mips_vr4300_cop0_register_read_status();
+   
+   tux64_boot_stage1_interrupt_enable_status(status);
+   return;
+}
+
+void
+tux64_boot_stage1_interrupt_disable(void) {
+   Tux64UInt32 status;
+
+   status = tux64_platform_mips_vr4300_cop0_register_read_status();
+   
+   tux64_boot_stage1_interrupt_disable_status(status);
    return;
 }
 

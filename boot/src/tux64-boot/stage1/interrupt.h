@@ -20,6 +20,14 @@ void
 tux64_boot_stage1_interrupt_initialize(void);
 
 /*----------------------------------------------------------------------------*/
+/* Enable or disable all interrupts.                                          */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_interrupt_enable(void);
+void
+tux64_boot_stage1_interrupt_disable(void);
+
+/*----------------------------------------------------------------------------*/
 /* Enable or disable VI interrupts.                                           */
 /*----------------------------------------------------------------------------*/
 void

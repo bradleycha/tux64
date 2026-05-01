@@ -100,7 +100,9 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/checksum.c \
 	src/tux64-boot/checksum.h \
 	src/tux64-boot/cache.c \
-	src/tux64-boot/cache.h
+	src/tux64-boot/cache.h \
+	src/tux64-boot/kernel.c \
+	src/tux64-boot/kernel.h
 stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.s
 stage1_SOURCES = \

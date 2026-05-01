@@ -104,12 +104,8 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_DATA
 );
 TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
-   tux64_boot_stage1_strings_hello_world_data,
-   TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA
-);
-TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
-   tux64_boot_stage1_strings_error_test_data,
-   TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_DATA
+   tux64_boot_stage1_strings_boot_kernel_data,
+   TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_DATA
 );
 
 /* alignment manually set for same reason as above.  this time the size of a */
@@ -248,14 +244,9 @@ TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
    TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_LENGTH
 );
 TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
-   tux64_boot_stage1_strings_hello_world,
-   tux64_boot_stage1_strings_hello_world_data,
-   TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH,
-   TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_LENGTH + TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_PERCENTAGE
-);
-TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
-   tux64_boot_stage1_strings_error_test,
-   tux64_boot_stage1_strings_error_test_data,
-   TUX64_BOOT_STAGE1_STRINGS_ERROR_TEST_LENGTH
+   tux64_boot_stage1_strings_boot_kernel,
+   tux64_boot_stage1_strings_boot_kernel_data,
+   TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_LENGTH,
+   TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_LENGTH
 );
 
