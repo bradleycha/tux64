@@ -8,7 +8,6 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/video.h"
 
-#include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/n64/mmio.h>
 #include <tux64/platform/mips/n64/vi.h>
 #include <tux64/bitwise.h>
@@ -16,6 +15,7 @@
 #include "tux64-boot/halt.h"
 #include "tux64-boot/sync.h"
 #include "tux64-boot/rsp.h"
+#include "tux64-boot/cache.h"
 #include "tux64-boot/stage1/interrupt.h"
 
 #define TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION \
@@ -94,7 +94,7 @@
 
 struct Tux64BootStage1VideoContext {
    struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
-   volatile Tux64UInt64 clear_color_rsp_dma_buffer [0x1000u / sizeof(Tux64UInt64)]
+   Tux64UInt64 clear_color_rsp_dma_buffer [0x1000u / sizeof(Tux64UInt64)]
    __attribute__((aligned(8u))); /* alignment required for RSP DMA */
    struct Tux64BootSyncFence vblank_fence;
    Tux64UInt8 framebuffer_index_displaying;
@@ -134,7 +134,7 @@ static void
 tux64_boot_stage1_video_set_vi_framebuffer(
    Tux64UInt8 index
 ) {
-   const volatile void * address;
+   const void * address;
 
    /* the upper 8 bits of the address are ignored, so we can safely write the */
    /* virtual address without having to convert to a physical address. */
@@ -168,7 +168,7 @@ tux64_boot_stage1_video_initialize_context_clear_color(
 ) {
    struct Tux64BootStage1VideoContext * ctx;
    Tux64UInt64 clear_color_x8b;
-   volatile Tux64UInt64 * iter_dma_buffer;
+   Tux64UInt64 * iter_dma_buffer;
    Tux64UInt32 words_remaining;
 
    ctx = &tux64_boot_stage1_video_context;
@@ -182,11 +182,8 @@ tux64_boot_stage1_video_initialize_context_clear_color(
 
    /* we now fill the rsp dma buffer 8 bytes at a time with out pixel data. */
    /* when we later clear the framebuffer, this will be used to fill the */
-   /* entire framebuffer one 4kb chunk at a time.  also, we don't cache */
-   /* writes because they could be used by the RSP before writeback, also it */
-   /* will need to be flushed immediately anyways, which could waste cache */
-   /* and unnecessarily writeback legitimately cached data. */
-   iter_dma_buffer = (volatile Tux64UInt64 *)tux64_platform_mips_n64_memory_map_direct_cached_to_direct_uncached(ctx->clear_color_rsp_dma_buffer);
+   /* entire framebuffer one 4kb chunk at a time. */
+   iter_dma_buffer = ctx->clear_color_rsp_dma_buffer;
    words_remaining = TUX64_LITERAL_UINT32(sizeof(ctx->clear_color_rsp_dma_buffer));
    do {
       *iter_dma_buffer = clear_color_x8b;
@@ -194,6 +191,12 @@ tux64_boot_stage1_video_initialize_context_clear_color(
       iter_dma_buffer++;
       words_remaining--;
    } while (words_remaining != TUX64_LITERAL_UINT32(0u));
+
+   /* and now make sure it's flushed for RSP DMA */
+   tux64_boot_cache_flush_data(
+      ctx->clear_color_rsp_dma_buffer,
+      TUX64_LITERAL_UINT32(sizeof(ctx->clear_color_rsp_dma_buffer))
+   );
 
    return;
 }

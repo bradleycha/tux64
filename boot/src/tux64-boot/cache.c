@@ -72,3 +72,17 @@ tux64_boot_cache_invalidate(
    return;
 }
 
+void
+tux64_boot_cache_flush_data(
+   const void * address,
+   Tux64UInt32 bytes
+) {
+   tux64_boot_cache_operation(
+      address,
+      bytes,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_VR4300_CACHE_BYTES_PER_LINE_DATA),
+      tux64_platform_mips_vr4300_cache_operation_data_hit_write_back
+   );
+   return;
+}
+

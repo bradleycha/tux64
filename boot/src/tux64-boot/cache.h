@@ -39,5 +39,14 @@ tux64_boot_cache_invalidate(
 );
 
 /*----------------------------------------------------------------------------*/
+/* Flush data cache to RDRAM in the range specified.                          */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_cache_flush_data(
+   const void * address,
+   Tux64UInt32 bytes
+);
+
+/*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_CACHE_H */
 
