@@ -17,6 +17,11 @@ The following files are created:
 
    * stage1.bin - The main bootloader binary.  This is what most users will
                   interact with and contains most of the bootloader code.
+                  It renders a framebuffer console to the screen to visually
+                  display boot status information.  If there is enough memory
+                  with itself loaded, it will also load the kernel, initramfs,
+                  and command-line.  If not, it will instead load and start the
+                  stage-2 bootloader.
 
    * stage1.bin.bss - A text file which contains the length of the stage-1's
                       .bss section, in bytes.  If the file is empty, then there
@@ -27,7 +32,8 @@ The following files are created:
    * stage2.bin - The code used to free the stage-1 bootloader from memory,
                   allowing all of RDRAM to be allocated to the kernel,
                   initramfs, and command-line.  This will be responsible for
-                  loading the above items into memory and starting the kernel.
+                  loading the above items into memory and starting the kernel
+                  if stage-1 unable to.
 
    * stage2.sym - Debug symbols for the stage-2 bootloader.
 
@@ -90,19 +96,20 @@ power-on to kernel entry:
 
    5: stage-1 bootloader - this provides all of the interactive components of
                            the bootloader.  on-screen logging is performed to
-                           display the boot process.  once ready to load the
-                           kernel, the stage-2 bootloader will be loaded into
-                           RSP IMEM, its checksum will be verified, the stack
-                           will be moved to the top of RSP DMEM, and execution
-                           will jump to the stage-2 start address.  Importantly,
-                           this will free all of RDRAM for use by Linux, so we
-                           can make stage-1 as fancy and big as we want without
-                           competing with Linux for work ram, although we still
-                           have to consider cartridge ROM.
+                           display the boot process.  it will check for total
+                           system memory and available system memory, that is
+                           memory which isn't used by the stage-1 bootloader.
+                           if there is not enough total system memory, it will
+                           error out.  if there is enough total system memory
+                           but not enough available memory, it will instead
+                           load the stage-2 bootloader and have it perform the
+                           above.
 
-   6: stage-2 bootloader - this loads the kernel into memory, decompresses it,
-                           performs relocations to support KASLR, decompresses
-                           and loads the initramfs, and loads the command-line.
-                           once complete, we initialize a new stack into RDRAM
-                           and jump to the kernel start address.
+   6: stage-2 bootloader - this does the same loading as stage-1, but without
+                           any of the interactive components.  it executes from
+                           RSP IMEM with a small stack and data segment in
+                           RDRAM.  this frees up almost all of RDRAM for the
+                           boot files, which can allow booting in some cases
+                           where it would otherwise be impossible with stage-1
+                           loaded.
 
