@@ -234,6 +234,8 @@ tux64_boot_stage1_fsm_transition_load_file(
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_load_file_kernel) {
    const struct Tux64PlatformMipsN64BootHeaderFileKernel * kernel;
 
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_KERNEL);
+
    kernel = tux64_boot_stage1_boot_header_file_kernel();
 
    /* TODO: transition to loading initramfs and command-line (or deferring to */
@@ -496,7 +498,7 @@ void
 tux64_boot_stage1_fsm_initialize(
    struct Tux64BootStage1Fsm * fsm
 ) {
-   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_INITIAL);
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_START);
 
    if (TUX64_BOOT_CONFIG_SPLASH) {
       tux64_boot_stage1_fsm_initialize_splash();
