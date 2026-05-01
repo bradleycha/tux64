@@ -823,6 +823,8 @@ If you'd like a nice sample configuration, the following should work for most pe
 
 --initramfs
 /boot/initramfs.cpio
+
+--memory-display
 ```
 
 ### Chapter 6.3 - Building the ROM image
