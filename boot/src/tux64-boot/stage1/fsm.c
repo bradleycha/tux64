@@ -413,6 +413,8 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boo
 }
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boot_kernel_wait) {
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_START_KERNEL);
+
    fsm->state = tux64_boot_stage1_fsm_state_boot_kernel;
    return;
 }
