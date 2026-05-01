@@ -86,6 +86,15 @@ tux64_boot_stage1_format_error(
    const struct Tux64BootStage1FbconText * reason
 );
 
+#define TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_LOADING \
+   TUX64_STRING_CHARACTERS("Loading ")
+
+void
+tux64_boot_stage1_format_loading(
+   Tux64BootStage1FbconLabel label,
+   const struct Tux64BootStage1FbconText * name
+);
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_FORMAT_H */
 

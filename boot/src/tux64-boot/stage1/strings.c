@@ -36,6 +36,10 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    TUX64_BOOT_STAGE1_STRINGS_FORMAT_ERROR_DATA
 );
 TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_format_loading_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_LOADING_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_splash_data,
    TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA
 );
@@ -70,6 +74,34 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
 TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_no_checksum_data,
    TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_file_bootloader_stage2_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_BOOTLOADER_STAGE2_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_file_kernel_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_KERNEL_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_file_initramfs_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_INITRAMFS_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_file_command_line_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_COMMAND_LINE_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_error_no_memory_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_NO_MEMORY_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_error_io_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_IO_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_error_checksum_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_DATA
 );
 TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_hello_world_data,
@@ -120,6 +152,11 @@ TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
    tux64_boot_stage1_strings_format_error,
    tux64_boot_stage1_strings_format_error_data,
    TUX64_BOOT_STAGE1_STRINGS_FORMAT_ERROR_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_format_loading,
+   tux64_boot_stage1_strings_format_loading_data,
+   TUX64_BOOT_STAGE1_STRINGS_FORMAT_LOADING_LENGTH
 );
 TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_splash,
@@ -174,6 +211,41 @@ TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_no_checksum_data,
    TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_file_bootloader_stage2,
+   tux64_boot_stage1_strings_file_bootloader_stage2_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_BOOTLOADER_STAGE2_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_file_kernel,
+   tux64_boot_stage1_strings_file_kernel_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_KERNEL_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_file_initramfs,
+   tux64_boot_stage1_strings_file_initramfs_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_INITRAMFS_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_file_command_line,
+   tux64_boot_stage1_strings_file_command_line_data,
+   TUX64_BOOT_STAGE1_STRINGS_FILE_COMMAND_LINE_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_error_no_memory,
+   tux64_boot_stage1_strings_error_no_memory_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_NO_MEMORY_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_error_io,
+   tux64_boot_stage1_strings_error_io_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_IO_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_error_checksum,
+   tux64_boot_stage1_strings_error_checksum_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_LENGTH
 );
 TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_hello_world,

@@ -21,6 +21,11 @@
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FORMAT_ERROR_LENGTH;
    .text                = "%ERROR% ";
 }
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FORMAT_LOADING_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FORMAT_LOADING_LENGTH;
+   .text                = "Loading ";
+}
 
 {
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_SPLASH_DATA;
@@ -76,6 +81,41 @@
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_NO_CHECKSUM_LENGTH;
    .text                = "Checksum verification DISABLED";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FILE_BOOTLOADER_STAGE2_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FILE_BOOTLOADER_STAGE2_LENGTH;
+   .text                = "stage 2 bootloader";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FILE_KERNEL_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FILE_KERNEL_LENGTH;
+   .text                = "kernel image";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FILE_INITRAMFS_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FILE_INITRAMFS_LENGTH;
+   .text                = "initramfs";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_FILE_COMMAND_LINE_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_FILE_COMMAND_LINE_LENGTH;
+   .text                = "kernel command line";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_ERROR_NO_MEMORY_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_ERROR_NO_MEMORY_LENGTH;
+   .text                = "Not enough memory to boot";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_ERROR_IO_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_ERROR_IO_LENGTH;
+   .text                = "IO error";
+}
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_LENGTH;
+   .text                = "Corrupt file";
 }
 {
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_HELLO_WORLD_DATA;

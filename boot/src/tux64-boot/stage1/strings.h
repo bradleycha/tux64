@@ -19,6 +19,8 @@ extern const struct Tux64BootStage1FbconText
 tux64_boot_stage1_strings_format_percentage_static;
 extern const struct Tux64BootStage1FbconText
 tux64_boot_stage1_strings_format_error;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_format_loading;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_splash;
 extern const struct Tux64BootStage1FbconTextLabel
@@ -37,6 +39,20 @@ extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_kernel_address_entry;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_no_checksum;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_file_bootloader_stage2;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_file_kernel;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_file_initramfs;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_file_command_line;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_error_no_memory;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_error_io;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_error_checksum;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_hello_world;
 extern const struct Tux64BootStage1FbconText

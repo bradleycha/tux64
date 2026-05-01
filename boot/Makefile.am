@@ -96,7 +96,11 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/rsp.c \
 	src/tux64-boot/rsp.h \
 	src/tux64-boot/pi.c \
-	src/tux64-boot/pi.h
+	src/tux64-boot/pi.h \
+	src/tux64-boot/checksum.c \
+	src/tux64-boot/checksum.h \
+	src/tux64-boot/cache.c \
+	src/tux64-boot/cache.h
 stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.s
 stage1_SOURCES = \

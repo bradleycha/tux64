@@ -263,22 +263,40 @@ tux64_boot_stage1_format_percentage(
    return;
 }
 
+static void
+tux64_boot_stage1_format_prefix(
+   Tux64BootStage1FbconLabel label,
+   const struct Tux64BootStage1FbconText * prefix,
+   const struct Tux64BootStage1FbconText * suffix
+) {
+   tux64_boot_stage1_fbcon_label_copy(label, TUX64_LITERAL_UINT8(0u), prefix);
+   tux64_boot_stage1_fbcon_label_copy(label, prefix->length, suffix);
+   return;
+}
+
 void
 tux64_boot_stage1_format_error(
    Tux64BootStage1FbconLabel label,
    const struct Tux64BootStage1FbconText * reason
 ) {
-   tux64_boot_stage1_fbcon_label_copy(
+   tux64_boot_stage1_format_prefix(
       label,
-      TUX64_LITERAL_UINT8(0u),
-      &tux64_boot_stage1_strings_format_error
-   );
-   tux64_boot_stage1_fbcon_label_copy(
-      label,
-      TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_ERROR),
+      &tux64_boot_stage1_strings_format_error,
       reason
    );
+   return;
+}
 
+void
+tux64_boot_stage1_format_loading(
+   Tux64BootStage1FbconLabel label,
+   const struct Tux64BootStage1FbconText * name
+) {
+   tux64_boot_stage1_format_prefix(
+      label,
+      &tux64_boot_stage1_strings_format_loading,
+      name
+   );
    return;
 }
 
