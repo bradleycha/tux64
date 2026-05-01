@@ -30,7 +30,7 @@ To do this, reconfigure ```tux64-lib``` with ```---enable-log-origin```.
 
 ## Enabling boot status codes
 
-`tux64-boot` can be optionally configured with `--enable-status`.  This will write status code information to a fixed memory address at the end of RSP DMEM, specifically 8 bytes to `0xa4000ff0`.  The bytes are ASCII characters which spell out `STAGEn:p`, where "n" is the bootloader stage and "p" is the location last reached within the relevant bootloader stage.
+`tux64-boot` can be optionally configured with `--enable-status`.  This will write status code information to a fixed memory address at the end of RSP DMEM, specifically 8 bytes to `0xa4000ff8`.  The bytes are ASCII characters which spell out `STAGEn:p`, where "n" is the bootloader stage and "p" is the location last reached within the relevant bootloader stage.
 
 These may be useful for extremely low-level debugging, such as debugging very early boot failures on real hardware before the remote debugger is available by probing the SysAD bus with a logic analyzer.  Otherwise, these serve no purpose and can be safely left disabled.
 
