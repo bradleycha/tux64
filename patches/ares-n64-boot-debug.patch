@@ -1,27 +1,8 @@
-diff --git a/ares/n64/accuracy.hpp b/ares/n64/accuracy.hpp
-index 4bad233..7c73e2f 100644
---- a/ares/n64/accuracy.hpp
-+++ b/ares/n64/accuracy.hpp
-@@ -19,14 +19,8 @@ struct Accuracy {
-     static constexpr bool SIMD = !SISD;
-   };
- 
--  struct RDRAM {
--    static constexpr bool Broadcasting = 0;
--  };
--
-   struct PIF {
-     // Emulate a region-locked console
-     static constexpr bool RegionLock = false;
--    // Emulate the PIF's checksum security check
--    static constexpr bool IPL2Checksum = true;
-   };
- };
 diff --git a/ares/n64/pif/hle.cpp b/ares/n64/pif/hle.cpp
-index 6420029..dc34f8c 100644
+index 0e87d80..3487252 100644
 --- a/ares/n64/pif/hle.cpp
 +++ b/ares/n64/pif/hle.cpp
-@@ -340,7 +340,7 @@ auto PIF::mainHLE() -> void {
+@@ -341,7 +341,7 @@ auto PIF::mainHLE() -> void {
            " != cpu:", 
            hex(intram.cpuChecksum[0], 2L), hex(intram.cpuChecksum[1], 2L), hex(intram.cpuChecksum[2], 2L),
            hex(intram.cpuChecksum[3], 2L), hex(intram.cpuChecksum[4], 2L), hex(intram.cpuChecksum[5], 2L));
@@ -57,10 +38,10 @@ index 5267965..7d3582e 100644
      io.mode    = 0x0e;
      io.config  = 0x40;
 diff --git a/ares/n64/system/system.cpp b/ares/n64/system/system.cpp
-index def30d1..8350c59 100644
+index 1efa678..57177c1 100644
 --- a/ares/n64/system/system.cpp
 +++ b/ares/n64/system/system.cpp
-@@ -42,6 +42,8 @@ auto option(string name, string value) -> bool {
+@@ -44,6 +44,8 @@ auto option(string name, string value) -> bool {
      }
    }
    if(Model::Nintendo64() && name == "Expansion Pak") system.expansionPak = value.boolean();
@@ -83,7 +64,7 @@ index 1f96f18..11996b0 100644
    u8 controllerPakBankCount = 1;
  
 diff --git a/desktop-ui/emulator/nintendo-64.cpp b/desktop-ui/emulator/nintendo-64.cpp
-index 01526dc..2afd226 100644
+index dedbfc4..9e3c09c 100644
 --- a/desktop-ui/emulator/nintendo-64.cpp
 +++ b/desktop-ui/emulator/nintendo-64.cpp
 @@ -116,6 +116,8 @@ auto Nintendo64::load() -> LoadResult {
@@ -96,7 +77,7 @@ index 01526dc..2afd226 100644
  
    if(!ares::Nintendo64::load(root, {"[Nintendo] ", name, " (", region, ")"})) return otherError;
 diff --git a/desktop-ui/emulator/nintendo-64dd.cpp b/desktop-ui/emulator/nintendo-64dd.cpp
-index b9db18f..bb349fa 100644
+index ae718d9..67223d5 100644
 --- a/desktop-ui/emulator/nintendo-64dd.cpp
 +++ b/desktop-ui/emulator/nintendo-64dd.cpp
 @@ -91,6 +91,8 @@ auto Nintendo64DD::load() -> LoadResult {
@@ -132,10 +113,10 @@ index b1969b6..e12699a 100644
      ComboButtonItem item{&nintendo64ControllerPakBankOption};
      item.setText(opt);
 diff --git a/desktop-ui/settings/settings.cpp b/desktop-ui/settings/settings.cpp
-index ac4195b..71a05ce 100644
+index 0c7f8d2..4f42b33 100644
 --- a/desktop-ui/settings/settings.cpp
 +++ b/desktop-ui/settings/settings.cpp
-@@ -123,6 +123,8 @@ auto Settings::process(bool load) -> void {
+@@ -127,6 +127,8 @@ auto Settings::process(bool load) -> void {
    bind(boolean, "DebugServer/UseIPv4", debugServer.useIPv4);
  
    bind(boolean, "Nintendo64/ExpansionPak", nintendo64.expansionPak);
@@ -145,10 +126,10 @@ index ac4195b..71a05ce 100644
  
    bind(boolean, "GameBoyAdvance/Player", gameBoyAdvance.player);
 diff --git a/desktop-ui/settings/settings.hpp b/desktop-ui/settings/settings.hpp
-index c8335d5..4dc7fce 100644
+index a947bd0..5669c99 100644
 --- a/desktop-ui/settings/settings.hpp
 +++ b/desktop-ui/settings/settings.hpp
-@@ -103,6 +103,8 @@ struct Settings : Markup::Node {
+@@ -104,6 +104,8 @@ struct Settings : Markup::Node {
  
    struct Nintendo64 {
      bool expansionPak = true;
@@ -157,7 +138,7 @@ index c8335d5..4dc7fce 100644
      u8 controllerPakBankCount = 1;
      string controllerPakBankString = "32KiB (Default)";
    } nintendo64;
-@@ -268,6 +270,12 @@ struct OptionSettings : VerticalLayout {
+@@ -269,6 +271,12 @@ struct OptionSettings : VerticalLayout {
      HorizontalLayout nintendo64ExpansionPakLayout{this, Size{~0, 0}, 5};
        CheckLabel nintendo64ExpansionPakOption{&nintendo64ExpansionPakLayout, Size{0, 0}, 5};
        Label nintendo64ExpansionPakHint{&nintendo64ExpansionPakLayout, Size{0, 0}};
