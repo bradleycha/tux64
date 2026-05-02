@@ -1,0 +1,152 @@
+diff --git a/ares/ares/node/debugger/tracer/dmesg.hpp b/ares/ares/node/debugger/tracer/dmesg.hpp
+new file mode 100644
+index 0000000..139f5c7
+--- /dev/null
++++ b/ares/ares/node/debugger/tracer/dmesg.hpp
+@@ -0,0 +1,22 @@
++struct Dmesg : Tracer {
++  DeclareClass(Dmesg, "debugger.tracer.dmesg")
++
++  Dmesg(string name = {}, string component = {}) : Tracer(name, component) {
++    _lineBuffer = {};
++  }
++
++  auto readCharacter(char character) -> void {
++    if(!enabled()) return;
++
++    if(character == '\n') {
++      PlatformLog(std::dynamic_pointer_cast<Tracer>(shared_from_this()), _lineBuffer);
++      _lineBuffer = {};
++      return;
++    }
++    
++    _lineBuffer.append(character);
++  }
++
++protected:
++  string _lineBuffer;
++};
+diff --git a/ares/ares/node/node.hpp b/ares/ares/node/node.hpp
+index 84923bf..aefce36 100644
+--- a/ares/ares/node/node.hpp
++++ b/ares/ares/node/node.hpp
+@@ -40,6 +40,7 @@ namespace ares::Core {
+       struct Tracer;
+       struct Notification;
+       struct Instruction;
++      struct Dmesg;
+     }
+   }
+ }
+@@ -86,6 +87,7 @@ namespace ares::Node {
+       using Tracer       = std::shared_ptr<Core::Debugger::Tracer::Tracer>;
+       using Notification = std::shared_ptr<Core::Debugger::Tracer::Notification>;
+       using Instruction  = std::shared_ptr<Core::Debugger::Tracer::Instruction>;
++      using Dmesg        = std::shared_ptr<Core::Debugger::Tracer::Dmesg>;
+     }
+   }
+ }
+@@ -139,6 +141,7 @@ namespace ares::Core {
+       #include <ares/node/debugger/tracer/tracer.hpp>
+       #include <ares/node/debugger/tracer/notification.hpp>
+       #include <ares/node/debugger/tracer/instruction.hpp>
++      #include <ares/node/debugger/tracer/dmesg.hpp>
+     }
+   }
+ }
+diff --git a/ares/n64/accuracy.hpp b/ares/n64/accuracy.hpp
+index 4bad233..7202b6b 100644
+--- a/ares/n64/accuracy.hpp
++++ b/ares/n64/accuracy.hpp
+@@ -23,6 +23,11 @@ struct Accuracy {
+     static constexpr bool Broadcasting = 0;
+   };
+ 
++  struct PI {
++    // Simulate correct PI bus latching for Linux dmesg writes.
++    static constexpr bool DmesgWriteLatch = 0;
++  };
++
+   struct PIF {
+     // Emulate a region-locked console
+     static constexpr bool RegionLock = false;
+diff --git a/ares/n64/pi/bus.hpp b/ares/n64/pi/bus.hpp
+index 5ff3b72..c609c70 100644
+--- a/ares/n64/pi/bus.hpp
++++ b/ares/n64/pi/bus.hpp
+@@ -57,6 +57,16 @@ inline auto PI::busRead(u32 address) -> u32 {
+ inline auto PI::writeWord(u32 address, u32 data, Thread& thread) -> void {
+   if(address <= 0x046f'ffff) return ioWrite(address, data);
+ 
++  // The upstream kernel doesn't wait for the PI bus to finish writing before
++  // writing another character, resulting in partial writes. This is a bug in
++  // the kernel and needs to be fixed.
++  if constexpr(!Accuracy::PI::DmesgWriteLatch) {
++    if(debugger.tracer.dmesg->enabled() && address == 0x0500'0020) {
++      debugger.dmesgRead(data);
++      return;
++    }
++  }
++
+   if(io.ioBusy) return;
+   io.ioBusy = 1;
+   io.busLatch = data;
+@@ -69,6 +79,12 @@ template <u32 Size>
+ inline auto PI::busWrite(u32 address, u32 data) -> void {
+   static_assert(Size == Half || Size == Word);  //PI bus will do 32-bit (CPU) or 16-bit (DMA) only
+   if(address <= 0x04ff'ffff) return; //Address range not memory mapped, only accessible via DMA
++  if constexpr(Accuracy::PI::DmesgWriteLatch) {
++    if(debugger.tracer.dmesg->enabled() && address == 0x0500'0020) {
++      debugger.dmesgRead(data);
++      return;
++    }
++  }
+   if(address <= 0x0500'03ff) {
+     if(_DD()) return dd.c2s.write<Size>(address, data);
+     return;
+diff --git a/ares/n64/pi/debugger.cpp b/ares/n64/pi/debugger.cpp
+index 155195e..01f42b3 100644
+--- a/ares/n64/pi/debugger.cpp
++++ b/ares/n64/pi/debugger.cpp
+@@ -1,5 +1,6 @@
+ auto PI::Debugger::load(Node::Object parent) -> void {
+   tracer.io = parent->append<Node::Debugger::Tracer::Notification>("I/O", "PI");
++  tracer.dmesg = parent->append<Node::Debugger::Tracer::Dmesg>("Dmesg", "PI");
+ }
+ 
+ auto PI::Debugger::io(bool mode, u32 address, u32 data) -> void {
+@@ -31,3 +32,18 @@ auto PI::Debugger::io(bool mode, u32 address, u32 data) -> void {
+     tracer.io->notify(message);
+   }
+ }
++
++auto PI::Debugger::dmesgRead(u32 data) -> void {
++  bool cpu_big = cpu.context.bigEndian();
++  bool host_big;
++
++#if defined(ENDIAN_BIG)
++  host_big = true;
++#else
++  host_big = false;
++#endif
++
++  if(cpu_big != host_big) data >>= 24;
++
++  tracer.dmesg->readCharacter((char)data);
++}
+diff --git a/ares/n64/pi/pi.hpp b/ares/n64/pi/pi.hpp
+index e824d5d..5e387c2 100644
+--- a/ares/n64/pi/pi.hpp
++++ b/ares/n64/pi/pi.hpp
+@@ -7,9 +7,11 @@ struct PI : Memory::RCP<PI> {
+     //debugger.cpp
+     auto load(Node::Object) -> void;
+     auto io(bool mode, u32 address, u32 data) -> void;
++    auto dmesgRead(u32 data) -> void;
+ 
+     struct Tracer {
+       Node::Debugger::Tracer::Notification io;
++      Node::Debugger::Tracer::Dmesg dmesg;
+     } tracer;
+   } debugger;
+ 
