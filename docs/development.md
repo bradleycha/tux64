@@ -76,14 +76,14 @@ make -j${TUX64_MAKEOPTS} install-strip
 
 ### Building Ares
 
-If you are looking to debug or develop the stage-0 bootloader, there is a source patch you can apply which adds options to aid in stage-0 development.  This can be applied with the following:
+If you are looking to debug or develop the bootloader or write kernel patches, there are source patches you can apply which adds options to aid in bootloader and kernel development.  These can be applied with the following:
 
 ```
 cd ${TUX64_BUILD_ROOT}/sources/ares-*
-git apply ${TUX64_BUILD_ROOT}/sources/tux64-*/patches/ares-n64-boot-debug.patch
+git apply ${TUX64_BUILD_ROOT}/sources/tux64-*/patches/ares-*.patch
 ```
 
-If you aren't interested in stage-0 development, the above step may be skipped.
+If you aren't interested in bootloader or kernel development, the above step may be skipped.
 
 Next, we build Ares with the following:
 
@@ -122,9 +122,10 @@ Before attempting to attach GDB, you should do the following:
    * Set on-focus-loss behavior to "Block input" under Settings > Drivers > When focus is lost
    * Launch the GDB server on boot under Settings > Boot Options > Launch Tracer
 
-Additionally, if you're doing stage-0 bootloader development and applied the above boot debugging patch, the following options might be interesting:
+Additionally, if you're doing bootloader or kernel development and applied the above patches, the following options might be interesting:
    * Disable RDRAM pre-initialization under Settings > Options > Nintendo 64 Settings > Pre-Initialize RDRAM
    * Disable IPL2 checksum enforcement under Settings > Options > Nintendo 64 Settings > Enforce IPL2 Checksum
+   * Enable kernel `printk()` tracing under Tools > Tracer > PI Dmesg
 
 ### Attaching GDB
 
