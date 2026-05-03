@@ -125,7 +125,7 @@ Before attempting to attach GDB, you should do the following:
 Additionally, if you're doing bootloader or kernel development and applied the above patches, the following options might be interesting:
    * Disable RDRAM pre-initialization under Settings > Options > Nintendo 64 Settings > Pre-Initialize RDRAM
    * Disable IPL2 checksum enforcement under Settings > Options > Nintendo 64 Settings > Enforce IPL2 Checksum
-   * Enable kernel `printk()` tracing under Tools > Tracer > PI Dmesg
+   * Enable kernel `printk()` tracing under Tools > Tracer > PI Serial
 
 ### Attaching GDB
 
