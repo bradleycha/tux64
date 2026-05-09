@@ -1,0 +1,32 @@
+diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
+index 83a6b68d8..3dde3d593 100644
+--- a/arch/mips/Kconfig
++++ b/arch/mips/Kconfig
+@@ -3005,6 +3005,27 @@ choice
+ 		bool "Extend builtin kernel arguments with bootloader arguments"
+ endchoice
+ 
++config MIPS_TUX64
++	bool "Tux64 support"
++	depends on MACH_NINTENDO64
++	default n
++	help
++	  Enables support for Tux64 exclusive features, such as extended boot
++	  parameters. This introduces breaking changes for existing bootloaders.
++
++	  If unsure, say n.
++
++config MIPS_TUX64_COMPATABILITY
++	bool "Support existing bootloaders"
++	depends on MIPS_TUX64
++	default y
++	help
++	  Support existing bootloaders, in addition to Tux64's bootloader.
++	  This can be useful for building a kernel which can be used with all
++	  existing Nintendo 64 Linux bootloaders.
++
++	  If unsure, say y.
++
+ endmenu
+ 
+ config LOCKDEP_SUPPORT
