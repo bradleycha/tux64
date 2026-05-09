@@ -655,7 +655,7 @@ ${TUX64_BUILD_ROOT}/scripts/kernel-make.sh menuconfig
 
 We will need to set the following configuration items:
 
-TODO: verify these actually boot.  these are here for testing and almost definitely don't work.
+TODO: create a more complete configuration which matches `clbr`'s binary kernel.  this gives us just enough to dump the `printk()` ring buffer from memory to find signs of life.
 
 ```
 Machine selection  --->
@@ -669,6 +669,19 @@ Kernel type  --->
 General setup  --->
    Local version - append to kernel release
       -tux64
+
+   Configure standard kernel features (expert users)  --->
+      [*] Enable support for printk
+
+Device drivers  --->
+   Character devices  --->
+      [*] Enable TTY
+      [*] Virtual terminal
+      [*] Support for console on virtual terminal
+
+Kernel hacking  --->
+   printk and dmesg options  --->
+      [*] Show timing information on printk
 ```
 
 Note that you don't necessarily have to use "-tux64" as the local version, but the branding is nice. :)
