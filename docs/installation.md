@@ -131,7 +131,7 @@ Some packages have patches which are applied to upstream sources.  This is done 
 To apply patches to required packages, run the following command:
 
 ```
-for pkg in gcc; do
+for pkg in gcc linux; do
     pushd [TUX64_BUILD_ROOT]/sources/$pkg-*
     git apply [TUX64_BUILD_ROOT]/sources/tux64-*/patches/$pkg-*.patch
     popd
@@ -659,29 +659,32 @@ TODO: create a more complete configuration which matches `clbr`'s binary kernel.
 
 ```
 Machine selection  --->
-   System type  --->
-      (X) Nintendo 64 console
+  System type  --->
+    (X) Nintendo 64 console
 
 Kernel type  --->
-   Kernel code model  --->
-      (X) 64-bit kernel
+  Kernel code model  --->
+    (X) 64-bit kernel
+   
+  [*] Tux64 support
+  [ ]   Support existing bootloaders
 
 General setup  --->
-   Local version - append to kernel release
-      -tux64
+  Local version - append to kernel release
+    -tux64
 
-   Configure standard kernel features (expert users)  --->
-      [*] Enable support for printk
+  Configure standard kernel features (expert users)  --->
+    [*] Enable support for printk
 
 Device drivers  --->
-   Character devices  --->
-      [*] Enable TTY
-      [*] Virtual terminal
-      [*] Support for console on virtual terminal
+  Character devices  --->
+    [*] Enable TTY
+    [*] Virtual terminal
+    [*] Support for console on virtual terminal
 
 Kernel hacking  --->
-   printk and dmesg options  --->
-      [*] Show timing information on printk
+  printk and dmesg options  --->
+    [*] Show timing information on printk
 ```
 
 Note that you don't necessarily have to use "-tux64" as the local version, but the branding is nice. :)
