@@ -103,8 +103,8 @@ cd ${TUX64_BUILD_ROOT}/builds/ares
       -S ../../sources/ares-*
 )
 
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install
+make C_FLAGS="${TUX64_CFLAGS_HOST}" CXX_FLAGS="${TUX64_CXXFLAGS_HOST}" -j${TUX64_MAKEOPTS}
+make C_FLAGS="${TUX64_CFLAGS_HOST}" CXX_FLAGS="${TUX64_CXXFLAGS_HOST}" -j${TUX64_MAKEOPTS} install
 ```
 
 You can now run Ares with the following command:
