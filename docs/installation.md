@@ -655,8 +655,6 @@ ${TUX64_BUILD_ROOT}/scripts/kernel-make.sh menuconfig
 
 We will need to set the following configuration items:
 
-TODO: create a more complete configuration which matches `clbr`'s binary kernel.  this gives us just enough to dump the `printk()` ring buffer from memory to find signs of life.
-
 ```
 Machine selection  --->
   System type  --->
@@ -676,11 +674,37 @@ General setup  --->
   Configure standard kernel features (expert users)  --->
     [*] Enable support for printk
 
+Executable file formats  --->
+  [*] Kernel support for ELF binaries
+  [*] Kernel support for scripts starting with #!
+
 Device drivers  --->
   Character devices  --->
     [*] Enable TTY
-    [*] Virtual terminal
-    [*] Support for console on virtual terminal
+    [*]   Virtual terminal
+    [ ]     Enable character translations in console
+    [*]     Support for console on virtual terminal
+    [ ]   Unix98 PTY support
+    [ ]   Legacy (BSD) PTY support
+    [ ]   Allow legacy TIOCSTI usage
+    [ ]   Automatically load TTY Line Disciplines
+
+  Graphics support  --->
+    Frame buffer Devices  --->
+      [*] Support for frame buffer device drivers
+      [*] Simple framebuffer support
+      [ ] Provide legacy /dev/fb* device
+
+    Console display driver support  --->
+      [*] Framebuffer Console support
+
+    [*] Bootup logo  --->
+      [ ] Standard black and white Linux logo
+      [ ] Standard 16-color Linux logo
+      [*] Standard 224-color Linux logo
+
+  [ ] Device Tree and Open Firmware support
+  [ ] HID bus support
 
 Kernel hacking  --->
   printk and dmesg options  --->
