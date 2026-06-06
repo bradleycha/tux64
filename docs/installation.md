@@ -697,6 +697,7 @@ Device drivers  --->
 
     Console display driver support  --->
       [*] Framebuffer Console support
+      [*] Map the console to the primary display device
 
     [*] Bootup logo  --->
       [ ] Standard black and white Linux logo
