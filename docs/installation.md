@@ -679,6 +679,13 @@ Executable file formats  --->
   [*] Kernel support for scripts starting with #!
 
 Device drivers  --->
+  Input device support  --->
+    [ ]   Keyboards  ----
+    [ ]   Mice  ----
+
+    Hardware I/O ports  --->
+      [ ] Serial I/O support
+
   Character devices  --->
     [*] Enable TTY
     [*]   Virtual terminal
