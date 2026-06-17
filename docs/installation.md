@@ -663,7 +663,8 @@ Machine selection  --->
 Kernel type  --->
   Kernel code model  --->
     (X) 64-bit kernel
-   
+
+  [*] Floating Point support
   [*] Tux64 support
   [ ]   Support existing bootloaders
 
