@@ -34,7 +34,7 @@ To do this, reconfigure ```tux64-lib``` with ```---enable-log-origin```.
 
 These may be useful for extremely low-level debugging, such as debugging very early boot failures on real hardware before the remote debugger is available by probing the SysAD bus with a logic analyzer.  Otherwise, these serve no purpose and can be safely left disabled.
 
-## Bootloader debugging in an emulator
+## Bootloader and kernel debugging in an emulator
 
 It's recommended to use Ares with the N64 core for development, as it's an accurate emulator with support for development features, such as viewing memory, monitoring various I/O components, and most importantly - remote debugging via GDB.  It's open-source and cross-platform, and there's no wonderful features like adding a donation pop-up which blocks using the emulator for 30 seconds.  We will show how to attach GDB and debug as early as the first instruction of the boot process, complete with full symbolic debugging.
 
@@ -49,6 +49,9 @@ The process of obtaining sources is the same as the Installation Guide.
 
 ### Building GDB
 
+First, we will build `gdb` targetting the bootloader.  If you don't intend on
+debugging the bootloader, you can skip this step.
+
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gdb
 cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gdb
@@ -62,6 +65,35 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gdb
       --target=${TUX64_TARGET_N64_BOOTLOADER} \
       --prefix=${TUX64_BUILD_ROOT}/tools \
       --program-prefix=${TUX64_TARGET_N64_BOOTLOADER}- \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --enable-host-pie \
+      --enable-lto
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+Next, we will build `gdb` targetting Linux.  This will be used to debug the
+Linux kernel as well as userspace programs.  If you don't intend on debugging
+the kernel or userspace programs, you can skip this step.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gdb
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gdb
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/gdb-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --target=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      --program-prefix=${TUX64_TARGET_N64_LINUX}- \
       CFLAGS="${TUX64_CFLAGS_HOST}" \
       CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
@@ -113,6 +145,21 @@ You can now run Ares with the following command:
 ${TUX64_BUILD_ROOT}/tools/bin/ares
 ```
 
+### Configuring Linux for debugging
+
+We now have to enable a few kernel configuration options for kernel debugging.
+
+```
+Kernel hacking  --->
+  Compile-time checks and compiler options  --->
+    Debug information  --->
+      (X) Rely on the toolchain's implicit default DWARF version
+
+    [*] Provide GDB scripts for kernel debugging
+```
+
+Now recompile and install the kernel, as well as rebuild the ROM image as detailed in the installation guide.
+
 ### Configuring Ares for debugging
 
 Before attempting to attach GDB, you should do the following:
@@ -127,7 +174,7 @@ Additionally, if you're doing bootloader or kernel development and applied the a
    * Disable IPL2 checksum enforcement under Settings > Options > Nintendo 64 Settings > Enforce IPL2 Checksum
    * Enable kernel `printk()` tracing under Tools > Tracer > PI Serial
 
-### Attaching GDB
+### Attaching GDB for bootloader debugging
 
 Launch GDB with the following command:
 
@@ -161,6 +208,22 @@ ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}-gdb \
 This has the advantage of being an easily copy-pasted command, but only one symbol file can be loaded at a time.  Adding additional symbol files will require the above `add-symbol-file` GDB command.
 
 To start the emulator, type ```continue```, or ```c``` for short in GDB, then untick Tools > Pause Emulation.
+
+### Attaching GDB for kernel debugging
+
+Launch GDB with the following command:
+
+```
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}-gdb \
+    ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot/vmlinux
+```
+
+Debugging now follows the same as for the bootloader.
+
+TODO: this is completely FUBAR'd.  breakpoints are skipped over, we get weird
+segfaults in random code, and backtraces are broken.  note that if we don't
+load `vmlinux` and manually type the address of each function, breakpoints
+work as expected.  something is breaking down when we load symbols.
 
 ## Recalculating the ```tux64-boot``` stage-0 CIC data
 
