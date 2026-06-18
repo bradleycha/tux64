@@ -6,9 +6,11 @@
 /*    definitions.                                                            */
 /*----------------------------------------------------------------------------*/
 
+/* TODO: run preprocessor on linker script to                                 */
+/* #include "tux64-boot/stage1/stack.h" and replace this definition with the  */
+/* TUX64_BOOT_STAGE1_STACK_BYTES from the header. */
 TUX64_BOOT_STAGE1_STACK_BYTES =
    0x00001000;
-   /* 4KiB stack, should be plenty */
 TUX64_BOOT_STAGE1_STACK_ADDRESS =
    TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED;
    /* place at the start of RDRAM */

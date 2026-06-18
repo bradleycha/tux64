@@ -6,6 +6,8 @@
 /*    definitions.                                                            */
 /*----------------------------------------------------------------------------*/
 
+/* TODO: run preprocessor on linker script to #include "tux64-boot/status.h" */
+/* and replace 0x08 with TUX64_BOOT_STATUS_BYTES. */
 TUX64_BOOT_MEMORY_ADDRESS_STATUS
  = TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x1000 - 0x08;
 

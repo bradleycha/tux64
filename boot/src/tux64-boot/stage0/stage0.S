@@ -63,138 +63,76 @@
 /* everything else:   non-volatile                                            */
 /*----------------------------------------------------------------------------*/
 
+#include <tux64/platform/mips/vr4300/cop0.h>
+#include <tux64/platform/mips/vr4300/cache.h>
+#include <tux64/platform/mips/n64/memory-map.h>
+#include <tux64/platform/mips/n64/mi.h>
+#include <tux64/platform/mips/n64/pi.h>
+#include <tux64/platform/mips/n64/ri.h>
+#include <tux64/platform/mips/n64/rdram.h>
+#include <tux64/platform/mips/n64/pif.h>
+#include <tux64/platform/mips/n64/boot.h>
+
+#include "tux64-boot/status.h"
+#include "tux64-boot/stage1/stack.h"
+
 .set noreorder
 .set noat
 .set nomacro
 
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT,$9
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE,$11
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS,$12
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE,$13
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO,$28
-.equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI,$29
-
-.equ TUX64_BOOT_STAGE0_COP0_STATUS_FLAGS_LOW_POWER,((1 << 27) >> 16)
-
-.equ TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE,32
-.equ TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE,16
-.equ TUX64_BOOT_STAGE0_ICACHE_LINE_COUNT,512
-.equ TUX64_BOOT_STAGE0_DCACHE_LINE_COUNT,512
-
-.equ TUX64_BOOT_STAGE0_CACHE_TYPE_ICACHE,0x0000
-.equ TUX64_BOOT_STAGE0_CACHE_TYPE_DCACHE,0x0001
-.equ TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG,0x0008
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI,0x8000
-.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI,0xa000
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI,0xa400
-.equ TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_LO,0x0000
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_MI_HI,0xa430
-.equ TUX64_BOOT_STAGE0_ADDRESS_MI_LO,0x0000
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_MI_MODE_LO,TUX64_BOOT_STAGE0_ADDRESS_MI_LO+0x0000
-.equ TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO,TUX64_BOOT_STAGE0_ADDRESS_MI_LO+0x0004
+/* need to do this because of dumb shit with how preprocessor is evaluated. */
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COUNT,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_COUNT
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_COMPARE,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_COMPARE
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_STATUS
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CAUSE
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGLO
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGHI
 
 .equ TUX64_BOOT_STAGE0_MI_MODE_REPEAT_16,0x010f
+.equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI,0x0202
+.equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO,0xb0b0
 
-.equ TUX64_BOOT_STAGE0_ADDRESS_PI_HI,0xa460
-.equ TUX64_BOOT_STAGE0_ADDRESS_PI_LO,0x0000
-
-.equ TUX64_BOOT_STAGE0_PI_DMA_CARTRIDGE_ROM_ADDRESS_HI,0x1000
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO,0x0000
-.equ TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO,0x0004
-.equ TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO,0x000c
-.equ TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS,0x0010
-
-.equ TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY,0x0003
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_RI_HI,0xa470
-.equ TUX64_BOOT_STAGE0_ADDRESS_RI_LO,0x0000
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_RI_MODE_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x0000
-.equ TUX64_BOOT_STAGE0_ADDRESS_RI_CONFIG_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x0004
-.equ TUX64_BOOT_STAGE0_ADDRESS_RI_CURRENT_LOAD_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x0008
-.equ TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO,TUX64_BOOT_STAGE0_ADDRESS_RI_LO+0x000c
+.equ TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY,(TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_DMA_BUSY | TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_IO_BUSY)
 
 .equ TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION,0x0040
 .equ TUX64_BOOT_STAGE0_RI_RX_TX_TIMINGS,0x0014
 .equ TUX64_BOOT_STAGE0_RI_MODE_STANDARD,0x000e
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_CARTRIDGE_ROM_HI,0xb000
-.equ TUX64_BOOT_STAGE0_ADDRESS_CARTRIDGE_ROM_LO,0x0000
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI,0xbfc0
-.equ TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO,0x07c0
-
-.equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI,0x0202
-.equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO,0xb0b0
-
-.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_HI,0xa3f8
-.equ TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_LO,0x0000
-
-.equ TUX64_BOOT_STAGE0_RDRAM_REGISTER_DEVICE_ID_LO,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_LO+0x0004
-.equ TUX64_BOOT_STAGE0_RDRAM_REGISTER_DELAY_LO,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_LO+0x0008
-.equ TUX64_BOOT_STAGE0_RDRAM_REGISTER_MODE_LO,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_LO+0x000c
-.equ TUX64_BOOT_STAGE0_RDRAM_REGISTER_REF_ROW_LO,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_LO+0x0014
 
 .equ TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING,0x18082838
 .equ TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL,0xfc800300 /* device ID 511 */
 .equ TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INVALID,0xf4800300 /* device ID 509 */
 .equ TUX64_BOOT_STAGE0_RDRAM_MODE_INITIAL,0x44000000
 
-.equ TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT,0x0008
-
 .equ TUX64_BOOT_STAGE0_1MIB_HI,0x0010
 
-.equ TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE,0x1000
-
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES,0x0054
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16,0x0060
+.equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE1_STACK_BYTES
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
 
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI,0x5442 /* TB */
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO,0x484d /* HM */
+.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES
+.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16
 
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC,0x0000
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM,0x0004
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA,0x0008
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS,0x0008
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM,0x000c
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH,0x0010
-.equ TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY,0x0014
+.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY,(TUX64_BOOT_STAGE1_STACK_BYTES + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16)
 
-.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
-.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_RDRAM_LO+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16
-
-.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY,(TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE + TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES_ALIGN16)
-
-.equ TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM,0x0001
-
-.equ TUX64_BOOT_STAGE0_STATUS_BYTES,8
-
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD0,0x5354 /* ST */
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD1,0x4147 /* AG */
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD2,0x4530 /* E0 */
-.equ TUX64_BOOT_STAGE0_STATUS_HWORD3,0x3a00 /* :(null) */
+.equ TUX64_BOOT_STAGE0_STATUS_WORD_HI,TUX64_BOOT_STATUS_MAGIC_HI                 /* STAG */
+.equ TUX64_BOOT_STAGE0_STATUS_WORD_LO,TUX64_BOOT_STATUS_MAGIC_LO | ('0' << 16)   /* E0:x */
 
 /* we store the upper and lower byte of the status code together to save on */
 /* an 'or' instruction for free in tux64_boot_stage0_status_code_write(). */
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                         (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'A')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,               (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'B')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_HARDWARE_INFORMATION,   (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'C')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,              (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'D')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,           (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'E')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,              (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'F')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE,          (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'G')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,             (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'H')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,                   (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'I')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'J')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,            (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'K')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  (TUX64_BOOT_STAGE0_STATUS_HWORD3 | 'L')
+#define TUX64_BOOT_STAGE0_STATUS_CODE(code)\
+   ((TUX64_BOOT_STAGE0_STATUS_WORD_LO & 0xffff) | code)
+
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN,                         TUX64_BOOT_STAGE0_STATUS_CODE('A')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_COP0_INITIALIZE,               TUX64_BOOT_STAGE0_STATUS_CODE('B')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_HARDWARE_INFORMATION,   TUX64_BOOT_STAGE0_STATUS_CODE('C')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE,              TUX64_BOOT_STAGE0_STATUS_CODE('D')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY,           TUX64_BOOT_STAGE0_STATUS_CODE('E')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_BOOT_HEADER,              TUX64_BOOT_STAGE0_STATUS_CODE('F')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE,          TUX64_BOOT_STAGE0_STATUS_CODE('G')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,             TUX64_BOOT_STAGE0_STATUS_CODE('H')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,                   TUX64_BOOT_STAGE0_STATUS_CODE('I')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('J')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,            TUX64_BOOT_STAGE0_STATUS_CODE('K')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('L')
 
 /* defined in stage1/boot-header.ld, included in stage0/stage0.ld */
 .extern tux64_boot_stage1_boot_header
@@ -205,7 +143,7 @@ tux64_boot_stage0_status:
    /* current boot status in memory to help debug early boot issues with */
    /* memory debuggers.  It will look like "STAGE0:c" when memory is */
    /* displayed as ASCII text, where 'c' is the current boot stage code. */
-   .skip TUX64_BOOT_STAGE0_STATUS_BYTES
+   .skip TUX64_BOOT_STATUS_BYTES
 /*tux64_boot_stage0_status*/
 
    .section .text
@@ -221,7 +159,7 @@ tux64_boot_stage0_halt:
    lw    $zero,0($gp)
 
    /* set the RP bit in the COP0 Status register */
-   lui   $t1,TUX64_BOOT_STAGE0_COP0_STATUS_FLAGS_LOW_POWER
+   lui   $t1,%hi(TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_RP)
    mfc0  $t0,TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS
    or    $t0,$t0,$t1
    mtc0  $t0,TUX64_BOOT_STAGE0_COP0_REGISTER_STATUS
@@ -235,9 +173,9 @@ tux64_boot_stage0_halt:
 
    .section .text
 tux64_boot_stage0_status_code_write:
-   /* $t0 contains HWORD3 or'd with the status code already, so we only need */
-   /* to load the upper 2 bytes. */
-   lui   $t1,TUX64_BOOT_STAGE0_STATUS_HWORD2
+   /* $t0 contains the low 16 bits or'd with the status code already, so we */
+   /* only need to load the upper 2 bytes. */
+   lui   $t1,%hi(TUX64_BOOT_STAGE0_STATUS_WORD_LO)
    or    $t1,$t1,$t0
    jr    $ra
    sw    $t1,%lo(tux64_boot_stage0_status)+0x04($gp)
@@ -296,11 +234,11 @@ tux64_boot_stage0_start:
 
    /* reserve $gp for the start of RSP DMEM, used everywhere to cut down on */
    /* code */
-   lui   $gp,TUX64_BOOT_STAGE0_ADDRESS_RSP_DMEM_HI
+   lui   $gp,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM)
 
    /* initialize status identifier and code */
-   lui   $t2,TUX64_BOOT_STAGE0_STATUS_HWORD0
-   ori   $t2,$t2,TUX64_BOOT_STAGE0_STATUS_HWORD1
+   lui   $t2,%hi(TUX64_BOOT_STAGE0_STATUS_WORD_HI)
+   ori   $t2,$t2,%lo(TUX64_BOOT_STAGE0_STATUS_WORD_HI)
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
    jal   tux64_boot_stage0_status_code_write
    sw    $t2,%lo(tux64_boot_stage0_status)+0x00($gp)
@@ -324,7 +262,7 @@ tux64_boot_stage0_start:
 
    /* reserve $fp for the MI base address until the end of RDRAM */
    /* initialization */
-   lui   $fp,TUX64_BOOT_STAGE0_ADDRESS_MI_HI
+   lui   $fp,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_MI)
 
    /* detect the hardware revision, which is used in RDRAM initialization and */
    /* to detect ique support.  we then reserve $s0 for the hardware revision */
@@ -332,7 +270,7 @@ tux64_boot_stage0_start:
    /* or not.  we then skip RDRAM initialization if we're on ique, as there's */
    /* no RDRAM to initialize. */
    lui   $t0,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI
-   lw    $t1,TUX64_BOOT_STAGE0_ADDRESS_MI_VERSION_LO($fp)
+   lw    $t1,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_VERSION)($fp)
    ori   $t0,$t0,TUX64_BOOT_STAGE0_MI_VERSION_IQUE_LO
    xor   $s2,$t0,$t1
    andi  $s0,$t1,0x00ff
@@ -345,10 +283,10 @@ tux64_boot_stage0_start:
 
    /* reserve $s1 for the RI base address until the end of RDRAM */
    /* initialization */
-   lui   $s1,TUX64_BOOT_STAGE0_ADDRESS_RI_HI
+   lui   $s1,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RI)
 
    /* check if RDRAM has already been initialized */
-   lw    $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO($s1)
+   lw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_SELECT)($s1)
    andi  $t0,$t0,0x00ff # mask out undefined bits
    bne   $t0,$zero,tux64_boot_stage0_start.skip_rdram_initialization
 
@@ -358,19 +296,19 @@ tux64_boot_stage0_start:
    /* perform current calibration */
    addiu $t1,$zero,TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION /* branch delay slot */
    jal   tux64_boot_stage0_rdram_wait
-   sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_RI_CONFIG_LO($s1) /* branch delay slot */
-   sw    $zero,TUX64_BOOT_STAGE0_ADDRESS_RI_CURRENT_LOAD_LO($s1)
+   sw    $t1,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_CONFIG)($s1) /* branch delay slot */
+   sw    $zero,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_CURRENT_LOAD)($s1)
 
    /* configure rx/tx signal timings */
    addiu $t0,$zero,TUX64_BOOT_STAGE0_RI_RX_TX_TIMINGS
-   sw    $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_SELECT_LO($s1)
+   sw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_SELECT)($s1)
 
    /* reset all the chips */
    jal   tux64_boot_stage0_rdram_wait
-   sw    $zero,TUX64_BOOT_STAGE0_ADDRESS_RI_MODE_LO($s1) /* RI_MODE = reset, branch delay slot */
+   sw    $zero,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_MODE)($s1) /* RI_MODE = reset, branch delay slot */
    addiu $t0,$zero,TUX64_BOOT_STAGE0_RI_MODE_STANDARD
    jal   tux64_boot_stage0_rdram_wait
-   sw    $t0,TUX64_BOOT_STAGE0_ADDRESS_RI_MODE_LO($s1) /* branch delay slot */
+   sw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_MODE)($s1) /* branch delay slot */
 
    /* reserve $a2 for the spacing between RDRAM registers.  HW1 RDRAM, found */
    /* on early development boards, is spaced out 0x200 bytes.  Everything */
@@ -386,18 +324,18 @@ tux64_boot_stage0_start:
    /* into $t2. */
    lui   $t0,%hi(TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING)
    addiu $t1,$zero,TUX64_BOOT_STAGE0_MI_MODE_REPEAT_16
-   lui   $t2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_REGISTERS_BROADCAST_HI
+   lui   $t2,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST)
    ori   $t0,$t0,%lo(TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING)
-   sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_MI_MODE_LO($fp)
-   sw    $t0,TUX64_BOOT_STAGE0_RDRAM_REGISTER_DELAY_LO($t2)
+   sw    $t1,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
+   sw    $t0,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DELAY)($t2)
 
    /* initialize the device IDs for every chip */
    lui   $t3,%hi(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL)
    ori   $t3,$t3,%lo(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL)
    lui   $t4,%hi(TUX64_BOOT_STAGE0_RDRAM_MODE_INITIAL) /* no low-order bits, so we only need lui */
-   sw    $t3,TUX64_BOOT_STAGE0_RDRAM_REGISTER_DEVICE_ID_LO($t2)
-   sw    $t4,TUX64_BOOT_STAGE0_RDRAM_REGISTER_MODE_LO($t2)
-   sw    $zero,TUX64_BOOT_STAGE0_RDRAM_REGISTER_REF_ROW_LO($t2)
+   sw    $t3,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID)($t2)
+   sw    $t4,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE)($t2)
+   sw    $zero,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_REF_ROW)($t2)
 
    /* TODO: implement per-chip initialization loop */
 
@@ -418,10 +356,10 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_DETECT_TOTAL_MEMORY
 
-   lui   $a0,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI
+   lui   $a0,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
    addiu $s0,$zero,0
    lui   $s1,TUX64_BOOT_STAGE0_1MIB_HI
-   lui   $a2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_UNCACHED_HI + (TUX64_BOOT_STAGE0_1MIB_HI * 8)
+   lui   $a2,(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED >> 16) + (TUX64_BOOT_STAGE0_1MIB_HI * 8)
    tux64_boot_stage0_start.detect_total_memory:
       ld    $t3,0($a0)     /* load current value            */
       nor   $t4,$t3,$zero  /* flips all bits                */
@@ -455,41 +393,41 @@ tux64_boot_stage0_start:
 
    /* reserve $a0 for the PI base address and $a1 for the high-order */
    /* cartridge ROM offset */
-   lui   $a0,TUX64_BOOT_STAGE0_ADDRESS_PI_HI
-   lui   $a1,TUX64_BOOT_STAGE0_PI_DMA_CARTRIDGE_ROM_ADDRESS_HI
+   lui   $a0,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PI)
+   lui   $a1,%hi(TUX64_PLATFORM_MIPS_N64_PI_BUS_DOMAIN_OFFSET_DOM1_ROM)
 
    /* halt any active PI DMA operations.  this needs to be done because we */
    /* could be coming from a reset in the middle if a PI DMA operation. */
    addiu $t2,$zero,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
-   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
+   sw    $t2,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)($a0)
 
    /* initiate the transfer in the background, we don't need to invalidate */
    /* cache as we're initializing it below anyways.  also note we don't need */
    /* to wait on any previous PI DMA operations since we halted them above */
    addiu $t3,$zero,%lo(tux64_boot_stage1_boot_header)
-   addiu $t4,$zero,(TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES - 1)
+   addiu $t4,$zero,(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES - 1)
    ori   $t5,$a1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
-   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($a0)
-   sw    $t5,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($a0)
-   sw    $t4,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
+   sw    $t3,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_DRAM_ADDR)($a0)
+   sw    $t5,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_CART_ADDR)($a0)
+   sw    $t4,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_WR_LEN)($a0)
 
    /* initialize the CPU caches, setting each line to 'invalid', continue */
    /* loading the boot header in the background */
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_CPU_CACHE_INITIALIZE
-   lui   $t2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
-   lui   $t3,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
-   lui   $a2,TUX64_BOOT_STAGE0_ADDRESS_RDRAM_CACHED_HI
+   lui   $t2,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED)
+   lui   $t3,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED)
+   lui   $a2,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED)
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO /* write 'invalid' tag */
    mtc0  $zero,TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI /* must be zero, undefined on boot */
-   addiu $t2,$t2,(TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_ICACHE_LINE_COUNT)
-   addiu $t3,$t3,(TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE * TUX64_BOOT_STAGE0_DCACHE_LINE_COUNT)
+   addiu $t2,$t2,(TUX64_PLATFORM_MIPS_VR4300_CACHE_BYTES_PER_LINE_INSTRUCTION * TUX64_PLATFORM_MIPS_VR4300_CACHE_LINE_COUNT_INSTRUCTION)
+   addiu $t3,$t3,(TUX64_PLATFORM_MIPS_VR4300_CACHE_BYTES_PER_LINE_DATA        * TUX64_PLATFORM_MIPS_VR4300_CACHE_LINE_COUNT_DATA)
    tux64_boot_stage0_start.initialize_cache:
-      addiu $t2,$t2,-TUX64_BOOT_STAGE0_ICACHE_BYTES_PER_LINE
-      addiu $t3,$t3,-TUX64_BOOT_STAGE0_DCACHE_BYTES_PER_LINE
-      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_ICACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($t2)
+      addiu $t2,$t2,-TUX64_PLATFORM_MIPS_VR4300_CACHE_BYTES_PER_LINE_INSTRUCTION
+      addiu $t3,$t3,-TUX64_PLATFORM_MIPS_VR4300_CACHE_BYTES_PER_LINE_DATA
+      cache (TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TARGET_INSTRUCTION | (TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_STORE_TAG << 2)),0($t2)
       bne   $a2,$t2,tux64_boot_stage0_start.initialize_cache
-      cache (TUX64_BOOT_STAGE0_CACHE_TYPE_DCACHE | TUX64_BOOT_STAGE0_CACHE_INDEX_STORE_TAG),0($t3)
+      cache (TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TARGET_DATA | (TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_STORE_TAG << 2)),0($t3)
    /*tux64_boot_stage0_start.initialize_cache*/
 
    /* we will now reserve $a2 for the cached RDRAM base address. here are the */
@@ -508,32 +446,32 @@ tux64_boot_stage0_start:
 
    /* wait for the boot header to have finished loading */
    tux64_boot_stage0_start.pi_io_dma_spinlock.boot_header:
-      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
+      lw    $at,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)($a0)
       andi  $at,$at,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.boot_header
    /*tux64_boot_stage0_start.pi_io_dma_spinlock.boot_header*/
 
    /* verify the boot header magic is present */
-   lui   $t0,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_HI /* branch delay slot */
-   lw    $t1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_MAGIC($a2)
-   ori   $t0,$t0,TUX64_BOOT_STAGE0_BOOT_HEADER_MAGIC_LO
+   lui   $t0,%hi(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC) /* branch delay slot */
+   lw    $t1,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_MAGIC($a2)
+   ori   $t0,$t0,%lo(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC)
    bne   $t0,$t1,tux64_boot_stage0_halt
    
    /* calculate the header's checksum and verify it, this also gets the boot */
    /* header into cache so that rambus goes vroom vroom, also the next */
    /* instruction executes in the above branch delay slot */
-   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_CHECKSUM($a2)
-   addiu $t0,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA
+   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_CHECKSUM($a2)
+   addiu $t0,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA
    jal   tux64_boot_stage0_checksum_calculate_and_verify
-   addiu $t1,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_BYTES
+   addiu $t1,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES
 
    /* begin loading the stage-1 binary into memory */
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
 
    /* read the stage-1 required memory and length */
-   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY($a2)
-   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH($a2)
+   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY($a2)
+   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH($a2)
 
    /* check if we have enough memory to load the stage-1 binary. */
    addiu $t0,$k0,-TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_REQUIRED_ADDITIONAL_MEMORY
@@ -549,15 +487,15 @@ tux64_boot_stage0_start:
    addiu $t1,$zero,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO /* branch delay slot */
    ori   $t2,$a1,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
    addiu $t3,$k1,-1
-   sw    $t1,TUX64_BOOT_STAGE0_ADDRESS_PI_DRAM_ADDR_LO($a0)
-   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PI_CART_ADDR_LO($a0)
-   sw    $t3,TUX64_BOOT_STAGE0_ADDRESS_PI_WR_LEN_LO($a0)
+   sw    $t1,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_DRAM_ADDR)($a0)
+   sw    $t2,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_CART_ADDR)($a0)
+   sw    $t3,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_WR_LEN)($a0)
 
    /* calculate the total available memory for stage-1, reserving $s1 */
    subu  $s1,$s0,$k0
 
    /* load the boot flags and stage-1 checksum, reserving $fp */
-   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FLAGS($a2)
+   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FLAGS($a2)
 
    /* as a reminder, here are the current registers we care about:            */
    /* $a0       - PI MMIO registers base address                              */
@@ -577,7 +515,7 @@ tux64_boot_stage0_start:
 
    /* check if the NO_CHECKSUM flag is set, freeing $fp from this point */
    /* forward */
-   andi  $fp,$fp,TUX64_BOOT_STAGE0_FLAG_NO_CHECKSUM
+   andi  $fp,$fp,TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_CHECKSUM
    bne   $fp,$zero,tux64_boot_stage0_start.skip_checksum_stage1
 
    /* wait for the PI DMA operation to complete, then verify the checksum */
@@ -585,13 +523,13 @@ tux64_boot_stage0_start:
    addiu $t0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
 
    tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum:
-      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
+      lw    $at,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)($a0)
       andi  $at,$at,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum
    /*tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum*/
 
    addu  $t1,$t0,$k1 /* branch delay slot */
-   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_BOOT_STAGE0_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($a2)
+   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($a2)
    jal   tux64_boot_stage0_checksum_calculate_and_verify
 
    tux64_boot_stage0_start.skip_checksum_stage1:
@@ -608,12 +546,12 @@ tux64_boot_stage0_start:
 
    /* send the PIF terminate boot process command.  we use a dummy load */
    /* instruction to block the CPU until the SI bus isn't busy. */
-   lui   $k0,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_HI /* branch delay slot */
+   lui   $k0,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PIF_RAM) /* branch delay slot */
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
-   addiu $t2,$zero,TUX64_BOOT_STAGE0_PIF_COMMAND_TERMINATE_BOOT
-   lw    $zero,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($k0)
-   sw    $t2,TUX64_BOOT_STAGE0_ADDRESS_PIF_RAM_LO+0x3c($k0)
+   addiu $t2,$zero,TUX64_PLATFORM_MIPS_N64_PIF_COMMAND_TERMINATE_BOOT
+   lw    $zero,%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PIF_RAM)+0x3c($k0)
+   sw    $t2,%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PIF_RAM)+0x3c($k0)
 
    /* calculate the stage-1 start address and prepare to start stage-1 */
    jal   tux64_boot_stage0_status_code_write
@@ -622,7 +560,7 @@ tux64_boot_stage0_start:
    /* wait for PI DMA, as we could reach here if we skipped the stage-1 */
    /* checksum without waiting on PI DMA to complete. */
    tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start:
-      lw    $at,TUX64_BOOT_STAGE0_ADDRESS_PI_STATUS($a0)
+      lw    $at,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)($a0)
       andi  $at,$at,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
    /*tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start*/
@@ -630,7 +568,7 @@ tux64_boot_stage0_start:
    /* initialize the stack and start stage-1 */
    addiu $k0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO /* branch delay slot */
    jr    $k0
-   addiu $sp,$a2,TUX64_BOOT_STAGE0_STAGE_1_STACK_SIZE
+   addiu $sp,$a2,TUX64_BOOT_STAGE1_STACK_BYTES
 /*tux64_boot_stage0_start*/
 
    /* TODO: add multiple of these, one for each CIC revision.  only do this */

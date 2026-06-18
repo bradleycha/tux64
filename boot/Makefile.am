@@ -65,6 +65,8 @@ AM_CFLAGS = \
 	-Wall \
 	-Wextra \
 	-Wpedantic
+AM_CCASFLAGS = \
+	-I $(top_srcdir)/src
 AM_LDFLAGS = \
 	-nostartfiles \
 	-nostdlib
@@ -111,6 +113,7 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/stage1.h \
 	src/tux64-boot/stage1/boot-header.c \
 	src/tux64-boot/stage1/boot-header.h \
+	src/tux64-boot/stage1/stack.h \
 	src/tux64-boot/stage1/fsm.c \
 	src/tux64-boot/stage1/fsm.h \
 	src/tux64-boot/stage1/interrupt.c \

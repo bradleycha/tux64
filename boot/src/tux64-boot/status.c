@@ -10,10 +10,6 @@
 
 #include <tux64/endian.h>
 
-#define TUX64_BOOT_STATUS_MAGIC_HI \
-   (0x53544147u) /* STAG */
-#define TUX64_BOOT_STATUS_MAGIC_LO \
-   (0x45003a00u) /* Ex:x */
 
 struct Tux64BootStatusCode {
    Tux64UInt32 hi;

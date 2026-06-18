@@ -12,6 +12,24 @@
 #include "tux64-boot/tux64-boot.h"
 
 /*----------------------------------------------------------------------------*/
+/* The high and low order magic words used for the status code, before        */
+/* formatting in the stage and code.                                          */
+/*----------------------------------------------------------------------------*/
+#define TUX64_BOOT_STATUS_MAGIC_HI \
+   (0x53544147u) /* STAG */
+#define TUX64_BOOT_STATUS_MAGIC_LO \
+   (0x45003a00u) /* Ex:x */
+
+/*----------------------------------------------------------------------------*/
+/* The number of bytes used for the status code.                              */
+/*----------------------------------------------------------------------------*/
+#define TUX64_BOOT_STATUS_BYTES\
+   (8u)
+
+#ifndef __ASSEMBLER__
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
 /* Initializes the low half of the status code word, which is static and      */
 /* doesn't change based on boot status.                                       */
 /*----------------------------------------------------------------------------*/
@@ -27,6 +45,9 @@ tux64_boot_status_code_write(
    char stage,
    char code
 );
+
+/*----------------------------------------------------------------------------*/
+#endif /* __ASSEMBLER__ */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STATUS_H */
