@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/vr4300/cache.h - Header for VR4300 cache       */
@@ -25,12 +25,45 @@
    (16u)
 
 /*----------------------------------------------------------------------------*/
+/* Cache type as used with the cache instruction.                             */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TARGET_INSTRUCTION\
+   (0x00u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TARGET_DATA\
+   (0x01u)
+
+/*----------------------------------------------------------------------------*/
+/* Cache operation as used with the cache instruction.                        */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_INVALIDATE\
+   (0x00u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_WRITE_BACK_INVALIDATE\
+   (0x00u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_LOAD_TAG\
+   (0x01u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_INDEX_STORE_TAG\
+   (0x02u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_CREATE_DIRTY_EXCLUSIVE\
+   (0x03u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_HIT_INVALIDATE\
+   (0x04u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_HIT_WRITE_BACK_INVALIDATE\
+   (0x05u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_FILL\
+   (0x05u)
+#define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION_TYPE_HIT_WRITE_BACK\
+   (0x06u)
+
+/*----------------------------------------------------------------------------*/
 /* The total number of cache lines.                                           */
 /*----------------------------------------------------------------------------*/
 #define TUX64_PLATFORM_MIPS_VR4300_CACHE_LINE_COUNT_INSTRUCTION\
    (512u)
 #define TUX64_PLATFORM_MIPS_VR4300_CACHE_LINE_COUNT_DATA\
    (512u)
+
+#ifndef __ASSEMBLER__
+/*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* Low-level wrappers for the cache instruction.  These may have side-effects */
@@ -91,6 +124,9 @@ void
 tux64_platform_mips_vr4300_cache_operation_data_hit_write_back(
    const void * address
 );
+
+/*----------------------------------------------------------------------------*/
+#endif /* __ASSEMBLER__ */
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */

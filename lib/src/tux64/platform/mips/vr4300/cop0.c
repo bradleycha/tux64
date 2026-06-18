@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/vr4300/cop0.c - Implementations for VR4300     */
@@ -14,14 +14,17 @@
 #if TUX64_PLATFORM_MIPS_VR4300_ENABLE
 /*----------------------------------------------------------------------------*/
 
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_ENCODE_REGISTER(identifier)\
+   #identifier
+
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_READ(output, identifier)\
    __asm__ (\
-      "mfc0 %0,$" identifier\
+      "mfc0 %0,$" TUX64_PLATFORM_MIPS_VR4300_COP0_ENCODE_REGISTER(identifier)\
       : "=r" (output)\
    );
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_WRITE(value, identifier)\
    __asm__ volatile (\
-      "mtc0 %0,$" identifier\
+      "mtc0 %0,$" TUX64_PLATFORM_MIPS_VR4300_COP0_ENCODE_REGISTER(identifier)\
       :: "r" (value)\
    );
 

@@ -172,6 +172,9 @@
       TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_PIF_RAM\
    )
 
+#ifndef __ASSEMBLER__
+/*----------------------------------------------------------------------------*/
+
 /*----------------------------------------------------------------------------*/
 /* Converts an address between various memory map segment types.              */
 /*----------------------------------------------------------------------------*/
@@ -199,6 +202,9 @@ const volatile void *
 tux64_platform_mips_n64_memory_map_direct_uncached_to_direct_cached(
    const volatile void * address
 );
+
+/*----------------------------------------------------------------------------*/
+#endif /* __ASSEMBLER__ */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_H */

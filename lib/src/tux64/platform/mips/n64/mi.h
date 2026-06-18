@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/n64/mi.h - MIPS Interface (MI) header.         */
@@ -17,6 +17,11 @@
    (\
       TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_MI +\
       0x00000000u\
+   )
+#define TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_VERSION\
+   (\
+      TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_MI +\
+      0x00000004u\
    )
 #define TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_INTERRUPT\
    (\

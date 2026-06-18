@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/vr4300/cop0.h - Header for VR4300 co-processor */
@@ -21,55 +21,58 @@
 /* assembly template strings.                                                 */
 /*----------------------------------------------------------------------------*/
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_INDEX\
-   "0"
+   0
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_RANDOM\
-   "1"
+   1
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ENTRYLO0\
-   "2"
+   2
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ENTRYLO1\
-   "3"
+   3
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CONTEXT\
-   "4"
+   4
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_PAGEMASK\
-   "5"
+   5
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_WIRED\
-   "6"
+   6
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_BADVADDR\
-   "8"
+   8
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_COUNT\
-   "9"
+   9
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ENTRYHI\
-   "10"
+   10
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_COMPARE\
-   "11"
+   11
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_STATUS\
-   "12"
+   12
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CAUSE\
-   "13"
+   13
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_EPC\
-   "14"
+   14
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_PRID\
-   "15"
+   15
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CONFIG\
-   "16"
+   16
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_LLADDR\
-   "17"
+   17
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_WATCHLO\
-   "18"
+   18
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_WATCHHI\
-   "19"
+   19
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_XCONTEXT\
-   "20"
+   20
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_PARITY_ERROR\
-   "26"
+   26
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CACHE_ERROR\
-   "27"
+   27
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGLO\
-   "28"
+   28
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGHI\
-   "29"
+   29
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ERROREPC\
-   "30"
+   30
+
+#ifndef __ASSEMBLER__
+/*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* Reads directly from or writes directly to various co-processor 0           */
@@ -253,6 +256,9 @@ enum Tux64PlatformMipsVr4300Cop0ExceptionCode
 tux64_platform_mips_vr4300_cop0_cause_exception_code(
    Tux64UInt32 cause
 );
+
+/*----------------------------------------------------------------------------*/
+#endif /* __ASSEMBLER__ */
 
 /*----------------------------------------------------------------------------*/
 /* Various bitflags for various co-processor 0 registers.                     */

@@ -6,6 +6,9 @@
 /*    bootloader header.                                                      */
 /*----------------------------------------------------------------------------*/
 
+/* TODO: run the preprocessor on the linker script to take these constants */
+/* from boot.h instead of duplicating code. */
+
 /* the length of the bootloader header, in bytes */
 TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES
    = 0x00000054;

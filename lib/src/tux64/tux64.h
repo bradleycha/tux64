@@ -21,7 +21,9 @@
    (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
 #endif /* TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG */
 
+#ifndef __ASSEMBLER__
 #include "tux64/types.h"
+#endif /* __ASSEMBLER__ */
 
 #define TUX64_NULLPTR_SENTINEL\
    (0u)
