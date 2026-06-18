@@ -62,7 +62,7 @@
 #define TUX64_PLATFORM_MIPS_VR4300_CACHE_LINE_COUNT_DATA\
    (512u)
 
-#ifndef __ASSEMBLER__
+#if !TUX64_PREPROCESSOR_ONLY
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
@@ -126,7 +126,7 @@ tux64_platform_mips_vr4300_cache_operation_data_hit_write_back(
 );
 
 /*----------------------------------------------------------------------------*/
-#endif /* __ASSEMBLER__ */
+#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */

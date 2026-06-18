@@ -71,7 +71,7 @@
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_ERROREPC\
    30
 
-#ifndef __ASSEMBLER__
+#if !TUX64_PREPROCESSOR_ONLY
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
@@ -258,7 +258,7 @@ tux64_platform_mips_vr4300_cop0_cause_exception_code(
 );
 
 /*----------------------------------------------------------------------------*/
-#endif /* __ASSEMBLER__ */
+#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 /* Various bitflags for various co-processor 0 registers.                     */

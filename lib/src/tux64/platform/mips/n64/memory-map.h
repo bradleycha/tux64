@@ -172,7 +172,7 @@
       TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_PIF_RAM\
    )
 
-#ifndef __ASSEMBLER__
+#if !TUX64_PREPROCESSOR_ONLY
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
@@ -204,7 +204,7 @@ tux64_platform_mips_n64_memory_map_direct_uncached_to_direct_cached(
 );
 
 /*----------------------------------------------------------------------------*/
-#endif /* __ASSEMBLER__ */
+#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_H */
