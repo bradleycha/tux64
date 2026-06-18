@@ -20,6 +20,13 @@ stage1_STRINGS = \
 stage1_LOGO = \
 	$(top_builddir)/src/tux64-boot/stage1/logo.bin.c
 
+stage0_LDSCRIPT = \
+	$(top_srcdir)/src/tux64-boot/stage0/stage0.ld
+stage1_LDSCRIPT = \
+	$(top_srcdir)/src/tux64-boot/stage1/stage1.ld
+stage2_LDSCRIPT = \
+	$(top_srcdir)/src/tux64-boot/stage2/stage2.ld
+
 stage0_ELF = \
 	$(top_builddir)/stage0
 stage1_ELF = \
@@ -155,13 +162,13 @@ EXTRA_DIST = \
 
 stage0_LDFLAGS = \
 	$(AM_LDFLAGS) \
-	-T $(top_srcdir)/src/tux64-boot/stage0/stage0.ld
+	-T $(stage0_LDSCRIPT)
 stage1_LDFLAGS = \
 	$(AM_LDFLAGS) \
-	-T $(top_srcdir)/src/tux64-boot/stage1/stage1.ld
+	-T $(stage1_LDSCRIPT)
 stage2_LDFLAGS = \
 	$(AM_LDFLAGS) \
-	-T $(top_srcdir)/src/tux64-boot/stage2/stage2.ld
+	-T $(stage2_LDSCRIPT)
 
 pkgdata_DATA = \
 	$(BIN_FILES) $(SYM_FILES)
@@ -187,6 +194,10 @@ $(stage1_LOGO) : $(top_srcdir)/src/tux64-boot/stage1/logo.rgba8888.data
 # enabled this works fine, but if we disable dependency tracking, this breaks
 # in multiple places.  figure out why this happens because this shouldn't
 # happen.
+
+$(stage0_ELF) : $(stage0_LDSCRIPT)
+$(stage1_ELF) : $(stage1_LDSCRIPT)
+$(stage1_ELF) : $(stage2_LDSCRIPT)
 
 $(stage0_BIN) : $(stage0_ELF)
 	$(OBJCOPY) $< --dump-section .rsp_dmem=$@ && chmod -x $@
