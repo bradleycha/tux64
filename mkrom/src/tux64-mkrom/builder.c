@@ -170,15 +170,18 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    struct Tux64MkromBuilderMeasureResult result;
    Tux64UInt32 cmdline_bytes;
    Tux64UInt32 offset;
+   union Tux64Int32 magic;
 
    cmdline_bytes = (input->kernel_command_line.characters + TUX64_LITERAL_UINT32(1u)) * TUX64_LITERAL_UINT32(sizeof(char));
 
    offset = TUX64_LITERAL_UINT32(0x00001000u + sizeof(struct Tux64PlatformMipsN64BootHeader));
 
+   magic.uint = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC), TUX64_ENDIAN_FORMAT_BIG);
+
    tux64_memory_copy(
       boot_header->magic,
-      TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC,
-      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES)
+      magic.bytes,
+      TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES
    );
 
    boot_header->data.flags = tux64_mkrom_builder_store_item_uint32(input->boot_header_flags);
