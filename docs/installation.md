@@ -829,11 +829,9 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       --enable-ique
 )
 
-make -j1
-make -j1 install
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
 ```
-
-Notice how we only build with a single job.  This is because with the current version of `tux64-boot`, multithreaded builds are broken and result in strange behavior.
 
 ### Chapter 6.2 - Configuring the ROM image
 
