@@ -7,7 +7,7 @@
 
 #ifndef _TUX64_H
 #define _TUX64_H
-/*------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 
 /* this must be included first so all future includes have this available*/
 #include "tux64/config.h"
@@ -21,9 +21,17 @@
    (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
 #endif /* TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG */
 
-#ifndef __ASSEMBLER__
+/*----------------------------------------------------------------------------*/
+/* Tells whether only preprocessor code should be considered or not.  This is */
+/* useful for creating headers which can be included in assembler source and  */
+/* C source files.                                                            */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PREPROCESSOR_ONLY\
+   (__ASSEMBLER__)
+
+#if !TUX64_PREPROCESSOR_ONLY
 #include "tux64/types.h"
-#endif /* __ASSEMBLER__ */
+#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 #define TUX64_NULLPTR_SENTINEL\
    (0u)
@@ -52,6 +60,9 @@
 #define TUX64_LINKER_SYMBOL(identifier) \
    extern Tux64UInt8 identifier []
 
-/*------------------------------------------------------------------------------*/
+#define TUX64_ASSERT_STATIC(condition)\
+   __extension__ _Static_assert((condition), "static assertion failed! " #condition)
+
+/*----------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
 
