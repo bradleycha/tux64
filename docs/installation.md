@@ -119,10 +119,10 @@ Every package listed should be stored uncompressed inside of `sources/`, with th
 | Package | Version | Notes |
 |---------|---------|-------|
 | [tux64](https://github.com/bradleycha/tux64/) | master | Currently no stable release.  Use `git` to clone the latest version of the 'master' branch.  If cloning directly from GitHub, you must run ```autoreconf -i```  for each sub-project which contains a GNU Autoconf script (```configure.ac```) |
-| [binutils](https://www.gnu.org/software/binutils/) | 2.46 | |
+| [binutils](https://www.gnu.org/software/binutils/) | 2.46.1 | |
 | [gcc](https://gcc.gnu.org/) | 16.1.0 | |
 | [musl](https://musl.libc.org/) | 1.2.6 | |
-| [linux](https://kernel.org/) | 6.18.26 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
+| [linux](https://kernel.org/) | 6.18.35 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 
 ### Chapter 2.3 - Apply Patches
 
@@ -680,13 +680,6 @@ Executable file formats  --->
   [*] Kernel support for scripts starting with #!
 
 Device drivers  --->
-  Input device support  --->
-    [ ]   Keyboards  ----
-    [ ]   Mice  ----
-
-    Hardware I/O ports  --->
-      [ ] Serial I/O support
-
   Character devices  --->
     [*] Enable TTY
     [*]   Virtual terminal
@@ -711,6 +704,13 @@ Device drivers  --->
       [ ] Standard black and white Linux logo
       [ ] Standard 16-color Linux logo
       [*] Standard 224-color Linux logo
+
+  Input device support  --->
+    [ ]   Keyboards  ----
+    [ ]   Mice  ----
+
+    Hardware I/O ports  --->
+      [ ] Serial I/O support
 
   [ ] Device Tree and Open Firmware support
   [ ] HID bus support
