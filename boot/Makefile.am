@@ -190,30 +190,33 @@ $(stage1_LOGO) : $(top_srcdir)/src/tux64-boot/stage1/logo.rgba8888.data
 		--name-pixels 			TUX64_BOOT_STAGE1_LOGO_IMAGE_PIXELS_COMPRESSED \
 		--name-color-table	TUX64_BOOT_STAGE1_LOGO_IMAGE_COLOR_TABLE
 
-# TODO: something is not right here.  if we configure with dependency tracking
-# enabled this works fine, but if we disable dependency tracking, this breaks
-# in multiple places.  figure out why this happens because this shouldn't
-# happen.
-
 $(stage0_ELF) : $(stage0_LDSCRIPT)
 $(stage1_ELF) : $(stage1_LDSCRIPT)
 $(stage1_ELF) : $(stage2_LDSCRIPT)
 
+# we output to /dev/null because for some stupid reason, objcopy zeroes out
+# the infile while running, then writes it back afterwards.  this results in
+# strange build errors when running parallel jobs.  due to the funky syntax
+# of --dump-section, we can't just specify $@ as the outfile.  by specifying
+# /dev/null, objcopy leaves $< intact, thus fixing the concurrency issue.
+# 
+# makes sense? no? that's because it doesn't.
+
 $(stage0_BIN) : $(stage0_ELF)
-	$(OBJCOPY) $< --dump-section .rsp_dmem=$@ && chmod -x $@
+	$(OBJCOPY) $< /dev/null --dump-section .rsp_dmem=$@ && chmod -x $@
 
 $(stage0_BIN_CIC) : $(stage0_ELF)
-	$(OBJCOPY) $< --dump-section .cic=$@ && chmod -x $@
+	$(OBJCOPY) $< /dev/null --dump-section .cic=$@ && chmod -x $@
 
 $(stage1_BIN) : $(stage1_ELF)
-	$(OBJCOPY) $< --dump-section .rdram=$@ && chmod -x $@
+	$(OBJCOPY) $< /dev/null --dump-section .rdram=$@ && chmod -x $@
 
 # TODO: parse the elf files in mkrom, this command is hacky and ridiculous
 $(stage1_BIN_BSS) : $(stage1_ELF)
 	$(OBJDUMP) -h $< | grep -e "\.rdram\.bss" | grep -e "[0-9a-fA-F]\{8\}" -o | head -n1 > $@
 
 $(stage2_BIN) : $(stage2_ELF)
-	$(OBJCOPY) $< --dump-section .rsp_imem=$@ && chmod -x $@
+	$(OBJCOPY) $< /dev/null --dump-section .rsp_imem=$@ && chmod -x $@
 
 $(stage0_SYM) : $(stage0_ELF)
 	$(OBJCOPY) --only-keep-debug $< $@ && chmod -x $@
