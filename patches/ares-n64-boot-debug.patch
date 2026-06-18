@@ -25,7 +25,7 @@ index f6c37c8..693cfce 100644
        //skipped. if we are forcing it to be skipped, we should also consume
        //enough cycles to not inadvertently speed up the boot process.
 diff --git a/ares/n64/ri/ri.cpp b/ares/n64/ri/ri.cpp
-index 5267965..7d3582e 100644
+index d98778a..39c5af8 100644
 --- a/ares/n64/ri/ri.cpp
 +++ b/ares/n64/ri/ri.cpp
 @@ -19,7 +19,7 @@ auto RI::unload() -> void {
@@ -38,7 +38,7 @@ index 5267965..7d3582e 100644
      io.mode    = 0x0e;
      io.config  = 0x40;
 diff --git a/ares/n64/system/system.cpp b/ares/n64/system/system.cpp
-index 1efa678..57177c1 100644
+index 74c2e1e..e4d5bf7 100644
 --- a/ares/n64/system/system.cpp
 +++ b/ares/n64/system/system.cpp
 @@ -44,6 +44,8 @@ auto option(string name, string value) -> bool {
@@ -64,7 +64,7 @@ index 1f96f18..11996b0 100644
    u8 controllerPakBankCount = 1;
  
 diff --git a/desktop-ui/emulator/nintendo-64.cpp b/desktop-ui/emulator/nintendo-64.cpp
-index dedbfc4..9e3c09c 100644
+index 2702272..48c06e7 100644
 --- a/desktop-ui/emulator/nintendo-64.cpp
 +++ b/desktop-ui/emulator/nintendo-64.cpp
 @@ -116,6 +116,8 @@ auto Nintendo64::load() -> LoadResult {
@@ -90,12 +90,12 @@ index ae718d9..67223d5 100644
  
    if(!ares::Nintendo64::load(root, {"[Nintendo] Nintendo 64DD (", region, ")"})) return otherError;
 diff --git a/desktop-ui/settings/options.cpp b/desktop-ui/settings/options.cpp
-index b1969b6..e12699a 100644
+index 27cc03f..c6344bc 100644
 --- a/desktop-ui/settings/options.cpp
 +++ b/desktop-ui/settings/options.cpp
-@@ -44,6 +44,18 @@ auto OptionSettings::construct() -> void {
+@@ -51,6 +51,18 @@ auto OptionSettings::construct() -> void {
    nintendo64ExpansionPakLayout.setAlignment(1).setPadding(12_sx, 0);
-       nintendo64ExpansionPakHint.setText("Enable/Disable the 4MB Expansion Pak").setFont(Font().setSize(7.0)).setForegroundColor(SystemColor::Sublabel);
+     nintendo64ExpansionPakHint.setText("Enable/Disable the 4MB Expansion Pak").setFont(Font().setSize(7.0)).setForegroundColor(SystemColor::Sublabel);
  
 +  nintendo64InitializeRdramOption.setText("Pre-Initialize RDRAM").setChecked(settings.nintendo64.initializeRdram).onToggle([&] {
 +    settings.nintendo64.initializeRdram = nintendo64InitializeRdramOption.checked();
@@ -109,14 +109,14 @@ index b1969b6..e12699a 100644
 +  nintendo64EnforceIpl2ChecksumLayout.setAlignment(1).setPadding(12_sx, 0);
 +      nintendo64EnforceIpl2ChecksumHint.setText("Enable/Disable halting the CPU when IPL2 checksum verification of IPL3 fails").setFont(Font().setSize(7.0)).setForegroundColor(SystemColor::Sublabel);
 +
-   for (auto& opt : array<string[4]>{"32KiB (Default)", "128KiB (Datel 1Meg)", "512KiB (Datel 4Meg)", "1984KiB (Maximum)"}) {
+   for(auto& opt : array<string[4]>{"32KiB (Default)", "128KiB (Datel 1Meg)", "512KiB (Datel 4Meg)", "1984KiB (Maximum)"}) {
      ComboButtonItem item{&nintendo64ControllerPakBankOption};
      item.setText(opt);
 diff --git a/desktop-ui/settings/settings.cpp b/desktop-ui/settings/settings.cpp
-index 0c7f8d2..4f42b33 100644
+index adb061a..681a9c5 100644
 --- a/desktop-ui/settings/settings.cpp
 +++ b/desktop-ui/settings/settings.cpp
-@@ -127,6 +127,8 @@ auto Settings::process(bool load) -> void {
+@@ -130,6 +130,8 @@ auto Settings::process(bool load) -> void {
    bind(boolean, "DebugServer/UseIPv4", debugServer.useIPv4);
  
    bind(boolean, "Nintendo64/ExpansionPak", nintendo64.expansionPak);
@@ -126,10 +126,10 @@ index 0c7f8d2..4f42b33 100644
  
    bind(boolean, "GameBoyAdvance/Player", gameBoyAdvance.player);
 diff --git a/desktop-ui/settings/settings.hpp b/desktop-ui/settings/settings.hpp
-index a947bd0..5669c99 100644
+index db32b01..9477f79 100644
 --- a/desktop-ui/settings/settings.hpp
 +++ b/desktop-ui/settings/settings.hpp
-@@ -104,6 +104,8 @@ struct Settings : Markup::Node {
+@@ -115,6 +115,8 @@ struct Settings : Markup::Node {
  
    struct Nintendo64 {
      bool expansionPak = true;
@@ -138,10 +138,10 @@ index a947bd0..5669c99 100644
      u8 controllerPakBankCount = 1;
      string controllerPakBankString = "32KiB (Default)";
    } nintendo64;
-@@ -269,6 +271,12 @@ struct OptionSettings : VerticalLayout {
+@@ -284,6 +286,12 @@ struct OptionSettings : VerticalLayout {
      HorizontalLayout nintendo64ExpansionPakLayout{this, Size{~0, 0}, 5};
        CheckLabel nintendo64ExpansionPakOption{&nintendo64ExpansionPakLayout, Size{0, 0}, 5};
-       Label nintendo64ExpansionPakHint{&nintendo64ExpansionPakLayout, Size{0, 0}};
+       Label nintendo64ExpansionPakHint{&nintendo64ExpansionPakLayout, Size{0, layoutVertSize}};
 +    HorizontalLayout nintendo64InitializeRdramLayout{this, Size{~0, 0}, 5};
 +      CheckLabel nintendo64InitializeRdramOption{&nintendo64InitializeRdramLayout, Size{0, 0}, 5};
 +      Label nintendo64InitializeRdramHint{&nintendo64InitializeRdramLayout, Size{0, 0}};
@@ -149,5 +149,5 @@ index a947bd0..5669c99 100644
 +      CheckLabel nintendo64EnforceIpl2ChecksumOption{&nintendo64EnforceIpl2ChecksumLayout, Size{0, 0}, 5};
 +      Label nintendo64EnforceIpl2ChecksumHint{&nintendo64EnforceIpl2ChecksumLayout, Size{0, 0}};
      HorizontalLayout nintendo64ControllerPakBankLayout{this, Size{~0, 0}, 5};
-       Label nintendo64ControllerPakBankLabel{&nintendo64ControllerPakBankLayout, Size{0, 0}};
+       Label nintendo64ControllerPakBankLabel{&nintendo64ControllerPakBankLayout, Size{0, layoutVertSize}};
        ComboButton nintendo64ControllerPakBankOption{&nintendo64ControllerPakBankLayout, Size{0, 0}};
