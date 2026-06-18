@@ -11,6 +11,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64/tux64.h"
+#include "tux64/math.h"
 
 /* the number of bytes per word. we choose this so all data will be 2-byte */
 /* aligned, which is the smallest required alignment to work with PI DMA. */
@@ -40,7 +41,7 @@
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES\
    (0x54u)
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16\
-   (0x60u)
+   (TUX64_MATH_ALIGN_FORWARD(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES, 16))
 
 /*----------------------------------------------------------------------------*/
 /* The offset of each field in the boot header.                               */

@@ -19,6 +19,17 @@
    (((dividend) + (divisor) - 1u) / (divisor))
 
 /*----------------------------------------------------------------------------*/
+/* Aligns a value forward to a boundary on literals.  Only use this if you    */
+/* can't use the non-preprocessor functions, for example in #define           */
+/* statements.                                                                */
+/*----------------------------------------------------------------------------*/
+#define TUX64_MATH_ALIGN_FORWARD(value, alignment)\
+   (TUX64_MATH_CEIL_DIVIDE(value, alignment) * (alignment))
+
+#if !TUX64_PREPROCESSOR_ONLY
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
 /* Performs integer ceiling division.                                         */
 /*----------------------------------------------------------------------------*/
 Tux64UInt8
@@ -46,14 +57,6 @@ tux64_math_ceil_divide_uintptr(
    Tux64UIntPtr dividend,
    Tux64UIntPtr divisor
 );
-
-/*----------------------------------------------------------------------------*/
-/* Aligns a value forward to a boundary on literals.  Only use this if you    */
-/* can't use the non-preprocessor functions, for example in #define           */
-/* statements.                                                                */
-/*----------------------------------------------------------------------------*/
-#define TUX64_MATH_ALIGN_FORWARD(value, alignment)\
-   (TUX64_MATH_CEIL_DIVIDE(value, alignment) * (alignment))
 
 /*----------------------------------------------------------------------------*/
 /* Aligns a value forward to a boundary.                                      */
@@ -112,6 +115,9 @@ tux64_math_absolute_difference_uintptr(
    Tux64UIntPtr lhs,
    Tux64UIntPtr rhs
 );
+
+/*----------------------------------------------------------------------------*/
+#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_MATH_H */
