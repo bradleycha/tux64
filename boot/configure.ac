@@ -75,6 +75,11 @@ AC_PROG_RANLIB
 AC_CHECK_HEADER([stddef.h])
 AC_CHECK_HEADER([tux64/tux64.h])
 
+AC_ARG_ENABLE([debug],
+   AS_HELP_STRING([--enable-debug], [Enable debug assertions]),
+   [tux64_boot_config_debug=1],
+   [tux64_boot_config_debug=0]
+)
 AC_ARG_ENABLE([status],
    AS_HELP_STRING([--enable-status], [Write status codes to a fixed memory location during the boot process]),
    [tux64_boot_config_status=1],
@@ -206,6 +211,10 @@ tux64_boot_config_color_foreground_enum=$(tux64_boot_enumerate_color $CONFIG_COL
 tux64_boot_config_color_background_enum=$(tux64_boot_enumerate_color $CONFIG_COLOR_BACKGROUND "background") || exit $?
 tux64_boot_config_delay_ticks=$CONFIG_DELAY_TICKS
 
+AC_DEFINE_UNQUOTED([CONFIG_DEBUG],
+   [$tux64_boot_config_debug],
+   [Enable debug assertions]
+)
 AC_DEFINE_UNQUOTED([CONFIG_STATUS],
    [$tux64_boot_config_status],
    [Write status codes to a fixed memory location during the boot process]
