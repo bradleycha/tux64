@@ -145,6 +145,7 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/start.c \
+	src/tux64-boot/stage1/stack.h \
 	src/tux64-boot/stage2/stage2.c \
 	src/tux64-boot/stage2/stage2.h \
 	src/tux64-boot/stage2/status.c \
@@ -160,7 +161,8 @@ EXTRA_DIST = \
 	src/tux64-boot/stage1/fontmap.rgb888.data \
 	src/tux64-boot/stage1/strings.txt \
 	src/tux64-boot/stage1/logo.rgba8888.data \
-	src/tux64-boot/stage2/stage2.ld
+	src/tux64-boot/stage2/stage2.ld \
+	src/tux64-boot/stage1/stack.ld
 
 stage0_LDFLAGS = \
 	$(AM_LDFLAGS) \
