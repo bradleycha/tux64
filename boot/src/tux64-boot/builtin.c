@@ -157,19 +157,16 @@ abort(void) {
    TUX64_UNREACHABLE;
 }
 
-/* good lord, don't even get me started on the multi-day LTO debugging hell */
-/* required to arrive at this horrendous macro garbage.  trust me, i tried */
-/* to get anything but this, but this shit was the only thing that worked. */
-#define TUX64_BOOT_BUILTIN_FORCE_LINKAGE(identifier) \
-   __asm__ volatile ("" :: "X" (identifier))
-
 void
 tux64_boot_builtin_link(void) {
-   TUX64_BOOT_BUILTIN_FORCE_LINKAGE(memcpy);
-   TUX64_BOOT_BUILTIN_FORCE_LINKAGE(memmove);
-   TUX64_BOOT_BUILTIN_FORCE_LINKAGE(memset);
-   TUX64_BOOT_BUILTIN_FORCE_LINKAGE(memcmp);
-   TUX64_BOOT_BUILTIN_FORCE_LINKAGE(abort);
+   /* chase from the future - this code is still horrendous fuck, but at */
+   /* least we could outline this code to tux64-lib due to it having more */
+   /* than one use-case. */
+   TUX64_EXPLICIT_DEPENDENCY(memcpy);
+   TUX64_EXPLICIT_DEPENDENCY(memmove);
+   TUX64_EXPLICIT_DEPENDENCY(memset);
+   TUX64_EXPLICIT_DEPENDENCY(memcmp);
+   TUX64_EXPLICIT_DEPENDENCY(abort);
    return;
 }
 
