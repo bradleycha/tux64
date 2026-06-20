@@ -11,12 +11,16 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
+#include "tux64-boot/load.h"
 
 /*----------------------------------------------------------------------------*/
 /* The main function for the stage-2 bootloader.                              */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_stage2_main(void)
+tux64_boot_stage2_main(
+   Tux64UInt32 memory_total,
+   Tux64BootLoadStatus load_status
+)
 __attribute__((noreturn));
 
 /*----------------------------------------------------------------------------*/

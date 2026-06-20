@@ -15,6 +15,7 @@
 #include <tux64/checksum.h>
 #include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/pi.h"
+#include "tux64-boot/rsp.h"
 #include "tux64-boot/cache.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/kernel.h"
@@ -28,6 +29,7 @@
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
+#include "tux64-boot/stage2/stack.h"
 
 #define TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(identifier) \
    static void identifier (struct Tux64BootStage1Fsm *)
@@ -42,6 +44,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_delay);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_halt);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_load_file);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_boot_kernel);
+TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_boot_stage2);
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_halt);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_start);
@@ -51,6 +54,8 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_lo
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_stage2);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel_wait);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_stage2);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_stage2_wait);
 
 static Tux64Boolean
 tux64_boot_stage1_fsm_checksum_enable(void) {
@@ -464,14 +469,12 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    stage2 = tux64_boot_stage1_boot_header_file_bootloader_stage2();
 
-   /* TODO: boot stage-2 instead of the kernel. */
-
    tux64_boot_stage1_fsm_transition_load_file(
       fsm,
       stage2,
       (Tux64UInt32)(Tux64UIntPtr)fsm->globals.stage2.dma_buffer,
       &tux64_boot_stage1_strings_file_bootloader_stage2,
-      tux64_boot_stage1_fsm_transition_boot_kernel
+      tux64_boot_stage1_fsm_transition_boot_stage2
    );
    return;
 }
@@ -633,6 +636,30 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boo
    return;
 }
 
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boot_stage2) {
+   (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_boot_stage2);
+
+   /* same comments as above. */
+   if (TUX64_BOOT_CONFIG_DELAY) {
+      tux64_boot_stage1_fsm_delay(
+         fsm,
+         tux64_boot_stage1_fsm_transition_boot_stage2_wait,
+         TUX64_LITERAL_UINT32(1u)
+      );
+   } else {
+      tux64_boot_stage1_fsm_transition_boot_stage2_wait(fsm);
+   }
+
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boot_stage2_wait) {
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_START_STAGE2);
+
+   fsm->state = tux64_boot_stage1_fsm_state_boot_stage2;
+   return;
+}
+
 static void
 tux64_boot_stage1_fsm_reset_hardware(void) {
    /* since we're coming from either the start of a new frame or after */
@@ -656,6 +683,71 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
 
    tux64_boot_stage1_fsm_reset_hardware();
    tux64_boot_kernel_start(entrypoint, arguments);
+   TUX64_UNREACHABLE;
+}
+
+typedef void (*Tux64BootStage1FsmStage2Start)(void);
+
+union Tux64BootStage1FsmStage2StartPtr {
+   Tux64BootStage1FsmStage2Start function;
+   const void * data;
+};
+
+__attribute__((noreturn))
+static void
+tux64_boot_stage1_fsm_stage2_start(
+   Tux64UInt32 memory_total,
+   Tux64BootLoadStatus load_status
+) {
+   union Tux64BootStage1FsmStage2StartPtr stage2_start;
+   register Tux64UInt32          param_memory_total   __asm__("$s0");
+   register Tux64BootLoadStatus  param_load_status    __asm__("$s1");
+   register Tux64UInt32          stack_pointer        __asm__("$sp");
+
+   stage2_start.data = (const void *)TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_IMEM);
+
+   param_memory_total   = memory_total;
+   param_load_status    = load_status;
+   stack_pointer        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE2_STACK_ADDRESS + TUX64_BOOT_STAGE2_STACK_BYTES);
+
+   TUX64_EXPLICIT_DEPENDENCY(param_memory_total);
+   TUX64_EXPLICIT_DEPENDENCY(param_load_status);
+   TUX64_EXPLICIT_DEPENDENCY(stack_pointer);
+   stage2_start.function();
+   TUX64_UNREACHABLE;
+}
+
+TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) {
+   struct Tux64BootRspDmaTransfer transfer;
+   Tux64UInt16 stage2_bytes;
+
+   stage2_bytes = (Tux64UInt16)tux64_boot_stage1_boot_header_file_bootloader_stage2()->length;
+
+   /* we have to load stage-2 into RSP IMEM first.  we don't have to wait for */
+   /* completion before the call because we're coming from the start of a new */
+   /* frame.  thus, the RSP DMA engine isn't active.  note that we have to    */
+   /* split this into two 'rows', as we allow a maximum of 4096 bytes.        */
+   /* however, row_bytes_copy maxes out at 4095 bytes.  this does cause       */
+   /* problems if stage-2 is an odd number of bytes.  we solve this by not    */
+   /* producing stage-2 binaries of odd length, 4head.                        */
+   transfer.addr_rsp_mem   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
+   transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)fsm->globals.stage2.dma_buffer;
+   transfer.row_bytes_copy = stage2_bytes / TUX64_LITERAL_UINT16(2u);
+   transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
+   transfer.row_count      = TUX64_LITERAL_UINT8(1u);
+   tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
+
+   /* TODO: DMA the boot header and allocations into RSP DMEM. */
+
+   /* we now have to flush all DMA operations since we will now begin */
+   /* executing stage-2. */
+   tux64_boot_rsp_dma_wait_idle();
+
+   tux64_boot_stage1_fsm_reset_hardware();
+   tux64_boot_stage1_fsm_stage2_start(
+      tux64_boot_stage1_memory_total(),
+      fsm->globals.load_info.status
+   );
    TUX64_UNREACHABLE;
 }
 

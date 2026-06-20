@@ -122,4 +122,9 @@
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_LENGTH;
    .text                = "Starting linux";
 }
+{
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_BOOT_STAGE2_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_BOOT_STAGE2_LENGTH;
+   .text                = "Starting linux from stage 2 bootloader";
+}
 

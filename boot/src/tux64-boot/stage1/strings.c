@@ -107,6 +107,10 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_boot_kernel_data,
    TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_DATA
 );
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_boot_stage2_data,
+   TUX64_BOOT_STAGE1_STRINGS_BOOT_STAGE2_DATA
+);
 
 /* alignment manually set for same reason as above.  this time the size of a */
 /* pointer since one of our fields is a pointer, with the rest of the fields */
@@ -248,5 +252,11 @@ TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_boot_kernel_data,
    TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_LENGTH,
    TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
+   tux64_boot_stage1_strings_boot_stage2,
+   tux64_boot_stage1_strings_boot_stage2_data,
+   TUX64_BOOT_STAGE1_STRINGS_BOOT_STAGE2_LENGTH,
+   TUX64_BOOT_STAGE1_STRINGS_BOOT_STAGE2_LENGTH
 );
 
