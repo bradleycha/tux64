@@ -2,23 +2,23 @@
 /*                          Copyright (C) Tux64 2026                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/kernel.h - Header for kernel booting.                  */
+/* boot/src/tux64-boot/exec.h - Header for executing the kernel and stage-2.  */
 /*----------------------------------------------------------------------------*/
 
-#ifndef _TUX64_BOOT_KERNEL_H
-#define _TUX64_BOOT_KERNEL_H
+#ifndef _TUX64_BOOT_EXEC_H
+#define _TUX64_BOOT_EXEC_H
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
 
-struct Tux64BootKernelArgumentsFile {
+struct Tux64BootExecKernelArgumentsFile {
    Tux64UInt32 address;
    Tux64UInt32 bytes;
 };
 
-struct Tux64BootKernelArguments {
-   struct Tux64BootKernelArgumentsFile initramfs;
-   struct Tux64BootKernelArgumentsFile command_line;
+struct Tux64BootExecKernelArguments {
+   struct Tux64BootExecKernelArgumentsFile initramfs;
+   struct Tux64BootExecKernelArgumentsFile command_line;
    Tux64UInt32 total_memory;
 };
 
@@ -29,12 +29,12 @@ struct Tux64BootKernelArguments {
 /* after kernel load, or set to TUX64_NULLPTR if not present.                 */
 /*----------------------------------------------------------------------------*/
 void
-tux64_boot_kernel_start(
+tux64_boot_exec_kernel(
    const void * entrypoint,
-   const struct Tux64BootKernelArguments * arguments
+   const struct Tux64BootExecKernelArguments * arguments
 )
 __attribute__((noreturn));
 
 /*----------------------------------------------------------------------------*/
-#endif /* _TUX64_BOOT_KERNEL_H */
+#endif /* _TUX64_BOOT_EXEC_H */
 

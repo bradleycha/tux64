@@ -18,7 +18,7 @@
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/cache.h"
 #include "tux64-boot/load.h"
-#include "tux64-boot/kernel.h"
+#include "tux64-boot/exec.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
@@ -672,7 +672,7 @@ tux64_boot_stage1_fsm_reset_hardware(void) {
 
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) {
    const void * entrypoint;
-   const struct Tux64BootKernelArguments * arguments;
+   const struct Tux64BootExecKernelArguments * arguments;
 
    entrypoint = (const void *)tux64_boot_stage1_boot_header_file_kernel()->addr_entry;
 
@@ -682,7 +682,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
    arguments = TUX64_NULLPTR;
 
    tux64_boot_stage1_fsm_reset_hardware();
-   tux64_boot_kernel_start(entrypoint, arguments);
+   tux64_boot_exec_kernel(entrypoint, arguments);
    TUX64_UNREACHABLE;
 }
 
