@@ -10,12 +10,12 @@
 #include "tux64-boot/stage1/memory.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
-#include "tux64-boot/arena-allocator.h"
+#include "tux64-boot/stage1/arena-allocator.h"
 
 struct Tux64BootStage1MemoryStatistics {
    Tux64UInt32 total;
    Tux64UInt32 free;
-   struct Tux64BootArenaAllocator heap;
+   struct Tux64BootStage1ArenaAllocator heap;
 };
 
 static struct Tux64BootStage1MemoryStatistics
@@ -41,7 +41,7 @@ tux64_boot_stage1_memory_initialize(
    heap_start  = (Tux64UIntPtr)tux64_boot_stage1_memory_heap_start;
    heap_end    = TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED) + memory_total;
 
-   tux64_boot_arena_allocator_initialize(
+   tux64_boot_stage1_arena_allocator_initialize(
       &tux64_boot_stage1_memory_statistics.heap,
       (void *)heap_start,
       (void *)heap_end
@@ -67,7 +67,7 @@ tux64_boot_stage1_memory_alloc_inplace(
 ) {
    Tux64Boolean retn;
 
-   retn = tux64_boot_arena_allocator_alloc_inplace(
+   retn = tux64_boot_stage1_arena_allocator_alloc_inplace(
       &tux64_boot_stage1_memory_statistics.heap,
       address,
       bytes
@@ -87,7 +87,7 @@ tux64_boot_stage1_memory_alloc(
 ) {
    void * retn;
 
-   retn = tux64_boot_arena_allocator_alloc(
+   retn = tux64_boot_stage1_arena_allocator_alloc(
       &tux64_boot_stage1_memory_statistics.heap,
       bytes,
       alignment
