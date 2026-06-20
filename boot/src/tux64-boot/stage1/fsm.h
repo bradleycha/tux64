@@ -12,6 +12,7 @@
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/pi.h>
 #include "tux64-boot/checksum.h"
+#include "tux64-boot/load.h"
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/format.h"
 
@@ -47,9 +48,19 @@ union Tux64BootStage1FsmMemory {
    struct Tux64BootStage1FsmMemoryTest test;
 };
 
+struct Tux64BootStage1FsmGlobalsLoadInfo {
+   struct Tux64BootLoadAllocations allocations;
+   Tux64BootLoadStatus status;
+};
+
+struct Tux64BootStage1FsmGlobals {
+   struct Tux64BootStage1FsmGlobalsLoadInfo load_info;
+};
+
 struct Tux64BootStage1Fsm {
-   union Tux64BootStage1FsmMemory memory;
    Tux64BootStage1FsmPfnState state;
+   union Tux64BootStage1FsmMemory memory;
+   struct Tux64BootStage1FsmGlobals globals;
 };
 
 /*----------------------------------------------------------------------------*/

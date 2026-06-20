@@ -9,10 +9,12 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/fsm.h"
 
+#include <tux64/bitwise.h>
 #include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/pi.h"
 #include "tux64-boot/checksum.h"
 #include "tux64-boot/cache.h"
+#include "tux64-boot/load.h"
 #include "tux64-boot/kernel.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/stage1/status.h"
@@ -158,25 +160,150 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_halt) {
 }
 
 static Tux64Boolean
-tux64_boot_stage1_fsm_enough_memory_to_boot(void) {
-   const struct Tux64PlatformMipsN64BootHeaderFileKernel * kernel;
-   const struct Tux64PlatformMipsN64BootHeaderFile * initramfs;
-   const struct Tux64PlatformMipsN64BootHeaderFile * command_line;
-   Tux64UInt32 required_memory;
+tux64_boot_stage1_fsm_allocate_kernel(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
+) {
+   const struct Tux64PlatformMipsN64BootHeaderFileKernel * kernel_file;
+   Tux64UInt32 kernel_address;
+   Tux64UInt32 kernel_bytes;
+   struct Tux64BootLoadAllocationsFile * kernel_allocation;
+   Tux64Boolean result;
 
-   /* this is just a basic check to see if we have enough total system memory */
-   /* to boot, regardless of stage-2. */
+   /* the kernel is a special case because it's the only boot file which has */
+   /* to be loaded at a specific address.  the rest of the boot files can be */
+   /* loaded anywhere. */
 
-   kernel         = tux64_boot_stage1_boot_header_file_kernel();
-   initramfs      = tux64_boot_stage1_boot_header_file_initramfs();
-   command_line   = tux64_boot_stage1_boot_header_file_command_line();
+   kernel_file       = tux64_boot_stage1_boot_header_file_kernel();
+   kernel_address    = kernel_file->addr_load;
+   kernel_bytes      = kernel_file->image.file.length;
 
-   required_memory = kernel->image.memory
-      + initramfs->length
-      + command_line->length
-      + TUX64_LITERAL_UINT32(sizeof(struct Tux64BootKernelArguments));
+   kernel_allocation = &load_info->allocations.required.kernel;
+   result            = TUX64_BOOLEAN_FALSE;
 
-   if (required_memory > tux64_boot_stage1_memory_total()) {
+   if (tux64_boot_stage1_memory_stage1_alloc_inplace(kernel_address, kernel_bytes) == TUX64_BOOLEAN_TRUE) {
+      result = TUX64_BOOLEAN_TRUE;
+
+      load_info->status = tux64_bitwise_flags_set_uint8(
+         load_info->status,
+         TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL)
+      );
+   }
+
+   if (tux64_boot_stage1_memory_stage2_alloc_inplace(kernel_address, kernel_bytes) == TUX64_BOOLEAN_TRUE) {
+      result = TUX64_BOOLEAN_TRUE;
+   }
+
+   kernel_allocation->address = kernel_address;
+   kernel_allocation->bytes   = kernel_bytes;
+   return result;
+}
+
+static Tux64Boolean
+tux64_boot_stage1_fsm_allocate(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info,
+   struct Tux64BootLoadAllocationsFile * allocation,
+   Tux64UInt8 status_flag,
+   Tux64UInt32 bytes,
+   Tux64UInt8 alignment
+) {
+   Tux64UInt32 address_stage1;
+   Tux64UInt32 address_stage2;
+
+   /* TODO: this will break if we load stage1 -> stage2 -> stage1 due to the */
+   /* heaps desynchronizing. */
+   address_stage1 = tux64_boot_stage1_memory_stage1_alloc(bytes, alignment);
+   address_stage2 = tux64_boot_stage1_memory_stage2_alloc(bytes, alignment);
+
+   allocation->bytes = bytes;
+
+   if (address_stage1 != TUX64_LITERAL_UINT32(0u)) {
+      load_info->status = tux64_bitwise_flags_set_uint8(load_info->status, status_flag);
+      allocation->address = address_stage1;
+      return TUX64_BOOLEAN_TRUE;
+   }
+   if (address_stage2 != TUX64_LITERAL_UINT32(0u)) {
+      allocation->address = address_stage2;
+      return TUX64_BOOLEAN_TRUE;
+   }
+
+   return TUX64_BOOLEAN_FALSE;
+}
+
+static Tux64Boolean
+tux64_boot_stage1_fsm_allocate_optional(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info,
+   struct Tux64BootLoadAllocationsFile * allocation,
+   Tux64UInt8 status_flag,
+   Tux64UInt32 bytes,
+   Tux64UInt8 alignment
+) {
+   if (bytes == TUX64_LITERAL_UINT32(0u)) {
+      load_info->status = tux64_bitwise_flags_set_uint8(load_info->status, status_flag);
+      allocation->address = TUX64_LITERAL_UINT32(0u);
+      return TUX64_BOOLEAN_TRUE;
+   }
+
+   return tux64_boot_stage1_fsm_allocate(
+      load_info,
+      allocation,
+      status_flag,
+      bytes,
+      alignment
+   );
+}
+
+static Tux64Boolean
+tux64_boot_stage1_fsm_allocate_optional_file(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info,
+   struct Tux64BootLoadAllocationsFile * allocation,
+   Tux64UInt8 status_flag,
+   const struct Tux64PlatformMipsN64BootHeaderFile * file
+) {
+   /* this has to be aligned for PI DMA. */
+   return tux64_boot_stage1_fsm_allocate_optional(
+      load_info,
+      allocation,
+      status_flag,
+      file->length,
+      TUX64_LITERAL_UINT8(8u)
+   );
+}
+
+static Tux64Boolean
+tux64_boot_stage1_fsm_allocate_initramfs(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
+) {
+   return tux64_boot_stage1_fsm_allocate_optional_file(
+      load_info,
+      &load_info->allocations.optional.initramfs,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS),
+      tux64_boot_stage1_boot_header_file_initramfs()
+   );
+}
+
+static Tux64Boolean
+tux64_boot_stage1_fsm_allocate_command_line(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
+) {
+   return tux64_boot_stage1_fsm_allocate_optional_file(
+      load_info,
+      &load_info->allocations.optional.command_line,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE),
+      tux64_boot_stage1_boot_header_file_command_line()
+   );
+}
+
+static Tux64Boolean
+tux64_boot_stage1_fsm_allocate_boot_files(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
+) {
+   if (tux64_boot_stage1_fsm_allocate_kernel(load_info) == TUX64_BOOLEAN_FALSE) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+   if (tux64_boot_stage1_fsm_allocate_initramfs(load_info) == TUX64_BOOLEAN_FALSE) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+   if (tux64_boot_stage1_fsm_allocate_command_line(load_info) == TUX64_BOOLEAN_FALSE) {
       return TUX64_BOOLEAN_FALSE;
    }
 
@@ -184,7 +311,7 @@ tux64_boot_stage1_fsm_enough_memory_to_boot(void) {
 }
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_start) {
-   if (tux64_boot_stage1_fsm_enough_memory_to_boot() == TUX64_BOOLEAN_FALSE) {
+   if (tux64_boot_stage1_fsm_allocate_boot_files(&fsm->globals.load_info) == TUX64_BOOLEAN_FALSE) {
       tux64_boot_stage1_fsm_halt(fsm, &tux64_boot_stage1_strings_error_no_memory);
       return;
    }
