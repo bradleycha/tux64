@@ -48,6 +48,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_st
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_kernel);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_initramfs);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_command_line);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_stage2);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel_wait);
 
@@ -327,7 +328,6 @@ tux64_boot_stage1_fsm_transition_load_file(
    struct Tux64BootStage1Fsm * fsm,
    const struct Tux64PlatformMipsN64BootHeaderFile * file,
    Tux64UInt32 load_address,
-   Tux64BootLoadStatus status_flag,
    const struct Tux64BootStage1FbconText * name,
    Tux64BootStage1FsmPfnTransition transition_next
 ) {
@@ -336,16 +336,6 @@ tux64_boot_stage1_fsm_transition_load_file(
    Tux64UInt8 label_characters;
 
    mem = &fsm->memory.load_file;
-
-   if (
-      load_address == TUX64_LITERAL_UINT32(0u) ||
-      tux64_bitwise_flags_check_one_uint8(fsm->globals.load_info.status, status_flag) == TUX64_BOOLEAN_FALSE
-   ) {
-      /* call directly since we're already coming from a transition, so we */
-      /* don't delay twice. */
-      transition_next(fsm);
-      return;
-   }
 
    mem->transition_next = transition_next;
    mem->iter_addr_rdram = load_address;
@@ -375,6 +365,35 @@ tux64_boot_stage1_fsm_transition_load_file(
    return;
 }
 
+static void
+tux64_boot_stage1_fsm_transition_load_file_optional(
+   struct Tux64BootStage1Fsm * fsm,
+   const struct Tux64PlatformMipsN64BootHeaderFile * file,
+   Tux64UInt32 load_address,
+   const struct Tux64BootStage1FbconText * name,
+   Tux64BootStage1FsmPfnTransition transition_next,
+   Tux64BootLoadStatus status_flag
+) {
+   if (
+      load_address == TUX64_LITERAL_UINT32(0u) ||
+      tux64_bitwise_flags_check_one_uint8(fsm->globals.load_info.status, status_flag) == TUX64_BOOLEAN_FALSE
+   ) {
+      /* call directly since we're already coming from a transition, so we */
+      /* don't delay twice. */
+      transition_next(fsm);
+      return;
+   }
+
+   tux64_boot_stage1_fsm_transition_load_file(
+      fsm,
+      file,
+      load_address,
+      name,
+      transition_next
+   );
+   return;
+}
+
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_load_file_kernel) {
    const struct Tux64PlatformMipsN64BootHeaderFileKernel * kernel;
 
@@ -382,13 +401,13 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    kernel = tux64_boot_stage1_boot_header_file_kernel();
 
-   tux64_boot_stage1_fsm_transition_load_file(
+   tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
       &kernel->image.file,
       fsm->globals.load_info.allocations.required.kernel.address,
-      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL),
       &tux64_boot_stage1_strings_file_kernel,
-      tux64_boot_stage1_fsm_transition_load_file_initramfs
+      tux64_boot_stage1_fsm_transition_load_file_initramfs,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL)
    );
    return;
 }
@@ -400,34 +419,58 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    initramfs = tux64_boot_stage1_boot_header_file_initramfs();
 
-   tux64_boot_stage1_fsm_transition_load_file(
+   tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
       initramfs,
       fsm->globals.load_info.allocations.optional.initramfs.address,
-      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS),
       &tux64_boot_stage1_strings_file_initramfs,
-      tux64_boot_stage1_fsm_transition_load_file_command_line
+      tux64_boot_stage1_fsm_transition_load_file_command_line,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS)
    );
    return;
 }
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_load_file_command_line) {
    const struct Tux64PlatformMipsN64BootHeaderFile * command_line;
+   Tux64BootStage1FsmPfnTransition transition_next;
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_COMMAND_LINE);
 
    command_line = tux64_boot_stage1_boot_header_file_command_line();
 
-   /* TODO: check if everything was loaded from stage-1.  if not, load and */
-   /* boot stage-2.  for now, we just assume everything succeeded and then */
-   /* proceed to the kernel. */
+   /* if we have everything loadable from stage-1, we can boot the kernel */
+   /* directly.  otherwise, we need the stage-2 loader. */
+   if (fsm->globals.load_info.status == TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_CONCURRENT_WITH_STAGE1)) {
+      transition_next = tux64_boot_stage1_fsm_transition_boot_kernel;
+   } else {
+      transition_next = tux64_boot_stage1_fsm_transition_load_file_stage2;
+   }
 
-   tux64_boot_stage1_fsm_transition_load_file(
+   tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
       command_line,
       fsm->globals.load_info.allocations.optional.command_line.address,
-      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE),
       &tux64_boot_stage1_strings_file_command_line,
+      transition_next,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE)
+   );
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_load_file_stage2) {
+   const struct Tux64PlatformMipsN64BootHeaderFile * stage2;
+
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_STAGE2);
+
+   stage2 = tux64_boot_stage1_boot_header_file_bootloader_stage2();
+
+   /* TODO: boot stage-2 instead of the kernel. */
+
+   tux64_boot_stage1_fsm_transition_load_file(
+      fsm,
+      stage2,
+      (Tux64UInt32)(Tux64UIntPtr)fsm->globals.stage2.dma_buffer,
+      &tux64_boot_stage1_strings_file_bootloader_stage2,
       tux64_boot_stage1_fsm_transition_boot_kernel
    );
    return;

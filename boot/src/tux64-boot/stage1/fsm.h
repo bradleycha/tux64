@@ -53,8 +53,15 @@ struct Tux64BootStage1FsmGlobalsLoadInfo {
    Tux64BootLoadStatus status;
 };
 
+struct Tux64BootStage1FsmGlobalsStage2 {
+   /* aligned for both PI dma and RSP dma. */
+   Tux64UInt8 dma_buffer [4096u]
+   __attribute__((aligned(8u)));
+};
+
 struct Tux64BootStage1FsmGlobals {
    struct Tux64BootStage1FsmGlobalsLoadInfo load_info;
+   struct Tux64BootStage1FsmGlobalsStage2 stage2;
 };
 
 struct Tux64BootStage1Fsm {
