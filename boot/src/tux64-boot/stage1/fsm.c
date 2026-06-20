@@ -9,10 +9,12 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/fsm.h"
 
+#include <tux64/memory.h>
+#include <tux64/endian.h>
 #include <tux64/bitwise.h>
+#include <tux64/checksum.h>
 #include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/pi.h"
-#include "tux64-boot/checksum.h"
 #include "tux64-boot/cache.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/kernel.h"
@@ -44,6 +46,8 @@ TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_boot_kernel)
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_halt);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_start);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_kernel);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_initramfs);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_command_line);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel_wait);
 
@@ -349,8 +353,8 @@ tux64_boot_stage1_fsm_transition_load_file(
    mem->bytes_remaining = file->length;
 
    if (tux64_boot_stage1_fsm_checksum_enable() == TUX64_BOOLEAN_TRUE) {
-      mem->checksum_expected = file->checksum;
-      tux64_boot_checksum_fletcher_64_32_initialize(&mem->checksum_context);
+      mem->checksum_expected.uint = tux64_endian_convert_uint32(file->checksum, TUX64_ENDIAN_FORMAT_BIG);
+      tux64_checksum_fletcher_64_32.initialize(&mem->checksum_context);
    }
 
    tux64_boot_stage1_format_percentage_initialize(
@@ -378,27 +382,59 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    kernel = tux64_boot_stage1_boot_header_file_kernel();
 
-   /* TODO: transition to loading initramfs and command-line (or deferring to */
-   /* stage-2 if we are fighting for memory) instead of the test state.  also */
-   /* create a contingency to defer to stage-2 if we can't allocate the */
-   /* memory with stage-1 loaded.  for now, we just directly boot the kernel */
-   /* with no initramfs/command-line. */
-
    tux64_boot_stage1_fsm_transition_load_file(
       fsm,
       &kernel->image.file,
       fsm->globals.load_info.allocations.required.kernel.address,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL),
       &tux64_boot_stage1_strings_file_kernel,
+      tux64_boot_stage1_fsm_transition_load_file_initramfs
+   );
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_load_file_initramfs) {
+   const struct Tux64PlatformMipsN64BootHeaderFile * initramfs;
+
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_INITRAMFS);
+
+   initramfs = tux64_boot_stage1_boot_header_file_initramfs();
+
+   tux64_boot_stage1_fsm_transition_load_file(
+      fsm,
+      initramfs,
+      fsm->globals.load_info.allocations.optional.initramfs.address,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS),
+      &tux64_boot_stage1_strings_file_initramfs,
+      tux64_boot_stage1_fsm_transition_load_file_command_line
+   );
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_load_file_command_line) {
+   const struct Tux64PlatformMipsN64BootHeaderFile * command_line;
+
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_COMMAND_LINE);
+
+   command_line = tux64_boot_stage1_boot_header_file_command_line();
+
+   /* TODO: check if everything was loaded from stage-1.  if not, load and */
+   /* boot stage-2.  for now, we just assume everything succeeded and then */
+   /* proceed to the kernel. */
+
+   tux64_boot_stage1_fsm_transition_load_file(
+      fsm,
+      command_line,
+      fsm->globals.load_info.allocations.optional.command_line.address,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE),
+      &tux64_boot_stage1_strings_file_command_line,
       tux64_boot_stage1_fsm_transition_boot_kernel
    );
    return;
 }
 
 /* WARNING: this must be aligned to an 8-byte boundary for use with both */
-/* PI DMA, which requires the RDRAM address to be aligned to 8 bytes, and */
-/* our specialized checksum function which requires both alignment to 4 bytes */
-/* as well as byte lengths which are a multiple of 4. */
+/* PI DMA, which requires the RDRAM address to be aligned to 8 bytes. */
 #define TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE \
    (4u * 1024u) /* 4KiB */
 
@@ -430,10 +466,7 @@ tux64_boot_stage1_fsm_load_file_block(
    }
 
    if (tux64_boot_stage1_fsm_checksum_enable() == TUX64_BOOLEAN_TRUE) {
-      /* since we are loading via PI DMA, which requires 8-byte aligned */
-      /* addresses, and our files are all aligned to 4 bytes in size, we can */
-      /* safely call this as-is. */
-      tux64_boot_checksum_fletcher_64_32_digest(
+      tux64_checksum_fletcher_64_32.digest(
          &mem->checksum_context,
          (const Tux64UInt8 *)transfer->addr_rdram,
          bytes
@@ -447,17 +480,19 @@ static Tux64Boolean
 tux64_boot_stage1_fsm_verify_file_checksum(
    struct Tux64BootStage1FsmMemoryLoadFile * mem
 ) {
-   Tux64UInt32 checksum_computed;
+   const Tux64UInt8 * checksum_computed;
 
    if (tux64_boot_stage1_fsm_checksum_enable() == TUX64_BOOLEAN_FALSE) {
       return TUX64_BOOLEAN_TRUE;
    }
    
-   checksum_computed = tux64_boot_checksum_fletcher_64_32_finalize(&mem->checksum_context);
+   checksum_computed = tux64_checksum_fletcher_64_32.finalize(&mem->checksum_context);
 
-   return (checksum_computed == mem->checksum_expected) ?
-      TUX64_BOOLEAN_TRUE :
-      TUX64_BOOLEAN_FALSE;
+   return tux64_memory_compare_with_equal_lengths(
+      checksum_computed,
+      mem->checksum_expected.bytes,
+      TUX64_LITERAL_UINT32(TUX64_CHECKSUM_FLETCHER_64_32_DIGEST_BYTES)
+   );
 }
 
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_load_file) {
