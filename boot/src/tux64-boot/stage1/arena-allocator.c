@@ -10,6 +10,7 @@
 #include "tux64-boot/stage1/arena-allocator.h"
 
 #include <tux64/math.h>
+#include "tux64-boot/halt.h"
 
 /*----------------------------------------------------------------------------*/
 /* the main benefit to our allocator is it doesn't support freeing blocks.    */
@@ -39,6 +40,16 @@ tux64_boot_stage1_arena_allocator_push_block(
    struct Tux64BootStage1ArenaAllocator * allocator
 ) {
    struct Tux64BootStage1ArenaAllocatorBlock * block;
+
+   if (
+      TUX64_BOOT_CONFIG_DEBUG &&
+      allocator->blocks_allocated == TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_ARENA_ALLOCATOR_MAX_ALLOCATIONS)
+   ) {
+      /* it's easy to accidentally allocate too much, so i think it's a good */
+      /* idea to add a debug-only safety check here. */
+      tux64_boot_halt();
+      TUX64_UNREACHABLE;
+   }
 
    block = &allocator->blocks[allocator->blocks_allocated];
    allocator->blocks_allocated++;
