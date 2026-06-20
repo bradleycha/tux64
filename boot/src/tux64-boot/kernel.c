@@ -15,12 +15,7 @@
 #define TUX64_BOOT_KERNEL_MAGIC \
    (0x54583634u) /* TX64 */
 
-typedef void (*Tux64BootKernelStart)(
-   unsigned long fw_arg0,
-   unsigned long fw_arg1,
-   unsigned long fw_arg2,
-   unsigned long fw_arg3
-);
+typedef void (*Tux64BootKernelStart)();
 
 /* like in the stage-1 interrupt handler, gcc will complain if we directly */
 /* pointer cast. */
@@ -34,11 +29,13 @@ tux64_boot_kernel_start(
    const void * entrypoint,
    const struct Tux64BootKernelArguments * arguments
 ) {
+   /* we're manually specifying the registers instead of adding function */
+   /* arguments to ensure a stable ABI. */
    union Tux64BootKernelStartPtr kernel_start; 
-   unsigned long fw_arg0;
-   unsigned long fw_arg1;
-   unsigned long fw_arg2;
-   unsigned long fw_arg3;
+   register unsigned long fw_arg0 __asm__("$a0");
+   register unsigned long fw_arg1 __asm__("$a1");
+   register unsigned long fw_arg2 __asm__("$a2");
+   register unsigned long fw_arg3 __asm__("$a3");
 
    kernel_start.data = entrypoint;
    fw_arg0           = (unsigned long)(Tux64UIntPtr)arguments;
@@ -46,7 +43,11 @@ tux64_boot_kernel_start(
    fw_arg2           = 0u;
    fw_arg3           = 0u;
 
-   kernel_start.function(fw_arg0, fw_arg1, fw_arg2, fw_arg3);
+   TUX64_EXPLICIT_DEPENDENCY(fw_arg0);
+   TUX64_EXPLICIT_DEPENDENCY(fw_arg1);
+   TUX64_EXPLICIT_DEPENDENCY(fw_arg2);
+   TUX64_EXPLICIT_DEPENDENCY(fw_arg3);
+   kernel_start.function();
    TUX64_UNREACHABLE;
 }
 
