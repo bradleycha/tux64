@@ -43,28 +43,51 @@ Tux64UInt32
 tux64_boot_stage1_memory_total(void);
 
 /*----------------------------------------------------------------------------*/
-/* Queries the amount of RDRAM in the system not in use.                      */
+/* Queries the amount of RDRAM in the system not in use by stage-1.           */
 /*----------------------------------------------------------------------------*/
 Tux64UInt32
 tux64_boot_stage1_memory_free(void);
 
 /*----------------------------------------------------------------------------*/
-/* Attempts to allocate a range of memory at a specified address.  This       */
-/* follows the same API as tux64_boot_arena_allocator_alloc_inplace().        */
+/* Attempts to allocate a range of memory at a specified address from the     */
+/* stage-1 heap.  This follows the same API as                                */
+/* tux64_boot_arena_allocator_alloc_inplace().                                */
 /*----------------------------------------------------------------------------*/
 Tux64Boolean
-tux64_boot_stage1_memory_alloc_inplace(
+tux64_boot_stage1_memory_stage1_alloc_inplace(
    void * address,
    Tux64UInt32 bytes
 );
 
 /*----------------------------------------------------------------------------*/
 /* Attempts to allocate a block of memory which satisfies the given size and  */
-/* alignment.  This follows the same API as                                   */
+/* alignment from the stage-1 heap.  This follows the same API as             */
 /* tux64_boot_arena_allocator_alloc().                                        */
 /*----------------------------------------------------------------------------*/
 void *
-tux64_boot_stage1_memory_alloc(
+tux64_boot_stage1_memory_stage1_alloc(
+   Tux64UInt32 bytes,
+   Tux64UInt8 alignment
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to allocate a range of memory at a specified address from the     */
+/* stage-2 heap.  This follows the same API as                                */
+/* tux64_boot_arena_allocator_alloc_inplace().                                */
+/*----------------------------------------------------------------------------*/
+Tux64Boolean
+tux64_boot_stage1_memory_stage2_alloc_inplace(
+   void * address,
+   Tux64UInt32 bytes
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to allocate a block of memory which satisfies the given size and  */
+/* alignment from the stage-2 heap.  This follows the same API as             */
+/* tux64_boot_arena_allocator_alloc().                                        */
+/*----------------------------------------------------------------------------*/
+void *
+tux64_boot_stage1_memory_stage2_alloc(
    Tux64UInt32 bytes,
    Tux64UInt8 alignment
 );
