@@ -201,7 +201,7 @@ static Tux64Boolean
 tux64_boot_stage1_fsm_allocate(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info,
    struct Tux64BootLoadAllocationsFile * allocation,
-   Tux64UInt8 status_flag,
+   Tux64BootLoadStatus status_flag,
    Tux64UInt32 bytes,
    Tux64UInt8 alignment
 ) {
@@ -230,7 +230,7 @@ static Tux64Boolean
 tux64_boot_stage1_fsm_allocate_optional(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info,
    struct Tux64BootLoadAllocationsFile * allocation,
-   Tux64UInt8 status_flag,
+   Tux64BootLoadStatus status_flag,
    Tux64UInt32 bytes,
    Tux64UInt8 alignment
 ) {
@@ -253,7 +253,7 @@ static Tux64Boolean
 tux64_boot_stage1_fsm_allocate_optional_file(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info,
    struct Tux64BootLoadAllocationsFile * allocation,
-   Tux64UInt8 status_flag,
+   Tux64BootLoadStatus status_flag,
    const struct Tux64PlatformMipsN64BootHeaderFile * file
 ) {
    /* this has to be aligned for PI DMA. */
@@ -323,6 +323,7 @@ tux64_boot_stage1_fsm_transition_load_file(
    struct Tux64BootStage1Fsm * fsm,
    const struct Tux64PlatformMipsN64BootHeaderFile * file,
    Tux64UInt32 load_address,
+   Tux64BootLoadStatus status_flag,
    const struct Tux64BootStage1FbconText * name,
    Tux64BootStage1FsmPfnTransition transition_next
 ) {
@@ -331,6 +332,16 @@ tux64_boot_stage1_fsm_transition_load_file(
    Tux64UInt8 label_characters;
 
    mem = &fsm->memory.load_file;
+
+   if (
+      load_address == TUX64_LITERAL_UINT32(0u) ||
+      tux64_bitwise_flags_check_one_uint8(fsm->globals.load_info.status, status_flag) == TUX64_BOOLEAN_FALSE
+   ) {
+      /* call directly since we're already coming from a transition, so we */
+      /* don't delay twice. */
+      transition_next(fsm);
+      return;
+   }
 
    mem->transition_next = transition_next;
    mem->iter_addr_rdram = load_address;
@@ -376,7 +387,8 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
    tux64_boot_stage1_fsm_transition_load_file(
       fsm,
       &kernel->image.file,
-      kernel->addr_load,
+      fsm->globals.load_info.allocations.required.kernel.address,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL),
       &tux64_boot_stage1_strings_file_kernel,
       tux64_boot_stage1_fsm_transition_boot_kernel
    );
