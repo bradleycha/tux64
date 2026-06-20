@@ -46,7 +46,7 @@ SECTIONS
    /* this must be placed after all other RDRAM sections so we can find the */
    /* start of free memory, for use with the memory management functions. */
    .rdram.end (ADDR(.rdram.bss) + SIZEOF(.rdram.bss)) : {
-      tux64_boot_stage1_memory_top_initial = ALIGN(8);
+      tux64_boot_stage1_memory_heap_start = .;
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
 

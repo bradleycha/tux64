@@ -34,20 +34,24 @@ Tux64UInt32
 tux64_boot_stage1_memory_free(void);
 
 /*----------------------------------------------------------------------------*/
-/* Queries the start address of free memory, returning a pointer to cached    */
-/* RDRAM.                                                                     */
-/*----------------------------------------------------------------------------*/
-void *
-tux64_boot_stage1_memory_top(void);
-
-/*----------------------------------------------------------------------------*/
-/* Checks if a given region of memory is free.  The region of memory must     */
-/* reside in either the cached or uncached RDRAM segment.                     */
+/* Attempts to allocate a range of memory at a specified address.  This       */
+/* follows the same API as tux64_boot_arena_allocator_alloc_inplace().        */
 /*----------------------------------------------------------------------------*/
 Tux64Boolean
-tux64_boot_stage1_memory_region_is_free(
-   const void * start,
+tux64_boot_stage1_memory_alloc_inplace(
+   void * address,
    Tux64UInt32 bytes
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to allocate a block of memory which satisfies the given size and  */
+/* alignment.  This follows the same API as                                   */
+/* tux64_boot_arena_allocator_alloc().                                        */
+/*----------------------------------------------------------------------------*/
+void *
+tux64_boot_stage1_memory_alloc(
+   Tux64UInt32 bytes,
+   Tux64UInt8 alignment
 );
 
 /*----------------------------------------------------------------------------*/
