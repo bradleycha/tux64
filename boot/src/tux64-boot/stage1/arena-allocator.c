@@ -26,11 +26,11 @@
 void
 tux64_boot_stage1_arena_allocator_initialize(
    struct Tux64BootStage1ArenaAllocator * allocator,
-   void * address_space_start,
-   void * address_space_end
+   Tux64UInt32 address_space_start,
+   Tux64UInt32 address_space_end
 ) {
-   allocator->address_space_start   = (Tux64UIntPtr)address_space_start;
-   allocator->address_space_end     = (Tux64UIntPtr)address_space_end;
+   allocator->address_space_start   = address_space_start;
+   allocator->address_space_end     = address_space_end;
    allocator->blocks_allocated      = TUX64_LITERAL_UINT8(0u);
    return;
 }
@@ -60,11 +60,11 @@ tux64_boot_stage1_arena_allocator_push_block(
 static Tux64Boolean
 tux64_boot_stage1_arena_allocator_region_is_within_address_space(
    const struct Tux64BootStage1ArenaAllocator * allocator,
-   Tux64UIntPtr ptr_start,
-   Tux64UIntPtr ptr_end
+   Tux64UInt32 ptr_start,
+   Tux64UInt32 ptr_end
 ) {
-   Tux64UIntPtr address_space_start;
-   Tux64UIntPtr address_space_end;
+   Tux64UInt32 address_space_start;
+   Tux64UInt32 address_space_end;
 
    address_space_start  = allocator->address_space_start;
    address_space_end    = allocator->address_space_end;
@@ -81,10 +81,10 @@ tux64_boot_stage1_arena_allocator_region_is_within_address_space(
 
 static Tux64Boolean
 tux64_boot_stage1_arena_allocator_regions_overlap(
-   Tux64UIntPtr lhs_start,
-   Tux64UIntPtr lhs_end,
-   Tux64UIntPtr rhs_start,
-   Tux64UIntPtr rhs_end
+   Tux64UInt32 lhs_start,
+   Tux64UInt32 lhs_end,
+   Tux64UInt32 rhs_start,
+   Tux64UInt32 rhs_end
 ) {
    if (rhs_start < lhs_end) {
       return TUX64_BOOLEAN_FALSE;
@@ -98,11 +98,11 @@ tux64_boot_stage1_arena_allocator_regions_overlap(
 static Tux64Boolean
 tux64_boot_stage1_arena_allocator_region_excludes_block(
    const struct Tux64BootStage1ArenaAllocatorBlock * block,
-   Tux64UIntPtr ptr_start,
-   Tux64UIntPtr ptr_end
+   Tux64UInt32 ptr_start,
+   Tux64UInt32 ptr_end
 ) {
-   Tux64UIntPtr block_start;
-   Tux64UIntPtr block_end;
+   Tux64UInt32 block_start;
+   Tux64UInt32 block_end;
 
    block_start = block->start;
    block_end   = block->end;
@@ -127,8 +127,8 @@ tux64_boot_stage1_arena_allocator_region_excludes_block(
 static Tux64Boolean
 tux64_boot_stage1_arena_allocator_region_is_free(
    const struct Tux64BootStage1ArenaAllocator * allocator,
-   Tux64UIntPtr ptr_start,
-   Tux64UIntPtr ptr_end
+   Tux64UInt32 ptr_start,
+   Tux64UInt32 ptr_end
 ) {
    Tux64UInt8 i;
    const struct Tux64BootStage1ArenaAllocatorBlock * block;
@@ -154,14 +154,14 @@ tux64_boot_stage1_arena_allocator_region_is_free(
 Tux64Boolean
 tux64_boot_stage1_arena_allocator_alloc_inplace(
    struct Tux64BootStage1ArenaAllocator * allocator,
-   void * address,
+   Tux64UInt32 address,
    Tux64UInt32 bytes
 ) {
-   Tux64UIntPtr ptr_start;
-   Tux64UIntPtr ptr_end;
+   Tux64UInt32 ptr_start;
+   Tux64UInt32 ptr_end;
    struct Tux64BootStage1ArenaAllocatorBlock * block_new;
 
-   ptr_start   = (Tux64UIntPtr)address;
+   ptr_start   = address;
    ptr_end     = ptr_start + bytes;
 
    if (tux64_boot_stage1_arena_allocator_region_is_within_address_space(
@@ -187,13 +187,13 @@ tux64_boot_stage1_arena_allocator_alloc_inplace(
    return TUX64_BOOLEAN_TRUE;
 }
 
-static Tux64UIntPtr
+static Tux64UInt32
 tux64_boot_stage1_arena_allocator_free_space_start(
    const struct Tux64BootStage1ArenaAllocator * allocator,
-   Tux64UIntPtr address_base,
+   Tux64UInt32 address_base,
    Tux64UInt8 alignment
 ) {
-   Tux64UIntPtr address_start;
+   Tux64UInt32 address_start;
    Tux64UInt8 i;
    const struct Tux64BootStage1ArenaAllocatorBlock * block;
    Tux64Boolean address_overlaps_block;
@@ -229,14 +229,14 @@ tux64_boot_stage1_arena_allocator_free_space_start(
    return address_start;
 }
 
-static Tux64UIntPtr
+static Tux64UInt32
 tux64_boot_stage1_arena_allocator_free_space_end(
    const struct Tux64BootStage1ArenaAllocator * allocator,
-   Tux64UIntPtr free_space_start 
+   Tux64UInt32 free_space_start 
 ) {
    Tux64UInt8 i;
    const struct Tux64BootStage1ArenaAllocatorBlock * block;
-   Tux64UIntPtr free_space_end;
+   Tux64UInt32 free_space_end;
 
    i              = allocator->blocks_allocated;
    block          = allocator->blocks;
@@ -257,25 +257,25 @@ tux64_boot_stage1_arena_allocator_free_space_end(
    return free_space_end;
 }
 
-void *
+Tux64UInt32
 tux64_boot_stage1_arena_allocator_alloc(
    struct Tux64BootStage1ArenaAllocator * allocator,
    Tux64UInt32 bytes,
    Tux64UInt8 alignment
 ) {
-   Tux64UIntPtr free_region_start;
-   Tux64UIntPtr free_region_end;
-   Tux64UIntPtr free_region_bytes;
-   Tux64UIntPtr alloc_start;
-   Tux64UIntPtr alloc_end;
+   Tux64UInt32 free_region_start;
+   Tux64UInt32 free_region_end;
+   Tux64UInt32 free_region_bytes;
+   Tux64UInt32 alloc_start;
+   Tux64UInt32 alloc_end;
    struct Tux64BootStage1ArenaAllocatorBlock * block_new;
 
    /* we implement this using the best fit algorithm.  a little "wasted" */
    /* performance is worth optimizing the contiguous free block size. */
 
    free_region_start = allocator->address_space_start;
-   alloc_start       = TUX64_LITERAL_UINTPTR(0u);
-   alloc_end         = TUX64_LITERAL_UINTPTR(0u);
+   alloc_start       = TUX64_LITERAL_UINT32(0u);
+   alloc_end         = TUX64_LITERAL_UINT32(0u);
    
    do {
       free_region_start = tux64_boot_stage1_arena_allocator_free_space_start(allocator, free_region_start, alignment);
@@ -285,7 +285,7 @@ tux64_boot_stage1_arena_allocator_alloc(
       if (
          (free_region_bytes >= bytes) &&
          (
-            alloc_start == TUX64_LITERAL_UINTPTR(0u) ||
+            alloc_start == TUX64_LITERAL_UINT32(0u) ||
             free_region_bytes < alloc_end - alloc_start
          )
       ) {
@@ -296,14 +296,14 @@ tux64_boot_stage1_arena_allocator_alloc(
       free_region_start = free_region_end;
    } while (free_region_end != allocator->address_space_end);
 
-   if (alloc_start == TUX64_LITERAL_UINTPTR(0u)) {
-      return TUX64_NULLPTR;
+   if (alloc_start == TUX64_LITERAL_UINT32(0u)) {
+      return TUX64_LITERAL_UINT32(0u);
    }
 
    block_new = tux64_boot_stage1_arena_allocator_push_block(allocator);
 
    block_new->start  = alloc_start;
    block_new->end    = alloc_start + bytes;
-   return (void *)alloc_start;
+   return alloc_start;
 }
 

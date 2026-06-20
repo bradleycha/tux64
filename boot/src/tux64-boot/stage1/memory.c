@@ -42,29 +42,29 @@ tux64_boot_stage1_memory_initialize(
    Tux64UInt32 memory_total,
    Tux64UInt32 memory_free
 ) {
-   Tux64UIntPtr heap_stage1_start;
-   Tux64UIntPtr heap_stage1_end;
-   Tux64UIntPtr heap_stage2_start;
-   Tux64UIntPtr heap_stage2_end;
+   Tux64UInt32 heap_stage1_start;
+   Tux64UInt32 heap_stage1_end;
+   Tux64UInt32 heap_stage2_start;
+   Tux64UInt32 heap_stage2_end;
 
    tux64_boot_stage1_memory_statistics.total = memory_total;
    tux64_boot_stage1_memory_statistics.free = memory_free;
 
-   heap_stage1_start = (Tux64UIntPtr)tux64_boot_stage1_memory_heap_start;
-   heap_stage1_end   = TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED) + memory_total;
+   heap_stage1_start = (Tux64UIntPtr)(Tux64UIntPtr)tux64_boot_stage1_memory_heap_start;
+   heap_stage1_end   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED) + memory_total;
 
-   heap_stage2_start = TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + TUX64_BOOT_STAGE2_MEMORY_RDRAM_RESERVED);
-   heap_stage2_end   = TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED) + memory_total;
+   heap_stage2_start = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + TUX64_BOOT_STAGE2_MEMORY_RDRAM_RESERVED);
+   heap_stage2_end   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED) + memory_total;
 
    tux64_boot_stage1_arena_allocator_initialize(
       &tux64_boot_stage1_memory_statistics.heap.stage1,
-      (void *)heap_stage1_start,
-      (void *)heap_stage1_end
+      heap_stage1_start,
+      heap_stage1_end
    );
    tux64_boot_stage1_arena_allocator_initialize(
       &tux64_boot_stage1_memory_statistics.heap.stage2,
-      (void *)heap_stage2_start,
-      (void *)heap_stage2_end
+      heap_stage2_start,
+      heap_stage2_end
    );
 
    return;
@@ -82,7 +82,7 @@ tux64_boot_stage1_memory_free(void) {
 
 Tux64Boolean
 tux64_boot_stage1_memory_stage1_alloc_inplace(
-   void * address,
+   Tux64UInt32 address,
    Tux64UInt32 bytes
 ) {
    Tux64Boolean retn;
@@ -100,12 +100,12 @@ tux64_boot_stage1_memory_stage1_alloc_inplace(
    return retn;
 }
 
-void *
+Tux64UInt32
 tux64_boot_stage1_memory_stage1_alloc(
    Tux64UInt32 bytes,
    Tux64UInt8 alignment
 ) {
-   void * retn;
+   Tux64UInt32 retn;
 
    retn = tux64_boot_stage1_arena_allocator_alloc(
       &tux64_boot_stage1_memory_statistics.heap.stage1,
@@ -113,7 +113,7 @@ tux64_boot_stage1_memory_stage1_alloc(
       alignment
    );
 
-   if (retn != TUX64_NULLPTR) {
+   if (retn != TUX64_LITERAL_UINT32(0u)) {
       tux64_boot_stage1_memory_statistics.free -= bytes;
    }
 
@@ -122,7 +122,7 @@ tux64_boot_stage1_memory_stage1_alloc(
 
 Tux64Boolean
 tux64_boot_stage1_memory_stage2_alloc_inplace(
-   void * address,
+   Tux64UInt32 address,
    Tux64UInt32 bytes
 ) {
    return tux64_boot_stage1_arena_allocator_alloc_inplace(
@@ -132,7 +132,7 @@ tux64_boot_stage1_memory_stage2_alloc_inplace(
    );
 }
 
-void *
+Tux64UInt32
 tux64_boot_stage1_memory_stage2_alloc(
    Tux64UInt32 bytes,
    Tux64UInt8 alignment

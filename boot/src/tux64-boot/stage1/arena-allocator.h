@@ -18,16 +18,16 @@
    3u
 
 struct Tux64BootStage1ArenaAllocatorBlock {
-   Tux64UIntPtr start;
-   Tux64UIntPtr end;
+   Tux64UInt32 start;
+   Tux64UInt32 end;
 };
 
 /*----------------------------------------------------------------------------*/
 /* Stores the information to implement an arena allocator.                    */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootStage1ArenaAllocator {
-   Tux64UIntPtr address_space_start;
-   Tux64UIntPtr address_space_end;
+   Tux64UInt32 address_space_start;
+   Tux64UInt32 address_space_end;
    struct Tux64BootStage1ArenaAllocatorBlock blocks [TUX64_BOOT_STAGE1_ARENA_ALLOCATOR_MAX_ALLOCATIONS];
    Tux64UInt8 blocks_allocated;
 };
@@ -39,8 +39,8 @@ struct Tux64BootStage1ArenaAllocator {
 void
 tux64_boot_stage1_arena_allocator_initialize(
    struct Tux64BootStage1ArenaAllocator * allocator,
-   void * address_space_start,
-   void * address_space_end
+   Tux64UInt32 address_space_start,
+   Tux64UInt32 address_space_end
 );
 
 /*----------------------------------------------------------------------------*/
@@ -51,16 +51,16 @@ tux64_boot_stage1_arena_allocator_initialize(
 Tux64Boolean
 tux64_boot_stage1_arena_allocator_alloc_inplace(
    struct Tux64BootStage1ArenaAllocator * allocator,
-   void * address,
+   Tux64UInt32 address,
    Tux64UInt32 bytes
 );
 
 /*----------------------------------------------------------------------------*/
 /* Attempts to allocate a block of memory which satisfies the given size and  */
 /* alignment.  Returns the pointer to the allocated block upon success, or    */
-/* TUX64_NULLPTR upon failure.                                                */
+/* zero upon failure.                                                         */
 /*----------------------------------------------------------------------------*/
-void *
+Tux64UInt32
 tux64_boot_stage1_arena_allocator_alloc(
    struct Tux64BootStage1ArenaAllocator * allocator,
    Tux64UInt32 bytes,
