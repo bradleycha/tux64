@@ -42,11 +42,10 @@ typedef Tux64UInt8 Tux64BootLoadStatus;
 
 /*----------------------------------------------------------------------------*/
 /* Stores the allocated region in RDRAM for a single file.  If the file is    */
-/* empty, then 'address' should be zero, and 'bytes' is undefined.            */
+/* empty, then 'address' should be zero.                                      */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootLoadAllocationsFile {
    Tux64UInt32 address;
-   Tux64UInt32 bytes;
 };
 
 struct Tux64BootLoadAllocationsRequired {

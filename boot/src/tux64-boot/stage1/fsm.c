@@ -194,7 +194,6 @@ tux64_boot_stage1_fsm_allocate_kernel(
    }
 
    kernel_allocation->address = kernel_address;
-   kernel_allocation->bytes   = kernel_bytes;
    return result;
 }
 
@@ -213,8 +212,6 @@ tux64_boot_stage1_fsm_allocate(
    /* heaps desynchronizing. */
    address_stage1 = tux64_boot_stage1_memory_stage1_alloc(bytes, alignment);
    address_stage2 = tux64_boot_stage1_memory_stage2_alloc(bytes, alignment);
-
-   allocation->bytes = bytes;
 
    if (address_stage1 != TUX64_LITERAL_UINT32(0u)) {
       load_info->status = tux64_bitwise_flags_set_uint8(load_info->status, status_flag);
