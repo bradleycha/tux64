@@ -63,6 +63,12 @@
 #define TUX64_ASSERT_STATIC(condition)\
    __extension__ _Static_assert((condition), "static assertion failed! " #condition)
 
+/* this macro is used to force the compiler to assume some variable's value   */
+/* externally visible.  this is useful for preventing invalid reordering of   */
+/* instructions and erroneous discarding of required symbols.                 */
+#define TUX64_EXPLICIT_DEPENDENCY(symbol) \
+   __asm__ volatile ("" :: "X" (symbol))
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
 
