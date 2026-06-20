@@ -30,6 +30,17 @@ typedef Tux64UInt8 Tux64BootLoadStatus;
    (1u << 2u)
 
 /*----------------------------------------------------------------------------*/
+/* When the load status is exactly equal to this constant, it means every     */
+/* file could be loaded from stage-1, thus there is no need for stage-2.      */
+/*----------------------------------------------------------------------------*/
+#define TUX64_BOOT_LOAD_STATUS_CONCURRENT_WITH_STAGE1 \
+   ( \
+      TUX64_BOOT_LOAD_STATUS_KERNEL       | \
+      TUX64_BOOT_LOAD_STATUS_INITRAMFS    | \
+      TUX64_BOOT_LOAD_STATUS_COMMAND_LINE \
+   )
+
+/*----------------------------------------------------------------------------*/
 /* Stores the allocated region in RDRAM for a single file.  If the file is    */
 /* empty, then 'address' should be zero, and 'bytes' is undefined.            */
 /*----------------------------------------------------------------------------*/
