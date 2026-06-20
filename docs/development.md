@@ -28,6 +28,12 @@ To enable dependency tracking, simply replace all instances of ```---disable-dep
 
 To do this, reconfigure ```tux64-lib``` with ```---enable-log-origin```.
 
+# Enabling debug assertions
+
+`tux64-boot` can be optionally configured with `--enable-debug`.  This enables some safety checks which can catch programming mistakes at the cost of some runtime overhead.
+
+This may be useful for bootloader development, where simple programming mistakes will cause the bootloader to safely halt instead of violently exploding, aiding in debugging.
+
 ## Enabling boot status codes
 
 `tux64-boot` can be optionally configured with `--enable-status`.  This will write status code information to a fixed memory address at the end of RSP DMEM, specifically 8 bytes to `0xa4000ff8`.  The bytes are ASCII characters which spell out `STAGEn:p`, where "n" is the bootloader stage and "p" is the location last reached within the relevant bootloader stage.
