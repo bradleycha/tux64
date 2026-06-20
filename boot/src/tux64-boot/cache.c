@@ -25,11 +25,15 @@ tux64_boot_cache_operation(
 
    iter = (const Tux64UInt8 *)address;
 
-   do {
+   while (bytes >= bytes_per_line) {
       cache_operation(iter);
       iter  += bytes_per_line;
       bytes -= bytes_per_line;
-   } while (bytes >= bytes_per_line);
+   }
+
+   if (bytes != TUX64_LITERAL_UINT32(0u)) {
+      cache_operation(iter);
+   }
 
    return;
 }
