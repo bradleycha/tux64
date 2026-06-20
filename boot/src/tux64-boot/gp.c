@@ -23,9 +23,10 @@ register void * gp __asm__("$gp");
 void
 tux64_boot_gp_load(void) {
    /* register variables are implicitly volatile, so it's sufficient to just */
-   /* do this.  the compiler will reorder/optimize for us, which is why we */
-   /* don't use inline assembly. */
+   /* do this.  we do need to insert an explicit dependency, as the compiler */
+   /* will sometimes use $gp before it's initialized. */
    gp = &_gp;
+   TUX64_EXPLICIT_DEPENDENCY(gp);
    return;
 }
 
