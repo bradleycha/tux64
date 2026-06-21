@@ -69,6 +69,9 @@
 #define TUX64_EXPLICIT_DEPENDENCY(symbol) \
    __asm__ volatile ("" :: "X" (symbol))
 
+#define TUX64_ALIGNOF(type) \
+   __alignof__(type)
+
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_H */
 
