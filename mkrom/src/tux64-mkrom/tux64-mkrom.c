@@ -841,8 +841,8 @@ tux64_mkrom_run_parsed_cmdline(
       goto load_err_exit6;
    }
 
-   /* create an owned copy of the kernel command-line */
-   kernel_command_line_ptr = malloc(config_file_parsed.command_line.characters * sizeof(char));
+   /* create an owned and null-terminated copy of the kernel command-line */
+   kernel_command_line_ptr = malloc((config_file_parsed.command_line.characters + 1u) * sizeof(char));
    if (kernel_command_line_ptr == NULL) {
       result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
       goto load_err_exit7;
@@ -852,6 +852,7 @@ tux64_mkrom_run_parsed_cmdline(
       config_file_parsed.command_line.ptr,
       config_file_parsed.command_line.characters * TUX64_LITERAL_UINT32(sizeof(char))
    );
+   kernel_command_line_ptr[config_file_parsed.command_line.characters] = '\0';
 
    /* attempt to parse the stage-1 BSS length file */
    stage1_bss_string.ptr = (const char *)stage1_bss_file.data;
@@ -896,7 +897,7 @@ tux64_mkrom_run_parsed_cmdline(
    /* initialize the rest of the fields for the input */
    input.rom_header = &config_file_parsed.rom_header;
    input.kernel_command_line.ptr = kernel_command_line_ptr;
-   input.kernel_command_line.characters = config_file_parsed.command_line.characters;
+   input.kernel_command_line.characters = config_file_parsed.command_line.characters + TUX64_LITERAL_UINT32(1u);
    input.path_output = cmdline->path_output;
    input.boot_header_flags = config_file_parsed.boot_header_flags;
 

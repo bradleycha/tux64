@@ -121,7 +121,7 @@ tux64_mkrom_builder_measure_and_verify_overflow(
    }
    marker = tux64_mkrom_builder_align_value(marker + input->files.initramfs.bytes);
 
-   cmdline_bytes = (input->kernel_command_line.characters + TUX64_LITERAL_UINT32(1u)) * TUX64_LITERAL_UINT32(sizeof(char));
+   cmdline_bytes = input->kernel_command_line.characters * TUX64_LITERAL_UINT32(sizeof(char));
 
    if (cmdline_bytes > TUX64_UINT16_MAX) {
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_INITRAMFS;
@@ -172,7 +172,11 @@ tux64_mkrom_builder_measure_and_verify_initialize_boot_header(
    Tux64UInt32 offset;
    union Tux64Int32 magic;
 
-   cmdline_bytes = (input->kernel_command_line.characters + TUX64_LITERAL_UINT32(1u)) * TUX64_LITERAL_UINT32(sizeof(char));
+   if (input->kernel_command_line.characters == TUX64_LITERAL_UINT32(1u)) {
+      cmdline_bytes = TUX64_LITERAL_UINT32(0u);
+   } else {
+      cmdline_bytes = input->kernel_command_line.characters * TUX64_LITERAL_UINT32(sizeof(char));
+   }
 
    offset = TUX64_LITERAL_UINT32(0x00001000u + sizeof(struct Tux64PlatformMipsN64BootHeader));
 
@@ -253,7 +257,11 @@ tux64_mkrom_builder_measure_and_verify(
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE0_CIC;
    }
 
-   cmdline_bytes = (input->kernel_command_line.characters + TUX64_LITERAL_UINT32(1u)) * TUX64_LITERAL_UINT32(sizeof(char));
+   if (input->kernel_command_line.characters == TUX64_LITERAL_UINT32(1u)) {
+      cmdline_bytes = TUX64_LITERAL_UINT32(0u);
+   } else {
+      cmdline_bytes = (input->kernel_command_line.characters + TUX64_LITERAL_UINT32(1u)) * TUX64_LITERAL_UINT32(sizeof(char));
+   }
 
    /* begin measuring the size of the ROM.  we initialize to 0x1000 because */
    /* we always must have this due to the IPl2 expecting IPL3 in those bytes. */
