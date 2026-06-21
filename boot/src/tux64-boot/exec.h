@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
+#include "tux64-boot/load.h"
 
 struct Tux64BootExecKernelArgumentsFile {
    Tux64UInt32 address;
@@ -32,6 +33,20 @@ void
 tux64_boot_exec_kernel(
    const void * entrypoint,
    const struct Tux64BootExecKernelArguments * arguments
+)
+__attribute__((noreturn));
+
+/*----------------------------------------------------------------------------*/
+/* Starts the stage-2 bootloader, assuming it is already loaded into RSP      */
+/* IMEM.  Assumes the boot header and allocations struct are loaded into the  */
+/* appropriate locations in RSP DMEM.  Assumes interrupts are disabled, the   */
+/* VI and AI are stopped, and there are no ongoing RSP, PI, or SI DMA         */
+/* transfers.                                                                 */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_exec_stage2(
+   Tux64UInt32 memory_total,
+   Tux64BootLoadStatus load_status
 )
 __attribute__((noreturn));
 

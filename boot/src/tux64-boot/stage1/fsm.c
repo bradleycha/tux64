@@ -29,7 +29,6 @@
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
-#include "tux64-boot/stage2/stack.h"
 
 #define TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(identifier) \
    static void identifier (struct Tux64BootStage1Fsm *)
@@ -686,37 +685,6 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
    TUX64_UNREACHABLE;
 }
 
-typedef void (*Tux64BootStage1FsmStage2Start)(void);
-
-union Tux64BootStage1FsmStage2StartPtr {
-   Tux64BootStage1FsmStage2Start function;
-   const void * data;
-};
-
-__attribute__((noreturn))
-static void
-tux64_boot_stage1_fsm_stage2_start(
-   Tux64UInt32 memory_total,
-   Tux64BootLoadStatus load_status
-) {
-   union Tux64BootStage1FsmStage2StartPtr stage2_start;
-   register Tux64UInt32          param_memory_total   __asm__("$s0");
-   register Tux64BootLoadStatus  param_load_status    __asm__("$s1");
-   register Tux64UInt32          stack_pointer        __asm__("$sp");
-
-   stage2_start.data = (const void *)TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_IMEM);
-
-   param_memory_total   = memory_total;
-   param_load_status    = load_status;
-   stack_pointer        = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE2_STACK_ADDRESS + TUX64_BOOT_STAGE2_STACK_BYTES);
-
-   TUX64_EXPLICIT_DEPENDENCY(param_memory_total);
-   TUX64_EXPLICIT_DEPENDENCY(param_load_status);
-   TUX64_EXPLICIT_DEPENDENCY(stack_pointer);
-   stage2_start.function();
-   TUX64_UNREACHABLE;
-}
-
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) {
    struct Tux64BootRspDmaTransfer transfer;
    Tux64UInt16 stage2_bytes;
@@ -744,7 +712,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) 
    tux64_boot_rsp_dma_wait_idle();
 
    tux64_boot_stage1_fsm_reset_hardware();
-   tux64_boot_stage1_fsm_stage2_start(
+   tux64_boot_exec_stage2(
       tux64_boot_stage1_memory_total(),
       fsm->globals.load_info.status
    );
