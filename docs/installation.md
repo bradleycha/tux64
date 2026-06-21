@@ -666,7 +666,6 @@ Kernel type  --->
 
   [*] Floating Point support
   [*] Tux64 support
-  [ ]   Support existing bootloaders
 
 General setup  --->
   Local version - append to kernel release
