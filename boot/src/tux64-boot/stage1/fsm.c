@@ -212,7 +212,7 @@ tux64_boot_stage1_fsm_allocate(
    struct Tux64BootLoadAllocationsFile * allocation,
    Tux64BootLoadStatus status_flag,
    Tux64UInt32 bytes,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 ) {
    Tux64UInt32 address_stage1;
    Tux64UInt32 address_stage2;
@@ -241,7 +241,7 @@ tux64_boot_stage1_fsm_allocate_optional(
    struct Tux64BootLoadAllocationsFile * allocation,
    Tux64BootLoadStatus status_flag,
    Tux64UInt32 bytes,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 ) {
    if (bytes == TUX64_LITERAL_UINT32(0u)) {
       load_info->status = tux64_bitwise_flags_set_uint8(load_info->status, status_flag);
@@ -271,7 +271,7 @@ tux64_boot_stage1_fsm_allocate_optional_file(
       allocation,
       status_flag,
       file->length,
-      TUX64_LITERAL_UINT8(8u)
+      TUX64_LITERAL_UINT32(8u)
    );
 }
 
@@ -288,7 +288,7 @@ tux64_boot_stage1_fsm_allocate_kernel_args(
       &load_info->allocations.required.kernel_args,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL_ARGS),
       TUX64_LITERAL_UINT32(sizeof(struct Tux64BootExecKernelArguments)),
-      TUX64_LITERAL_UINT8(TUX64_ALIGNOF(struct Tux64BootExecKernelArguments))
+      TUX64_LITERAL_UINT32(TUX64_ALIGNOF(struct Tux64BootExecKernelArguments))
    );
 }
 

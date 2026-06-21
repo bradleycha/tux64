@@ -191,7 +191,7 @@ static Tux64UInt32
 tux64_boot_stage1_arena_allocator_free_space_start(
    const struct Tux64BootStage1ArenaAllocator * allocator,
    Tux64UInt32 address_base,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 ) {
    Tux64UInt32 address_start;
    Tux64UInt8 i;
@@ -200,7 +200,7 @@ tux64_boot_stage1_arena_allocator_free_space_start(
 
    address_start = address_base;
    do {
-      address_start = tux64_math_align_forward_uintptr(address_start, alignment);
+      address_start = tux64_math_align_forward_uint32(address_start, alignment);
 
       /* since forward-aligning may push us into an existing allocation, we */
       /* need all this crap. */
@@ -261,7 +261,7 @@ Tux64UInt32
 tux64_boot_stage1_arena_allocator_alloc(
    struct Tux64BootStage1ArenaAllocator * allocator,
    Tux64UInt32 bytes,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 ) {
    Tux64UInt32 free_region_start;
    Tux64UInt32 free_region_end;

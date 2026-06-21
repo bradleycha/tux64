@@ -67,7 +67,7 @@ tux64_boot_stage1_memory_stage1_alloc_inplace(
 Tux64UInt32
 tux64_boot_stage1_memory_stage1_alloc(
    Tux64UInt32 bytes,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 );
 
 /*----------------------------------------------------------------------------*/
@@ -89,7 +89,7 @@ tux64_boot_stage1_memory_stage2_alloc_inplace(
 Tux64UInt32
 tux64_boot_stage1_memory_stage2_alloc(
    Tux64UInt32 bytes,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 );
 
 /*----------------------------------------------------------------------------*/

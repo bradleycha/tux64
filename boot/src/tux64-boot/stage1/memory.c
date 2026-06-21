@@ -103,7 +103,7 @@ tux64_boot_stage1_memory_stage1_alloc_inplace(
 Tux64UInt32
 tux64_boot_stage1_memory_stage1_alloc(
    Tux64UInt32 bytes,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 ) {
    Tux64UInt32 retn;
 
@@ -135,7 +135,7 @@ tux64_boot_stage1_memory_stage2_alloc_inplace(
 Tux64UInt32
 tux64_boot_stage1_memory_stage2_alloc(
    Tux64UInt32 bytes,
-   Tux64UInt8 alignment
+   Tux64UInt32 alignment
 ) {
    return tux64_boot_stage1_arena_allocator_alloc(
       &tux64_boot_stage1_memory_statistics.heap.stage2,
