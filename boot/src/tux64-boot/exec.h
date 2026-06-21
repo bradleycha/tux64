@@ -17,6 +17,10 @@ struct Tux64BootExecKernelArgumentsFile {
    Tux64UInt32 bytes;
 };
 
+/*----------------------------------------------------------------------------*/
+/* Boot arguments passed to the kernel.  Each primitive must be stored in the */
+/* big-endian format.                                                         */
+/*----------------------------------------------------------------------------*/
 struct Tux64BootExecKernelArguments {
    struct Tux64BootExecKernelArgumentsFile initramfs;
    struct Tux64BootExecKernelArgumentsFile command_line;

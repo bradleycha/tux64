@@ -9,6 +9,7 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/exec.h"
 
+#include <tux64/endian.h>
 #include <tux64/platform/mips/n64/memory-map.h>
 #include "tux64-boot/load.h"
 #include "tux64-boot/stage2/stack.h"
@@ -37,16 +38,27 @@ tux64_boot_exec_kernel(
    /* we're manually specifying the registers instead of adding function */
    /* arguments to ensure a stable ABI. */
    union Tux64BootExecStartPtr start; 
+   Tux64UInt32 fw_arg0_u32;
+   Tux64UInt32 fw_arg1_u32;
+   Tux64UInt32 fw_arg2_u32;
+   Tux64UInt32 fw_arg3_u32;
    register unsigned long fw_arg0 __asm__("$a0");
    register unsigned long fw_arg1 __asm__("$a1");
    register unsigned long fw_arg2 __asm__("$a2");
    register unsigned long fw_arg3 __asm__("$a3");
 
    start.data  = entrypoint;
-   fw_arg0     = (unsigned long)(Tux64UIntPtr)arguments;
-   fw_arg1     = TUX64_BOOT_EXEC_KERNEL_MAGIC;
-   fw_arg2     = 0u;
-   fw_arg3     = 0u;
+
+   fw_arg0_u32 = (Tux64UIntPtr)arguments;
+   fw_arg1_u32 = TUX64_LITERAL_UINT32(TUX64_BOOT_EXEC_KERNEL_MAGIC);
+   fw_arg2_u32 = TUX64_LITERAL_UINT32(0u);
+   fw_arg3_u32 = TUX64_LITERAL_UINT32(0u);
+
+   /* theoretically the kernel could be a foreign endianess, so we do this. */
+   fw_arg0 = tux64_endian_convert_uint32(fw_arg0_u32, TUX64_ENDIAN_FORMAT_BIG);
+   fw_arg1 = tux64_endian_convert_uint32(fw_arg1_u32, TUX64_ENDIAN_FORMAT_BIG);
+   fw_arg2 = tux64_endian_convert_uint32(fw_arg2_u32, TUX64_ENDIAN_FORMAT_BIG);
+   fw_arg3 = tux64_endian_convert_uint32(fw_arg3_u32, TUX64_ENDIAN_FORMAT_BIG);
 
    TUX64_EXPLICIT_DEPENDENCY(fw_arg0);
    TUX64_EXPLICIT_DEPENDENCY(fw_arg1);
