@@ -697,7 +697,6 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
    Tux64UInt32 initramfs_address;
    Tux64UInt32 initramfs_bytes;
    Tux64UInt32 command_line_address;
-   Tux64UInt32 command_line_bytes;
    Tux64UInt32 total_memory;
 
    entrypoint = (const void *)tux64_boot_stage1_boot_header_file_kernel()->addr_entry;
@@ -710,13 +709,11 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
    initramfs_address    = allocations->optional.initramfs.address;
    initramfs_bytes      = tux64_boot_stage1_boot_header_file_initramfs()->length;
    command_line_address = allocations->optional.command_line.address;
-   command_line_bytes   = tux64_boot_stage1_boot_header_file_command_line()->length;
    total_memory         = tux64_boot_stage1_memory_total();
 
-   arguments->initramfs.address     = tux64_endian_convert_uint32(initramfs_address, TUX64_ENDIAN_FORMAT_BIG);
-   arguments->initramfs.bytes       = tux64_endian_convert_uint32(initramfs_bytes, TUX64_ENDIAN_FORMAT_BIG);
-   arguments->command_line.address  = tux64_endian_convert_uint32(command_line_address, TUX64_ENDIAN_FORMAT_BIG);
-   arguments->command_line.bytes    = tux64_endian_convert_uint32(command_line_bytes, TUX64_ENDIAN_FORMAT_BIG);
+   arguments->initramfs_address     = tux64_endian_convert_uint32(initramfs_address, TUX64_ENDIAN_FORMAT_BIG);
+   arguments->initramfs_bytes       = tux64_endian_convert_uint32(initramfs_bytes, TUX64_ENDIAN_FORMAT_BIG);
+   arguments->command_line_address  = tux64_endian_convert_uint32(command_line_address, TUX64_ENDIAN_FORMAT_BIG);
    arguments->total_memory          = tux64_endian_convert_uint32(total_memory, TUX64_ENDIAN_FORMAT_BIG);
 
    tux64_boot_stage1_fsm_reset_hardware();

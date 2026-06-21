@@ -12,18 +12,14 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/load.h"
 
-struct Tux64BootExecKernelArgumentsFile {
-   Tux64UInt32 address;
-   Tux64UInt32 bytes;
-};
-
 /*----------------------------------------------------------------------------*/
 /* Boot arguments passed to the kernel.  Each primitive must be stored in the */
 /* big-endian format.                                                         */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootExecKernelArguments {
-   struct Tux64BootExecKernelArgumentsFile initramfs;
-   struct Tux64BootExecKernelArgumentsFile command_line;
+   Tux64UInt32 initramfs_address;
+   Tux64UInt32 initramfs_bytes;
+   Tux64UInt32 command_line_address;
    Tux64UInt32 total_memory;
 };
 
