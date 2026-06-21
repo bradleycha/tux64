@@ -12,10 +12,10 @@
 
 #include "tux64-boot/tux64-boot.h"
 
-/* kernel + initramfs + command line.  this is why we don't implement this in */
-/* tux64-lib. */
+/* kernel + kernel args + initramfs + command line.  this is why we don't */
+/* implement this in tux64-lib. */
 #define TUX64_BOOT_STAGE1_ARENA_ALLOCATOR_MAX_ALLOCATIONS\
-   3u
+   4u
 
 struct Tux64BootStage1ArenaAllocatorBlock {
    Tux64UInt32 start;

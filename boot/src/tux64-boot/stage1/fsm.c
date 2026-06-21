@@ -276,6 +276,23 @@ tux64_boot_stage1_fsm_allocate_optional_file(
 }
 
 static Tux64Boolean
+tux64_boot_stage1_fsm_allocate_kernel_args(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
+) {
+   /* this has to be allocated dynamically so it can live after the */
+   /* bootloaders are unloaded.  we could theoretically denote a static */
+   /* region of memory for kernel args, but that is ugly and could cause more */
+   /* problems down the line.  let's just allocate dynamically. */
+   return tux64_boot_stage1_fsm_allocate(
+      load_info,
+      &load_info->allocations.required.kernel_args,
+      TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL_ARGS),
+      TUX64_LITERAL_UINT32(sizeof(struct Tux64BootExecKernelArguments)),
+      TUX64_LITERAL_UINT8(TUX64_ALIGNOF(struct Tux64BootExecKernelArguments))
+   );
+}
+
+static Tux64Boolean
 tux64_boot_stage1_fsm_allocate_initramfs(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
 ) {
@@ -304,6 +321,9 @@ tux64_boot_stage1_fsm_allocate_boot_files(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
 ) {
    if (tux64_boot_stage1_fsm_allocate_kernel(load_info) == TUX64_BOOLEAN_FALSE) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+   if (tux64_boot_stage1_fsm_allocate_kernel_args(load_info) == TUX64_BOOLEAN_FALSE) {
       return TUX64_BOOLEAN_FALSE;
    }
    if (tux64_boot_stage1_fsm_allocate_initramfs(load_info) == TUX64_BOOLEAN_FALSE) {
@@ -671,14 +691,22 @@ tux64_boot_stage1_fsm_reset_hardware(void) {
 
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) {
    const void * entrypoint;
-   const struct Tux64BootExecKernelArguments * arguments;
+   const struct Tux64BootLoadAllocations * allocations;
+   Tux64UInt32 addr_arguments;
+   struct Tux64BootExecKernelArguments * arguments;
 
    entrypoint = (const void *)tux64_boot_stage1_boot_header_file_kernel()->addr_entry;
 
-   /* TODO: once we implement initramfs/command-line loading, allocate the */
-   /* boot arguments struct and set its arguments accordingly. */
-   (void)fsm;
-   arguments = TUX64_NULLPTR;
+   allocations = &fsm->globals.load_info.allocations;
+
+   addr_arguments = fsm->globals.load_info.allocations.required.kernel_args.address;
+   arguments      = (struct Tux64BootExecKernelArguments *)(Tux64UIntPtr)addr_arguments;
+
+   arguments->initramfs.address     = allocations->optional.initramfs.address;
+   arguments->initramfs.bytes       = tux64_boot_stage1_boot_header_file_initramfs()->length;
+   arguments->command_line.address  = allocations->optional.command_line.address;
+   arguments->command_line.bytes    = tux64_boot_stage1_boot_header_file_command_line()->length;
+   arguments->total_memory          = tux64_boot_stage1_memory_total();
 
    tux64_boot_stage1_fsm_reset_hardware();
    tux64_boot_exec_kernel(entrypoint, arguments);

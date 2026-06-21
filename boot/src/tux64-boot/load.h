@@ -24,10 +24,12 @@ typedef Tux64UInt8 Tux64BootLoadStatus;
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_LOAD_STATUS_KERNEL \
    (1u << 0u)
-#define TUX64_BOOT_LOAD_STATUS_INITRAMFS \
+#define TUX64_BOOT_LOAD_STATUS_KERNEL_ARGS \
    (1u << 1u)
-#define TUX64_BOOT_LOAD_STATUS_COMMAND_LINE \
+#define TUX64_BOOT_LOAD_STATUS_INITRAMFS \
    (1u << 2u)
+#define TUX64_BOOT_LOAD_STATUS_COMMAND_LINE \
+   (1u << 3u)
 
 /*----------------------------------------------------------------------------*/
 /* When the load status is exactly equal to this constant, it means every     */
@@ -36,6 +38,7 @@ typedef Tux64UInt8 Tux64BootLoadStatus;
 #define TUX64_BOOT_LOAD_STATUS_CONCURRENT_WITH_STAGE1 \
    ( \
       TUX64_BOOT_LOAD_STATUS_KERNEL       | \
+      TUX64_BOOT_LOAD_STATUS_KERNEL_ARGS  | \
       TUX64_BOOT_LOAD_STATUS_INITRAMFS    | \
       TUX64_BOOT_LOAD_STATUS_COMMAND_LINE \
    )
@@ -50,6 +53,7 @@ struct Tux64BootLoadAllocationsFile {
 
 struct Tux64BootLoadAllocationsRequired {
    struct Tux64BootLoadAllocationsFile kernel;
+   struct Tux64BootLoadAllocationsFile kernel_args;
 };
 
 struct Tux64BootLoadAllocationsOptional {
