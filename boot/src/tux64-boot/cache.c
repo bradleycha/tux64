@@ -22,8 +22,14 @@ tux64_boot_cache_operation(
    Tux64BootCacheOperation cache_operation
 ) {
    const Tux64UInt8 * iter;
+   Tux64UInt32 align_delta;
 
    iter = (const Tux64UInt8 *)address;
+
+   /* align backward so the address starts on a cache line. */
+   align_delta = (Tux64UIntPtr)address % bytes_per_line;
+   iter -= align_delta;
+   bytes += align_delta;
 
    while (bytes >= bytes_per_line) {
       cache_operation(iter);
