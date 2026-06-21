@@ -1,0 +1,225 @@
+diff --git a/arch/mips/n64/Makefile b/arch/mips/n64/Makefile
+index b64a05ae2..dfae324a7 100644
+--- a/arch/mips/n64/Makefile
++++ b/arch/mips/n64/Makefile
+@@ -4,3 +4,4 @@
+ #
+ 
+ obj-y := init.o irq.o
++obj-$(CONFIG_MIPS_TUX64) += tux64-boot.o
+diff --git a/arch/mips/n64/init.c b/arch/mips/n64/init.c
+index dfbd864f4..15db2bddb 100644
+--- a/arch/mips/n64/init.c
++++ b/arch/mips/n64/init.c
+@@ -3,6 +3,7 @@
+  *  Nintendo 64 init.
+  *
+  *  Copyright (C) 2021	Lauri Kasanen
++ *  Copyright (C) 2026	Chase Bradley <bradleycha@proton.me>
+  */
+ #include <linux/init.h>
+ #include <linux/ioport.h>
+@@ -43,9 +44,15 @@ const char *get_system_type(void)
+ 	return "Nintendo 64";
+ }
+ 
++extern void __init tux64_prom_init(void);
++
+ void __init prom_init(void)
+ {
+-	fw_init_cmdline();
++	if (CONFIG_MIPS_TUX64) {
++		tux64_prom_init();
++	} else {
++		fw_init_cmdline();
++	}
+ }
+ 
+ #define W 320
+@@ -75,8 +82,15 @@ static const u32 ntsc_320[] __initconst = {
+ #define SI_REG_BASE 0x4800000
+ #define NUM_SI_REGS 7
+ 
++extern void __init tux64_platform_init(void);
++
+ static int __init n64_platform_init(void)
+ {
++	if (CONFIG_MIPS_TUX64)
++	{
++		tux64_platform_init();
++	}
++
+ 	static const char simplefb_resname[] = "FB";
+ 	static const struct simplefb_platform_data mode = {
+ 		.width = W,
+@@ -151,10 +165,18 @@ static int __init n64_platform_init(void)
+ 
+ arch_initcall(n64_platform_init);
+ 
++extern void __init tux64_plat_mem_setup(void);
++
+ void __init plat_mem_setup(void)
+ {
+ 	iomem_resource_init();
+-	memblock_add(0x0, 8 * 1024 * 1024); /* Bootloader blocks the 4mb config */
++
++	if (CONFIG_MIPS_TUX64)
++	{
++		tux64_plat_mem_setup();
++	} else {
++		memblock_add(0x0, 8 * 1024 * 1024); /* Bootloader blocks the 4mb config */
++	}
+ }
+ 
+ void __init plat_time_init(void)
+diff --git a/arch/mips/n64/tux64-boot.c b/arch/mips/n64/tux64-boot.c
+new file mode 100644
+index 000000000..93dfa7ebd
+--- /dev/null
++++ b/arch/mips/n64/tux64-boot.c
+@@ -0,0 +1,145 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * tux64-boot.c: Kernel support for extended boot information provided by tux64-boot.
++ *
++ * Copyright (C) 2026 Chase Bradley <bradleycha@proton.me>
++ */
++
++#include <linux/init.h>
++#include <linux/initrd.h>
++#include <linux/memblock.h>
++#include <linux/string.h>
++
++#include <asm/bootinfo.h>
++
++void __init tux64_prom_init(void);
++void __init tux64_platform_init(void);
++void __init tux64_plat_mem_setup(void);
++
++static void __initdata *initrd_ptr = 0;
++static unsigned long __initdata initrd_bytes = 0;
++static const char __initdata *cmdline = NULL;
++static uint32_t __initdata system_memory;
++
++struct tux64_boot_resource
++{
++	uint32_t address;
++	uint32_t bytes;
++};
++
++struct tux64_boot_args
++{
++	uint32_t initrd_address;
++	uint32_t initrd_bytes;
++	uint32_t command_line_address;
++	uint32_t total_memory;
++};
++
++static void __init tux64_load_boot_args(struct tux64_boot_args *args)
++{
++	const struct tux64_boot_args *args_raw;
++
++	args_raw = (const struct tux64_boot_args *)CKSEG0ADDR(be32_to_cpu(fw_arg0));
++
++	/* args_raw is aligned by the bootloader. */
++	args->initrd_address		= be32_to_cpu(args_raw->initrd_address);
++	args->initrd_bytes		= be32_to_cpu(args_raw->initrd_bytes);
++	args->command_line_address	= be32_to_cpu(args_raw->command_line_address);
++	args->total_memory		= be32_to_cpu(args_raw->total_memory);
++}
++
++static void __init tux64_prom_init_cmdline(void)
++{
++	if (!cmdline)
++		return;
++
++#ifdef CONFIG_CMDLINE_BOOL
++	strscpy(arcs_cmdline, CONFIG_CMDLINE, COMMAND_LINE_SIZE);
++#ifndef CONFIG_CMDLINE_OVERRIDE
++	if (cmdline[0] != '\0')
++		strlcat(arcs_cmdline, " ", COMMAND_LINE_SIZE);
++#endif
++#endif
++
++#ifndef CONFIG_CMDLINE_OVERRIDE
++	strlcat(arcs_cmdline, cmdline, COMMAND_LINE_SIZE);
++#endif
++}
++
++static void __init tux64_prom_init_args(void)
++{
++	struct tux64_boot_args args;
++
++	tux64_load_boot_args(&args);
++
++	if (args.initrd_address != 0)
++	{
++		initrd_ptr	= (void *)CKSEG0ADDR(args.initrd_address);
++		initrd_bytes	= args.initrd_bytes;
++	}
++	if (args.command_line_address != 0)
++	{
++		cmdline = (const char *)CKSEG0ADDR(args.command_line_address);
++	}
++
++	system_memory = args.total_memory;
++}
++
++void __init tux64_prom_init(void)
++{
++	tux64_prom_init_cmdline();
++}
++
++void __init tux64_platform_init(void)
++{
++}
++
++static void __init tux64_plat_mem_setup_address_space(void)
++{
++	memblock_add(0x0, system_memory);
++}
++
++#if CONFIG_BLK_DEV_INITRD
++static int __init tux64_initrd_page_align(void)
++{
++	void *initrd_ptr_relocated;
++
++	if (PAGE_ALIGNED(initrd_ptr))
++		return 0;
++
++	initrd_ptr_relocated = memblock_alloc(initrd_bytes, PAGE_SIZE);
++	if (!initrd_ptr_relocated)
++		return -ENOMEM;
++
++	memmove(initrd_ptr_relocated, initrd_ptr, initrd_bytes);
++	initrd_ptr = initrd_ptr_relocated;
++
++	return 0;
++}
++
++static void __init tux64_plat_mem_setup_initrd(void)
++{
++	if (!initrd_ptr)
++		return;
++	
++	if (tux64_initrd_page_align() < 0)
++	{
++		pr_err("Unable to relocate initrd to page boundary");
++		return;
++	}
++
++	initrd_start	= (unsigned long)initrd_ptr;
++	initrd_end	= (unsigned long)initrd_ptr + initrd_bytes;
++}
++#else
++static void __init tux64_plat_mem_setup_initrd(void)
++{
++}
++#endif
++
++void __init tux64_plat_mem_setup(void)
++{
++	tux64_prom_init_args();
++	tux64_plat_mem_setup_address_space();
++	tux64_plat_mem_setup_initrd();
++}
