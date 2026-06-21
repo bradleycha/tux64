@@ -14,13 +14,6 @@
 #include "tux64-boot/load.h"
 #include "tux64-boot/stage2/stack.h"
 
-/* since we want to maintain compatability with existing kernel loaders, such */
-/* as libdragon's ELF loader and clbr's old n64bootloader, we pass a magic */
-/* value for fw_arg1.  this allows the kernel to identify whether fw_arg0 */
-/* contains a pointer to our arguments or not. */
-#define TUX64_BOOT_EXEC_KERNEL_MAGIC \
-   (0x54583634u) /* TX64 */
-
 typedef void (*Tux64BootExecStartFunction)();
 
 /* like in the stage-1 interrupt handler, gcc will complain if we directly */
@@ -50,7 +43,7 @@ tux64_boot_exec_kernel(
    start.data  = entrypoint;
 
    fw_arg0_u32 = (Tux64UIntPtr)arguments;
-   fw_arg1_u32 = TUX64_LITERAL_UINT32(TUX64_BOOT_EXEC_KERNEL_MAGIC);
+   fw_arg1_u32 = TUX64_LITERAL_UINT32(0u);
    fw_arg2_u32 = TUX64_LITERAL_UINT32(0u);
    fw_arg3_u32 = TUX64_LITERAL_UINT32(0u);
 
