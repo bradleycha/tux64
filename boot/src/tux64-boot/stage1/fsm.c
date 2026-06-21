@@ -263,15 +263,15 @@ tux64_boot_stage1_fsm_allocate_optional_file(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info,
    struct Tux64BootLoadAllocationsFile * allocation,
    Tux64BootLoadStatus status_flag,
-   const struct Tux64PlatformMipsN64BootHeaderFile * file
+   const struct Tux64PlatformMipsN64BootHeaderFile * file,
+   Tux64UInt32 alignment
 ) {
-   /* this has to be aligned for PI DMA. */
    return tux64_boot_stage1_fsm_allocate_optional(
       load_info,
       allocation,
       status_flag,
       file->length,
-      TUX64_LITERAL_UINT32(8u)
+      alignment
    );
 }
 
@@ -296,11 +296,15 @@ static Tux64Boolean
 tux64_boot_stage1_fsm_allocate_initramfs(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
 ) {
+   /* the kernel expects the initrd to be page-aligned.  we assume a default */
+   /* page size of 4096 bytes and align to that.  if the kernel has a */
+   /* different page size, it can relocate the initrd itself. */
    return tux64_boot_stage1_fsm_allocate_optional_file(
       load_info,
       &load_info->allocations.optional.initramfs,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS),
-      tux64_boot_stage1_boot_header_file_initramfs()
+      tux64_boot_stage1_boot_header_file_initramfs(),
+      TUX64_LITERAL_UINT32(4096u)
    );
 }
 
@@ -308,11 +312,13 @@ static Tux64Boolean
 tux64_boot_stage1_fsm_allocate_command_line(
    struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
 ) {
+   /* this has to be aligned for PI DMA. */
    return tux64_boot_stage1_fsm_allocate_optional_file(
       load_info,
       &load_info->allocations.optional.command_line,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE),
-      tux64_boot_stage1_boot_header_file_command_line()
+      tux64_boot_stage1_boot_header_file_command_line(),
+      TUX64_LITERAL_UINT32(8u)
    );
 }
 
