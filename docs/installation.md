@@ -671,6 +671,15 @@ General setup  --->
   Local version - append to kernel release
     -tux64
 
+  [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+  [*] Support initial ramdisk/ramfs compressed using gzip
+  [ ] Support initial ramdisk/ramfs compressed using bzip2
+  [ ] Support initial ramdisk/ramfs compressed using LZMA
+  [ ] Support initial ramdisk/ramfs compressed using XZ
+  [ ] Support initial ramdisk/ramfs compressed using LZO
+  [ ] Support initial ramdisk/ramfs compressed using LZ4
+  [ ] Support initial ramdisk/ramfs compressed using ZSTD
+
   Configure standard kernel features (expert users)  --->
     [*] Enable support for printk
 
