@@ -61,6 +61,8 @@
    TUX64_LITERAL_UINT32(\
       TUX64_UINT32_MAX - (TUX64_UINT32_MAX % TUX64_MKROM_BUILDER_ALIGNMENT_BOUNDARY)\
    )
+#define TUX64_MKROM_BUILDER_ROM_SIZE_ALIGNMENT\
+   16u
 
 static Tux64UInt32
 tux64_mkrom_builder_align_value(
@@ -297,6 +299,8 @@ tux64_mkrom_builder_measure_and_verify(
       result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_COMMAND_LINE;
       return result;
    }
+
+   marker = tux64_math_align_forward_uint32(marker, TUX64_LITERAL_UINT32(TUX64_MKROM_BUILDER_ROM_SIZE_ALIGNMENT));
 
    result.status = TUX64_MKROM_BUILDER_MEASURE_STATUS_OK;
    result.payload.ok.rom_bytes = marker;
