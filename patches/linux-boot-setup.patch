@@ -74,7 +74,7 @@ index dfbd864f4..15db2bddb 100644
  void __init plat_time_init(void)
 diff --git a/arch/mips/n64/tux64-boot.c b/arch/mips/n64/tux64-boot.c
 new file mode 100644
-index 000000000..93dfa7ebd
+index 000000000..f532afff9
 --- /dev/null
 +++ b/arch/mips/n64/tux64-boot.c
 @@ -0,0 +1,145 @@
@@ -167,6 +167,7 @@ index 000000000..93dfa7ebd
 +
 +void __init tux64_prom_init(void)
 +{
++	tux64_prom_init_args();
 +	tux64_prom_init_cmdline();
 +}
 +
@@ -219,7 +220,6 @@ index 000000000..93dfa7ebd
 +
 +void __init tux64_plat_mem_setup(void)
 +{
-+	tux64_prom_init_args();
 +	tux64_plat_mem_setup_address_space();
 +	tux64_plat_mem_setup_initrd();
 +}
