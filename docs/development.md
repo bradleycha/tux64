@@ -226,10 +226,12 @@ ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}-gdb \
 
 Debugging now follows the same as for the bootloader.
 
-TODO: this is completely FUBAR'd.  breakpoints are skipped over, we get weird
-segfaults in random code, and backtraces are broken.  note that if we don't
-load `vmlinux` and manually type the address of each function, breakpoints
-work as expected.  something is breaking down when we load symbols.
+TODO: install and load GDB scripts.
+
+TODO: this is completely FUBAR'd for 64-bit builds.  breakpoints are skipped over,
+we get weird segfaults in random code, and backtraces are broken.
+note that if we don't load `vmlinux` and manually type the address of each function,
+breakpoints work as expected.  something is breaking down when we load symbols.
 
 ## Recalculating the ```tux64-boot``` stage-0 CIC data
 
