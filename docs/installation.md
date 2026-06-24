@@ -188,7 +188,7 @@ TUX64_TARGET_HOST is the target for the host machine.  This needs to be set manu
 
 TUX64_TARGET_N64_BOOTLOADER is set to target 64-bit MIPS to make use of GCC's O64 ABI, which provides 32-bit addresses with 64-bit registers.  As the VR4300's virtual address space is only 32-bit, there is not purpose to 64-bit pointers.  In the future, the kernel and userspace will also be built with `-mabi=o64`, but currently it's unsupported outside of the bootloader.
 
-TUX64_TARGET_N64_LINUX is set to use 32-bit MIPS because 32-bit code is smaller on-average than 64-bit code.  Also, 64-bit kernels are currently broken and crash when attempting to run any userspace programs.  If you want, you are welcome to try setting this to `mips64-linux-musl` instead to see what happens.  Just make sure to update `TUX64_CFLAGS_N64_LINUX` to use `-mabi=64`.
+TUX64_TARGET_N64_LINUX is set to use 32-bit MIPS because 32-bit code is smaller on-average than 64-bit code.  Also, 64-bit kernels are currently broken and crash when attempting to run any userspace programs.  If you want, you are welcome to try setting this to `mips64-linux-musl` instead to see what happens.  Just make sure to update `TUX64_CFLAGS_N64_LINUX` to use `-mabi=64`, and select `64-bit kernel` for the kernel configuration.
 
 TUX64_LDFLAGS_HOST and TUX64_LDFLAGS_N64_COMMON include `-Wl,--gc-sections`.  This is a flag which removes unused sections when linking programs.  This can help with dead code elimination, thus producing smaller binaries.
 
@@ -666,7 +666,7 @@ Machine selection  --->
 
 Kernel type  --->
   Kernel code model  --->
-    (X) 64-bit kernel
+    (X) 32-bit kernel
 
   [*] Floating Point support
   [*] Tux64 support
