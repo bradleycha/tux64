@@ -158,12 +158,12 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_MAKEOPTS | The number of parallel make jobs to run. | $(nproc) |
 | TUX64_TARGET_HOST | The target system for the host. | |
 | TUX64_TARGET_N64_BOOTLOADER | The target system for the Nintendo 64's bootloader. | mips64-elf |
-| TUX64_TARGET_N64_LINUX | The target system for the Nintendo 64's kernel and userspace programs. | mips64-linux-musl |
+| TUX64_TARGET_N64_LINUX | The target system for the Nintendo 64's kernel and userspace programs. | mips-linux-musl |
 | TUX64_CFLAGS_HOST | Flags to pass to the host's C compiler. | -pipe -march=native -O2 -flto |
 | TUX64_CXXFLAGS_HOST | Flags to pass to the host's C++ compiler. | ${TUX64_CFLAGS_HOST} |
 | TUX64_ASFLAGS_HOST | Flags to pass to the host's assembler. | |
 | TUX64_LDFLAGS_HOST | Flags to pass to the host's linker. | -Wl,--gc-sections -flto |
-| TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -mabi=64 -Oz -flto -fno-stack-protector |
+| TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -Oz -flto -fno-stack-protector |
 | TUX64_CXXFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C++ compilers. | ${TUX64_CFLAGS_N64_COMMON} |
 | TUX64_ASFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's assemblers. | -march=vr4300 -mtune=vr4300 |
 | TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -Wl,--gc-sections -flto |
@@ -172,8 +172,8 @@ This will copy the helper scripts to a more convenient location, and also allow 
 | TUX64_LDFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader linker. | ${TUX64_LDFLAGS_N64_COMMON} |
 | TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} -fno-lto |
 | TUX64_ASFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
-| TUX64_CFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C compiler. | ${TUX64_CFLAGS_N64_COMMON} |
-| TUX64_CXXFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C++ compiler. | ${TUX64_CXXFLAGS_N64_COMMON} |
+| TUX64_CFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C compiler. | ${TUX64_CFLAGS_N64_COMMON} -mabi=32 |
+| TUX64_CXXFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C++ compiler. | ${TUX64_CFLAGS_N64_LINUX} |
 | TUX64_ASFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
 | TUX64_LDFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace linker. | ${TUX64_LDFLAGS_N64_COMMON} |
 
@@ -186,11 +186,15 @@ TUX64_MAKEOPTS is the number of parallel jobs to run when building software.  Th
 TUX64_TARGET_HOST is the target for the host machine.  This needs to be set manually as there's no easy way to detect this automatically in a simple shell script.  This follows the format `[arch][sub]-[vendor]-[sys]-[env]`.  For example, Linux running glibc on a 64-bit Intel or AMD processor would have the target triple
 `x86_64-pc-linux-gnu`.  For more information, refer to [this website](https://clang.llvm.org/docs/CrossCompilation.html).
 
+TUX64_TARGET_N64_BOOTLOADER is set to target 64-bit MIPS to make use of GCC's O64 ABI, which provides 32-bit addresses with 64-bit registers.  As the VR4300's virtual address space is only 32-bit, there is not purpose to 64-bit pointers.  In the future, the kernel and userspace will also be built with `-mabi=o64`, but currently it's unsupported outside of the bootloader.
+
+TUX64_TARGET_N64_LINUX is set to use 32-bit MIPS because 32-bit code is smaller on-average than 64-bit code.  Also, 64-bit kernels are currently broken and crash when attempting to run any userspace programs.  If you want, you are welcome to try setting this to `mips64-linux-musl` instead to see what happens.  Just make sure to update `TUX64_CFLAGS_N64_LINUX` to use `-mabi=64`.
+
 TUX64_LDFLAGS_HOST and TUX64_LDFLAGS_N64_COMMON include `-Wl,--gc-sections`.  This is a flag which removes unused sections when linking programs.  This can help with dead code elimination, thus producing smaller binaries.
 
 TUX64_CFLAGS_N64_COMMON includes `-mfix4300`.  This is a flag which patches code to work around hardware bugs in early N64 CPU revisions, at the cost of code size and performance.  We include this flag by default for compatibility with all N64 revisions.  However if you are planning on only running Tux64 on NUS-CPU-04 and later revisions, you should be able to safely remove this flag for improved performance and smaller code size.
 
-TUX64_CFLAGS_N64_BOOTLOADER includes `-mabi=o64`.  This uses GCC's MIPS O64 ABI, which is basically the regular 64-bit ABI but with 32-bit pointers.  Since the VR4300's virtual address space is only 32-bit, there's no purpose to 64-bit pointers.  In the future, the kernel and userspace will also be built with `-mabi=o64`, but currently it's unsupported outside of the bootloader.  A few other CFLAGS are also included which make the bootloader smaller, but are generally unsafe to use outside of the bootloader.
+TUX64_CFLAGS_N64_BOOTLOADER includes `-mabi=o64`.  This uses GCC's MIPS O64 ABI, as documented above.  A few other CFLAGS are also included which make the bootloader smaller, but are generally unsafe to use outside of the bootloader.
 
 After reviewing and setting the required environment variables, these can be exported to the current shell with the following command:
 

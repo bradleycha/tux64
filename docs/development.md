@@ -10,7 +10,7 @@ It's recommended to make the following changes to ```buildconf.sh``` to aid in d
 |------|-------|
 | TUX64_CFLAGS_HOST | -pipe -march=native -O0 -g -fsanitize=undefined |
 | TUX64_LDFLAGS_HOST | -g |
-| TUX64_CFLAGS_N64_COMMON |  -pipe -march=vr4300 -mfix4300 -mabi=64 -O0 -g |
+| TUX64_CFLAGS_N64_COMMON |  -pipe -march=vr4300 -mfix4300 -O0 -g |
 | TUX64_LDFLAGS_N64_COMMON | -g |
 | TUX64_CFLAGS_N64_BOOTLOADER | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 |
 
@@ -227,11 +227,6 @@ ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}-gdb \
 Debugging now follows the same as for the bootloader.
 
 TODO: install and load GDB scripts.
-
-TODO: this is completely FUBAR'd for 64-bit builds.  breakpoints are skipped over,
-we get weird segfaults in random code, and backtraces are broken.
-note that if we don't load `vmlinux` and manually type the address of each function,
-breakpoints work as expected.  something is breaking down when we load symbols.
 
 ## Recalculating the ```tux64-boot``` stage-0 CIC data
 
