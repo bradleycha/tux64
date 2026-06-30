@@ -18,7 +18,6 @@
 /*  * Verify the boot header's checksum                                       */
 /*  * Load the stage-1 binary into RDRAM via PI DMA                           */
 /*  * Verify the stage-1 binary's checksum if boot flag NO_CHECKSUM isn't set */
-/*  * Send the boot termination command to the PIF                            */
 /*  * Move the stack into RDRAM                                               */
 /*  * Jump to the stage-1 start address                                       */
 /*                                                                            */
@@ -71,7 +70,6 @@
 #include <tux64/platform/mips/n64/pi.h>
 #include <tux64/platform/mips/n64/ri.h>
 #include <tux64/platform/mips/n64/rdram.h>
-#include <tux64/platform/mips/n64/pif.h>
 #include <tux64/platform/mips/n64/boot.h>
 
 #include "tux64-boot/status.h"
@@ -139,8 +137,7 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_BOOT_HEADER,             TUX64_BOOT_STAGE0_STATUS_CODE('H')
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1,                   TUX64_BOOT_STAGE0_STATUS_CODE('I')
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('J')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT,            TUX64_BOOT_STAGE0_STATUS_CODE('K')
-.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('L')
+.equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('K')
 
 /* defined in stage1/boot-header.ld, included in stage0/stage0.ld */
 .extern tux64_boot_stage1_boot_header
@@ -918,8 +915,8 @@ tux64_boot_stage0_start:
    /*tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum*/
 
    addu  $t1,$t0,$k1 /* branch delay slot */
-   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($a2)
    jal   tux64_boot_stage0_checksum_calculate_and_verify
+   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($a2) /* branch delay slot */
 
    tux64_boot_stage0_start.skip_checksum_stage1:
 
@@ -932,15 +929,6 @@ tux64_boot_stage0_start:
    /* $s2       - ique boolean                                                */
    /* $s3-$s7   - IPL2 arguments                                              */
    /* $fp       - boot flags                                                  */
-
-   /* send the PIF terminate boot process command.  we use a dummy load */
-   /* instruction to block the CPU until the SI bus isn't busy. */
-   lui   $k0,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PIF_RAM) /* branch delay slot */
-   jal   tux64_boot_stage0_status_code_write
-   addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_PIF_TERMINATE_BOOT
-   addiu $t2,$zero,TUX64_PLATFORM_MIPS_N64_PIF_COMMAND_TERMINATE_BOOT
-   lw    $zero,%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PIF_RAM)+0x3c($k0)
-   sw    $t2,%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PIF_RAM)+0x3c($k0)
 
    /* calculate the stage-1 start address and prepare to start stage-1 */
    jal   tux64_boot_stage0_status_code_write

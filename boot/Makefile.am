@@ -106,6 +106,8 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/rsp.h \
 	src/tux64-boot/pi.c \
 	src/tux64-boot/pi.h \
+	src/tux64-boot/pif.c \
+	src/tux64-boot/pif.h \
 	src/tux64-boot/cache.c \
 	src/tux64-boot/cache.h \
 	src/tux64-boot/load.h \

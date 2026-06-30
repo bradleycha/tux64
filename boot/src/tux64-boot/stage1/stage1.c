@@ -11,6 +11,7 @@
 #include "tux64-boot/initialize.h"
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/rsp.h"
+#include "tux64-boot/pif.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/interrupt.h"
@@ -120,6 +121,18 @@ tux64_boot_stage1_main(
    );
 
    tux64_boot_stage1_fsm_initialize(&tux64_boot_stage1_fsm);
+
+   /* we used to execute this at the end of stage-0, but we moved it to here. */
+   /* the reason is we want to wait as late into the boot process to          */
+   /* terminate booting because if we fail to boot and halt the CPU with our  */
+   /* hacking software method, we also want to give a chance for the PIF to   */
+   /* halt the CPU for us.  stage-0 shouldn't take much time to execute, and  */
+   /* there is a non-zero chance (due to either bugs or cosmic rays) that     */
+   /* stage-1 fails to start despite passing all checks from stage-0.  after  */
+   /* we start executing stage-1, it could potentially take over 5 seconds to */
+   /* load/boot the kernel, so that's why we can't wait any longer.           */
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_PIF_TERMINATE_BOOT);
+   tux64_boot_pif_terminate_boot();
 
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_fsm_execute(&tux64_boot_stage1_fsm);
