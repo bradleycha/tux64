@@ -57,10 +57,11 @@
 /* Note #3: For optimization, we use a custom calling convention that goes    */
 /* like this:                                                                 */
 /*                                                                            */
-/* $t0-$t3:           arguments, volatile                                     */
-/* $t4-$t7, $at:      volatile                                                */
-/* $v0-$v1:           return addresses, volatile                              */
-/* everything else:   non-volatile                                            */
+/* $t0-$t3:          arguments, volatile                                      */
+/* $t4-$t7, $at:     volatile                                                 */
+/* $v0-$v1:          return value, volatile                                   */
+/* $ra:              return address, volatile                                 */
+/* everything else:  non-volatile                                             */
 /*----------------------------------------------------------------------------*/
 
 #include <tux64/platform/mips/vr4300/cop0.h>
@@ -98,11 +99,19 @@
 .equ TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION,0x0040
 .equ TUX64_BOOT_STAGE0_RI_RX_TX_TIMINGS,0x0014
 .equ TUX64_BOOT_STAGE0_RI_MODE_STANDARD,0x000e
+.equ TUX64_BOOT_STAGE0_RI_REFRESH_CLEANDELAY,(52)
+.equ TUX64_BOOT_STAGE0_RI_REFRESH_DIRTYDELAY,(54 << 8)
+.equ TUX64_BOOT_STAGE0_RI_REFRESH_BASE,(TUX64_PLATFORM_MIPS_N64_RI_REFRESH_BIT_OPTIMIZE | TUX64_PLATFORM_MIPS_N64_RI_REFRESH_BIT_ENABLE | TUX64_BOOT_STAGE0_RI_REFRESH_CLEANDELAY | TUX64_BOOT_STAGE0_RI_REFRESH_DIRTYDELAY)
 
 .equ TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING,0x18082838
-.equ TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL,0xfc800300 /* device ID 511 */
-.equ TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INVALID,0xf4800300 /* device ID 509 */
 .equ TUX64_BOOT_STAGE0_RDRAM_MODE_INITIAL,0x44000000
+.equ TUX64_BOOT_STAGE0_RDRAM_MODE_CURRENT_CALIBRATE_MANUAL,(1 << 1) | (1 << 2) | (1 << 6)
+.equ TUX64_BOOT_STAGE0_RDRAM_MODE_CURRENT_CALIBRATE_AUTOMATIC,(1 << 1) | (1 << 2) | (1 << 6) | (1 << 7)
+.equ TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL,511
+.equ TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL_ENCODED,0xfc800300 /* device ID 511 */
+.equ TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INVALID_ENCODED,0xf4800300 /* device ID 509 */
+.equ TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_DEFAULT,0x101c0a04
+.equ TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_UNKNOWN,0x080c1204
 
 .equ TUX64_BOOT_STAGE0_1MIB_HI,0x0010
 
@@ -144,6 +153,14 @@ tux64_boot_stage0_status:
    /* displayed as ASCII text, where 'c' is the current boot stage code. */
    .skip TUX64_BOOT_STATUS_BYTES
 /*tux64_boot_stage0_status*/
+
+   .section .rodata
+tux64_boot_stage0_float.1div80f:
+   .word 0x3c4ccccd /* 1.0f / 80.0f */
+tux64_boot_stage0_float.2pt2f:
+   .word 0x400ccccd /* 2.2f */
+tux64_boot_stage0_float.0pt5f:
+   .word 0x3f000000 /* 0.5f */
 
    .section .text
 tux64_boot_stage0_halt:
@@ -280,13 +297,24 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
 
+   /* TODO: this does not work.  something is messed up with the RDRAM init */
+   /* code.  theoretically this is just a manually compiled version of the */
+   /* libdragon rdram.c, but when run on real hardware, it fails to detect */
+   /* and configure any memory chips, thus we always boot with no memory */
+   /* configured.  this will be extra fun debugging because not only is it */
+   /* highly optimized assembly for a complicated process, but we also have */
+   /* no easy way to debug this since ares doesn't accurately emulate rdram.  */
+   /* thus, our only option is to either write information to sram, or attach */
+   /* a logic analyzer to the sysad bus on a real N64 and watch the reads and */
+   /* writes from the MI, RI, and RDRAM MMIO registers. */
+
    /* reserve $s1 for the RI base address until the end of RDRAM */
    /* initialization */
    lui   $s1,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RI)
 
    /* check if RDRAM has already been initialized */
    lw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_SELECT)($s1)
-   andi  $t0,$t0,0x00ff # mask out undefined bits
+   andi  $t0,$t0,0x00ff /* mask out undefined bits */
    bne   $t0,$zero,tux64_boot_stage0_start.skip_rdram_initialization
 
    /* i'll admit, the RDRAM code below is mostly referenced from libdragon, */
@@ -309,39 +337,399 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_rdram_wait
    sw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_MODE)($s1) /* branch delay slot */
 
-   /* reserve $a2 for the spacing between RDRAM registers.  HW1 RDRAM, found */
-   /* on early development boards, is spaced out 0x200 bytes.  Everything */
-   /* else is spaced out 0x400 bytes.  also frees $s0. */
+   /* reserve $a2 for the spacing between RDRAM registers, and $k0 for the */
+   /* offset to access rdram registers for the initial chip ID.  HW1 rdram is */
+   /* spaced out by 0x200 bytes, and everything else is spaced out by 0x400  */
+   /* bytes.  note that we double $a2 because in the chip initialization  */
+   /* loop, we access only increments of 2 chips at a time, so we save an */
+   /* instruction by doubling the constant here. */
+   lui   $k0,%hi(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL * 0x200)
    addiu $t0,$zero,1
+   ori   $k0,$k0,%lo(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL * 0x200)
    beq   $t0,$s0,tux64_boot_stage0_start.rdram_hw1
-   addiu $a2,$zero,0x200 /* branch delay slot */
-   addiu $a2,$a2,0x200
+   addiu $a2,$zero,(0x200 * 2) /* branch delay slot */
+   sll   $k0,$k0,1
+   sll   $a2,$a2,1
    tux64_boot_stage0_start.rdram_hw1:
 
+   /* reserve $a3 for the base address of RDRAM registers.  this will be used */
+   /* both to do broadcast writes as well as per-chip access.  we will also */
+   /* use $t2 for broadcast writes we do shortly. */
+   lui   $t2,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST)
+   lui   $a3,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS)
+
    /* initialize Delay register.  see libdragon/boot/rdram.c:142 for more */
-   /* information.  also loads the RDRAM broadcast registers base address */
-   /* into $t2. */
+   /* information. */
    lui   $t0,%hi(TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING)
    addiu $t1,$zero,TUX64_BOOT_STAGE0_MI_MODE_REPEAT_16
-   lui   $t2,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST)
    ori   $t0,$t0,%lo(TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING)
    sw    $t1,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
    sw    $t0,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DELAY)($t2)
 
    /* initialize the device IDs for every chip */
-   lui   $t3,%hi(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL)
-   ori   $t3,$t3,%lo(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL)
+   lui   $t3,%hi(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL_ENCODED)
+   ori   $t3,$t3,%lo(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL_ENCODED)
    lui   $t4,%hi(TUX64_BOOT_STAGE0_RDRAM_MODE_INITIAL) /* no low-order bits, so we only need lui */
-   sw    $t3,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID)($t2)
-   sw    $t4,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE)($t2)
-   sw    $zero,(%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_REGISTERS_BROADCAST) + TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_REF_ROW)($t2)
+   sw    $t3,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID($t2)
+   sw    $t4,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($t2)
+   sw    $zero,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_REF_ROW($t2)
 
-   /* TODO: implement per-chip initialization loop */
+   /* compute the base address for the rdram registers for the initial chip */
+   /* id and reserve $k0 for it until we finish initializing all chips. */
+   addu  $k0,$k0,$a3
 
+   /* reserve $t8 and $t9 for the SetUpper and ClearUpper bits for MI_MODE, */
+   /* which are needed because odd-numbered RDRAM registers required */
+   /* "Upper Mode".  */
+   addiu $t8,$zero,TUX64_PLATFORM_MIPS_N64_MI_MODE_BIT_UPPER_SET
+   addiu $t9,$zero,TUX64_PLATFORM_MIPS_N64_MI_MODE_BIT_UPPER_CLEAR
 
-   /* TODO: configure RI refresh rate */
-   b     tux64_boot_stage0_halt
-   nop
+   /* start initializing all chips, reserving $a1 for chip_id until the end */
+   /* of rdram initialization and $a3 for the address of the current chip's */
+   /* rdram registers. */
+   addiu $a1,$zero,0 /* chip_id */
+   tux64_boot_stage0_start.rdram_initialize_chip:
+      /* set the chip ID.  all this bit math shit was previously done */
+      /* statically with the constants, but now we have no choice but to */
+      /* compute it at runtime.  this combines the weird bit shifting with */
+      /* byte swapping to little endian, leading to borderline undecipherable */
+      /* code.  we also load a constant which will be used below for */
+      /* pipelining. */
+      andi  $t0,$a1,0x003f
+      andi  $t1,$a1,0x0040
+      andi  $t2,$a1,0x7f80
+      sll   $t0,$t0,26
+      sll   $t1,$t1,17
+      sll   $t2,$t2,1
+      or    $t0,$t0,$t1
+      or    $t0,$t0,$t2
+      lui   $t3,0x4600 /* used below, placed here for pipelining */
+      sw    $t0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID($k0)
+
+      /* turn the chip on by setting the following bits for the Mode register */
+      /* and flipping endianess:                                              */
+      /* X2 (bit 1)                                                           */
+      /* PL (bit 2)                                                           */
+      /* DE (bit 6)                                                           */
+      sw    $t3,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3)
+
+      /* check if the DE bit was actually set.  if not, there's no more chips */
+      /* and we are done. */
+      sw    $t8,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
+      lw    $t0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3)
+      sw    $t9,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
+      srl   $t0,25
+      andi  $t0,1
+      beq   $t0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.exit
+
+      /* now we start current calibration.  we first configure the chips */
+      /* manually and see the lowest cc value which gives us full accuracy. */
+      addiu $a0,$zero,0                                     /* $a0 = cc, also branch delay slot */
+      mtc1  $zero,$f0                                       /* $f0 = weighted_sum               */
+      mtc1  $zero,$f1                                       /* $f1 = prev_accuracy              */
+      lwc1  $f2,%lo(tux64_boot_stage0_float.1div80f)($gp)   /* $f2 = 1.0f/80.0f                 */
+      tux64_boot_stage0_start.rdram_initialize_chip.cc_manual:
+         /* configure the chip for the current cc value */
+         jal   tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_manual
+         addiu $t0,$a0,0 /* branch delay slot */
+
+         /* perform a memory test to measure accuracy at this cc value */
+         sll      $t2,$a1,20
+         daddiu   $t0,$zero,10  /* loop count */
+         lui      $t6,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
+         daddiu   $t1,$zero,0   /* total counted accurate bits */
+         addu     $t6,$t6,$t2   /* memory test base address */
+         tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test:
+            /* write 8 "0xff" bytes to the start of the current chip's memory */
+            addiu $t2,$zero,-1
+            sw    $t2,0($t6)
+            sw    $t2,4($t6)
+
+            /* now read back one byte and count the number of set bits */
+            lb    $t2,5($t6)
+            andi  $t2,$t2,0xff
+            tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt:
+               beq   $t2,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt.exit
+               dsll  $t3,$t2,63
+               dsrl  $t3,$t3,63
+               daddu $t1,$t1,$t3
+               b     tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt
+               srl   $t2,$t2,1 /* branch delay slot */
+            /*tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt*/
+            tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt.exit:
+
+            daddiu   $t0,$t0,-1
+            bne      $t0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test
+         /*tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test*/
+
+         /* calculate accuracy as a percentage and accumulate weighted sum, */
+         /* with a thousand nops because of stupid pipeline details and */
+         /* hardware bugs. */
+         mtc1     $t1,$f3 /* branch delay slot */
+         mtc1     $a0,$f5
+         cvt.s.w  $f3,$f3
+         cvt.s.w  $f5,$f5     /* $f4 = (float)cc       */
+         mul.s    $f3,$f3,$f2 /* $f3 = (float)accuracy */
+         nop
+         nop
+         sub.s    $f6,$f3,$f1
+         nop
+         mul.s    $f6,$f6,$f5
+         nop
+         nop
+         add.s    $f0,$f0,$f6 /* $f0 += (accuracy - prev_accuracy) * cc */
+
+         /* exit if we have full accuracy */
+         addiu $t2,80
+         beq   $t1,$t2,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.exit
+
+         /* store the current accuracy as prev_accuracy */
+         mov.s    $f1,$f3 /* branch delay slot */
+
+         /* move to the next cc value */
+         addiu $t3,64
+         addiu $a0,$a0,1
+         bne   $a0,$t3,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual
+         nop /* branch delay slot */
+      /*tux64_boot_stage0_start.rdram_initialize_chip.cc_manual*/
+      tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.exit:
+
+      /* compute target_cc and invalidate the chip if it's zero, reserving */
+      /* $a0 for target_cc until the end of current calibration. */
+      lwc1        $f1,%lo(tux64_boot_stage0_float.2pt2f)($gp) /* $f1 = 2.2f */
+      lwc1        $f2,%lo(tux64_boot_stage0_float.0pt5f)($gp) /* $f2 = 0.5f */
+      mul.s       $f1,$f0,$f1
+      nop
+      nop
+      add.s       $f1,$f1,$f2
+      nop
+      trunc.w.s   $f1,$f1
+      mfc1        $a0,$f1
+
+      /* check to make sure target_cc is valid */
+      beq   $a0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
+
+      /* we now begin automatic current calibration.  it's worth noting by    */
+      /* this point we are desperate for non-volatile registers, as these are */
+      /* the only non-volatiles left:                                         */
+      /*                                                                      */
+      /* $v1, $k1, $sp                                                        */
+      /*                                                                      */ 
+      /* luckily, it turns out to be just enough.                             */
+      addiu $v1,$zero,0 /* $v1 = minerr, branch delay slot */
+      addiu $k1,$zero,0 /* $k1 = autocc                    */
+      addiu $sp,$zero,0 /* $sp = cc                        */
+      tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic:
+         /* write the current cc value in automatic mode */
+         jal   tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic
+         addiu $t0,$sp,0 /* branch delay slot */
+
+         /* convert the returned cc_readback into something we can work with. */
+         srl   $t0,$v0,6
+         srl   $t1,$v0,13
+         srl   $t2,$v0,20
+         srl   $t3,$v0,4
+         srl   $t4,$v0,11
+         srl   $t5,$v0,18
+         andi  $t0,$t0,(1 << 0)
+         andi  $t1,$t1,(1 << 1)
+         andi  $t2,$t2,(1 << 2)
+         andi  $t3,$t3,(1 << 3)
+         andi  $t4,$t4,(1 << 4)
+         andi  $t5,$t5,(1 << 5)
+         or    $t0,$t0,$t1
+         or    $t2,$t2,$t3
+         or    $t4,$t4,$t5
+         or    $t0,$t0,$t2
+         or    $t0,$t0,$t4
+
+         /* compute err into $t2 */
+         sltu  $t1,$t0,$a0
+         beq   $t1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.err_geq
+         subu  $t2,$t0,$a0
+         subu  $t2,$a0,$t0
+         tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.err_geq:
+
+         /* check if we should set minerr and autocc */
+         beq   $sp,$zero,tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.advance
+         sltu  $t1,$t2,$v1 /* branch delay slot */
+         beq   $t1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.no_advance
+         nop /* branch delay slot */
+         tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.advance:
+         addiu $v1,$t2,0 /* minerr = err */
+         addiu $k1,$sp,0 /* autocc = cc  */
+         tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.no_advance:
+
+         /* check if cc_readback > target_cc */
+         sltu  $t1,$a0,$t0
+         bne   $t1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.exit
+
+         /* move to next cc value */
+         addiu $sp,$sp,1 /* branch delay slot */
+         addiu $t0,$t0,64
+         bne   $sp,$t0,tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic
+         nop /* branch delay slot */
+      /*tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic*/
+      tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.exit:
+
+      /* make sure we chose a valid autocc value */
+      beq   $k1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
+
+      /* write our final chosen cc value */
+      addiu $t0,$k1,0 /* branch delay slot */
+      jal   tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic
+      nop /* branch delay slot */
+
+      /* read the DeviceType register and begin enumerating chip information */
+      lw    $t0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_TYPE($a3)
+
+      /* verify the chip has the expected geometry, that is we have the       */
+      /* following geometry:                                                  */
+      /*                                                                      */ 
+      /* BankBits    -  1                                                     */
+      /* RowBits     -  9                                                     */
+      /* ColumnBits  - 11                                                     */
+      /* Bn          -  1                                                     */
+      addiu $t1,$zero,1
+      addiu $t2,$zero,9
+      addiu $t3,$zero,11
+      srl   $t4,$t0,20
+      srl   $t5,$t0,16
+      srl   $t6,$t0,28
+      srl   $t7,$t0,26
+      andi  $t4,$t4,0x000f /* BankBits */
+      bne   $t4,$t1,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
+      andi  $t5,$t5,0x000f /* RowBits */
+      bne   $t5,$t9,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
+      andi  $t6,$t6,0x000f /* ColumnBits */
+      bne   $t6,$t3,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
+      andi  $t7,$t7,0x0001 /* Bn */
+      bne   $t7,$t1,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
+      
+      /* isolate En bit from DeviceType using branch delay slot */
+      srl   $t0,$t0,24 /* branch delay slot */
+      andi  $t0,$t0,0x0001
+
+      /* read the manufacturer to configure timing, we still keep $t0 holding */
+      /* DeviceType so we can check more information from it. */
+      sw    $t8,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
+      lw    $t1,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_MANUFACTURER($a3)
+      sw    $t9,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
+
+      /* if the manufacturer isn't NEC and the En bit isn't set, then */
+      /* use slower timings.  otherwise, use default timings. */
+      addiu $t2,$zero,0x0005 /* NEC's manufacturer ID */
+      srl   $t1,$t1,24 /* extract least significant byte */
+      lui   $t3,%hi(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_DEFAULT)
+      beq   $t1,$t2,tux64_boot_stage0_start.rdram_initialize_chip.default_ras_interval
+      ori   $t3,$t3,%lo(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_DEFAULT) /* branch delay slot */
+      bne   $t0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.default_ras_interval
+      lui   $t4,%hi(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_UNKNOWN) /* branch delay slot */
+      ori   $t3,$t4,%lo(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_UNKNOWN) /* branch delay slot */
+      tux64_boot_stage0_start.rdram_initialize_chip.default_ras_interval:
+
+      /* set the RasInterval using our selected timings */
+      sw    $t3,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_RAS_INTERVAL($a3)
+
+      /* settle timing circuits, also reserves $s0 for the total amount of */
+      /* detected memory for the rest of stage-0. */
+      lui   $t0,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
+      sll   $s0,$a1,20 /* chip_id * 1MiB */
+      lui   $t1,((512 * 1024) >> 16)
+      addiu $t2,$zero,4
+      add   $t0,$t0,$s0
+      tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits:
+         lw    $zero,0($t0)
+         lw    $zero,4($t0)
+         addiu $t2,$t2,-1
+         bne   $t2,$zero,tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits
+         addu  $t0,$t0,$t1 /* branch delay slot */
+      /*tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits*/
+
+      /* move to next chip */
+      add   $a3,$a3,$a2
+      b     tux64_boot_stage0_start.rdram_initialize_chip
+      addiu $a1,$a1,2 /* branch delay slot */
+
+      tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_manual:
+         /* we do this to help make the code a little less confusing when     */
+         /* calling from the main loop.  refer to the notes below.            */
+         /*                                                                   */
+         /* $t0 - current calibration value                                   */
+         /* $t1 - bit flags, in little endian                                 */
+         lui   $t1,(TUX64_BOOT_STAGE0_RDRAM_MODE_CURRENT_CALIBRATE_MANUAL << 8)
+      tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode:
+         /* this is a co-routine which writes RDRAM_REG_MODE with a current   */
+         /* calibration value.  it's to be used during current calibration    */
+         /* similar to how it's done in libdragon, with the exception that it */
+         /* doesn't return anything.                                          */
+         /*                                                                   */
+         /* $t0 - current calibration value                                   */
+         /* $t1 - bit flags, in little endian                                 */
+         xori  $t0,$t0,0x003f
+         andi  $t2,$t0,(1 << 0)
+         andi  $t3,$t0,(1 << 1)
+         andi  $t4,$t0,(1 << 2)
+         andi  $t5,$t0,(1 << 3)
+         andi  $t6,$t0,(1 << 4)
+         andi  $t7,$t0,(1 << 5)
+         sll   $t2,$t2,6
+         sll   $t3,$t3,13
+         sll   $t4,$t4,20
+         sll   $t5,$t5,4
+         sll   $t6,$t6,11
+         sll   $t7,$t7,18
+         or    $t1,$t1,$t2
+         or    $t3,$t3,$t4
+         or    $t5,$t5,$t6
+         or    $t1,$t1,$t7
+         or    $t3,$t3,$t5
+         or    $t1,$t1,$t3
+         jr    $ra
+         sw    $t1,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3) /* branch delay slot */
+      /*tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode*/
+
+      tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic:
+         /* this is an extension of the below co-routine which loads $t1 with */
+         /* the little-endian bitflags for automatic current calibration.     */
+         /* we then also need to read and return the cc value.  note that we  */
+         /* assume $at isn't clobbered by the below function calls.           */
+         /*                                                                   */
+         /* $t0 - current calibration value                                   */
+         /* $v0 - (return value) read current calibration value from chip,    */
+         /*       before any endian or bit conversions are performed.         */
+         addiu $at,$ra,0
+         jal   tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode
+         lui   $t1,(TUX64_BOOT_STAGE0_RDRAM_MODE_CURRENT_CALIBRATE_AUTOMATIC << 8) /* branch delay slot */
+
+         /* read the current calibration value */
+         jal   tux64_boot_stage0_rdram_wait
+         nop /* branch delay slot */
+         lw    $zero,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3)
+         jr    $at
+         lw    $v0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3) /* branch delay slot */
+      /*tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic*/
+      
+   /*tux64_boot_stage0_start.rdram_initialize_chip*/
+
+   /* if we encountered an error during initialization of the last chip, make */
+   /* sure to invalidate the chip ID. */
+   tux64_boot_stage0_start.rdram_initialize_chip.err_exit:
+   lui   $t0,%hi(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INVALID_ENCODED)
+   ori   $t0,$t0,%lo(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INVALID_ENCODED)
+   sw    $t0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID($a3)
+   tux64_boot_stage0_start.rdram_initialize_chip.exit:
+
+   /* configure RI refresh rate and skip past memory detection */
+   addiu $t1,$a1,-1
+   lui   $t0,%hi(TUX64_BOOT_STAGE0_RI_REFRESH_BASE)
+   andi  $t1,$t1,0x000f
+   ori   $t0,$t0,%lo(TUX64_BOOT_STAGE0_RI_REFRESH_BASE)
+   sll   $t1,$t1,19
+   or    $t0,$t0,$t1
+   sw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_REFRESH)($s1)
+   b     tux64_boot_stage0_start.skip_detect_total_memory
+   lw    $zero,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_REFRESH)($s1) /* branch delay slot */
 
    tux64_boot_stage0_start.skip_rdram_initialization:
 
@@ -380,7 +768,9 @@ tux64_boot_stage0_start:
       /* increment the total detected memory using the branch delay slot */
       addu  $s0,$s0,$s1
    /*tux64_boot_stage0_start.detect_total_memory*/
+
    tux64_boot_stage0_start.detect_total_memory.exit:
+   tux64_boot_stage0_start.skip_detect_total_memory:
 
    /* from this point forward, $s0 is reserved for the total system memory, */
    /* in bytes until stage-1 begins.  this will be passed as an argument to */
@@ -474,7 +864,7 @@ tux64_boot_stage0_start:
 
    /* check if we have enough memory to load the stage-1 binary. */
    addiu $t0,$k0,-TUX64_BOOT_STAGE1_MEMORY_RDRAM_RESERVED
-   slt   $t0,$s0,$t0
+   sltu  $t0,$s0,$t0
    bne   $t0,$zero,tux64_boot_stage0_halt
 
    /* copy the stage-1 bootloader into memory via PI DMA, no need to */
@@ -519,7 +909,7 @@ tux64_boot_stage0_start:
 
    /* wait for the PI DMA operation to complete, then verify the checksum */
    /* branch delay slot.  we now free $k1. */
-   addiu $t0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO # branch delay slot
+   addiu $t0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO /* branch delay slot */
 
    tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum:
       lw    $at,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)($a0)
