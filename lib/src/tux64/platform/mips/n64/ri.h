@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/platform/mips/n64/ri.h - RDRAM Interface (RI) header.              */
@@ -53,6 +53,14 @@
       TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RI +\
       0x0000001cu\
    )
+
+/* RI_REFRESH flags */
+#define TUX64_PLATFORM_MIPS_N64_RI_REFRESH_BIT_BANK\
+   (1u << 16u)
+#define TUX64_PLATFORM_MIPS_N64_RI_REFRESH_BIT_ENABLE\
+   (1u << 17u)
+#define TUX64_PLATFORM_MIPS_N64_RI_REFRESH_BIT_OPTIMIZE\
+   (1u << 18u)
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_PLATFORM_MIPS_N64_RI_H */
