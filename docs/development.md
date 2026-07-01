@@ -61,7 +61,6 @@ The process of obtaining sources is the same as the Installation Guide.
 | Package | Version | Notes |
 |---------|---------|-------|
 | [gdb](https://www.sourceware.org/gdb/) | 17.2 | |
-| [ares](https://ares-emu.net/) | v148 | |
 
 ### Building GDB
 
