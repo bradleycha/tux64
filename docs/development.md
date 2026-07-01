@@ -40,6 +40,14 @@ This may be useful for bootloader development, where simple programming mistakes
 
 These may be useful for extremely low-level debugging, such as debugging very early boot failures on real hardware before the remote debugger is available by probing the SysAD bus with a logic analyzer.  Otherwise, these serve no purpose and can be safely left disabled.
 
+## Enabling dumping of register file and status codes to cartridge SRAM.
+
+`tux64-boot` can be optionally configured with `--enable-dump-to-sram`.  This will add the ability to dump the entire general-purpose register file and current status code to cartridge SRAM with the macro `TUX64_BOOT_STAGE0_DUMP_TO_SRAM`.
+
+This can be used to aid in stage-0 debugging without the need of a logic analyzer as detailed above.  However, it will require a flashcart with the ability to dump save files, such as a SummerCart64.
+
+Note that this configuration option will break the brute-forced IPL2 checksum value.  This may be a problem with some flashcarts and require computing a new checksum value, but your mileage may vary.
+
 ## Bootloader and kernel debugging in an emulator
 
 It's recommended to use Ares with the N64 core for development, as it's an accurate emulator with support for development features, such as viewing memory, monitoring various I/O components, and most importantly - remote debugging via GDB.  It's open-source and cross-platform, and there's no wonderful features like adding a donation pop-up which blocks using the emulator for 30 seconds.  We will show how to attach GDB and debug as early as the first instruction of the boot process, complete with full symbolic debugging.
