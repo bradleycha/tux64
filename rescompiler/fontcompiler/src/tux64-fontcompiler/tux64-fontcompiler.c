@@ -71,104 +71,6 @@ tux64_fontcompiler_exit_result_display_too_many_arguments(
 }
 
 static void
-tux64_fontcompiler_exit_result_display_arguments_parse_error(
-   const struct Tux64FontCompilerExitPayloadArgumentsParseError * self
-) {
-   /* yes, I copy-pasted this from tux64-mkrom. deal with it. */
-   switch (self->result.status) {
-      case TUX64_ARGUMENTS_PARSE_STATUS_OK:
-         TUX64_UNREACHABLE;
-      case TUX64_ARGUMENTS_PARSE_STATUS_EXIT:
-         TUX64_UNREACHABLE;
-      case TUX64_ARGUMENTS_PARSE_STATUS_NOT_AN_ARGUMENT:
-         TUX64_LOG_ERROR_FMT(
-            "\'%.*s\' is not an argument",
-            self->result.payload.not_an_argument.argument.characters,
-            self->result.payload.not_an_argument.argument.ptr
-         );
-         break;
-      case TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER:
-         TUX64_LOG_ERROR_FMT(
-            "unknown argument \'%.*s\'",
-            self->result.payload.unknown_identifier.identifier.characters,
-            self->result.payload.unknown_identifier.identifier.ptr
-         );
-         break;
-      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING:
-         TUX64_LOG_ERROR_FMT(
-            "argument \'%.*s\' expects a parameter, but none was given",
-            self->result.payload.parameter_missing.identifier.characters,
-            self->result.payload.parameter_missing.identifier
-         );
-         break;
-      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED:
-         TUX64_LOG_ERROR_FMT(
-            "argument \'%.*s\' doesn't expect parameter \'%.*s\'",
-            self->result.payload.parameter_unexpected.identifier.characters,
-            self->result.payload.parameter_unexpected.identifier.ptr,
-            self->result.payload.parameter_unexpected.parameter.characters,
-            self->result.payload.parameter_unexpected.parameter.ptr
-         );
-         break;
-      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID:
-         TUX64_LOG_ERROR_FMT(
-            "invalid parameter \'%.*s\' for argument \'%.*s\': %.*s",
-            self->result.payload.parameter_invalid.parameter.characters,
-            self->result.payload.parameter_invalid.parameter.ptr,
-            self->result.payload.parameter_invalid.identifier.characters,
-            self->result.payload.parameter_invalid.identifier.ptr,
-            self->result.payload.parameter_invalid.reason.characters,
-            self->result.payload.parameter_invalid.reason.ptr
-         );
-         break;
-      case TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING:
-         TUX64_LOG_ERROR_FMT(
-            "missing required argument \'%.*s\'",
-            self->result.payload.required_missing.identifier.characters,
-            self->result.payload.required_missing.identifier.ptr
-         );
-         break;
-      default:
-         TUX64_UNREACHABLE;
-   }
-
-   return;
-}
-
-static void
-tux64_fontcompiler_exit_result_display_fs_error(
-   const struct Tux64FontCompilerExitPayloadFsError * self
-) {
-   /* yes, i also copy+pasted this from mkrom.  too bad! */
-   switch (self->reason.status) {
-      case TUX64_FS_STATUS_OK:
-         TUX64_UNREACHABLE;
-      case TUX64_FS_STATUS_NOT_FOUND:
-         TUX64_LOG_ERROR("file not found");
-         break;
-      case TUX64_FS_STATUS_PERMISSION_DENIED:
-         TUX64_LOG_ERROR("permission denied");
-         break;
-      case TUX64_FS_STATUS_NOT_A_FILE:
-         TUX64_LOG_ERROR("expected a file, encountered a directory or other non-file object");
-         break;
-      case TUX64_FS_STATUS_OUT_OF_MEMORY:
-         TUX64_UNREACHABLE;
-         break;
-      case TUX64_FS_STATUS_UNKNOWN_ERROR:
-         TUX64_LOG_ERROR_FMT(
-            "unknown I/O error (%d)",
-            self->reason.payload.unknown_error
-         );
-         break;
-      default:
-         TUX64_UNREACHABLE;
-   }
-
-   return;
-}
-
-static void
 tux64_fontcompiler_exit_result_display_generator_parse_error(
    const struct Tux64FontCompilerExitPayloadGeneratorParseError * self
 ) {
@@ -200,10 +102,10 @@ tux64_fontcompiler_exit_result_display(
          tux64_fontcompiler_exit_result_display_too_many_arguments(&self->payload.too_many_arguments);
          break;
       case TUX64_FONTCOMPILER_EXIT_STATUS_ARGUMENTS_PARSE_ERROR:
-         tux64_fontcompiler_exit_result_display_arguments_parse_error(&self->payload.arguments_parse_error);
+         tux64_arguments_log_result(&self->payload.arguments_parse_error.result);
          break;
       case TUX64_FONTCOMPILER_EXIT_STATUS_FS_ERROR:
-         tux64_fontcompiler_exit_result_display_fs_error(&self->payload.fs_error);
+         tux64_fs_log_result(&self->payload.fs_error.reason);
          break;
       case TUX64_FONTCOMPILER_EXIT_STATUS_GENERATOR_PARSE_ERROR:
          tux64_fontcompiler_exit_result_display_generator_parse_error(&self->payload.generator_parse_error);
