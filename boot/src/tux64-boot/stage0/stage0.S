@@ -72,6 +72,7 @@
 #include <tux64/platform/mips/n64/rdram.h>
 #include <tux64/platform/mips/n64/boot.h>
 
+#include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/status.h"
 #include "tux64-boot/stage1/stack.h"
 #include "tux64-boot/stage1/memory.h"
@@ -184,14 +185,163 @@ tux64_boot_stage0_halt:
    ld    $zero,0($gp)
 /*tux64_boot_stage0_halt*/
 
+#if TUX64_BOOT_CONFIG_DUMP_TO_SRAM
+/*----------------------------------------------------------------------------*/
+
+   .section .text
+tux64_boot_stage0_sram_write_word:
+   /* writes a word to an offset in cartridge SRAM.                           */
+   /*                                                                         */
+   /* $t0 - 32-bit word to write to the offset pointed at by $t0.             */
+   /* $t1 - address offset into SRAM.                                         */
+   lui   $t3,%hi(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)
+
+   tux64_boot_stage0_sram_write_word.pi_io_dma_spinlock:
+      lw    $at,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)($t3)
+      andi  $at,$at,TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY
+      bne   $at,$zero,tux64_boot_stage0_sram_write_word.pi_io_dma_spinlock
+   /*tux64_boot_stage0_sram_write_word.pi_io_dma_spinlock*/
+
+   lui   $t2,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_CARTRIDGE_RAM) /* branch delay slot */
+   addu  $t2,$t2,$t1
+   jr    $ra
+   sw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_CARTRIDGE_RAM)($t2) /* branch delay slot */
+/*tux64_boot_stage0_sram_write_word*/
+
+   .section .text
+tux64_boot_stage0_dump_to_sram:
+   /* backup the register file, careful not to touch anything. */
+   sw    $0, -128($sp)
+   sw    $1, -124($sp)
+   sw    $2, -120($sp)
+   sw    $3, -116($sp)
+   sw    $4, -112($sp)
+   sw    $5, -108($sp)
+   sw    $6, -104($sp)
+   sw    $7, -100($sp)
+   sw    $8, -96($sp)
+   sw    $9, -92($sp)
+   sw    $10,-88($sp)
+   sw    $11,-84($sp)
+   sw    $12,-80($sp)
+   sw    $13,-76($sp)
+   sw    $14,-72($sp)
+   sw    $15,-68($sp)
+   sw    $16,-64($sp)
+   sw    $17,-60($sp)
+   sw    $18,-56($sp)
+   sw    $19,-52($sp)
+   sw    $20,-48($sp)
+   sw    $21,-44($sp)
+   sw    $22,-40($sp)
+   sw    $23,-36($sp)
+   sw    $24,-32($sp)
+   sw    $25,-28($sp)
+   sw    $26,-24($sp)
+   sw    $27,-20($sp)
+   sw    $28,-16($sp)
+   sw    $29,-12($sp)
+   sw    $30,-8($sp)
+   sw    $31,-4($sp)
+   addiu $sp,$sp,-128
+
+   /* first, write the status code out. */
+   lui   $s0,%hi(TUX64_BOOT_STAGE0_STATUS_WORD_HI)
+   addiu $t1,$zero,0
+   ori   $s0,$s0,%lo(TUX64_BOOT_STAGE0_STATUS_WORD_HI)
+   jal   tux64_boot_stage0_sram_write_word
+   addiu $t0,$s0,0
+   addiu $t1,$zero,8
+   jal   tux64_boot_stage0_sram_write_word
+   addiu $t0,$s0,0
+   lw    $t0,%lo(tux64_boot_stage0_status)+0x04($gp)
+   jal   tux64_boot_stage0_sram_write_word
+   addiu $t1,$zero,12
+
+   /* now dump the entire register file, stored on the stack. */
+   addiu $s0,$sp,0    /* iter_reg  */
+   addiu $s1,$zero,16 /* iter_sram */
+   addiu $s2,$zero,32 /* i         */
+   tux64_boot_stage0_dump_to_sram.dump_register:
+      /* load the current register and write to sram */
+      lw    $t0,0($s0)
+      jal   tux64_boot_stage0_sram_write_word
+      addiu $t1,$s1,0
+
+      /* move to next register */
+      addiu $s2,$s2,-1
+      addiu $s1,$s1,4
+      bne   $s2,$zero,tux64_boot_stage0_dump_to_sram.dump_register
+      addiu $s0,$s0,4 /* branch delay slot */
+   /*tux64_boot_stage0_dump_to_sram.dump_register*/
+
+   /* now restore the register file and return */
+   addiu $sp,$sp,128
+   lw    $31,-4($sp)
+   lw    $30,-8($sp)
+   lw    $29,-12($sp)
+   lw    $28,-16($sp)
+   lw    $27,-20($sp)
+   lw    $26,-24($sp)
+   lw    $25,-28($sp)
+   lw    $24,-32($sp)
+   lw    $23,-36($sp)
+   lw    $22,-40($sp)
+   lw    $21,-44($sp)
+   lw    $20,-48($sp)
+   lw    $19,-52($sp)
+   lw    $18,-56($sp)
+   lw    $17,-60($sp)
+   lw    $16,-64($sp)
+   lw    $15,-68($sp)
+   lw    $14,-72($sp)
+   lw    $13,-76($sp)
+   lw    $12,-80($sp)
+   lw    $11,-84($sp)
+   lw    $10,-88($sp)
+   lw    $9, -92($sp)
+   lw    $8, -96($sp)
+   lw    $7, -100($sp)
+   lw    $6, -104($sp)
+   lw    $5, -108($sp)
+   lw    $4, -112($sp)
+   lw    $3, -116($sp)
+   lw    $2, -120($sp)
+   lw    $1, -124($sp)
+   jr    $ra
+   lw    $0, -128($sp)
+/*tux64_boot_stage0_dump_to_sram*/
+
+.macro TUX64_BOOT_STAGE0_DUMP_TO_SRAM
+   nop
+   jal tux64_boot_stage0_dump_to_sram
+   nop
+.endm
+
+/*----------------------------------------------------------------------------*/
+#else /* TUX64_BOOT_CONFIG_DUMP_TO_SRAM */
+/*----------------------------------------------------------------------------*/
+
+.macro TUX64_BOOT_STAGE0_DUMP_TO_SRAM
+.endm
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_BOOT_CONFIG_DUMP_TO_SRAM */
+
    .section .text
 tux64_boot_stage0_status_code_write:
    /* $t0 contains the low 16 bits or'd with the status code already, so we */
    /* only need to load the upper 2 bytes. */
    lui   $t1,%hi(TUX64_BOOT_STAGE0_STATUS_WORD_LO)
-   or    $t1,$t1,$t0
+   or    $t0,$t0,$t1
+#if TUX64_BOOT_CONFIG_DUMP_TO_SRAM
+   sw    $t0,%lo(tux64_boot_stage0_status)+0x04($gp)
+   b     tux64_boot_stage0_sram_write_word
+   addiu $t1,$zero,4
+#else /* TUX64_BOOT_CONFIG_DUMP_TO_SRAM */
    jr    $ra
-   sw    $t1,%lo(tux64_boot_stage0_status)+0x04($gp)
+   sw    $t0,%lo(tux64_boot_stage0_status)+0x04($gp)
+#endif /* TUX64_BOOT_CONFIG_DUMP_TO_SRAM */
 /*tux64_boot_stage0_status_code_write*/
 
    .section .text
@@ -402,6 +552,8 @@ tux64_boot_stage0_start:
       or    $t0,$t0,$t2
       lui   $t3,0x4600 /* used below, placed here for pipelining */
       sw    $t0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID($k0)
+
+      TUX64_BOOT_STAGE0_DUMP_TO_SRAM
 
       /* turn the chip on by setting the following bits for the Mode register */
       /* and flipping endianess:                                              */

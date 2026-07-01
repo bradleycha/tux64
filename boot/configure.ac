@@ -80,6 +80,11 @@ AC_ARG_ENABLE([debug],
    [tux64_boot_config_debug=1],
    [tux64_boot_config_debug=0]
 )
+AC_ARG_ENABLE([dump-to-sram],
+   AS_HELP_STRING([--enable-dump-to-sram], [Enable dumping the current status code and register file to cartridge SRAM.  This will cause the IPL2 checksum verification to fail for stage-0.]),
+   [tux64_boot_config_dump_to_sram=1],
+   [tux64_boot_config_dump_to_sram=0]
+)
 AC_ARG_ENABLE([status],
    AS_HELP_STRING([--enable-status], [Write status codes to a fixed memory location during the boot process]),
    [tux64_boot_config_status=1],
@@ -214,6 +219,10 @@ tux64_boot_config_delay_ticks=$CONFIG_DELAY_TICKS
 AC_DEFINE_UNQUOTED([CONFIG_DEBUG],
    [$tux64_boot_config_debug],
    [Enable debug assertions]
+)
+AC_DEFINE_UNQUOTED([CONFIG_DUMP_TO_SRAM],
+   [$tux64_boot_config_dump_to_sram],
+   [Enable dumping the current status code and register file to cartridge SRAM.  This will cause the IPL2 checksum verification to fail for stage-0.]
 )
 AC_DEFINE_UNQUOTED([CONFIG_STATUS],
    [$tux64_boot_config_status],
