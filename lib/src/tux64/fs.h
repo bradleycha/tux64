@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/fs.h - Header for filesystem functions.                      */
@@ -78,6 +78,15 @@ tux64_fs_file_save(
 void
 tux64_fs_file_unload(
    struct Tux64FsLoadedFile * file
+);
+
+/*----------------------------------------------------------------------------*/
+/* Formats and logs 'result' to the console.  Assumes result->status is never */
+/* TUX64_FS_STATUS_OK.                                                        */
+/*----------------------------------------------------------------------------*/
+void
+tux64_fs_log_result(
+   const struct Tux64FsResult * result
 );
 
 /*----------------------------------------------------------------------------*/

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/fs.c - Implementations for filesystem functions.             */
@@ -10,6 +10,8 @@
 
 #if _TUX64_FS_ENABLE
 /*----------------------------------------------------------------------------*/
+
+#include <tux64/log.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -259,6 +261,38 @@ tux64_fs_file_unload(
    struct Tux64FsLoadedFile * file
 ) {
    free(file->data);
+   return;
+}
+
+void
+tux64_fs_log_result(
+   const struct Tux64FsResult * result
+) {
+   switch (result->status) {
+      case TUX64_FS_STATUS_OK:
+         TUX64_UNREACHABLE;
+      case TUX64_FS_STATUS_NOT_FOUND:
+         TUX64_LOG_ERROR("file not found");
+         break;
+      case TUX64_FS_STATUS_PERMISSION_DENIED:
+         TUX64_LOG_ERROR("permission denied");
+         break;
+      case TUX64_FS_STATUS_NOT_A_FILE:
+         TUX64_LOG_ERROR("expected a file, encountered a directory or other non-file object");
+         break;
+      case TUX64_FS_STATUS_OUT_OF_MEMORY:
+         TUX64_UNREACHABLE;
+         break;
+      case TUX64_FS_STATUS_UNKNOWN_ERROR:
+         TUX64_LOG_ERROR_FMT(
+            "unknown I/O error (%d)",
+            result->payload.unknown_error
+         );
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
    return;
 }
 

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/arguments.c - Implementations for argument parsing           */
@@ -12,6 +12,7 @@
 #include "tux64/memory.h"
 #include "tux64/string.h"
 #include "tux64/bitwise.h"
+#include "tux64/log.h"
 
 void
 tux64_arguments_iterator_initialize_command_line(
@@ -717,5 +718,69 @@ tux64_arguments_parse(
    /* check that all required arguments were present and GTFO */
    result = tux64_arguments_parse_check_required(list, required_storage);
    return result;
+}
+
+void
+tux64_arguments_log_result(
+   const struct Tux64ArgumentsParseResult * result
+) {
+   switch (result->status) {
+      case TUX64_ARGUMENTS_PARSE_STATUS_OK:
+         TUX64_UNREACHABLE;
+      case TUX64_ARGUMENTS_PARSE_STATUS_EXIT:
+         TUX64_UNREACHABLE;
+      case TUX64_ARGUMENTS_PARSE_STATUS_NOT_AN_ARGUMENT:
+         TUX64_LOG_ERROR_FMT(
+            "\'%.*s\' is not an argument",
+            result->payload.not_an_argument.argument.characters,
+            result->payload.not_an_argument.argument.ptr
+         );
+         break;
+      case TUX64_ARGUMENTS_PARSE_STATUS_UNKNOWN_IDENTIFIER:
+         TUX64_LOG_ERROR_FMT(
+            "unknown argument \'%.*s\'",
+            result->payload.unknown_identifier.identifier.characters,
+            result->payload.unknown_identifier.identifier.ptr
+         );
+         break;
+      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_MISSING:
+         TUX64_LOG_ERROR_FMT(
+            "argument \'%.*s\' expects a parameter, but none was given",
+            result->payload.parameter_missing.identifier.characters,
+            result->payload.parameter_missing.identifier
+         );
+         break;
+      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED:
+         TUX64_LOG_ERROR_FMT(
+            "argument \'%.*s\' doesn't expect parameter \'%.*s\'",
+            result->payload.parameter_unexpected.identifier.characters,
+            result->payload.parameter_unexpected.identifier.ptr,
+            result->payload.parameter_unexpected.parameter.characters,
+            result->payload.parameter_unexpected.parameter.ptr
+         );
+         break;
+      case TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_INVALID:
+         TUX64_LOG_ERROR_FMT(
+            "invalid parameter \'%.*s\' for argument \'%.*s\': %.*s",
+            result->payload.parameter_invalid.parameter.characters,
+            result->payload.parameter_invalid.parameter.ptr,
+            result->payload.parameter_invalid.identifier.characters,
+            result->payload.parameter_invalid.identifier.ptr,
+            result->payload.parameter_invalid.reason.characters,
+            result->payload.parameter_invalid.reason.ptr
+         );
+         break;
+      case TUX64_ARGUMENTS_PARSE_STATUS_REQUIRED_MISSING:
+         TUX64_LOG_ERROR_FMT(
+            "missing required argument \'%.*s\'",
+            result->payload.required_missing.identifier.characters,
+            result->payload.required_missing.identifier.ptr
+         );
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   return;
 }
 

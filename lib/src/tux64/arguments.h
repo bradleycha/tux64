@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/arguments.h - Header for arguments parsing functions.        */
@@ -32,6 +32,7 @@ struct Tux64ArgumentsIteratorImplementationConfigFile {
    const struct Tux64ArgumentsIteratorOptionsConfigFile * options;
    struct Tux64String slice;
 };
+
 
 union Tux64ArgumentsIteratorImplementation {
    struct Tux64ArgumentsIteratorImplementationCommandLine command_line;
@@ -191,6 +192,15 @@ tux64_arguments_parse(
    struct Tux64ArgumentsIterator * iterator,
    void * context,
    Tux64UInt8 * required_storage
+);
+
+/*----------------------------------------------------------------------------*/
+/* Formats and logs 'result' to the console.  Assumes result->status is never */
+/* TUX64_ARGUMENTS_PARSE_STATUS_OK or TUX64_ARGUMENTS_PARSE_STATUS_EXIT.      */
+/*----------------------------------------------------------------------------*/
+void
+tux64_arguments_log_result(
+   const struct Tux64ArgumentsParseResult * result
 );
 
 /*----------------------------------------------------------------------------*/
