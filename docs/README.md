@@ -3,5 +3,5 @@
 
 * [Installation Guide](installation/README.md)
 * [Development Guide](development/README.md)
-* [Contributing Guide](contributing/README.md)
+* [Contribution Guide](contributing/README.md)
 

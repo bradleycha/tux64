@@ -1,4 +1,4 @@
-# Tux64 Contributing Guide
+# Tux64 Contribution Guide
 <img src="../logo.png" width="156" height="156"/>
 
 ## Introduction
