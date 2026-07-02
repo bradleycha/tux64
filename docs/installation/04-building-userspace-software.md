@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 3 - Building The Toolchains](03-building-the-toolchains.md)
 * Next Page: [Chapter 5 - Building The Kernel](05-building-the-kernel.md)

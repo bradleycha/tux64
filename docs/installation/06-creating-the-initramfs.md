@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 5 - Building The Kernel](05-building-the-kernel.md)
 * Next Page: [Chapter 7 - Creating The Root Filesystem](07-creating-the-root-filesystem.md)

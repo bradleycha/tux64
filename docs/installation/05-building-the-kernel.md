@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 4 - Building Userspace Software](04-building-userspace-software.md)
 * Next Page: [Chapter 6 - Creating The Initramfs](06-creating-the-initramfs.md)

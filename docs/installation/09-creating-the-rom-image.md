@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 8 - Building The Bootloader](08-building-the-bootloader.md)
 * Next Page: [Chapter 10 - Installing The ROM Image and Root Filesystem](10-installing-the-rom-image-and-root-filesystem.md)

@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 0 - Introduction](00-introduction.md)
 * Next Page: [Chapter 2 - Obtaining Sources](02-obtaining-sources.md)

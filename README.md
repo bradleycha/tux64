@@ -1,4 +1,6 @@
 # Tux64
+<img src="docs/logo.png" width="156" height="156"/>
+
 A minimal, yet functional, Linux distribution for the Nintendo 64.
 
 ## Setting Expectations

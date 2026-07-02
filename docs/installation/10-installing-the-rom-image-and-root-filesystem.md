@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 9 - Creating The ROM Image](09-creating-the-rom-image.md)
 

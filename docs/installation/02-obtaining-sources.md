@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 1 - Setup](01-setup.md)
 * Next Page: [Chapter 3 - Building The Toolchains](03-building-the-toolchains.md)

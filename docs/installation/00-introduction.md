@@ -1,4 +1,5 @@
 # Tux64 Installation Guide
+<img src="../logo.png" width="156" height="156"/>
 
 * Next Page: [Chapter 1 - Setup](01-setup.md)
 
