@@ -553,8 +553,6 @@ tux64_boot_stage0_start:
       lui   $t3,0x4600 /* used below, placed here for pipelining */
       sw    $t0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID($k0)
 
-      TUX64_BOOT_STAGE0_DUMP_TO_SRAM
-
       /* turn the chip on by setting the following bits for the Mode register */
       /* and flipping endianess:                                              */
       /* X2 (bit 1)                                                           */
