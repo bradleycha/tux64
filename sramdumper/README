@@ -1,0 +1,4 @@
+tux64-sramdumper is a tool used to help with debugging tux64-boot.  It takes
+stage-0 SRAM dumps and parses them into a human-readable form.  For more
+information, run tux64-sramdumper without any arguments to display the help
+menu.
