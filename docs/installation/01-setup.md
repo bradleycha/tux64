@@ -35,5 +35,5 @@ A description of each directory is provided here:
 | initramfs | Tux64 initramfs filesystem |
 | rootfs | Tux64 root filesystem |
 
-We will now proceed to [obtaining package sources](02-obtaining-sources).
+We will now proceed to [obtaining package sources](02-obtaining-sources.md).
 
