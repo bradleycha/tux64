@@ -327,7 +327,26 @@ Once you've inserted your call to `TUX64_BOOT_STAGE0_DUMP_TO_SRAM`, recompile th
 sudo ${TUX64_BUILD_ROOT}/tools/bin/sc64deployer download save sram-dump.bin
 ```
 
-TODO: create a tool to decode the SRAM dump and present it in a more readable form.
+This will give us the raw memory dump.  We now convert this into a human-readable from with `tux64-sramdumper`:
+
+```
+${TUX64_BUILD_ROOT}/tools/bin/tux64-sramdumper \
+   --input sram-dump.bin \
+   --output sram-dump.txt
+```
+
+You can now inspect status codes and the register file in `sram-dump.txt`.
+
+If you would like a one-liner command to do all of the above at once for faster debugging, here it is:
+
+```
+sudo ${TUX64_BUILD_ROOT}/tools/bin/sc64deployer download save sram-dump.bin && \
+${TUX64_BUILD_ROOT}/tools/bin/tux64-sramdumper \
+   --input sram-dump.bin \
+   --output sram-dump.txt && \
+rm -f sram-dump.bin && \
+cat sram-dump.txt
+```
 
 #### Attaching GDB for bootloader debugging
 
