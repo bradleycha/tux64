@@ -1,3 +1,6 @@
+# Tux64 Contributing Guide
+<img src="../logo.png" width="156" height="156"/>
+
 ## Introduction
 
 Welcome to the Tux64 contribution guide!  This will help those looking to get
@@ -111,9 +114,11 @@ tux64_boot_foo_do_thing(struct Tux64BootFooContext * ctx);
  * All `#include` directives belong before all other declarations and definitions
 
 ```
-#include <tux64/butthole.h>
+#include <tux64/mascot.h>
 
-void dialate(struct Tux64Butthole * butthole);
+void tux64_mascot_entrance_contributors(
+    struct Tux64Mascot * mascot
+);
 ```
 
  * GNU C extensions are allowed unwrapped since GCC will be used for building all programs
@@ -173,7 +178,7 @@ foo(Tux64UInt32 bar) {
    /* do this instead! */
    bar = tux64_bitwise_flags_clear_uint32(bar, TUX64_LITERAL_UINT32(BIT_A));
 
-   /* and for the love of fuck, don't do something like this... */
+   /* and for the love of god, don't do something like this... */
    for (Tux64UInt32 i = 0; i < 8; ++i) {
       for (Tux64UInt32 j = 0; j < i / 2; j += 2) {
          (void)printf("%u%u", j - i, i - j);
@@ -241,7 +246,7 @@ expect your code to always be graciously accepted immediately.  As of writing
 (October 2025), I'm in my Senior year of a CS and Math major and I'm also taking
 graduate CS classes, and I also have other projects I work on.  If I take some
 time to review your pull request, please be patient.  I'm not deliberately
-ignoring you, I'm probably just busy or burnt out on life.
+ignoring you, I'm probably just busy or burnt out.
 
 ## Issues
 
@@ -274,30 +279,7 @@ tux64-boot: boot failure on PAL consoles
     commands.
 ```
 
-## AI Generated Code
+## AI-Generated Code
 
-If you choose to use AI to generate code, it should be indistinguishable from
-human-written code.  It is expected to adhere to the above code formatting
-guidelines, and you are expected to have reviewed and verified the generated
-code.  If you choose to ignore this and AI generate random code and submit it
-without reading what the AI did, please refer to the section on AI generated
-slop down below.
+No.
 
-It's worth noting that there's a bit of contention on the legality of AI
-generated code with respect to the GPLv3 license.  Personally, as long as you
-are using AI as stated above, telling the difference between human-written
-and AI written code should be impossible.  Thus, I don't see a problem with
-accepting such AI generated code with respect to the GPLv3.
-
-## AI Generated Slop
-
-If you're here just to generate random crap using some bot and get your name
-on this project, go away.  We don't want you here.  Nobody wants you.  You do
-nothing but waste everyone's time having to review the garbage you try to shovel
-down our throats just to get your name on a random GitHub project.  If you do
-this, you'll probably be flat-out banned from contributing, or let off with a
-warning and rejection if I'm in a good mood.  Other projects already get hit
-with what is essentially a DDoS attack due to people like you, and I'm not
-interested in falling victim to this crap as well.
-
-Go waste another project's time and never come back.
