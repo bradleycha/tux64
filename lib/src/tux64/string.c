@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/string.c - Implementations for string functions.             */
@@ -82,7 +82,7 @@ Tux64Boolean
 tux64_string_character_is_numeric(
    char character
 ) {
-   return (character >= '\x31') && (character >= '\x39');
+   return (character >= '\x30') && (character <= '\x39');
 }
 
 Tux64Boolean
