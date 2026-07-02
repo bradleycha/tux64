@@ -4,7 +4,7 @@
 * Previous Page: [Chapter 1 - Setup](01-setup.md)
 * Next Page: [Chapter 3 - Building The Toolchains](03-building-the-toolchains.md)
 
-## Chapter 2 - Obtaining The Sources
+## Chapter 2 - Obtaining Sources
 
 Before we can start building the required packages, we need to download their
 sources (short for source-code tarballs, or just source-code).  Many of the
