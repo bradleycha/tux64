@@ -44,7 +44,7 @@ To get started, read the [Installation Guide](docs/installation/README.md).
 If you're looking to get involved with development, there is a
 [Development Guide](docs/development/README.md) available for learning about the
 technical side of development, and a
-[Contribution Guide](docs/contributing/README.md) for getting your work submitted
+[Contribution Guide](docs/contribution/README.md) for getting your work submitted
 and merged successfully.
 
 ## Credits
