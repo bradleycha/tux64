@@ -261,6 +261,30 @@ This guide will document the SummerCart64 flashcart, an open-source N64 flashcar
 |---------|---------|-------|
 | [SummerCart64](https://github.com/Polprzewodnikowy/SummerCart64/) | 2.20.2 | |
 
+#### Building tux64-sramdumper
+
+`tux64-sramdumper` is a tool used to parse `tux64-boot` stage-0 SRAM dumps into a human-readable form.  If you are looking to debug the stage-0 bootloader on real hardware, you may want to build this package.  Otherwise, you may safely skips this step.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/tux64-sramdumper
+cd ${TUX64_BUILD_ROOT}/builds/tux64-sramdumper
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/tux64-*/sramdumper/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}"
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
 #### Building sc64deployer
 
 To interface with the SummerCart64 from the host machine, we will need to build `sc64deployer`.
