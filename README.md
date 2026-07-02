@@ -36,13 +36,13 @@ documentation and custom software to fix these issues, while building upon the
 original with an improved bootloader, up-to-date kernel patches, and more.
 
 ## Getting Started
-To get started, read the [Installation Guide](docs/installation/index.md).
+To get started, read the [Installation Guide](docs/installation/README.md).
 
 ## Development and Contribution
 If you're looking to get involved with development, there is a
-[Development Guide](docs/development/index.md) available for learning about the
+[Development Guide](docs/development/README.md) available for learning about the
 technical side of development, and a
-[Contribution Guide](docs/contributing/index.md) for getting your work submitted
+[Contribution Guide](docs/contributing/README.md) for getting your work submitted
 and merged successfully.
 
 ## Credits
