@@ -210,40 +210,45 @@ tux64_boot_stage0_sram_write_word:
 
    .section .text
 tux64_boot_stage0_dump_to_sram:
-   /* backup the register file, careful not to touch anything. */
-   sw    $0, -128($sp)
-   sw    $1, -124($sp)
-   sw    $2, -120($sp)
-   sw    $3, -116($sp)
-   sw    $4, -112($sp)
-   sw    $5, -108($sp)
-   sw    $6, -104($sp)
-   sw    $7, -100($sp)
-   sw    $8, -96($sp)
-   sw    $9, -92($sp)
-   sw    $10,-88($sp)
-   sw    $11,-84($sp)
-   sw    $12,-80($sp)
-   sw    $13,-76($sp)
-   sw    $14,-72($sp)
-   sw    $15,-68($sp)
-   sw    $16,-64($sp)
-   sw    $17,-60($sp)
-   sw    $18,-56($sp)
-   sw    $19,-52($sp)
-   sw    $20,-48($sp)
-   sw    $21,-44($sp)
-   sw    $22,-40($sp)
-   sw    $23,-36($sp)
-   sw    $24,-32($sp)
-   sw    $25,-28($sp)
-   sw    $26,-24($sp)
-   sw    $27,-20($sp)
-   sw    $28,-16($sp)
-   sw    $29,-12($sp)
-   sw    $30,-8($sp)
-   sw    $31,-4($sp)
-   addiu $sp,$sp,-128
+   /* backup the register file, careful not to touch anything.  $ra, as */
+   /* visible to the dump, is pushed/popped by macro invocation. */
+   sw    $0, -140($sp)
+   sw    $1, -136($sp)
+   sw    $2, -132($sp)
+   sw    $3, -128($sp)
+   sw    $4, -124($sp)
+   sw    $5, -120($sp)
+   sw    $6, -116($sp)
+   sw    $7, -112($sp)
+   sw    $8, -108($sp)
+   sw    $9, -104($sp)
+   sw    $10,-100($sp)
+   sw    $11,-96($sp)
+   sw    $12,-92($sp)
+   sw    $13,-88($sp)
+   sw    $14,-84($sp)
+   sw    $15,-80($sp)
+   sw    $16,-76($sp)
+   sw    $17,-72($sp)
+   sw    $18,-68($sp)
+   sw    $19,-64($sp)
+   sw    $20,-60($sp)
+   sw    $21,-56($sp)
+   sw    $22,-52($sp)
+   sw    $23,-48($sp)
+   sw    $24,-44($sp)
+   sw    $25,-40($sp)
+   sw    $26,-36($sp)
+   sw    $27,-32($sp)
+   sw    $28,-28($sp)
+   sw    $29,-24($sp)
+   sw    $30,-20($sp)
+   sw    $31,-12($sp) /* current $ra, dump program counter */
+   mfhi  $t0
+   mflo  $t1
+   sw    $t0,-8($sp)
+   sw    $t1,-4($sp)
+   addiu $sp,$sp,-140
 
    /* first, write the status code out. */
    lui   $s0,%hi(TUX64_BOOT_STAGE0_STATUS_WORD_HI)
@@ -261,7 +266,7 @@ tux64_boot_stage0_dump_to_sram:
    /* now dump the entire register file, stored on the stack. */
    addiu $s0,$sp,0    /* iter_reg  */
    addiu $s1,$zero,16 /* iter_sram */
-   addiu $s2,$zero,32 /* i         */
+   addiu $s2,$zero,35 /* i         */
    tux64_boot_stage0_dump_to_sram.dump_register:
       /* load the current register and write to sram */
       lw    $t0,0($s0)
@@ -276,46 +281,53 @@ tux64_boot_stage0_dump_to_sram:
    /*tux64_boot_stage0_dump_to_sram.dump_register*/
 
    /* now restore the register file and return */
-   addiu $sp,$sp,128
-   lw    $31,-4($sp)
-   lw    $30,-8($sp)
-   lw    $29,-12($sp)
-   lw    $28,-16($sp)
-   lw    $27,-20($sp)
-   lw    $26,-24($sp)
-   lw    $25,-28($sp)
-   lw    $24,-32($sp)
-   lw    $23,-36($sp)
-   lw    $22,-40($sp)
-   lw    $21,-44($sp)
-   lw    $20,-48($sp)
-   lw    $19,-52($sp)
-   lw    $18,-56($sp)
-   lw    $17,-60($sp)
-   lw    $16,-64($sp)
-   lw    $15,-68($sp)
-   lw    $14,-72($sp)
-   lw    $13,-76($sp)
-   lw    $12,-80($sp)
-   lw    $11,-84($sp)
-   lw    $10,-88($sp)
-   lw    $9, -92($sp)
-   lw    $8, -96($sp)
-   lw    $7, -100($sp)
-   lw    $6, -104($sp)
-   lw    $5, -108($sp)
-   lw    $4, -112($sp)
-   lw    $3, -116($sp)
-   lw    $2, -120($sp)
-   lw    $1, -124($sp)
+   addiu $sp,$sp,140
+   lw    $t1,-4($sp)
+   lw    $t0,-8($sp)
+   mflo  $t1
+   mfhi  $t0
+   lw    $31,-12($sp)
+   lw    $30,-20($sp)
+   lw    $29,-24($sp)
+   lw    $28,-28($sp)
+   lw    $27,-32($sp)
+   lw    $26,-36($sp)
+   lw    $25,-40($sp)
+   lw    $24,-44($sp)
+   lw    $23,-48($sp)
+   lw    $22,-52($sp)
+   lw    $21,-56($sp)
+   lw    $20,-60($sp)
+   lw    $19,-64($sp)
+   lw    $18,-68($sp)
+   lw    $17,-72($sp)
+   lw    $16,-76($sp)
+   lw    $15,-80($sp)
+   lw    $14,-84($sp)
+   lw    $13,-88($sp)
+   lw    $12,-92($sp)
+   lw    $11,-96($sp)
+   lw    $10,-100($sp)
+   lw    $9, -104($sp)
+   lw    $8, -108($sp)
+   lw    $7, -112($sp)
+   lw    $6, -116($sp)
+   lw    $5, -120($sp)
+   lw    $4, -124($sp)
+   lw    $3, -128($sp)
+   lw    $2, -132($sp)
+   lw    $1, -136($sp)
    jr    $ra
-   lw    $0, -128($sp)
+   lw    $0, -140($sp)
 /*tux64_boot_stage0_dump_to_sram*/
 
 .macro TUX64_BOOT_STAGE0_DUMP_TO_SRAM
-   nop
-   jal tux64_boot_stage0_dump_to_sram
-   nop
+   /* pushing/popping of $ra is done by caller to prevent my boy Jal */
+   /* from clobbering the dump.  always Jal messing shit up! */
+   sw    $ra,-16($sp)
+   jal   tux64_boot_stage0_dump_to_sram
+   nop   /* branch delay slot */
+   lw    $ra,-16($sp)
 .endm
 
 /*----------------------------------------------------------------------------*/
