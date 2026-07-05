@@ -194,6 +194,85 @@ tux64_sramdumper_format_register_file(
    return characters;
 }
 
+static const char
+tux64_sramdumper_format_special_register_names [TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT][TUX64_SRAMDUMPER_FORMAT_REGISTER_NAME_LENGTH] = {
+   {'p', 'c'},
+   {'l', 'o'},
+   {'h', 'i'}
+};
+
+static Tux64UInt32
+tux64_sramdumper_format_special_registers(
+   char * buffer,
+   const Tux64UInt32 special_registers [TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT]
+) {
+   Tux64UInt32 characters;
+   char * ptr;
+   Tux64UInt32 len;
+   Tux64UInt8 i;
+
+   characters = TUX64_LITERAL_UINT32(0u);
+   ptr = buffer;
+
+   len = (Tux64UInt32)sprintf(ptr, "  ");
+   ptr += len;
+   characters += len;
+
+   i = TUX64_LITERAL_UINT8(0u);
+   do {
+      len = (Tux64UInt32)sprintf(
+         ptr,
+         "           $%.*s",
+         TUX64_SRAMDUMPER_FORMAT_REGISTER_NAME_LENGTH,
+         tux64_sramdumper_format_special_register_names[i]
+      );
+      ptr += len;
+      characters += len;
+
+      i++;
+   } while (i != TUX64_LITERAL_UINT8(TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT));
+
+   len = (Tux64UInt32)sprintf(ptr, "\n     ");
+   ptr += len;
+   characters += len;
+
+   i = TUX64_LITERAL_UINT8(0u);
+   do {
+      len = (Tux64UInt32)sprintf(
+         ptr,
+         "    %10" PRIu32,
+         special_registers[i]
+      );
+      ptr += len;
+      characters += len;
+
+      i++;
+   } while (i != TUX64_LITERAL_UINT8(TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT));
+
+   len = (Tux64UInt32)sprintf(ptr, "\n     ");
+   ptr += len;
+   characters += len;
+
+   i = TUX64_LITERAL_UINT8(0u);
+   do {
+      len = (Tux64UInt32)sprintf(
+         ptr,
+         "    0x%08" PRIx32,
+         special_registers[i]
+      );
+      ptr += len;
+      characters += len;
+
+      i++;
+   } while (i != TUX64_LITERAL_UINT8(TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT));
+
+   len = (Tux64UInt32)sprintf(ptr, "\n\n");
+   ptr += len;
+   characters += len;
+
+   return characters;
+}
+
 struct Tux64SramDumperFormatResult
 tux64_sramdumper_format(
    const struct Tux64SramDumperParseInformation * dump
@@ -222,6 +301,10 @@ tux64_sramdumper_format(
    result.characters += len;
 
    len = tux64_sramdumper_format_register_file(ptr, dump->register_file);
+   ptr += len;
+   result.characters += len;
+
+   len = tux64_sramdumper_format_special_registers(ptr, dump->special_registers);
    ptr += len;
    result.characters += len;
    

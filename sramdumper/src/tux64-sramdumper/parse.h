@@ -13,6 +13,8 @@
 
 #define TUX64_SRAMDUMPER_PARSE_INFORMATION_REGISTER_COUNT \
    32u
+#define TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT \
+   3u
 
 #define TUX64_SRAMDUMPER_PARSE_INFORMATION_STATUS_CODE_INVALID \
    '\x7f'
@@ -31,6 +33,7 @@ struct Tux64SramDumperParseInformationStatusCodes {
 
 struct Tux64SramDumperParseInformation {
    Tux64UInt32 register_file [TUX64_SRAMDUMPER_PARSE_INFORMATION_REGISTER_COUNT];
+   Tux64UInt32 special_registers [TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT];
    struct Tux64SramDumperParseInformationStatusCodes status_codes;
 };
 

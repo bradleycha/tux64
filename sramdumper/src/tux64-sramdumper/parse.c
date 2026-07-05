@@ -20,7 +20,8 @@
 #define TUX64_SRAMDUMPER_PARSE_DUMP_MINIMUM_SIZE \
    ( \
       ((TUX64_SRAMDUMPER_PARSE_STATUS_CODE_BYTES) * 2u) + \
-      (sizeof(Tux64UInt32) * TUX64_SRAMDUMPER_PARSE_INFORMATION_REGISTER_COUNT) \
+      (sizeof(Tux64UInt32) * TUX64_SRAMDUMPER_PARSE_INFORMATION_REGISTER_COUNT) + \
+      (sizeof(Tux64UInt32) * TUX64_SRAMDUMPER_PARSE_INFORMATION_SPECIAL_REGISTER_COUNT) \
    )
 
 #define TUX64_SRAMDUMPER_PARSE_OFFSET_STATUS_CODE_LAST_WRITTEN \
@@ -29,6 +30,8 @@
    (TUX64_SRAMDUMPER_PARSE_OFFSET_STATUS_CODE_LAST_WRITTEN + TUX64_SRAMDUMPER_PARSE_STATUS_CODE_BYTES)
 #define TUX64_SRAMDUMPER_PARSE_OFFSET_REGISTER_FILE \
    (TUX64_SRAMDUMPER_PARSE_OFFSET_STATUS_CODE_TIME_OF_DUMP + TUX64_SRAMDUMPER_PARSE_STATUS_CODE_BYTES)
+#define TUX64_SRAMDUMPER_PARSE_OFFSET_SPECIAL_REGISTER_FILE \
+   (TUX64_SRAMDUMPER_PARSE_OFFSET_REGISTER_FILE + (sizeof(Tux64UInt32) * TUX64_SRAMDUMPER_PARSE_INFORMATION_REGISTER_COUNT))
 
 #define TUX64_SRAMDUMPER_PARSE_STATUS_CODE_PREFIX \
    "STAGE"
@@ -69,17 +72,18 @@ invalid_status:
 }
 
 static void
-tux64_sramdumper_parse_correct_register_file_endianess(
-   Tux64UInt32 register_file [TUX64_SRAMDUMPER_PARSE_INFORMATION_REGISTER_COUNT]
+tux64_sramdumper_parse_correct_array_endianess(
+   Tux64UInt32 * words,
+   Tux64UInt8 count
 ) {
    Tux64UInt8 i;
 
-   i = TUX64_LITERAL_UINT8(TUX64_SRAMDUMPER_PARSE_INFORMATION_REGISTER_COUNT);
+   i = count;
    do {
       i--;
 
-      register_file[i] = tux64_endian_convert_uint32(
-         register_file[i],
+      words[i] = tux64_endian_convert_uint32(
+         words[i],
          TUX64_SRAMDUMPER_PARSE_ENDIAN_FORMAT_N64
       );
    } while (i != TUX64_LITERAL_UINT8(0u));
@@ -118,7 +122,20 @@ tux64_sramdumper_parse(
       &sram_ptr[TUX64_SRAMDUMPER_PARSE_OFFSET_REGISTER_FILE],
       TUX64_LITERAL_UINT32(sizeof(result.payload.ok.register_file))
    );
-   tux64_sramdumper_parse_correct_register_file_endianess(result.payload.ok.register_file);
+   tux64_sramdumper_parse_correct_array_endianess(
+      result.payload.ok.register_file,
+      TUX64_LITERAL_UINT32(TUX64_ARRAY_ELEMENTS(result.payload.ok.register_file))
+   );
+
+   tux64_memory_copy(
+      result.payload.ok.special_registers,
+      &sram_ptr[TUX64_SRAMDUMPER_PARSE_OFFSET_SPECIAL_REGISTER_FILE],
+      TUX64_LITERAL_UINT8(sizeof(result.payload.ok.special_registers))
+   );
+   tux64_sramdumper_parse_correct_array_endianess(
+      result.payload.ok.special_registers,
+      TUX64_LITERAL_UINT8(TUX64_ARRAY_ELEMENTS(result.payload.ok.special_registers))
+   );
 
    result.status = TUX64_SRAMDUMPER_PARSE_STATUS_OK;
    return result;
