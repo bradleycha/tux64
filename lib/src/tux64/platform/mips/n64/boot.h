@@ -22,7 +22,7 @@
    4u
 
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC\
-   (0x5442484d) /* TBHM (Tux64 Boot Header Magic) */
+   (0x5442484du) /* TBHM (Tux64 Boot Header Magic) */
 
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES\
    (4u)
@@ -39,7 +39,7 @@
 /* forward to the nearest 16-byte boundary.                                   */
 /*----------------------------------------------------------------------------*/
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES\
-   (0x54u)
+   (TUX64_SIZEOF_STRUCT_TUX64PLATFORMMIPSN64BOOTHEADER) /* computed in configure.ac */
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16\
    (TUX64_MATH_ALIGN_FORWARD(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES, 16))
 
@@ -159,10 +159,6 @@ struct Tux64PlatformMipsN64BootHeader {
 
 /* since we have to set stuff manually to work with assembler includes, it's */
 /* a good idea to make sure we don't have any issues. */
-
-TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES == sizeof(struct Tux64PlatformMipsN64BootHeader));
-TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16 % 16 == 0);
-TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16 < 16 + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES);
 
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_MAGIC                               == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, magic));
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_CHECKSUM                            == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, checksum));

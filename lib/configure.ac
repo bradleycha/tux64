@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (c) Tux64 2025, 2026                        #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
 # lib/configure.ac - GNU Autoconf script for tux64-lib.                        #
@@ -32,6 +32,7 @@ AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([void *])
+AC_CHECK_SIZEOF([struct Tux64PlatformMipsN64BootHeader], [], [#include "tux64/platform/mips/n64/boot.h"])
 
 AC_CHECK_HEADERS([stdint.h stdarg.h stdlib.h string.h stdio.h errno.h])
 
