@@ -16,7 +16,8 @@
 #include "tux64-boot/stage1/stack.h"
 
 #define TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS \
-   (TUX64_BOOT_STAGE1_STACK_ADDRESS + TUX64_BOOT_STAGE1_STACK_BYTES)
+   (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + 0x200u)
+   /* place right after exception vectors, with a little padding for safety. */
 
 #if !TUX64_PREPROCESSOR_ONLY
 /*----------------------------------------------------------------------------*/

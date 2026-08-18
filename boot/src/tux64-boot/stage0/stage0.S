@@ -75,7 +75,6 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/status.h"
 #include "tux64-boot/stage1/stack.h"
-#include "tux64-boot/stage1/boot-header.h"
 #include "tux64-boot/stage1/memory.h"
 
 .set noreorder
@@ -118,7 +117,7 @@
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 
 .equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES
-.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,(TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS & 0xffff)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16
+.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,(TUX64_BOOT_STAGE1_STACK_ADDRESS & 0xffff) + TUX64_BOOT_STAGE1_STACK_BYTES
 
 .equ TUX64_BOOT_STAGE0_STATUS_WORD_HI,TUX64_BOOT_STATUS_MAGIC_HI                 /* STAG */
 .equ TUX64_BOOT_STAGE0_STATUS_WORD_LO,TUX64_BOOT_STATUS_MAGIC_LO | ('0' << 16)   /* E0:x */
@@ -1107,7 +1106,7 @@ tux64_boot_stage0_start:
    /* initialize the stack and start stage-1 */
    addiu $k0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO /* branch delay slot */
    jr    $k0
-   addiu $sp,$a2,TUX64_BOOT_STAGE1_STACK_BYTES
+   addiu $sp,$a2,(TUX64_BOOT_STAGE1_STACK_ADDRESS & 0xffff) + TUX64_BOOT_STAGE1_STACK_BYTES
 /*tux64_boot_stage0_start*/
 
    /* TODO: add multiple of these, one for each CIC revision.  only do this */

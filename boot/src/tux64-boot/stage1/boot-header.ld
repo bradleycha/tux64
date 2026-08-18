@@ -6,15 +6,13 @@
 /*    script definitions.                                                     */
 /*----------------------------------------------------------------------------*/
 
-/* this should be included after stack.ld */
-
 INCLUDE tux64/ldscripts/platform/mips/n64/boot.ld
 
 /* TODO: run preprocessor on linker script to                                 */
 /* #include "tux64-boot/stage1/boot-header.h" and replace this definition     */
 /* with the TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS from the header.            */
 TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS =
-   TUX64_BOOT_STAGE1_STACK_ADDRESS + TUX64_BOOT_STAGE1_STACK_BYTES;
+   TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + 0x200;
 
 SECTIONS
 {
