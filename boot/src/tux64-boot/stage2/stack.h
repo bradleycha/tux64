@@ -5,8 +5,8 @@
 /* boot/src/tux64-boot/stage2/stack.h - Stage-2 stack definitions.            */
 /*----------------------------------------------------------------------------*/
 
-#ifndef _TUX64_BOOT_STAGE2_H
-#define _TUX64_BOOT_STAGE2_H
+#ifndef _TUX64_BOOT_STAGE2_STACK_H
+#define _TUX64_BOOT_STAGE2_STACK_H
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
@@ -29,5 +29,5 @@
    TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED
 
 /*----------------------------------------------------------------------------*/
-#endif /* _TUX64_BOOT_STAGE2_H */
+#endif /* _TUX64_BOOT_STAGE2_STACK_H */
 
