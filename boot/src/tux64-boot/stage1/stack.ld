@@ -6,7 +6,7 @@
 /*    definitions.                                                            */
 /*----------------------------------------------------------------------------*/
 
-/* this should be included after boot-header.ld */
+/* this should be included after header.ld */
 
 /* TODO: run preprocessor on linker script to                                 */
 /* #include "tux64-boot/stage1/stack.h" and replace this definition with the  */
@@ -14,8 +14,7 @@
 TUX64_BOOT_STAGE1_STACK_BYTES =
    0x00001000;
 TUX64_BOOT_STAGE1_STACK_ADDRESS =
-   TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES_ALIGN16;
-   /* place at the start of RDRAM */
+   TUX64_BOOT_HEADER_ADDRESS + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES_ALIGN16;
 
 SECTIONS
 {

@@ -20,12 +20,12 @@
 #include "tux64-boot/load.h"
 #include "tux64-boot/exec.h"
 #include "tux64-boot/halt.h"
+#include "tux64-boot/header.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/preempt.h"
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/interrupt.h"
-#include "tux64-boot/stage1/boot-header.h"
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
@@ -62,7 +62,7 @@ tux64_boot_stage1_fsm_checksum_enable(void) {
       return TUX64_BOOLEAN_FALSE;
    }
 
-   return (tux64_boot_stage1_boot_header_flag_no_checksum() == TUX64_BOOLEAN_FALSE);
+   return (tux64_boot_header_flag_no_checksum() == TUX64_BOOLEAN_FALSE);
 }
 
 static Tux64Boolean
@@ -71,7 +71,7 @@ tux64_boot_stage1_fsm_delay_enable(void) {
       return TUX64_BOOLEAN_FALSE;
    }
 
-   return (tux64_boot_stage1_boot_header_flag_no_delay() == TUX64_BOOLEAN_FALSE);
+   return (tux64_boot_header_flag_no_delay() == TUX64_BOOLEAN_FALSE);
 }
 
 static void
@@ -182,7 +182,7 @@ tux64_boot_stage1_fsm_allocate_kernel(
    /* to be loaded at a specific address.  the rest of the boot files can be */
    /* loaded anywhere. */
 
-   kernel_file       = tux64_boot_stage1_boot_header_file_kernel();
+   kernel_file       = tux64_boot_header_file_kernel();
    kernel_address    = kernel_file->addr_load;
    kernel_bytes      = kernel_file->image.file.length;
 
@@ -303,7 +303,7 @@ tux64_boot_stage1_fsm_allocate_initramfs(
       load_info,
       &load_info->allocations.optional.initramfs,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS),
-      tux64_boot_stage1_boot_header_file_initramfs(),
+      tux64_boot_header_file_initramfs(),
       TUX64_LITERAL_UINT32(4096u)
    );
 }
@@ -317,7 +317,7 @@ tux64_boot_stage1_fsm_allocate_command_line(
       load_info,
       &load_info->allocations.optional.command_line,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE),
-      tux64_boot_stage1_boot_header_file_command_line(),
+      tux64_boot_header_file_command_line(),
       TUX64_LITERAL_UINT32(8u)
    );
 }
@@ -429,7 +429,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_KERNEL);
 
-   kernel = tux64_boot_stage1_boot_header_file_kernel();
+   kernel = tux64_boot_header_file_kernel();
 
    tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
@@ -447,7 +447,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_INITRAMFS);
 
-   initramfs = tux64_boot_stage1_boot_header_file_initramfs();
+   initramfs = tux64_boot_header_file_initramfs();
 
    tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
@@ -466,7 +466,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_COMMAND_LINE);
 
-   command_line = tux64_boot_stage1_boot_header_file_command_line();
+   command_line = tux64_boot_header_file_command_line();
 
    /* if we have everything loadable from stage-1, we can boot the kernel */
    /* directly.  otherwise, we need the stage-2 loader. */
@@ -492,7 +492,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_LOAD_FILE_STAGE2);
 
-   stage2 = tux64_boot_stage1_boot_header_file_bootloader_stage2();
+   stage2 = tux64_boot_header_file_bootloader_stage2();
 
    tux64_boot_stage1_fsm_transition_load_file(
       fsm,
@@ -705,7 +705,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
    Tux64UInt32 command_line_address;
    Tux64UInt32 total_memory;
 
-   entrypoint = (const void *)tux64_boot_stage1_boot_header_file_kernel()->addr_entry;
+   entrypoint = (const void *)tux64_boot_header_file_kernel()->addr_entry;
 
    allocations = &fsm->globals.load_info.allocations;
 
@@ -713,7 +713,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
    arguments      = (struct Tux64BootExecKernelArguments *)(Tux64UIntPtr)addr_arguments;
 
    initramfs_address    = allocations->optional.initramfs.address;
-   initramfs_bytes      = tux64_boot_stage1_boot_header_file_initramfs()->length;
+   initramfs_bytes      = tux64_boot_header_file_initramfs()->length;
    command_line_address = allocations->optional.command_line.address;
    total_memory         = tux64_boot_stage1_memory_total();
 
@@ -731,7 +731,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) 
    struct Tux64BootRspDmaTransfer transfer;
    Tux64UInt16 stage2_bytes;
 
-   stage2_bytes = (Tux64UInt16)tux64_boot_stage1_boot_header_file_bootloader_stage2()->length;
+   stage2_bytes = (Tux64UInt16)tux64_boot_header_file_bootloader_stage2()->length;
 
    /* we have to load stage-2 into RSP IMEM first.  we don't have to wait for */
    /* completion before the call because we're coming from the start of a new */
@@ -783,12 +783,12 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    Tux64UInt32 kernel_addr_load;
    Tux64UInt32 kernel_addr_entry;
 
-   if (tux64_boot_stage1_boot_header_flag_memory_display() == TUX64_BOOLEAN_FALSE) {
+   if (tux64_boot_header_flag_memory_display() == TUX64_BOOLEAN_FALSE) {
       return;
    }
 
-   kernel      = tux64_boot_stage1_boot_header_file_kernel();
-   initramfs   = tux64_boot_stage1_boot_header_file_initramfs();
+   kernel      = tux64_boot_header_file_kernel();
+   initramfs   = tux64_boot_header_file_initramfs();
 
    kernel_length     = kernel->image.file.length;
    kernel_memory     = kernel->image.memory;

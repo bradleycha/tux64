@@ -96,6 +96,8 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/ipl2.h \
 	src/tux64-boot/status.c \
 	src/tux64-boot/status.h \
+	src/tux64-boot/header.c \
+	src/tux64-boot/header.h \
 	src/tux64-boot/idle.c \
 	src/tux64-boot/idle.h \
 	src/tux64-boot/halt.c \
@@ -119,8 +121,6 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/start.c \
 	src/tux64-boot/stage1/stage1.c \
 	src/tux64-boot/stage1/stage1.h \
-	src/tux64-boot/stage1/boot-header.c \
-	src/tux64-boot/stage1/boot-header.h \
 	src/tux64-boot/stage1/stack.h \
 	src/tux64-boot/stage1/fsm.c \
 	src/tux64-boot/stage1/fsm.h \
@@ -156,10 +156,10 @@ stage2_SOURCES = \
 EXTRA_DIST = \
 	src/tux64-boot/tux64-boot.ld \
 	src/tux64-boot/status.ld \
+	src/tux64-boot/header.ld \
 	src/tux64-boot/stage0/stage0.ld \
 	src/tux64-boot/stage1/stage1.ld \
 	src/tux64-boot/stage1/stack.ld \
-	src/tux64-boot/stage1/boot-header.ld \
 	src/tux64-boot/stage1/fontmap.rgb888.data \
 	src/tux64-boot/stage1/strings.txt \
 	src/tux64-boot/stage1/logo.rgba8888.data \

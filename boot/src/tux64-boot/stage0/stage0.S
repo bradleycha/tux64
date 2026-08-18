@@ -140,7 +140,7 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('K')
 
 /* defined in stage1/boot-header.ld, included in stage0/stage0.ld */
-.extern tux64_boot_stage1_boot_header
+.extern tux64_boot_header
 
    .section .tux64_boot.status
 tux64_boot_stage0_status:
@@ -951,7 +951,7 @@ tux64_boot_stage0_start:
    /* initiate the transfer in the background, we don't need to invalidate */
    /* cache as we're initializing it below anyways.  also note we don't need */
    /* to wait on any previous PI DMA operations since we halted them above */
-   addiu $t3,$zero,%lo(tux64_boot_stage1_boot_header)
+   addiu $t3,$zero,%lo(tux64_boot_header)
    addiu $t4,$zero,(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES - 1)
    ori   $t5,$a1,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO
    sw    $t3,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_DRAM_ADDR)($a0)
@@ -1000,25 +1000,25 @@ tux64_boot_stage0_start:
 
    /* verify the boot header magic is present */
    lui   $t0,%hi(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC) /* branch delay slot */
-   lw    $t1,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_MAGIC($a2)
+   lw    $t1,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_MAGIC($a2)
    ori   $t0,$t0,%lo(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC)
    bne   $t0,$t1,tux64_boot_stage0_halt
    
    /* calculate the header's checksum and verify it, this also gets the boot */
    /* header into cache so that rambus goes vroom vroom, also the next */
    /* instruction executes in the above branch delay slot */
-   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_CHECKSUM($a2)
-   addiu $t0,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA
+   lw    $t2,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_CHECKSUM($a2)
+   addiu $t0,$a2,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA
    jal   tux64_boot_stage0_checksum_calculate_and_verify
-   addiu $t1,$a2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES
+   addiu $t1,$a2,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES
 
    /* begin loading the stage-1 binary into memory */
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_LOAD_STAGE1
 
    /* read the stage-1 required memory and length */
-   lw    $k0,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY($a2)
-   lw    $k1,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH($a2)
+   lw    $k0,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_MEMORY($a2)
+   lw    $k1,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH($a2)
 
    /* check if we have enough memory to load the stage-1 binary. */
    addiu $t0,$k0,-TUX64_BOOT_STAGE1_MEMORY_RDRAM_RESERVED
@@ -1042,7 +1042,7 @@ tux64_boot_stage0_start:
    subu  $s1,$s0,$k0
 
    /* load the boot flags and stage-1 checksum, reserving $fp */
-   lw    $fp,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FLAGS($a2)
+   lw    $fp,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FLAGS($a2)
 
    /* as a reminder, here are the current registers we care about:            */
    /* $a0       - PI MMIO registers base address                              */
@@ -1077,7 +1077,7 @@ tux64_boot_stage0_start:
 
    addu  $t1,$t0,$k1 /* branch delay slot */
    jal   tux64_boot_stage0_checksum_calculate_and_verify
-   lw    $t2,%lo(tux64_boot_stage1_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($a2) /* branch delay slot */
+   lw    $t2,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_CHECKSUM($a2) /* branch delay slot */
 
    tux64_boot_stage0_start.skip_checksum_stage1:
 
