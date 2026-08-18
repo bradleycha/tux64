@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/stage1/boot-header.ld - Stage-1 boot header linker     */
@@ -10,6 +10,9 @@
 
 INCLUDE tux64/ldscripts/platform/mips/n64/boot.ld
 
+/* TODO: run preprocessor on linker script to                                 */
+/* #include "tux64-boot/stage1/boot-header.h" and replace this definition     */
+/* with the TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS from the header.            */
 TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS =
    TUX64_BOOT_STAGE1_STACK_ADDRESS + TUX64_BOOT_STAGE1_STACK_BYTES;
 

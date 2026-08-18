@@ -12,6 +12,14 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/boot.h>
+#include <tux64/platform/mips/n64/memory-map.h>
+#include "tux64-boot/stage1/stack.h"
+
+#define TUX64_BOOT_STAGE1_BOOT_HEADER_ADDRESS \
+   (TUX64_BOOT_STAGE1_STACK_ADDRESS + TUX64_BOOT_STAGE1_STACK_BYTES)
+
+#if !TUX64_PREPROCESSOR_ONLY
+/*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* Checks if various boot flags are set.                                      */
@@ -34,6 +42,9 @@ const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_stage1_boot_header_file_initramfs(void);
 const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_stage1_boot_header_file_command_line(void);
+
+/*----------------------------------------------------------------------------*/
+#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_BOOT_HEADER_H */
