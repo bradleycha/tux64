@@ -747,7 +747,8 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) 
    transfer.row_count      = TUX64_LITERAL_UINT8(1u);
    tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
 
-   /* TODO: DMA the boot header and allocations into RSP DMEM. */
+   /* TODO: DMA the allocations into RSP DMEM.  we have the boot header */
+   /* already present in memory, so we can just re-use that. */
 
    /* we now have to flush all DMA operations since we will now begin */
    /* executing stage-2. */

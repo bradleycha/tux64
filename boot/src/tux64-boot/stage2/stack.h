@@ -2,7 +2,7 @@
 /*                          Copyright (C) Tux64 2026                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/stage1/stack.h - Stage-2 stack definitions.            */
+/* boot/src/tux64-boot/stage2/stack.h - Stage-2 stack definitions.            */
 /*----------------------------------------------------------------------------*/
 
 #ifndef _TUX64_BOOT_STAGE2_H
@@ -11,12 +11,16 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/memory-map.h>
+#include "tux64-boot/header.h"
 
 /*----------------------------------------------------------------------------*/
 /* The size of the stack, in bytes.                                           */
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_STAGE2_STACK_BYTES\
-   (0x100) /* 256 byte stack.  we don't need a lot, since stage-2 is so simple. */
+   TUX64_BOOT_HEADER_ADDRESS_OFFSET
+   /* since we don't need exception processing in stage-2, we can make use of */
+   /* the reserved chunk of memory before the boot header for the stack, thus */
+   /* freeing more memory for the boot files. */
 
 /*----------------------------------------------------------------------------*/
 /* The location of the start of the stack in memory.                          */

@@ -10,13 +10,16 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include "tux64-boot/stage2/stack.h"
+#include <tux64/platform/mips/n64/boot.h>
+#include "tux64-boot/header.h"
 
 /*----------------------------------------------------------------------------*/
 /* The amount of bytes from the start of RDRAM reserved by stage-2.           */
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_STAGE2_MEMORY_RDRAM_RESERVED \
-   (TUX64_BOOT_STAGE2_STACK_BYTES)
+   (TUX64_BOOT_HEADER_ADDRESS_OFFSET + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES)
+   /* stack is placed first, then the boot header.  everything else is in RSP */
+   /* memory, so all memory after the boot header is fair game. */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE2_MEMORY_H */

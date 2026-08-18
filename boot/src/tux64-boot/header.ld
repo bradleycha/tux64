@@ -10,8 +10,10 @@ INCLUDE tux64/ldscripts/platform/mips/n64/boot.ld
 /* TODO: run preprocessor on linker script to                                 */
 /* #include "tux64-boot/header.h" and replace this definition with the        */
 /* TUX64_BOOT_HEADER_ADDRESS from the header.                                 */
+TUX64_BOOT_HEADER_ADDRESS_OFFSET =
+   0x200;
 TUX64_BOOT_HEADER_ADDRESS =
-   TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + 0x200;
+   TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + TUX64_BOOT_HEADER_ADDRESS_OFFSET;
 
 SECTIONS
 {

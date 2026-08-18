@@ -6,9 +6,11 @@
 /*    definitions.                                                            */
 /*----------------------------------------------------------------------------*/
 
+/* should be included after header.h */
+
 /* TODO: same comments about duplicated code from stage1/stack.ld */
 TUX64_BOOT_STAGE2_STACK_BYTES =
-   0x100;
+   TUX64_BOOT_HEADER_ADDRESS_OFFSET;
 TUX64_BOOT_STAGE2_STACK_ADDRESS =
    TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED;
 

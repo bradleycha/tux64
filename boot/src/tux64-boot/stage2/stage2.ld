@@ -10,6 +10,8 @@ INCLUDE tux64-boot/tux64-boot.ld
 INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
 
 INCLUDE tux64-boot/status.ld
+INCLUDE tux64-boot/header.ld
+INCLUDE tux64-boot/stage2/stack.ld
 
 ENTRY(tux64_boot_stage2_start)
 
