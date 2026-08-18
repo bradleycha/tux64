@@ -24,7 +24,7 @@ SECTIONS
       /* 16-byte boundary so we can use PI DMA into RDRAM, as well as ensure */
       /* we are on a different cache line than the boot header so we dont */
       /* have to worry about invalidating any parts of cache. */
-      . = TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES_ALIGN16;
+      . += TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES_ALIGN16;
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
 
