@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ----------------------------------------------------------------------------
-#                          Copyright (c) Tux64 2025
+#                       Copyright (c) Tux64 2025, 2026
 # ----------------------------------------------------------------------------
 # This file is licensed under the GPLv3 license.  For more information, see
 # LICENSE.
@@ -23,6 +23,7 @@ export OBJCOPY=${1}-objcopy
 export OBJDUMP=${1}-objdump
 export OTOOL=${1}-otool
 export READELF=${1}-readelf
+export CPP=${1}-cpp
 
 if [ -v 2 ]; then
    export CC_FOR_TARGET=${2}-gcc
@@ -37,6 +38,7 @@ if [ -v 2 ]; then
    export OBJCOPY_FOR_TARGET=${2}-objcopy
    export OBJDUMP_FOR_TARGET=${2}-objdump
    export OTOOL_FOR_TARGET=${2}-otool
-   export READELF_FOR_TARGET=${2}-readelf;
+   export READELF_FOR_TARGET=${2}-readelf
+   export CPP_FOR_TARGET=${2}-cpp;
 fi
 
