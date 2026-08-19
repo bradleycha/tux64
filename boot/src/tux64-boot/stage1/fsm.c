@@ -29,6 +29,7 @@
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
+#include "tux64-boot/stage2/allocations.h"
 
 #define TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(identifier) \
    static void identifier (struct Tux64BootStage1Fsm *)
@@ -747,11 +748,18 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) 
    transfer.row_count      = TUX64_LITERAL_UINT8(1u);
    tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
 
-   /* TODO: DMA the allocations into RSP DMEM.  we have the boot header */
-   /* already present in memory, so we can just re-use that. */
+   /* we now DMA the load allocations into RSP DMEM. */
+   transfer.addr_rsp_mem   = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE2_ALLOCATIONS_ADDRESS);
+   transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)&fsm->globals.load_info.allocations;
+   transfer.row_bytes_copy = TUX64_LITERAL_UINT16(TUX64_BOOT_LOAD_ALLOCATIONS_BYTES);
+   transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
+   transfer.row_count      = TUX64_LITERAL_UINT8(0u);
+   tux64_boot_rsp_dma_wait_queue();
+   tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
 
    /* we now have to flush all DMA operations since we will now begin */
-   /* executing stage-2. */
+   /* executing stage-2.  note that we just leave the boot header in RDRAM */
+   /* since we can neatly fit the stack and boot header together. */
    tux64_boot_rsp_dma_wait_idle();
 
    tux64_boot_stage1_fsm_reset_hardware();
