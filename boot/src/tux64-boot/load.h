@@ -13,6 +13,15 @@
 #include "tux64-boot/tux64-boot.h"
 
 /*----------------------------------------------------------------------------*/
+/* The size of the load allocations, in bytes.                                */
+/*----------------------------------------------------------------------------*/
+#define TUX64_BOOT_LOAD_ALLOCATIONS_BYTES\
+   (0x10) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
+
+#if !TUX64_PREPROCESSOR_ONLY
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
 /* Stores bitflags representing if each file is loaded by stage-1 or stage-2. */
 /* If a bit it set to '1', it is loaded by stage-1.  If a bit is set to '0',  */
 /* it is loaded by stage-2.                                                   */
@@ -70,6 +79,9 @@ struct Tux64BootLoadAllocations {
    struct Tux64BootLoadAllocationsRequired required;
    struct Tux64BootLoadAllocationsOptional optional;
 };
+
+/*----------------------------------------------------------------------------*/
+#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_LOAD_H */

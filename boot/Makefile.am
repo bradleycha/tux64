@@ -155,6 +155,8 @@ stage2_SOURCES = \
 	src/tux64-boot/stage2/start.c \
 	src/tux64-boot/stage2/stack.h \
 	src/tux64-boot/stage2/stack.ld.h \
+	src/tux64-boot/stage2/allocations.h \
+	src/tux64-boot/stage2/allocations.ld.h \
 	src/tux64-boot/stage2/stage2.c \
 	src/tux64-boot/stage2/stage2.h \
 	src/tux64-boot/stage2/status.c \
