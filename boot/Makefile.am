@@ -21,11 +21,11 @@ stage1_LOGO = \
 	$(top_builddir)/src/tux64-boot/stage1/logo.bin.c
 
 stage0_LDSCRIPT = \
-	$(top_srcdir)/src/tux64-boot/stage0/stage0.ld
+	$(top_builddir)/src/tux64-boot/stage0/stage0.ld
 stage1_LDSCRIPT = \
-	$(top_srcdir)/src/tux64-boot/stage1/stage1.ld
+	$(top_builddir)/src/tux64-boot/stage1/stage1.ld
 stage2_LDSCRIPT = \
-	$(top_srcdir)/src/tux64-boot/stage2/stage2.ld
+	$(top_builddir)/src/tux64-boot/stage2/stage2.ld
 
 stage0_ELF = \
 	$(top_builddir)/stage0
@@ -77,6 +77,8 @@ AM_CCASFLAGS = \
 AM_LDFLAGS = \
 	-nostartfiles \
 	-nostdlib
+AM_CPPFLAGS = \
+	-I $(top_srcdir)/src
 
 LDADD = \
 	-L $(top_srcdir)/src \
@@ -157,14 +159,14 @@ EXTRA_DIST = \
 	src/tux64-boot/tux64-boot.ld \
 	src/tux64-boot/status.ld \
 	src/tux64-boot/header.ld \
-	src/tux64-boot/stage0/stage0.ld \
-	src/tux64-boot/stage1/stage1.ld \
+	src/tux64-boot/stage0/stage0.ld.S \
+	src/tux64-boot/stage1/stage1.ld.S \
 	src/tux64-boot/stage1/stack.ld \
 	src/tux64-boot/stage1/fontmap.rgb888.data \
 	src/tux64-boot/stage1/strings.txt \
 	src/tux64-boot/stage1/logo.rgba8888.data \
-	src/tux64-boot/stage2/stage2.ld \
-	src/tux64-boot/stage1/stack.ld
+	src/tux64-boot/stage1/stack.ld \
+	src/tux64-boot/stage2/stage2.ld.S
 
 stage0_LDFLAGS = \
 	$(AM_LDFLAGS) \
@@ -199,6 +201,14 @@ $(stage1_LOGO) : $(top_srcdir)/src/tux64-boot/stage1/logo.rgba8888.data
 $(stage0_ELF) : $(stage0_LDSCRIPT)
 $(stage1_ELF) : $(stage1_LDSCRIPT)
 $(stage1_ELF) : $(stage2_LDSCRIPT)
+
+# TODO: make this modular (and also -I our includes)
+$(stage0_LDSCRIPT) : $(top_srcdir)/src/tux64-boot/stage0/stage0.ld.S
+	$(CPP) $(AM_CPPFLAGS) -P $< -o $@
+$(stage1_LDSCRIPT) : $(top_srcdir)/src/tux64-boot/stage1/stage1.ld.S
+	$(CPP) $(AM_CPPFLAGS) -P $< -o $@ 
+$(stage2_LDSCRIPT) : $(top_srcdir)/src/tux64-boot/stage2/stage2.ld.S
+	$(CPP) $(AM_CPPFLAGS) -P $< -o $@
 
 # we output to /dev/null because for some stupid reason, objcopy zeroes out
 # the infile while running, then writes it back afterwards.  this results in

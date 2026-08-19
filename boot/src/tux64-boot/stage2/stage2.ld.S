@@ -2,8 +2,11 @@
 /*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/stage2/stage2.ld - Stage-2 bootloader linker script.   */
+/* boot/src/tux64-boot/stage2/stage2.ld.S - Stage-2 bootloader linker script. */
 /*----------------------------------------------------------------------------*/
+
+/* HACK fix until we rework how tux64-lib installs linker scripts. */
+#undef mips
 
 INCLUDE tux64-boot/tux64-boot.ld
 

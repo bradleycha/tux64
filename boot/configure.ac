@@ -55,6 +55,12 @@ if [[ -z "$OBJDUMP" ]]; then
    exit 1
 fi
 
+AC_CHECK_TOOL([CPP], [cpp])
+if [[ -z "$CPP" ]]; then
+   $(tux64_boot_err_log "unable to find ${host_cpu}-${host_os}-cpp.  please verify the build was configured correctly.")
+   exit 1
+fi
+
 # since we have to use a patched compiler, we should make sure the compiler
 # actually has our patches applied.  doing this here can help if people
 # forget to apply patches and give more helpful error messages.
