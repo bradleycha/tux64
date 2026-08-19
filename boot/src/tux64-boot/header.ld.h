@@ -2,18 +2,16 @@
 /*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/header.ld - Boot header linker script definitions.     */
+/* boot/src/tux64-boot/header.ld.h - Boot header linker script definitions.   */
 /*----------------------------------------------------------------------------*/
 
-INCLUDE tux64/ldscripts/platform/mips/n64/boot.ld
+#ifndef _TUX64_BOOT_HEADER_LD_H
+#define _TUX64_BOOT_HEADER_LD_H
+/*----------------------------------------------------------------------------*/
 
-/* TODO: run preprocessor on linker script to                                 */
-/* #include "tux64-boot/header.h" and replace this definition with the        */
-/* TUX64_BOOT_HEADER_ADDRESS from the header.                                 */
-TUX64_BOOT_HEADER_ADDRESS_OFFSET =
-   0x200;
-TUX64_BOOT_HEADER_ADDRESS =
-   TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + TUX64_BOOT_HEADER_ADDRESS_OFFSET;
+#include "tux64-boot/tux64-boot.ld.h"
+#include "tux64-boot/header.h"
+#include <tux64/platform/mips/n64/boot.h>
 
 SECTIONS
 {
@@ -24,7 +22,10 @@ SECTIONS
       /* 16-byte boundary so we can use PI DMA into RDRAM, as well as ensure */
       /* we are on a different cache line than the boot header so we dont */
       /* have to worry about invalidating any parts of cache. */
-      . += TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_LENGTH_BYTES_ALIGN16;
+      . += TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16;
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_BOOT_HEADER_LD_H */
 

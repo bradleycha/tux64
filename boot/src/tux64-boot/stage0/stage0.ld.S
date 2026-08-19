@@ -5,16 +5,11 @@
 /* boot/src/tux64-boot/stage0/stage0.ld.S - Stage-0 bootloader linker script. */
 /*----------------------------------------------------------------------------*/
 
-/* HACK fix until we rework how tux64-lib installs linker scripts. */
-#undef mips
+#include "tux64-boot/tux64-boot.ld.h"
 
-INCLUDE tux64-boot/tux64-boot.ld
-
-INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
-
-INCLUDE tux64-boot/status.ld
-INCLUDE tux64-boot/header.ld
-INCLUDE tux64-boot/stage1/stack.ld
+#include <tux64/platform/mips/n64/memory-map.h>
+#include "tux64-boot/status.h"
+#include "tux64-boot/stage1/stack.ld.h"
 
 ENTRY(tux64_boot_stage0_start)
 
@@ -22,7 +17,7 @@ ENTRY(tux64_boot_stage0_start)
 /* code, which means we aren't wasting any memory at runtime by including the */
 /* CIC data. */
 TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA
- = TUX64_BOOT_MEMORY_ADDRESS_STATUS;
+ = TUX64_BOOT_STATUS_ADDRESS;
 
 SECTIONS
 {

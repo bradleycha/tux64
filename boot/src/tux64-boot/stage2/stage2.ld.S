@@ -5,16 +5,9 @@
 /* boot/src/tux64-boot/stage2/stage2.ld.S - Stage-2 bootloader linker script. */
 /*----------------------------------------------------------------------------*/
 
-/* HACK fix until we rework how tux64-lib installs linker scripts. */
-#undef mips
+#include "tux64-boot/tux64-boot.ld.h"
 
-INCLUDE tux64-boot/tux64-boot.ld
-
-INCLUDE tux64/ldscripts/platform/mips/n64/n64.ld
-
-INCLUDE tux64-boot/status.ld
-INCLUDE tux64-boot/header.ld
-INCLUDE tux64-boot/stage2/stack.ld
+#include "tux64-boot/stage2/stack.ld.h"
 
 ENTRY(tux64_boot_stage2_start)
 

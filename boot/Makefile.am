@@ -78,7 +78,8 @@ AM_LDFLAGS = \
 	-nostartfiles \
 	-nostdlib
 AM_CPPFLAGS = \
-	-I $(top_srcdir)/src
+	-I $(top_srcdir)/src \
+	-I $(top_builddir)/configdir
 
 LDADD = \
 	-L $(top_srcdir)/src \
@@ -89,6 +90,7 @@ LDADD = \
 
 libtux64_boot_a_SOURCES = \
 	src/tux64-boot/tux64-boot.h \
+	src/tux64-boot/tux64-boot.ld.h \
 	src/tux64-boot/builtin.c \
 	src/tux64-boot/builtin.h \
 	src/tux64-boot/gp.c \
@@ -98,8 +100,10 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/ipl2.h \
 	src/tux64-boot/status.c \
 	src/tux64-boot/status.h \
+	src/tux64-boot/status.ld.h \
 	src/tux64-boot/header.c \
 	src/tux64-boot/header.h \
+	src/tux64-boot/header.ld.h \
 	src/tux64-boot/idle.c \
 	src/tux64-boot/idle.h \
 	src/tux64-boot/halt.c \
@@ -124,6 +128,7 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/stage1.c \
 	src/tux64-boot/stage1/stage1.h \
 	src/tux64-boot/stage1/stack.h \
+	src/tux64-boot/stage1/stack.ld.h \
 	src/tux64-boot/stage1/fsm.c \
 	src/tux64-boot/stage1/fsm.h \
 	src/tux64-boot/stage1/interrupt.c \
@@ -148,7 +153,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/start.c \
-	src/tux64-boot/stage1/stack.h \
+	src/tux64-boot/stage2/stack.h \
+	src/tux64-boot/stage2/stack.ld.h \
 	src/tux64-boot/stage2/stage2.c \
 	src/tux64-boot/stage2/stage2.h \
 	src/tux64-boot/stage2/status.c \
@@ -156,17 +162,12 @@ stage2_SOURCES = \
 	src/tux64-boot/stage1/memory.h
 
 EXTRA_DIST = \
-	src/tux64-boot/tux64-boot.ld \
-	src/tux64-boot/status.ld \
-	src/tux64-boot/header.ld \
 	src/tux64-boot/stage0/stage0.ld.S \
 	src/tux64-boot/stage1/stage1.ld.S \
-	src/tux64-boot/stage1/stack.ld \
+	src/tux64-boot/stage2/stage2.ld.S \
 	src/tux64-boot/stage1/fontmap.rgb888.data \
 	src/tux64-boot/stage1/strings.txt \
-	src/tux64-boot/stage1/logo.rgba8888.data \
-	src/tux64-boot/stage1/stack.ld \
-	src/tux64-boot/stage2/stage2.ld.S
+	src/tux64-boot/stage1/logo.rgba8888.data
 
 stage0_LDFLAGS = \
 	$(AM_LDFLAGS) \
@@ -200,7 +201,7 @@ $(stage1_LOGO) : $(top_srcdir)/src/tux64-boot/stage1/logo.rgba8888.data
 
 $(stage0_ELF) : $(stage0_LDSCRIPT)
 $(stage1_ELF) : $(stage1_LDSCRIPT)
-$(stage1_ELF) : $(stage2_LDSCRIPT)
+$(stage2_ELF) : $(stage2_LDSCRIPT)
 
 # TODO: make this modular (and also -I our includes)
 $(stage0_LDSCRIPT) : $(top_srcdir)/src/tux64-boot/stage0/stage0.ld.S
@@ -258,5 +259,5 @@ dump-code : $(stage0_ELF) $(stage1_ELF) $(stage2_ELF)
 all-local : $(BIN_FILES) $(SYM_FILES)
 
 clean-local :
-	rm -f $(BIN_FILES) $(SYM_FILES) $(stage1_FONTMAP) $(stage1_STRINGS) $(stage1_LOGO)
+	rm -f $(BIN_FILES) $(SYM_FILES) $(stage1_FONTMAP) $(stage1_STRINGS) $(stage1_LOGO) $(stage0_LDSCRIPT) $(stage1_LDSCRIPT) $(stage2_LDSCRIPT)
 

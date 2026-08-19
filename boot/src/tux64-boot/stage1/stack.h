@@ -18,7 +18,7 @@
 /* The size of the stack, in bytes.                                           */
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_STAGE1_STACK_BYTES\
-   (0x00001000u) /* 4KiB stack, should be plenty */
+   (0x00001000) /* 4KiB stack, should be plenty */
 
 /*----------------------------------------------------------------------------*/
 /* The location of the start of the stack in memory.                          */

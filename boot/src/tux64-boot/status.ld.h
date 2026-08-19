@@ -2,19 +2,24 @@
 /*                          Copyright (C) Tux64 2026                          */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* boot/src/tux64-boot/status.ld - Boot status code linker script             */
+/* boot/src/tux64-boot/status.ld.h - Boot status code linker script           */
 /*    definitions.                                                            */
 /*----------------------------------------------------------------------------*/
 
-/* TODO: run preprocessor on linker script to #include "tux64-boot/status.h" */
-/* and replace 0x08 with TUX64_BOOT_STATUS_BYTES. */
-TUX64_BOOT_MEMORY_ADDRESS_STATUS
- = TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x1000 - 0x08;
+#ifndef _TUX64_BOOT_STATUS_LD_H
+#define _TUX64_BOOT_STATUS_LD_H
+/*----------------------------------------------------------------------------*/
+
+#include "tux64-boot/tux64-boot.ld.h"
+#include "tux64-boot/status.h"
 
 SECTIONS
 {
-   .rsp_dmem.status (TUX64_BOOT_MEMORY_ADDRESS_STATUS) : {
+   .rsp_dmem.status (TUX64_BOOT_STATUS_ADDRESS) : {
       *(.tux64_boot.status);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_BOOT_STATUS_LD_H */
 

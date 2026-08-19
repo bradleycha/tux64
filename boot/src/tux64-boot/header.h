@@ -16,7 +16,7 @@
 #include "tux64-boot/stage1/stack.h"
 
 #define TUX64_BOOT_HEADER_ADDRESS_OFFSET \
-   (0x200u) /* place right after exception vectors, with a little padding for safety. */
+   (0x200) /* place right after exception vectors, with a little padding for safety. */
 
 #define TUX64_BOOT_HEADER_ADDRESS \
    (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + TUX64_BOOT_HEADER_ADDRESS_OFFSET)
