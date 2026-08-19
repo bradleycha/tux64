@@ -16,7 +16,7 @@
 /* use the non-preprocessor functions, for example in #define statements.     */
 /*----------------------------------------------------------------------------*/
 #define TUX64_MATH_CEIL_DIVIDE(dividend, divisor)\
-   (((dividend) + (divisor) - 1u) / (divisor))
+   (((dividend) + (divisor) - 1) / (divisor))
 
 /*----------------------------------------------------------------------------*/
 /* Aligns a value forward to a boundary on literals.  Only use this if you    */
