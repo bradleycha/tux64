@@ -1,10 +1,18 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
-/* lib/src/tux64/platform/mips/n64/mmio.ld - Memory-mapped I/O (MMIO) linker  */
-/*    script to place MMIO structs in the correct location.                   */
+/* lib/src/tux64/platform/mips/n64/mmio.ld.h - Memory-mapped I/O (MMIO)       */
+/*    linker script to place MMIO structs in the correct location.            */
 /*----------------------------------------------------------------------------*/
+
+#ifndef _TUX64_PLATFORM_MIPS_N64_MMIO_LD_H
+#define _TUX64_PLATFORM_MIPS_N64_MMIO_LD_H
+/*----------------------------------------------------------------------------*/
+
+#include "tux64/tux64.h"
+#include "tux64/platform/mips/n64/memory-map.h"
+#include "tux64/platform/mips/n64/memory-map.ld.h"
 
 SECTIONS
 {
@@ -50,4 +58,7 @@ SECTIONS
       *(.tux64.platform.mips.n64.mmio.si);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_SI
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_PLATFORM_MIPS_N64_MMIO_LD_H */
 

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/n64/memory-map.h - CPU memory map constants    */
@@ -15,56 +15,56 @@
 /* MMU address segments which change how virtual addresses are mapped to */
 /* physical addresses. */
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_SEGMENT_USER_TLB\
-   (0x00000000u)
+   (0x00000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_SEGMENT_DIRECT_CACHED\
-   (0x80000000u)
+   (0x80000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_SEGMENT_DIRECT_UNCACHED\
-   (0xa0000000u)
+   (0xa0000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_SEGMENT_SUPERVISOR_TLB\
-   (0xc0000000u)
+   (0xc0000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_SEGMENT_KERNEL_TLB\
-   (0xe0000000u)
+   (0xe0000000)
 
 /* physical memory addresses which map directly to the console's address */
 /* space. */
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RDRAM\
-   (0x00000000u)
+   (0x00000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RDRAM_REGISTERS\
-   (0x03f00000u)
+   (0x03f00000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RDRAM_REGISTERS_BROADCAST\
-   (0x03f80000u)
+   (0x03f80000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_DMEM\
-   (0x04000000u)
+   (0x04000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM\
-   (0x04001000u)
+   (0x04001000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_REGISTERS\
-   (0x04040000u)
+   (0x04040000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RDP_REGISTERS\
-   (0x04100000u)
+   (0x04100000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_MI\
-   (0x04300000u)
+   (0x04300000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_VI\
-   (0x04400000u)
+   (0x04400000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_AI\
-   (0x04500000u)
+   (0x04500000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_PI\
-   (0x04600000u)
+   (0x04600000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RI\
-   (0x04700000u)
+   (0x04700000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_SI\
-   (0x04800000u)
+   (0x04800000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_64DD_REGISTERS\
-   (0x05000000u)
+   (0x05000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_64DD_IPL_ROM\
-   (0x06000000u)
+   (0x06000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_CARTRIDGE_RAM\
-   (0x08000000u)
+   (0x08000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_CARTRIDGE_ROM\
-   (0x10000000u)
+   (0x10000000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_PIF_ROM\
-   (0x1fc00000u)
+   (0x1fc00000)
 #define TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_PIF_RAM\
-   (0x1fc007c0u)
+   (0x1fc007c0)
 
 /* virtual addresses which can be used as an address from the CPU.  all of */
 /* these will use the uncached direct segment, as user programs should never */
