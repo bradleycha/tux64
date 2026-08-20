@@ -20,6 +20,7 @@
 #include <tux64/platform/mips/n64/n64.ld.h>
 #include "tux64-boot/status.ld.h"
 #include "tux64-boot/header.ld.h"
+#include "tux64-boot/load.ld.h"
 
 SECTIONS {
    /* forcefully remove any sections implicitly created by the toolchain      */

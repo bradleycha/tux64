@@ -12,13 +12,11 @@
 #include <tux64/checksum.h>
 #include <tux64/memory.h>
 #include <tux64/endian.h>
-#include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/header.h"
-#include "tux64-boot/halt.h"
 #include "tux64-boot/load.h"
+#include "tux64-boot/halt.h"
 #include "tux64-boot/pi.h"
 #include "tux64-boot/stage2/status.h"
-#include "tux64-boot/stage2/allocations.h"
 
 static void
 tux64_boot_stage2_file_verify_checksum(
@@ -90,7 +88,7 @@ tux64_boot_stage2_file_load_kernel(void) {
    tux64_boot_stage2_status_code_write(TUX64_BOOT_STAGE2_STATUS_CODE_LOAD_FILE_KERNEL);
 
    tux64_boot_stage2_file_load(
-      tux64_boot_stage2_allocations.required.kernel.address,
+      tux64_boot_load_allocations.required.kernel.address,
       &tux64_boot_header_file_kernel()->image.file
    );
 
@@ -102,7 +100,7 @@ tux64_boot_stage2_file_load_initramfs(void) {
    tux64_boot_stage2_status_code_write(TUX64_BOOT_STAGE2_STATUS_CODE_LOAD_FILE_INITRAMFS);
 
    tux64_boot_stage2_file_load_optional(
-      tux64_boot_stage2_allocations.optional.initramfs.address,
+      tux64_boot_load_allocations.optional.initramfs.address,
       tux64_boot_header_file_initramfs()
    );
 
@@ -114,7 +112,7 @@ tux64_boot_stage2_file_load_command_line(void) {
    tux64_boot_stage2_status_code_write(TUX64_BOOT_STAGE2_STATUS_CODE_LOAD_FILE_COMMAND_LINE);
 
    tux64_boot_stage2_file_load_optional(
-      tux64_boot_stage2_allocations.optional.command_line.address,
+      tux64_boot_load_allocations.optional.command_line.address,
       tux64_boot_header_file_command_line()
    );
 

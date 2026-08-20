@@ -49,7 +49,6 @@ union Tux64BootStage1FsmMemory {
 };
 
 struct Tux64BootStage1FsmGlobalsLoadInfo {
-   struct Tux64BootLoadAllocations allocations;
    Tux64BootLoadStatus status;
 };
 

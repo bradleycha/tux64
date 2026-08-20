@@ -21,6 +21,7 @@
 #include "tux64-boot/exec.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/header.h"
+#include "tux64-boot/load.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/preempt.h"
@@ -29,7 +30,6 @@
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
-#include "tux64-boot/stage2/allocations.h"
 
 #define TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(identifier) \
    static void identifier (struct Tux64BootStage1Fsm *)
@@ -187,7 +187,7 @@ tux64_boot_stage1_fsm_allocate_kernel(
    kernel_address    = kernel_file->addr_load;
    kernel_bytes      = kernel_file->image.file.length;
 
-   kernel_allocation = &load_info->allocations.required.kernel;
+   kernel_allocation = &tux64_boot_load_allocations.required.kernel;
    result            = TUX64_BOOLEAN_FALSE;
 
    if (tux64_boot_stage1_memory_stage1_alloc_inplace(kernel_address, kernel_bytes) == TUX64_BOOLEAN_TRUE) {
@@ -286,7 +286,7 @@ tux64_boot_stage1_fsm_allocate_kernel_args(
    /* problems down the line.  let's just allocate dynamically. */
    return tux64_boot_stage1_fsm_allocate(
       load_info,
-      &load_info->allocations.required.kernel_args,
+      &tux64_boot_load_allocations.required.kernel_args,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL_ARGS),
       TUX64_LITERAL_UINT32(sizeof(struct Tux64BootExecKernelArguments)),
       TUX64_LITERAL_UINT32(TUX64_ALIGNOF(struct Tux64BootExecKernelArguments))
@@ -302,7 +302,7 @@ tux64_boot_stage1_fsm_allocate_initramfs(
    /* different page size, it can relocate the initrd itself. */
    return tux64_boot_stage1_fsm_allocate_optional_file(
       load_info,
-      &load_info->allocations.optional.initramfs,
+      &tux64_boot_load_allocations.optional.initramfs,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS),
       tux64_boot_header_file_initramfs(),
       TUX64_LITERAL_UINT32(4096u)
@@ -316,7 +316,7 @@ tux64_boot_stage1_fsm_allocate_command_line(
    /* this has to be aligned for PI DMA. */
    return tux64_boot_stage1_fsm_allocate_optional_file(
       load_info,
-      &load_info->allocations.optional.command_line,
+      &tux64_boot_load_allocations.optional.command_line,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE),
       tux64_boot_header_file_command_line(),
       TUX64_LITERAL_UINT32(8u)
@@ -435,7 +435,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
    tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
       &kernel->image.file,
-      fsm->globals.load_info.allocations.required.kernel.address,
+      tux64_boot_load_allocations.required.kernel.address,
       &tux64_boot_stage1_strings_file_kernel,
       tux64_boot_stage1_fsm_transition_load_file_initramfs,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_KERNEL)
@@ -453,7 +453,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
    tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
       initramfs,
-      fsm->globals.load_info.allocations.optional.initramfs.address,
+      tux64_boot_load_allocations.optional.initramfs.address,
       &tux64_boot_stage1_strings_file_initramfs,
       tux64_boot_stage1_fsm_transition_load_file_command_line,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_INITRAMFS)
@@ -480,7 +480,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
    tux64_boot_stage1_fsm_transition_load_file_optional(
       fsm,
       command_line,
-      fsm->globals.load_info.allocations.optional.command_line.address,
+      tux64_boot_load_allocations.optional.command_line.address,
       &tux64_boot_stage1_strings_file_command_line,
       transition_next,
       TUX64_LITERAL_UINT8(TUX64_BOOT_LOAD_STATUS_COMMAND_LINE)
@@ -698,27 +698,26 @@ tux64_boot_stage1_fsm_reset_hardware(void) {
 
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) {
    const void * entrypoint;
-   const struct Tux64BootLoadAllocations * allocations;
    Tux64UInt32 addr_arguments;
    struct Tux64BootExecKernelArguments * arguments;
 
    entrypoint = (const void *)tux64_boot_header_file_kernel()->addr_entry;
 
-   allocations = &fsm->globals.load_info.allocations;
-
-   addr_arguments = fsm->globals.load_info.allocations.required.kernel_args.address;
+   addr_arguments = tux64_boot_load_allocations.required.kernel_args.address;
    arguments      = (struct Tux64BootExecKernelArguments *)(Tux64UIntPtr)addr_arguments;
 
    tux64_boot_exec_kernel_arguments_initialize(
       arguments,
-      allocations->optional.initramfs.address,
+      tux64_boot_load_allocations.optional.initramfs.address,
       tux64_boot_header_file_initramfs()->length,
-      allocations->optional.command_line.address,
+      tux64_boot_load_allocations.optional.command_line.address,
       tux64_boot_stage1_memory_total()
    );
 
    tux64_boot_stage1_fsm_reset_hardware();
    tux64_boot_exec_kernel(entrypoint, arguments);
+
+   (void)fsm;
    TUX64_UNREACHABLE;
 }
 
@@ -740,23 +739,6 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) 
    transfer.row_bytes_copy = (stage2_bytes / TUX64_LITERAL_UINT16(2u)) - TUX64_LITERAL_UINT16(1u);
    transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
    transfer.row_count      = TUX64_LITERAL_UINT8(1u);
-   tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
-
-   /* before we DMA the load allocations into RSP DMEM, we have to flush them */
-   /* from cache.  remember, CPU cache is invisible to the RSP DMA engine. */
-   /* i wasted 2 and a half hours debugging this one issue. :') */
-   tux64_boot_cache_flush_data(
-      &fsm->globals.load_info.allocations,
-      TUX64_LITERAL_UINT32(sizeof(fsm->globals.load_info.allocations))
-   );
-
-   /* now DMA the load allocations into RSP DMEM. */
-   transfer.addr_rsp_mem   = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE2_ALLOCATIONS_ADDRESS);
-   transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)&fsm->globals.load_info.allocations;
-   transfer.row_bytes_copy = TUX64_LITERAL_UINT16(TUX64_BOOT_LOAD_ALLOCATIONS_BYTES - 1u);
-   transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
-   transfer.row_count      = TUX64_LITERAL_UINT8(0u);
-   tux64_boot_rsp_dma_wait_queue();
    tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
 
    /* we now have to flush all DMA operations since we will now begin */

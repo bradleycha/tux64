@@ -8,7 +8,6 @@
 #include "tux64-boot/tux64-boot.ld.h"
 
 #include "tux64-boot/stage2/stack.ld.h"
-#include "tux64-boot/stage2/allocations.ld.h"
 
 ENTRY(tux64_boot_stage2_start)
 
@@ -27,7 +26,7 @@ SECTIONS
 
    /* place the stage-2 uninitialized variables into RSP DMEM after the */
    /* allocations struct. */
-   .rsp_dmem.bss (ADDR(.rsp_dmem.allocations) + SIZEOF(.rsp_dmem.allocations)) : {
+   .rsp_dmem.bss : {
       /* same trick with $gp from stage-1 */
       *(.sbss*);
 

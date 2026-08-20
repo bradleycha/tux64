@@ -9,9 +9,9 @@
 
 #include "tux64-boot/initialize.h"
 #include "tux64-boot/header.h"
+#include "tux64-boot/load.h"
 #include "tux64-boot/exec.h"
 #include "tux64-boot/stage2/status.h"
-#include "tux64-boot/stage2/allocations.h"
 #include "tux64-boot/stage2/file.h"
 
 __attribute__((noreturn))
@@ -22,7 +22,7 @@ tux64_boot_stage2_start_kernel(
    Tux64UInt32 addr_arguments;
    struct Tux64BootExecKernelArguments * arguments;
 
-   addr_arguments = tux64_boot_stage2_allocations.required.kernel_args.address;
+   addr_arguments = tux64_boot_load_allocations.required.kernel_args.address;
    arguments      = (struct Tux64BootExecKernelArguments *)(Tux64UIntPtr)addr_arguments;
 
    /* while we could initialize this from stage-1 if allocation succeeded, we */
@@ -31,9 +31,9 @@ tux64_boot_stage2_start_kernel(
    /* arguments. */
    tux64_boot_exec_kernel_arguments_initialize(
       arguments,
-      tux64_boot_stage2_allocations.optional.initramfs.address,
+      tux64_boot_load_allocations.optional.initramfs.address,
       tux64_boot_header_file_initramfs()->length,
-      tux64_boot_stage2_allocations.optional.command_line.address,
+      tux64_boot_load_allocations.optional.command_line.address,
       memory_total
    );
 
