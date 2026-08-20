@@ -14,14 +14,21 @@
 #include "tux64-boot/load.h"
 #include "tux64-boot/stage2/stack.h"
 
+__attribute__((section(".kernel_arguments")))
+extern struct Tux64BootExecKernelArguments
+tux64_boot_exec_kernel_arguments;
+
 void
 tux64_boot_exec_kernel_arguments_initialize(
-   struct Tux64BootExecKernelArguments * arguments,
    Tux64UInt32 initramfs_address,
    Tux64UInt32 initramfs_bytes,
    Tux64UInt32 command_line_address,
    Tux64UInt32 total_memory
 ) {
+   struct Tux64BootExecKernelArguments * arguments;
+
+   arguments = &tux64_boot_exec_kernel_arguments;
+
    arguments->initramfs_address     = tux64_endian_convert_uint32(initramfs_address, TUX64_ENDIAN_FORMAT_BIG);
    arguments->initramfs_bytes       = tux64_endian_convert_uint32(initramfs_bytes, TUX64_ENDIAN_FORMAT_BIG);
    arguments->command_line_address  = tux64_endian_convert_uint32(command_line_address, TUX64_ENDIAN_FORMAT_BIG);
@@ -31,8 +38,7 @@ tux64_boot_exec_kernel_arguments_initialize(
 
 void
 tux64_boot_exec_kernel(
-   const void * entrypoint,
-   const struct Tux64BootExecKernelArguments * arguments
+   const void * entrypoint
 ) {
    Tux64UInt32 fw_arg0_u32;
    Tux64UInt32 fw_arg1_u32;
@@ -43,7 +49,7 @@ tux64_boot_exec_kernel(
    unsigned long fw_arg2;
    unsigned long fw_arg3;
 
-   fw_arg0_u32 = (Tux64UIntPtr)arguments;
+   fw_arg0_u32 = (Tux64UIntPtr)&tux64_boot_exec_kernel_arguments;
    fw_arg1_u32 = TUX64_LITERAL_UINT32(0u);
    fw_arg2_u32 = TUX64_LITERAL_UINT32(0u);
    fw_arg3_u32 = TUX64_LITERAL_UINT32(0u);

@@ -21,6 +21,7 @@
 #include "tux64-boot/status.ld.h"
 #include "tux64-boot/header.ld.h"
 #include "tux64-boot/load.ld.h"
+#include "tux64-boot/exec.ld.h"
 
 SECTIONS {
    /* forcefully remove any sections implicitly created by the toolchain      */

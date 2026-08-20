@@ -10,7 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include "tux64-boot/load.h"
+#include "tux64-boot/exec.h"
 
 /*----------------------------------------------------------------------------*/
 /* The size of the stack, in bytes.                                           */
@@ -22,7 +22,7 @@
 /* The location of the start of the stack in memory.                          */
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_STAGE1_STACK_ADDRESS\
-   (TUX64_BOOT_LOAD_ALLOCATIONS_ADDRESS + TUX64_BOOT_LOAD_ALLOCATIONS_BYTES)
+   (TUX64_BOOT_EXEC_KERNEL_ARGUMENTS_ADDRESS + TUX64_BOOT_EXEC_KERNEL_ARGUMENTS_BYTES)
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_STACK_H */

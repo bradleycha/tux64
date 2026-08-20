@@ -11,6 +11,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
+#include <tux64/math.h>
 #include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/header.h"
 
@@ -24,7 +25,9 @@
 /* The size of the load allocations, in bytes.                                */
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_LOAD_ALLOCATIONS_BYTES\
-   (0x10) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
+   (TUX64_MATH_ALIGN_FORWARD(0x0c, 8))
+   /* TODO: generate this using AC_CHECK_SIZEOF(...).  we should also find a */
+   /* cleaner way to align not just this, but everything else. */
 
 #if !TUX64_PREPROCESSOR_ONLY
 /*----------------------------------------------------------------------------*/
@@ -41,8 +44,6 @@ typedef Tux64UInt8 Tux64BootLoadStatus;
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_LOAD_STATUS_KERNEL \
    (1u << 0u)
-#define TUX64_BOOT_LOAD_STATUS_KERNEL_ARGS \
-   (1u << 1u)
 #define TUX64_BOOT_LOAD_STATUS_INITRAMFS \
    (1u << 2u)
 #define TUX64_BOOT_LOAD_STATUS_COMMAND_LINE \
@@ -55,7 +56,6 @@ typedef Tux64UInt8 Tux64BootLoadStatus;
 #define TUX64_BOOT_LOAD_STATUS_CONCURRENT_WITH_STAGE1 \
    ( \
       TUX64_BOOT_LOAD_STATUS_KERNEL       | \
-      TUX64_BOOT_LOAD_STATUS_KERNEL_ARGS  | \
       TUX64_BOOT_LOAD_STATUS_INITRAMFS    | \
       TUX64_BOOT_LOAD_STATUS_COMMAND_LINE \
    )
@@ -70,7 +70,6 @@ struct Tux64BootLoadAllocationsFile {
 
 struct Tux64BootLoadAllocationsRequired {
    struct Tux64BootLoadAllocationsFile kernel;
-   struct Tux64BootLoadAllocationsFile kernel_args;
 };
 
 struct Tux64BootLoadAllocationsOptional {

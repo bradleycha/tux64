@@ -19,28 +19,11 @@ static void
 tux64_boot_stage2_start_kernel(
    Tux64UInt32 memory_total
 ) {
-   Tux64UInt32 addr_arguments;
-   struct Tux64BootExecKernelArguments * arguments;
+   const void * entrypoint;
 
-   addr_arguments = tux64_boot_load_allocations.required.kernel_args.address;
-   arguments      = (struct Tux64BootExecKernelArguments *)(Tux64UIntPtr)addr_arguments;
+   entrypoint = (const void *)tux64_boot_header_file_kernel()->addr_entry;
 
-   /* while we could initialize this from stage-1 if allocation succeeded, we */
-   /* would then need a conditional and include the init code anyways.  it's */
-   /* cheaper, in terms of code size, to just always initialize the kernel */
-   /* arguments. */
-   tux64_boot_exec_kernel_arguments_initialize(
-      arguments,
-      tux64_boot_load_allocations.optional.initramfs.address,
-      tux64_boot_header_file_initramfs()->length,
-      tux64_boot_load_allocations.optional.command_line.address,
-      memory_total
-   );
-
-   tux64_boot_exec_kernel(
-      (const void *)tux64_boot_header_file_kernel()->addr_entry,
-      arguments
-   );
+   tux64_boot_exec_kernel(entrypoint);
 }
 
 void
