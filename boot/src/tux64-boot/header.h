@@ -13,7 +13,6 @@
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/boot.h>
 #include <tux64/platform/mips/n64/memory-map.h>
-#include "tux64-boot/stage1/stack.h"
 
 #define TUX64_BOOT_HEADER_ADDRESS_OFFSET \
    (0x200) /* place right after exception vectors, with a little padding for safety. */

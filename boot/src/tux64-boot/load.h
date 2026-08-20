@@ -91,7 +91,7 @@ struct Tux64BootLoadAllocations {
 /*----------------------------------------------------------------------------*/
 /* The allocations struct which is statically allocated in memory.            */
 /*----------------------------------------------------------------------------*/
-__attribute__((section(".rdram.load.allocations")))
+__attribute__((section(".load_allocations")))
 extern struct Tux64BootLoadAllocations
 tux64_boot_load_allocations;
 /* we do this so we have the allocations at an address which is stable across */

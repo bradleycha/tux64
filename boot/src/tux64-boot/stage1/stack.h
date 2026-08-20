@@ -5,8 +5,8 @@
 /* boot/src/tux64-boot/stage1/stack.h - Stage-1 stack definitions.            */
 /*----------------------------------------------------------------------------*/
 
-#ifndef _TUX64_BOOT_STAGE1_H
-#define _TUX64_BOOT_STAGE1_H
+#ifndef _TUX64_BOOT_STAGE1_STACK_H
+#define _TUX64_BOOT_STAGE1_STACK_H
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
@@ -25,5 +25,5 @@
    (TUX64_BOOT_LOAD_ALLOCATIONS_ADDRESS + TUX64_BOOT_LOAD_ALLOCATIONS_BYTES)
 
 /*----------------------------------------------------------------------------*/
-#endif /* _TUX64_BOOT_STAGE1_H */
+#endif /* _TUX64_BOOT_STAGE1_STACK_H */
 
