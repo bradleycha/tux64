@@ -24,6 +24,18 @@ struct Tux64BootExecKernelArguments {
 };
 
 /*----------------------------------------------------------------------------*/
+/* Initializes the kernel arguments struct.                                   */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_exec_kernel_arguments_initialize(
+   struct Tux64BootExecKernelArguments * arguments,
+   Tux64UInt32 initramfs_address,
+   Tux64UInt32 initramfs_bytes,
+   Tux64UInt32 command_line_address,
+   Tux64UInt32 total_memory
+);
+
+/*----------------------------------------------------------------------------*/
 /* Starts the linux kernel given by the entrypoint.  Assumes interrupts are   */
 /* disabled, the VI and AI are stopped, and there are no ongoing RSP, PI, or  */
 /* SI DMA transfers.  'arguments' should be dynamically allocated and present */

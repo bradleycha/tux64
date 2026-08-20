@@ -161,7 +161,9 @@ stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.h \
 	src/tux64-boot/stage2/status.c \
 	src/tux64-boot/stage2/status.h \
-	src/tux64-boot/stage1/memory.h
+	src/tux64-boot/stage2/memory.h \
+	src/tux64-boot/stage2/file.c \
+	src/tux64-boot/stage2/file.h
 
 EXTRA_DIST = \
 	src/tux64-boot/stage0/stage0.ld.S \

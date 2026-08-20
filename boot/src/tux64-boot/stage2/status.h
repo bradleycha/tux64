@@ -12,7 +12,11 @@
 #include "tux64-boot/tux64-boot.h"
 
 enum Tux64BootStage2StatusCode {
-   TUX64_BOOT_STAGE2_STATUS_CODE_BEGIN = 'A'
+   TUX64_BOOT_STAGE2_STATUS_CODE_BEGIN                   = 'A',
+   TUX64_BOOT_STAGE2_STATUS_CODE_LOAD_FILE_KERNEL        = 'B',
+   TUX64_BOOT_STAGE2_STATUS_CODE_LOAD_FILE_INITRAMFS     = 'C',
+   TUX64_BOOT_STAGE2_STATUS_CODE_LOAD_FILE_COMMAND_LINE  = 'D',
+   TUX64_BOOT_STAGE2_STATUS_CODE_START_KERNEL            = 'E'
 };
 
 /*----------------------------------------------------------------------------*/
