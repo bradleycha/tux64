@@ -11,14 +11,14 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.ld.h"
-#include "tux64-boot/exec.h"
+#include "tux64-boot/layout.h"
 
 SECTIONS
 {
-   .rdram.kernel_arguments (TUX64_BOOT_EXEC_KERNEL_ARGUMENTS_ADDRESS) : {
+   .rdram.kernel_arguments (TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_ADDRESS) : {
       tux64_boot_exec_kernel_arguments = .;
 
-      . += TUX64_BOOT_EXEC_KERNEL_ARGUMENTS_BYTES;
+      . += TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_BYTES;
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
 

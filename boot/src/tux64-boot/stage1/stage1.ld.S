@@ -7,13 +7,13 @@
 
 #include "tux64-boot/tux64-boot.ld.h"
 #include "tux64-boot/stage1/stack.ld.h"
+#include "tux64-boot/layout.h"
 
 ENTRY(tux64_boot_stage1_start)
          
 SECTIONS
 {
-   /* place the main stage-1 binary after the boot header and stack. */
-   .rdram (ADDR(.rdram.stack) + SIZEOF(.rdram.stack)) : {
+   .rdram (TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
 

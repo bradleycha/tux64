@@ -10,8 +10,6 @@
 #include "tux64-boot/header.h"
 
 #include <tux64/platform/mips/n64/boot.h>
-#include <tux64/platform/mips/n64/pi.h>
-#include <tux64/platform/mips/n64/rom.h>
 #include <tux64/bitwise.h>
 #include <tux64/math.h>
 

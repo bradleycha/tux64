@@ -74,8 +74,7 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/status.h"
-#include "tux64-boot/stage1/stack.h"
-#include "tux64-boot/stage1/memory.h"
+#include "tux64-boot/layout.h"
 
 .set noreorder
 .set noat
@@ -117,7 +116,6 @@
 .equ TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO,0x1000
 
 .equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO,TUX64_BOOT_STAGE0_BOOT_HEADER_ADDRESS_CARTRIDGE_ROM_LO+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES
-.equ TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO,(TUX64_BOOT_STAGE1_STACK_ADDRESS & 0xffff) + TUX64_BOOT_STAGE1_STACK_BYTES
 
 .equ TUX64_BOOT_STAGE0_STATUS_WORD_HI,TUX64_BOOT_STATUS_MAGIC_HI                 /* STAG */
 .equ TUX64_BOOT_STAGE0_STATUS_WORD_LO,TUX64_BOOT_STATUS_MAGIC_LO | ('0' << 16)   /* E0:x */
@@ -139,7 +137,7 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('J')
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('K')
 
-/* defined in stage1/boot-header.ld, included in stage0/stage0.ld */
+/* defined in stage1/boot-header.ld.h, included in stage0/stage0.ld.S */
 .extern tux64_boot_header
 
    .section .tux64_boot.status
@@ -148,7 +146,7 @@ tux64_boot_stage0_status:
    /* current boot status in memory to help debug early boot issues with */
    /* memory debuggers.  It will look like "STAGE0:c" when memory is */
    /* displayed as ASCII text, where 'c' is the current boot stage code. */
-   .skip TUX64_BOOT_STATUS_BYTES
+   .skip TUX64_BOOT_LAYOUT_STATUS_BYTES
 /*tux64_boot_stage0_status*/
 
    .section .rodata
@@ -1021,7 +1019,7 @@ tux64_boot_stage0_start:
    lw    $k1,%lo(tux64_boot_header)+TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_STAGE1_LENGTH($a2)
 
    /* check if we have enough memory to load the stage-1 binary. */
-   addiu $t0,$k0,-TUX64_BOOT_STAGE1_MEMORY_RDRAM_RESERVED
+   addiu $t0,$k0,-TUX64_BOOT_LAYOUT_STAGE1_MEMORY_RESERVED
    sltu  $t0,$s0,$t0
    bne   $t0,$zero,tux64_boot_stage0_halt
 
@@ -1031,7 +1029,7 @@ tux64_boot_stage0_start:
    /* on the same cache line as the header.  note that this concerns data */
    /* cache.  if we were in instruction cache, we would need to align to a */
    /* 32-byte boundary. */
-   addiu $t1,$zero,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO /* branch delay slot */
+   addiu $t1,$zero,%lo(TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) /* branch delay slot */
    ori   $t2,$a1,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_CARTRIDGE_ROM_LO
    addiu $t3,$k1,-1
    sw    $t1,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_DRAM_ADDR)($a0)
@@ -1067,7 +1065,7 @@ tux64_boot_stage0_start:
 
    /* wait for the PI DMA operation to complete, then verify the checksum */
    /* branch delay slot.  we now free $k1. */
-   addiu $t0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO /* branch delay slot */
+   addiu $t0,$a2,%lo(TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) /* branch delay slot */
 
    tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_checksum:
       lw    $at,%lo(TUX64_PLATFORM_MIPS_N64_PI_ADDRESS_STATUS)($a0)
@@ -1104,9 +1102,9 @@ tux64_boot_stage0_start:
    /*tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start*/
 
    /* initialize the stack and start stage-1 */
-   addiu $k0,$a2,TUX64_BOOT_STAGE0_PAYLOAD_STAGE1_ADDRESS_RDRAM_LO /* branch delay slot */
+   addiu $k0,$a2,%lo(TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) /* branch delay slot */
    jr    $k0
-   addiu $sp,$a2,(TUX64_BOOT_STAGE1_STACK_ADDRESS & 0xffff) + TUX64_BOOT_STAGE1_STACK_BYTES
+   addiu $sp,$a2,(TUX64_BOOT_LAYOUT_STAGE1_STACK_ADDRESS & 0xffff) + TUX64_BOOT_LAYOUT_STAGE1_STACK_BYTES
 /*tux64_boot_stage0_start*/
 
    /* TODO: add multiple of these, one for each CIC revision.  only do this */

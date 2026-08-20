@@ -91,6 +91,7 @@ LDADD = \
 libtux64_boot_a_SOURCES = \
 	src/tux64-boot/tux64-boot.h \
 	src/tux64-boot/tux64-boot.ld.h \
+	src/tux64-boot/layout.h \
 	src/tux64-boot/builtin.c \
 	src/tux64-boot/builtin.h \
 	src/tux64-boot/gp.c \
@@ -129,7 +130,6 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/start.c \
 	src/tux64-boot/stage1/stage1.c \
 	src/tux64-boot/stage1/stage1.h \
-	src/tux64-boot/stage1/stack.h \
 	src/tux64-boot/stage1/stack.ld.h \
 	src/tux64-boot/stage1/fsm.c \
 	src/tux64-boot/stage1/fsm.h \
@@ -155,7 +155,6 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/status.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/start.c \
-	src/tux64-boot/stage2/stack.h \
 	src/tux64-boot/stage2/stack.ld.h \
 	src/tux64-boot/stage2/allocations.h \
 	src/tux64-boot/stage2/allocations.ld.h \
@@ -163,7 +162,6 @@ stage2_SOURCES = \
 	src/tux64-boot/stage2/stage2.h \
 	src/tux64-boot/stage2/status.c \
 	src/tux64-boot/stage2/status.h \
-	src/tux64-boot/stage2/memory.h \
 	src/tux64-boot/stage2/file.c \
 	src/tux64-boot/stage2/file.h
 

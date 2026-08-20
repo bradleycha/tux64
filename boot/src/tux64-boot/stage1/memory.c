@@ -10,8 +10,8 @@
 #include "tux64-boot/stage1/memory.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
+#include "tux64-boot/layout.h"
 #include "tux64-boot/stage1/arena-allocator.h"
-#include "tux64-boot/stage2/memory.h"
 
 /* we two seperate heaps so we can perform memory allocations for stage-2     */
 /* ahead of time without including the entire arena allocator in the stage-2  */
@@ -53,7 +53,7 @@ tux64_boot_stage1_memory_initialize(
    heap_stage1_start = (Tux64UIntPtr)(Tux64UIntPtr)tux64_boot_stage1_memory_heap_start;
    heap_stage1_end   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED) + memory_total;
 
-   heap_stage2_start = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + TUX64_BOOT_STAGE2_MEMORY_RDRAM_RESERVED);
+   heap_stage2_start = TUX64_LITERAL_UINT32(TUX64_BOOT_LAYOUT_STAGE2_MEMORY_RESERVED);
    heap_stage2_end   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED) + memory_total;
 
    tux64_boot_stage1_arena_allocator_initialize(

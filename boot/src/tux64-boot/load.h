@@ -11,26 +11,6 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include <tux64/math.h>
-#include <tux64/platform/mips/n64/boot.h>
-#include "tux64-boot/header.h"
-
-/*----------------------------------------------------------------------------*/
-/* The location in memory of the load allocations struct.                     */
-/*----------------------------------------------------------------------------*/
-#define TUX64_BOOT_LOAD_ALLOCATIONS_ADDRESS\
-   (TUX64_BOOT_HEADER_ADDRESS + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16)
-
-/*----------------------------------------------------------------------------*/
-/* The size of the load allocations, in bytes.                                */
-/*----------------------------------------------------------------------------*/
-#define TUX64_BOOT_LOAD_ALLOCATIONS_BYTES\
-   (TUX64_MATH_ALIGN_FORWARD(0x0c, 8))
-   /* TODO: generate this using AC_CHECK_SIZEOF(...).  we should also find a */
-   /* cleaner way to align not just this, but everything else. */
-
-#if !TUX64_PREPROCESSOR_ONLY
-/*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* Stores bitflags representing if each file is loaded by stage-1 or stage-2. */
@@ -97,9 +77,6 @@ tux64_boot_load_allocations;
 /* stage-1 and stage-2, thus we don't need to copy any data over.  the */
 /* stage-1 FSM struct previously stored this, so we don't waste any memory */
 /* by doing this manually. */
-
-/*----------------------------------------------------------------------------*/
-#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_LOAD_H */

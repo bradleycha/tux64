@@ -10,21 +10,6 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include <tux64/platform/mips/n64/boot.h>
-#include "tux64-boot/stage1/stack.h"
-
-/*----------------------------------------------------------------------------*/
-/* The amount of bytes from the start of RDRAM reserved by stage-1, not       */
-/* including the stage-1 binary itself.                                       */
-/*----------------------------------------------------------------------------*/
-#define TUX64_BOOT_STAGE1_MEMORY_RDRAM_RESERVED \
-   ( \
-      TUX64_BOOT_STAGE1_STACK_BYTES + \
-      TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES_ALIGN16 \
-   )
-
-#if !TUX64_PREPROCESSOR_ONLY
-/*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* Initialize the memory manager.  All other functions must be called only    */
@@ -91,9 +76,6 @@ tux64_boot_stage1_memory_stage2_alloc(
    Tux64UInt32 bytes,
    Tux64UInt32 alignment
 );
-
-/*----------------------------------------------------------------------------*/
-#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_MEMORY_H */

@@ -6,15 +6,15 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.ld.h"
-
 #include "tux64-boot/stage2/stack.ld.h"
+#include "tux64-boot/layout.h"
 
 ENTRY(tux64_boot_stage2_start)
 
 SECTIONS
 {
    /* place the stage-2 code and data into RSP IMEM */
-   .rsp_imem : {
+   .rsp_imem (TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
 

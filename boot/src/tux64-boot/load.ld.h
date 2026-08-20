@@ -11,14 +11,14 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.ld.h"
-#include "tux64-boot/load.h"
+#include "tux64-boot/layout.h"
 
 SECTIONS
 {
-   .rdram.load_allocations (TUX64_BOOT_LOAD_ALLOCATIONS_ADDRESS) : {
+   .rdram.load_allocations (TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_ADDRESS) : {
       tux64_boot_load_allocations = .;
 
-      . += TUX64_BOOT_LOAD_ALLOCATIONS_BYTES;
+      . += TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_BYTES;
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
 

@@ -8,8 +8,7 @@
 #include "tux64-boot/tux64-boot.ld.h"
 
 #include <tux64/platform/mips/n64/memory-map.h>
-#include "tux64-boot/status.h"
-#include "tux64-boot/stage1/stack.ld.h"
+#include "tux64-boot/layout.h"
 
 ENTRY(tux64_boot_stage0_start)
 
@@ -17,7 +16,7 @@ ENTRY(tux64_boot_stage0_start)
 /* code, which means we aren't wasting any memory at runtime by including the */
 /* CIC data. */
 TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA
- = TUX64_BOOT_STATUS_ADDRESS;
+ = TUX64_BOOT_LAYOUT_STATUS_ADDRESS;
 
 SECTIONS
 {

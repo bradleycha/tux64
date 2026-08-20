@@ -13,21 +13,6 @@
 #include "tux64-boot/load.h"
 
 /*----------------------------------------------------------------------------*/
-/* The location in memory of the kernel arguments struct.                     */
-/*----------------------------------------------------------------------------*/
-#define TUX64_BOOT_EXEC_KERNEL_ARGUMENTS_ADDRESS\
-   (TUX64_BOOT_LOAD_ALLOCATIONS_ADDRESS + TUX64_BOOT_LOAD_ALLOCATIONS_BYTES)
-
-/*----------------------------------------------------------------------------*/
-/* The size of the kernel arguments struct, in bytes.                         */
-/*----------------------------------------------------------------------------*/
-#define TUX64_BOOT_EXEC_KERNEL_ARGUMENTS_BYTES\
-   (0x10) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
-
-#if !TUX64_PREPROCESSOR_ONLY
-/*----------------------------------------------------------------------------*/
-
-/*----------------------------------------------------------------------------*/
 /* Boot arguments passed to the kernel.  Each primitive must be stored in the */
 /* big-endian format.                                                         */
 /*----------------------------------------------------------------------------*/
@@ -73,9 +58,6 @@ tux64_boot_exec_stage2(
    Tux64BootLoadStatus load_status
 )
 __attribute__((noreturn));
-
-/*----------------------------------------------------------------------------*/
-#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_EXEC_H */

@@ -11,8 +11,8 @@
 
 #include <tux64/endian.h>
 #include <tux64/platform/mips/n64/memory-map.h>
+#include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
-#include "tux64-boot/stage2/stack.h"
 
 __attribute__((section(".kernel_arguments")))
 extern struct Tux64BootExecKernelArguments
@@ -78,7 +78,7 @@ tux64_boot_exec_kernel(
 /* needs to be a macro so it's evaluated as a constant for use with the "K" */
 /* assembler template constraint. */
 #define TUX64_BOOT_EXEC_STAGE2_STACK_POINTER \
-   (TUX64_BOOT_STAGE2_STACK_ADDRESS + TUX64_BOOT_STAGE2_STACK_BYTES)
+   (TUX64_BOOT_LAYOUT_STAGE2_STACK_ADDRESS + TUX64_BOOT_LAYOUT_STAGE2_STACK_BYTES)
 
 void
 tux64_boot_exec_stage2(
@@ -86,7 +86,7 @@ tux64_boot_exec_stage2(
 ) {
    const void * entrypoint;
 
-   entrypoint = (const void *)TUX64_LITERAL_UINTPTR(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_IMEM);
+   entrypoint = (const void *)TUX64_LITERAL_UINTPTR(TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS);
 
    /* same issue as above, but now we also have to set the stack pointer. */
    __asm__ volatile (

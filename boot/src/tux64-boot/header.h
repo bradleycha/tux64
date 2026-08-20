@@ -12,16 +12,6 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/boot.h>
-#include <tux64/platform/mips/n64/memory-map.h>
-
-#define TUX64_BOOT_HEADER_ADDRESS_OFFSET \
-   (0x200) /* place right after exception vectors, with a little padding for safety. */
-
-#define TUX64_BOOT_HEADER_ADDRESS \
-   (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED + TUX64_BOOT_HEADER_ADDRESS_OFFSET)
-
-#if !TUX64_PREPROCESSOR_ONLY
-/*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* Checks if various boot flags are set.                                      */
@@ -44,9 +34,6 @@ const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_header_file_initramfs(void);
 const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_header_file_command_line(void);
-
-/*----------------------------------------------------------------------------*/
-#endif /* !TUX64_PREPROCESSOR_ONLY */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_HEADER_H */
