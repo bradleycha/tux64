@@ -47,10 +47,14 @@
 /* load.h memory layout.                                                      */
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_ADDRESS\
-   (\
-      TUX64_BOOT_LAYOUT_HEADER_ADDRESS\
-      + TUX64_BOOT_LAYOUT_HEADER_BYTES\
-   )
+   TUX64_MATH_ALIGN_FORWARD(\
+      (\
+         TUX64_BOOT_LAYOUT_HEADER_ADDRESS\
+         + TUX64_BOOT_LAYOUT_HEADER_BYTES\
+      ),\
+      4\
+   ) /* TODO: compute alignment using AC_CHECK_ALIGNOF(...) */
+   
 #define TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_BYTES\
    (0x0c) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
 
@@ -58,10 +62,13 @@
 /* exec.h memory layout.                                                      */
 /*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_ADDRESS\
-   (\
-      TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_ADDRESS\
-      + TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_BYTES\
-   )
+   TUX64_MATH_ALIGN_FORWARD(\
+      (\
+         TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_ADDRESS\
+         + TUX64_BOOT_LAYOUT_LOAD_ALLOCATIONS_BYTES\
+      ),\
+      4\
+   ) /* TODO: compute alignment using AC_CHECK_ALIGNOF(...) */
 #define TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_BYTES\
    (0x10) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
 
