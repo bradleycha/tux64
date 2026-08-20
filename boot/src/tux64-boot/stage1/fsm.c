@@ -725,10 +725,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) 
    tux64_boot_rsp_dma_wait_idle();
 
    tux64_boot_stage1_fsm_reset_hardware();
-   tux64_boot_exec_stage2(
-      tux64_boot_stage1_memory_total(),
-      fsm->globals.load_info.status
-   );
+   tux64_boot_exec_stage2(fsm->globals.load_info.status);
    TUX64_UNREACHABLE;
 }
 

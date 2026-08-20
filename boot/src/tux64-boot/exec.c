@@ -82,7 +82,6 @@ tux64_boot_exec_kernel(
 
 void
 tux64_boot_exec_stage2(
-   Tux64UInt32 memory_total,
    Tux64BootLoadStatus load_status
 ) {
    const void * entrypoint;
@@ -98,8 +97,7 @@ tux64_boot_exec_stage2(
       :: "r"      (entrypoint),
          "K"      (TUX64_BOOT_EXEC_STAGE2_STACK_POINTER >> TUX64_LITERAL_UINT8(16u)),
          "K"      (TUX64_BOOT_EXEC_STAGE2_STACK_POINTER & TUX64_LITERAL_UINT32(TUX64_UINT16_MAX)),
-         "{s0}"   (memory_total),
-         "{s1}"   (load_status)
+         "{s0}"   (load_status)
    );
    TUX64_UNREACHABLE;
 }

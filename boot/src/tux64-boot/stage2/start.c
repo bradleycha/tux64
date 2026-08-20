@@ -17,13 +17,9 @@ __attribute__((noreturn, section(".start"), externally_visible));
 void
 tux64_boot_stage2_start(void) {
    /* same idea as stage-1, which ensures a stable ABI across boot stages. */
-   register Tux64UInt32          memory_total   __asm__("$s0");
-   register Tux64BootLoadStatus  load_status    __asm__("$s1");
+   register Tux64BootLoadStatus  load_status    __asm__("$s0");
 
-   tux64_boot_stage2_main(
-      memory_total,
-      load_status
-   );
+   tux64_boot_stage2_main(load_status);
    TUX64_UNREACHABLE;
 }
 

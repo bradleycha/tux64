@@ -70,7 +70,6 @@ __attribute__((noreturn));
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_exec_stage2(
-   Tux64UInt32 memory_total,
    Tux64BootLoadStatus load_status
 )
 __attribute__((noreturn));

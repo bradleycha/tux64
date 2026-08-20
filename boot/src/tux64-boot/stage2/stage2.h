@@ -18,7 +18,6 @@
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage2_main(
-   Tux64UInt32 memory_total,
    Tux64BootLoadStatus load_status
 )
 __attribute__((noreturn));

@@ -16,9 +16,7 @@
 
 __attribute__((noreturn))
 static void
-tux64_boot_stage2_start_kernel(
-   Tux64UInt32 memory_total
-) {
+tux64_boot_stage2_start_kernel(void) {
    const void * entrypoint;
 
    entrypoint = (const void *)tux64_boot_header_file_kernel()->addr_entry;
@@ -28,7 +26,6 @@ tux64_boot_stage2_start_kernel(
 
 void
 tux64_boot_stage2_main(
-   Tux64UInt32 memory_total,
    Tux64BootLoadStatus load_status
 ) {
    tux64_boot_initialize();
@@ -39,7 +36,7 @@ tux64_boot_stage2_main(
 
    tux64_boot_stage2_status_code_write(TUX64_BOOT_STAGE2_STATUS_CODE_START_KERNEL);
 
-   tux64_boot_stage2_start_kernel(memory_total);
+   tux64_boot_stage2_start_kernel();
    TUX64_UNREACHABLE;
 }
 
