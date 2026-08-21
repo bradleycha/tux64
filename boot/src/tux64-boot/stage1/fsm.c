@@ -77,6 +77,15 @@ tux64_boot_stage1_fsm_delay(
 }
 
 static void
+tux64_boot_stage1_fsm_delay_one(
+   struct Tux64BootStage1Fsm * fsm,
+   Tux64BootStage1FsmPfnTransition transition
+) {
+   tux64_boot_stage1_fsm_delay(fsm, transition, TUX64_LITERAL_UINT32(1u));
+   return;
+}
+
+static void
 tux64_boot_stage1_fsm_transition(
    struct Tux64BootStage1Fsm * fsm,
    Tux64BootStage1FsmPfnTransition transition
@@ -124,11 +133,7 @@ tux64_boot_stage1_fsm_halt(
    /* delay when it's compiled out because at that point, it's clear the */
    /* user knows what they're doing. */
    if (TUX64_BOOT_CONFIG_DELAY) {
-      tux64_boot_stage1_fsm_delay(
-         fsm,
-         tux64_boot_stage1_fsm_transition_halt,
-         TUX64_LITERAL_UINT32(1u)
-      );
+      tux64_boot_stage1_fsm_delay_one(fsm, tux64_boot_stage1_fsm_transition_halt);
    } else {
       /* this works for all but the initial state because we are already in a */
       /* state, so the halt state only gets executed on the next tick. */
@@ -535,11 +540,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boo
    /* for the same reason as we have in tux64_boot_stage1_fsm_halt(), we need */
    /* to delay for 1 frame so that the message below displays. */
    if (TUX64_BOOT_CONFIG_DELAY) {
-      tux64_boot_stage1_fsm_delay(
-         fsm,
-         tux64_boot_stage1_fsm_transition_boot_kernel_wait,
-         TUX64_LITERAL_UINT32(1u)
-      );
+      tux64_boot_stage1_fsm_delay_one(fsm, tux64_boot_stage1_fsm_transition_boot_kernel_wait);
    } else {
       /* execute directly to eliminate any delay. */
       tux64_boot_stage1_fsm_transition_boot_kernel_wait(fsm);
@@ -560,11 +561,7 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boo
 
    /* same comments as above. */
    if (TUX64_BOOT_CONFIG_DELAY) {
-      tux64_boot_stage1_fsm_delay(
-         fsm,
-         tux64_boot_stage1_fsm_transition_boot_stage2_wait,
-         TUX64_LITERAL_UINT32(1u)
-      );
+      tux64_boot_stage1_fsm_delay_one(fsm, tux64_boot_stage1_fsm_transition_boot_stage2_wait);
    } else {
       tux64_boot_stage1_fsm_transition_boot_stage2_wait(fsm);
    }
