@@ -662,6 +662,14 @@ tux64_boot_stage1_fsm_initialize_memory_display(
 
 static void
 tux64_boot_stage1_fsm_initialize_checksum(void) {
+   /* check directly since we already checked from the function call.  we do */
+   /* this so we print the below string if checksums are compiled in, but are */
+   /* disabled at runtime.  if they are compiled out, we assume the user */
+   /* knows that they are doing, thus we don't want to bloat the binary. */
+   if (tux64_boot_header_flag_no_checksum() == TUX64_BOOLEAN_FALSE) {
+      return;
+   }
+
    (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_no_checksum);
    return;
 }
@@ -683,7 +691,8 @@ tux64_boot_stage1_fsm_initialize(
       );
    }
 
-   if (tux64_boot_flag_checksum() == TUX64_BOOLEAN_TRUE) {
+   /* see comment above for why we split the checks like this. */
+   if (TUX64_BOOT_CONFIG_CHECKSUM) {
       tux64_boot_stage1_fsm_initialize_checksum();
    }
 
