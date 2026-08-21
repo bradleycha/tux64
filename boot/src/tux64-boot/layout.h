@@ -73,13 +73,43 @@
    (0x10) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
 
 /*----------------------------------------------------------------------------*/
-/* Stage-1 bootloader memory layout.                                          */
+/* Stage-2 bootloader memory layout.                                          */
 /*----------------------------------------------------------------------------*/
-#define TUX64_BOOT_LAYOUT_STAGE1_STACK_ADDRESS\
+#define TUX64_BOOT_LAYOUT_STAGE2_STACK_ADDRESS\
+   TUX64_MATH_ALIGN_FORWARD(\
+      TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED,\
+      8\
+   ) /* aligned for maximum primitive type (8 bytes) */
+#define TUX64_BOOT_LAYOUT_STAGE2_STACK_BYTES\
+   TUX64_BOOT_LAYOUT_HEADER_ADDRESS_OFFSET
+   /* since we don't need exception processing in stage-2, we can make use of */
+   /* the reserved chunk of memory before the boot header for the stack, thus */
+   /* freeing more memory for the boot files. */
+#define TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS\
    TUX64_MATH_ALIGN_FORWARD(\
       (\
          TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_ADDRESS\
          + TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_BYTES\
+      ),\
+      8\
+   ) /* aligned for use with RSP DMA. */
+#define TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM\
+   (0x4000) /* 4KiB, matches the maximum size we used to have with RSP memory */
+#define TUX64_BOOT_LAYOUT_STAGE2_MEMORY_RESERVED\
+   (\
+      TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS\
+      + TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM\
+   )
+
+/*----------------------------------------------------------------------------*/
+/* Stage-1 bootloader memory layout.  Declared after stage-2 memory layout    */
+/* due to dependencies.                                                       */
+/*----------------------------------------------------------------------------*/
+#define TUX64_BOOT_LAYOUT_STAGE1_STACK_ADDRESS\
+   TUX64_MATH_ALIGN_FORWARD(\
+      (\
+         TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS\
+         + TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM\
       ),\
       8\
    ) /* aligned for maximum primitive type (8 bytes) */
@@ -97,30 +127,6 @@
    (\
       TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS\
       - TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED\
-   )
-
-/*----------------------------------------------------------------------------*/
-/* Stage-2 bootloader memory layout.                                          */
-/*----------------------------------------------------------------------------*/
-#define TUX64_BOOT_LAYOUT_STAGE2_STACK_ADDRESS\
-   TUX64_MATH_ALIGN_FORWARD(\
-      TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_CACHED,\
-      8\
-   ) /* aligned for maximum primitive type (8 bytes) */
-#define TUX64_BOOT_LAYOUT_STAGE2_STACK_BYTES\
-   TUX64_BOOT_LAYOUT_HEADER_ADDRESS_OFFSET
-   /* since we don't need exception processing in stage-2, we can make use of */
-   /* the reserved chunk of memory before the boot header for the stack, thus */
-   /* freeing more memory for the boot files. */
-#define TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS\
-   TUX64_MATH_ALIGN_FORWARD(\
-      TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_IMEM,\
-      8\
-   ) /* aligned for use with RSP DMA. */
-#define TUX64_BOOT_LAYOUT_STAGE2_MEMORY_RESERVED\
-   (\
-      TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_ADDRESS\
-      + TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_BYTES\
    )
 
 /*----------------------------------------------------------------------------*/

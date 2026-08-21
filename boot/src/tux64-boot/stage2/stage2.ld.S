@@ -14,23 +14,15 @@ ENTRY(tux64_boot_stage2_start)
 SECTIONS
 {
    /* place the stage-2 code and data into RSP IMEM */
-   .rsp_imem (TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS) : {
+   .rdram (TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
 
       /* same trick with $gp from stage-1 */
       _gp = ALIGN(8) + 0x8000;
 
-      *(.sdata*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
-
-   /* place the stage-2 uninitialized variables into RSP DMEM after the */
-   /* allocations struct. */
-   .rsp_dmem.bss : {
-      /* same trick with $gp from stage-1 */
-      *(.sbss*);
-
+      *(.sdata* .sbss);
       *(.bss*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
 

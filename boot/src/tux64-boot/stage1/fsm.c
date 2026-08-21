@@ -21,6 +21,7 @@
 #include "tux64-boot/exec.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/header.h"
+#include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
@@ -56,6 +57,11 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_bo
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_kernel_wait);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_stage2);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_boot_stage2_wait);
+
+/* defined by the linker in stage1.ld.S, allows us to load stage-2 directly. */
+__attribute__((section(".file_stage2")))
+extern Tux64UInt8
+tux64_boot_stage1_file_stage2[TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM];
 
 static Tux64Boolean
 tux64_boot_stage1_fsm_checksum_enable(void) {
@@ -484,10 +490,18 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
 
    stage2 = tux64_boot_header_file_bootloader_stage2();
 
+   if (
+      TUX64_BOOT_CONFIG_DEBUG &&
+      stage2->length > TUX64_LITERAL_UINT32(TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM)
+   ) {
+      tux64_boot_halt();
+      TUX64_UNREACHABLE;
+   }
+
    tux64_boot_stage1_fsm_transition_load_file(
       fsm,
       stage2,
-      (Tux64UInt32)(Tux64UIntPtr)fsm->globals.stage2.dma_buffer,
+      (Tux64UInt32)(Tux64UIntPtr)tux64_boot_stage1_file_stage2,
       &tux64_boot_stage1_strings_file_bootloader_stage2,
       tux64_boot_stage1_fsm_transition_boot_stage2
    );
@@ -700,30 +714,6 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) 
 }
 
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_stage2) {
-   struct Tux64BootRspDmaTransfer transfer;
-   Tux64UInt16 stage2_bytes;
-
-   stage2_bytes = (Tux64UInt16)tux64_boot_header_file_bootloader_stage2()->length;
-
-   /* we have to load stage-2 into RSP IMEM first.  we don't have to wait for */
-   /* completion before the call because we're coming from the start of a new */
-   /* frame.  thus, the RSP DMA engine isn't active.  note that we have to    */
-   /* split this into two 'rows', as we allow a maximum of 4096 bytes.        */
-   /* however, row_bytes_copy maxes out at 4095 bytes.  this does cause       */
-   /* problems if stage-2 is an odd number of bytes.  we solve this by not    */
-   /* producing stage-2 binaries of odd length, 4head.                        */
-   transfer.addr_rsp_mem   = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_PHYSICAL_RSP_IMEM);
-   transfer.addr_rdram     = (Tux64UInt32)(Tux64UIntPtr)fsm->globals.stage2.dma_buffer;
-   transfer.row_bytes_copy = (stage2_bytes / TUX64_LITERAL_UINT16(2u)) - TUX64_LITERAL_UINT16(1u);
-   transfer.row_bytes_skip = TUX64_LITERAL_UINT16(0u);
-   transfer.row_count      = TUX64_LITERAL_UINT8(1u);
-   tux64_boot_rsp_dma_start(&transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
-
-   /* we now have to flush all DMA operations since we will now begin */
-   /* executing stage-2.  note that we just leave the boot header in RDRAM */
-   /* since we can neatly fit the stack and boot header together. */
-   tux64_boot_rsp_dma_wait_idle();
-
    tux64_boot_stage1_fsm_reset_hardware();
    tux64_boot_exec_stage2(fsm->globals.load_info.status);
    TUX64_UNREACHABLE;

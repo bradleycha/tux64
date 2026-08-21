@@ -237,7 +237,7 @@ $(stage1_BIN_BSS) : $(stage1_ELF)
 	$(OBJDUMP) -h $< | grep -e "\.rdram\.bss" | grep -e "[0-9a-fA-F]\{8\}" -o | head -n1 > $@
 
 $(stage2_BIN) : $(stage2_ELF)
-	$(OBJCOPY) $< /dev/null --dump-section .rsp_imem=$@ && chmod -x $@
+	$(OBJCOPY) $< /dev/null --dump-section .rdram=$@ && chmod -x $@
 
 $(stage0_SYM) : $(stage0_ELF)
 	$(OBJCOPY) --only-keep-debug $< $@ && chmod -x $@

@@ -13,6 +13,14 @@ ENTRY(tux64_boot_stage1_start)
          
 SECTIONS
 {
+   /* place this before the stage-1 binary so we don't need any complicated */
+   /* crap to load stage-2 into memory while stage-1 is loaded. */
+   .rdram.stage2 (TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS) : {
+      tux64_boot_stage1_file_stage2 = .;
+
+      . += TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM;
+   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+
    .rdram (TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);

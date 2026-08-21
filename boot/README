@@ -30,7 +30,7 @@ The following files are created:
    * stage1.sym - Debug symbols for the stage-1 bootloader.
 
    * stage2.bin - The code used to free the stage-1 bootloader from memory,
-                  allowing all of RDRAM to be allocated to the kernel,
+                  allowing almost all of RDRAM to be allocated to the kernel,
                   initramfs, and command-line.  This will be responsible for
                   loading the above items into memory and starting the kernel
                   if stage-1 unable to.
@@ -107,9 +107,8 @@ power-on to kernel entry:
 
    6: stage-2 bootloader - this does the same loading as stage-1, but without
                            any of the interactive components.  it executes from
-                           RSP IMEM with a small stack and data segment in
-                           RDRAM.  this frees up almost all of RDRAM for the
-                           boot files, which can allow booting in some cases
-                           where it would otherwise be impossible with stage-1
-                           loaded.
+                           a small section at the start of RDRAM.  this frees up
+                           almost all of RDRAM for the boot files, which can
+                           allow booting in some cases where it would otherwise
+                           be impossible with stage-1 loaded.
 
