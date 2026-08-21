@@ -25,9 +25,9 @@ typedef Tux64UInt8 Tux64BootLoadStatus;
 #define TUX64_BOOT_LOAD_STATUS_KERNEL \
    (1u << 0u)
 #define TUX64_BOOT_LOAD_STATUS_INITRAMFS \
-   (1u << 2u)
+   (1u << 1u)
 #define TUX64_BOOT_LOAD_STATUS_COMMAND_LINE \
-   (1u << 3u)
+   (1u << 2u)
 
 /*----------------------------------------------------------------------------*/
 /* When the load status is exactly equal to this constant, it means every     */
