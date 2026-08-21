@@ -28,3 +28,11 @@ tux64_boot_flag_delay(void) {
    return (tux64_boot_header_flag_no_delay() == TUX64_BOOLEAN_FALSE);
 }
 
+Tux64Boolean
+tux64_boot_flag_memory_display(void) {
+   if (!TUX64_BOOT_CONFIG_MEMORY_DISPLAY) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   return (tux64_boot_header_flag_memory_display() == TUX64_BOOLEAN_TRUE);
+}

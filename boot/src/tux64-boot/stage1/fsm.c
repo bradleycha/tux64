@@ -81,7 +81,6 @@ tux64_boot_stage1_fsm_transition(
    struct Tux64BootStage1Fsm * fsm,
    Tux64BootStage1FsmPfnTransition transition
 ) {
-
    if (tux64_boot_flag_delay() == TUX64_BOOLEAN_FALSE) {
       transition(fsm);
       return;
@@ -632,10 +631,6 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    Tux64UInt32 kernel_addr_load;
    Tux64UInt32 kernel_addr_entry;
 
-   if (tux64_boot_header_flag_memory_display() == TUX64_BOOLEAN_FALSE) {
-      return;
-   }
-
    kernel      = tux64_boot_header_file_kernel();
    initramfs   = tux64_boot_header_file_initramfs();
 
@@ -670,11 +665,7 @@ tux64_boot_stage1_fsm_initialize_memory_display(
 
 static void
 tux64_boot_stage1_fsm_initialize_checksum(void) {
-   if (!tux64_boot_flag_checksum()) {
-      (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_no_checksum);
-      return;
-   }
-
+   (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_no_checksum);
    return;
 }
 
@@ -688,14 +679,14 @@ tux64_boot_stage1_fsm_initialize(
       tux64_boot_stage1_fsm_initialize_splash();
    }
 
-   if (TUX64_BOOT_CONFIG_MEMORY_DISPLAY) {
+   if (tux64_boot_flag_memory_display() == TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_fsm_initialize_memory_display(
          tux64_boot_stage1_memory_total(),
          tux64_boot_stage1_memory_free()
       );
    }
 
-   if (TUX64_BOOT_CONFIG_CHECKSUM) {
+   if (tux64_boot_flag_checksum() == TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_fsm_initialize_checksum();
    }
 
