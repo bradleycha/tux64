@@ -104,6 +104,8 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/status.ld.h \
 	src/tux64-boot/header.c \
 	src/tux64-boot/header.h \
+	src/tux64-boot/flag.c \
+	src/tux64-boot/flag.h \
 	src/tux64-boot/header.ld.h \
 	src/tux64-boot/idle.c \
 	src/tux64-boot/idle.h \
@@ -152,7 +154,9 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/strings.c \
 	src/tux64-boot/stage1/strings.h \
 	src/tux64-boot/stage1/status.c \
-	src/tux64-boot/stage1/status.h
+	src/tux64-boot/stage1/status.h \
+	src/tux64-boot/stage1/file.c \
+	src/tux64-boot/stage1/file.h
 stage2_SOURCES = \
 	src/tux64-boot/stage2/start.c \
 	src/tux64-boot/stage2/stack.ld.h \

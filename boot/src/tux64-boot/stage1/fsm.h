@@ -10,11 +10,10 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
-#include <tux64/platform/mips/n64/pi.h>
-#include <tux64/checksum.h>
 #include "tux64-boot/load.h"
 #include "tux64-boot/stage1/fbcon.h"
 #include "tux64-boot/stage1/format.h"
+#include "tux64-boot/stage1/file.h"
 
 struct Tux64BootStage1Fsm;
 
@@ -27,14 +26,10 @@ struct Tux64BootStage1FsmMemoryDelay {
 };
 
 struct Tux64BootStage1FsmMemoryLoadFile {
+   struct Tux64BootStage1FileLoadContext file_load_context;
    struct Tux64BootStage1FormatPercentageContext percentage_progress;
    Tux64BootStage1FbconLabel label_percentage_progress;
    Tux64BootStage1FsmPfnTransition transition_next;
-   Tux64UInt32 iter_addr_rdram;
-   Tux64PlatformMipsN64PiBusAddress iter_addr_cart;
-   Tux64UInt32 bytes_remaining;
-   union Tux64Int32 checksum_expected;
-   struct Tux64ChecksumContext checksum_context;
 };
 
 struct Tux64BootStage1FsmMemoryTest {

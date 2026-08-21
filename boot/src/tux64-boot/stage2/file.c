@@ -16,6 +16,7 @@
 #include "tux64-boot/load.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/pi.h"
+#include "tux64-boot/flag.h"
 #include "tux64-boot/stage2/status.h"
 
 static void
@@ -59,7 +60,7 @@ tux64_boot_stage2_file_load(
    tux64_boot_pi_dma_start(&transfer, TUX64_BOOT_PI_DMA_DESTINATION_RDRAM);
    tux64_boot_pi_dma_wait_idle();
 
-   if (tux64_boot_header_flag_no_checksum() == TUX64_BOOLEAN_FALSE) {
+   if (tux64_boot_flag_checksum() == TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage2_file_verify_checksum(
          (const Tux64UInt8 *)load_address,
          file->length,

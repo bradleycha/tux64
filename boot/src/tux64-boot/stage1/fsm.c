@@ -9,20 +9,16 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/fsm.h"
 
-#include <tux64/memory.h>
-#include <tux64/endian.h>
 #include <tux64/bitwise.h>
-#include <tux64/checksum.h>
 #include <tux64/platform/mips/n64/boot.h>
-#include "tux64-boot/pi.h"
 #include "tux64-boot/rsp.h"
-#include "tux64-boot/cache.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/exec.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/header.h"
 #include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
+#include "tux64-boot/flag.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/preempt.h"
@@ -63,24 +59,6 @@ __attribute__((section(".file_stage2")))
 extern Tux64UInt8
 tux64_boot_stage1_file_stage2[TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM];
 
-static Tux64Boolean
-tux64_boot_stage1_fsm_checksum_enable(void) {
-   if (!TUX64_BOOT_CONFIG_CHECKSUM) {
-      return TUX64_BOOLEAN_FALSE;
-   }
-
-   return (tux64_boot_header_flag_no_checksum() == TUX64_BOOLEAN_FALSE);
-}
-
-static Tux64Boolean
-tux64_boot_stage1_fsm_delay_enable(void) {
-   if (!TUX64_BOOT_CONFIG_DELAY) {
-      return TUX64_BOOLEAN_FALSE;
-   }
-
-   return (tux64_boot_header_flag_no_delay() == TUX64_BOOLEAN_FALSE);
-}
-
 static void
 tux64_boot_stage1_fsm_delay(
    struct Tux64BootStage1Fsm * fsm,
@@ -104,7 +82,7 @@ tux64_boot_stage1_fsm_transition(
    Tux64BootStage1FsmPfnTransition transition
 ) {
 
-   if (tux64_boot_stage1_fsm_delay_enable() == TUX64_BOOLEAN_FALSE) {
+   if (tux64_boot_flag_delay() == TUX64_BOOLEAN_FALSE) {
       transition(fsm);
       return;
    }
@@ -363,19 +341,15 @@ tux64_boot_stage1_fsm_transition_load_file(
 
    mem = &fsm->memory.load_file;
 
-   mem->transition_next = transition_next;
-   mem->iter_addr_rdram = load_address;
-   mem->iter_addr_cart  = file->addr_cart;
-   mem->bytes_remaining = file->length;
-
-   if (tux64_boot_stage1_fsm_checksum_enable() == TUX64_BOOLEAN_TRUE) {
-      mem->checksum_expected.uint = tux64_endian_convert_uint32(file->checksum, TUX64_ENDIAN_FORMAT_BIG);
-      tux64_checksum_fletcher_64_32.initialize(&mem->checksum_context);
-   }
+   tux64_boot_stage1_file_load_initialize(
+      &mem->file_load_context,
+      file,
+      load_address
+   );
 
    tux64_boot_stage1_format_percentage_initialize(
       &mem->percentage_progress,
-      mem->bytes_remaining
+      file->length
    );
 
    label_characters = name->length
@@ -386,6 +360,8 @@ tux64_boot_stage1_fsm_transition_load_file(
    tux64_boot_stage1_format_loading(label, name);
    tux64_boot_stage1_format_percentage(&mem->percentage_progress, label);
    mem->label_percentage_progress = label;
+
+   mem->transition_next = transition_next;
 
    fsm->state = tux64_boot_stage1_fsm_state_load_file;
    return;
@@ -508,134 +484,49 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_loa
    return;
 }
 
-/* WARNING: this must be aligned to an 8-byte boundary for use with both */
-/* PI DMA, which requires the RDRAM address to be aligned to 8 bytes. */
-#define TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE \
-   (4u * 1024u) /* 4KiB */
-
-static enum Tux64BootPiDmaStatus
-tux64_boot_stage1_fsm_load_file_block(
-   struct Tux64BootStage1FsmMemoryLoadFile * mem,
-   const struct Tux64BootPiDmaTransfer * transfer
-) {
-   enum Tux64BootPiDmaStatus status;
-   Tux64UInt32 bytes;
-
-   tux64_boot_pi_dma_start(transfer, TUX64_BOOT_PI_DMA_DESTINATION_RDRAM);
-
-   bytes = transfer->bytes + TUX64_LITERAL_UINT32(1u);
-
-   /* we always invalidate both instruction and data cache because the file */
-   /* could contain executable code, but we don't really care to set up a */
-   /* conditional to check for such files.  since we invalidate cache during */
-   /* the DMA transfer, we should have more than enough time to invalidate */
-   /* both. */
-   tux64_boot_cache_invalidate(
-      (const void *)(Tux64UIntPtr)transfer->addr_rdram,
-      bytes
-   );
-
-   status = tux64_boot_pi_dma_wait_idle();
-   if (status == TUX64_BOOT_PI_DMA_STATUS_IO_ERROR) {
-      return status;
-   }
-
-   if (tux64_boot_stage1_fsm_checksum_enable() == TUX64_BOOLEAN_TRUE) {
-      tux64_checksum_fletcher_64_32.digest(
-         &mem->checksum_context,
-         (const Tux64UInt8 *)transfer->addr_rdram,
-         bytes
-      );
-   }
-
-   return status;
-}
-
-static Tux64Boolean
-tux64_boot_stage1_fsm_verify_file_checksum(
-   struct Tux64BootStage1FsmMemoryLoadFile * mem
-) {
-   const Tux64UInt8 * checksum_computed;
-
-   if (tux64_boot_stage1_fsm_checksum_enable() == TUX64_BOOLEAN_FALSE) {
-      return TUX64_BOOLEAN_TRUE;
-   }
-   
-   checksum_computed = tux64_checksum_fletcher_64_32.finalize(&mem->checksum_context);
-
-   return tux64_memory_compare_with_equal_lengths(
-      checksum_computed,
-      mem->checksum_expected.bytes,
-      TUX64_LITERAL_UINT32(TUX64_CHECKSUM_FLETCHER_64_32_DIGEST_BYTES)
-   );
-}
-
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_load_file) {
    struct Tux64BootStage1FsmMemoryLoadFile * mem;
-   struct Tux64BootPiDmaTransfer transfer;
-   enum Tux64BootPiDmaStatus pi_status;
-   Tux64UInt32 bytes_transferred;
-   Tux64Boolean dma_complete;
-   Tux64Boolean valid_checksum;
+   struct Tux64BootStage1FileLoadPollResult poll_result;
 
    mem = &fsm->memory.load_file;
 
-   transfer.addr_pibus  = mem->iter_addr_cart;
-   transfer.addr_rdram  = mem->iter_addr_rdram;
-   transfer.bytes       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE - 1u);
-
-   bytes_transferred = TUX64_LITERAL_UINT32(0u);
-   dma_complete = TUX64_BOOLEAN_FALSE;
-
    do {
-      if (mem->bytes_remaining >= TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE)) {
-         mem->bytes_remaining -= TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE);
-         bytes_transferred    += TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE);
-      } else {
-         transfer.bytes = mem->bytes_remaining - TUX64_LITERAL_UINT32(1u);
-         bytes_transferred += mem->bytes_remaining;
-         dma_complete = TUX64_BOOLEAN_TRUE;
-      }
+      poll_result = tux64_boot_stage1_file_load_poll(&mem->file_load_context);
+      tux64_boot_stage1_format_percentage_accumulate(
+         &mem->percentage_progress,
+         poll_result.bytes
+      );
 
-      pi_status = tux64_boot_stage1_fsm_load_file_block(mem, &transfer);
-      if (pi_status == TUX64_BOOT_PI_DMA_STATUS_IO_ERROR) {
+      if (poll_result.status != TUX64_BOOT_STAGE1_FILE_LOAD_POLL_STATUS_BUSY) {
          break;
       }
-      if (dma_complete == TUX64_BOOLEAN_TRUE) {
-         break;
-      }
-
-      transfer.addr_pibus  += TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE);
-      transfer.addr_rdram  += TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_FSM_LOAD_FILE_BLOCK_SIZE);
    } while (tux64_boot_stage1_preempt_yield() == TUX64_BOOLEAN_FALSE);
-
-   tux64_boot_stage1_format_percentage_accumulate(
-      &mem->percentage_progress,
-      bytes_transferred
-   );
+   
    tux64_boot_stage1_format_percentage(
       &mem->percentage_progress,
       mem->label_percentage_progress
    );
 
-   if (pi_status == TUX64_BOOT_PI_DMA_STATUS_IO_ERROR) {
-      tux64_boot_stage1_fsm_halt(fsm, &tux64_boot_stage1_strings_error_io);
-      return;
-   }
+   switch (poll_result.status) {
+      case TUX64_BOOT_STAGE1_FILE_LOAD_POLL_STATUS_BUSY:
+         break;
 
-   if (dma_complete == TUX64_BOOLEAN_TRUE) {
-      valid_checksum = tux64_boot_stage1_fsm_verify_file_checksum(mem);
-      if (valid_checksum == TUX64_BOOLEAN_FALSE) {
+      case TUX64_BOOT_STAGE1_FILE_LOAD_POLL_STATUS_COMPLETE:
+         tux64_boot_stage1_fsm_transition(fsm, mem->transition_next);
+         return;
+      
+      case TUX64_BOOT_STAGE1_FILE_LOAD_POLL_STATUS_IO_ERROR:
+         tux64_boot_stage1_fsm_halt(fsm, &tux64_boot_stage1_strings_error_io);
+         return;
+
+      case TUX64_BOOT_STAGE1_FILE_LOAD_POLL_STATUS_BAD_CHECKSUM:
          tux64_boot_stage1_fsm_halt(fsm, &tux64_boot_stage1_strings_error_checksum);
          return;
-      }
-      
-      tux64_boot_stage1_fsm_transition(fsm, mem->transition_next);
-      return;
+
+      default:
+         TUX64_UNREACHABLE;
    }
 
-   mem->iter_addr_cart  = transfer.addr_pibus;
-   mem->iter_addr_rdram = transfer.addr_rdram;
    return;
 }
 
@@ -779,7 +670,7 @@ tux64_boot_stage1_fsm_initialize_memory_display(
 
 static void
 tux64_boot_stage1_fsm_initialize_checksum(void) {
-   if (!tux64_boot_stage1_fsm_checksum_enable()) {
+   if (!tux64_boot_flag_checksum()) {
       (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_no_checksum);
       return;
    }
