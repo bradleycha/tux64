@@ -92,8 +92,15 @@ make -j${TUX64_MAKEOPTS} install-strip
 ```
 
 Once `gcc` finally finishes building and installing, we will have a bootstrapped
-host toolchain.  Lastly, we need to recompile `binutils` using our fresh host
-toolchain:
+host toolchain.  Before we recompile `binutils` using our fresh host toolchain,
+we need to create symbolic links for `usetoolchain.sh`:
+
+```
+cd ${TUX64_BUILD_ROOT}/tools/bin
+ln -sf cpp ${TUX64_TARGET_HOST}-cpp
+```
+
+We can now compile `binutils` using our bootstrapped toolchain:
 
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-binutils-stage2
