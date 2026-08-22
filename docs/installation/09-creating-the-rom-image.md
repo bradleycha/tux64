@@ -52,6 +52,8 @@ people:
 /boot/initramfs.cpio
 
 --memory-display
+--no-delay
+#--no-checksum
 ```
 
 ### Chapter 9.2 - Building The ROM Image
