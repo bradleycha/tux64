@@ -32,7 +32,6 @@ AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([void *])
-AC_CHECK_SIZEOF([struct Tux64PlatformMipsN64BootHeader], [], [#include "tux64/platform/mips/n64/boot.h"])
 
 AC_CHECK_HEADERS([stdint.h stdarg.h stdlib.h string.h stdio.h errno.h])
 
