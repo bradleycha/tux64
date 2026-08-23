@@ -160,7 +160,7 @@ target triple `x86_64-pc-linux-gnu`.  For more information, refer to
 
 `${TUX64_TARGET_N64_BOOTLOADER}` is set to target 64-bit MIPS to make use of
 GCC's O64 ABI, which provides 32-bit addresses with 64-bit registers.  As the
-VR4300's virtual address space is only 32-bit, there is not purpose to 64-bit
+VR4300's virtual address space is only 32-bit, there is no purpose to 64-bit
 pointers.  In the future, the kernel and userspace will also be built with
 `-mabi=o64`, but currently it's unsupported outside of the bootloader.
 
