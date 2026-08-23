@@ -89,7 +89,13 @@ tux64_fs_errno_to_fs_file_load_result(
    fs_result = tux64_fs_errno_to_fs_result(err);
 
    result.status = fs_result.status;
-   result.payload.err = fs_result.payload;
+
+   /* this needs to be checked, otherwise we end up copying an uninitialized */
+   /* variable, invoking undefined behavior.  it doesn't matter that calling */
+   /* code (shouldn't) access this field, because we're accessing it here. */
+   if (fs_result.status == TUX64_FS_STATUS_UNKNOWN_ERROR) {
+      result.payload.err = fs_result.payload;
+   }
 
    return result;
 }
