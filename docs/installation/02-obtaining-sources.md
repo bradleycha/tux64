@@ -96,7 +96,7 @@ the format `[NAME]-[VERSION]`.
 | [binutils](https://www.gnu.org/software/binutils/) | 2.47 | |
 | [gcc](https://gcc.gnu.org/) | 16.2.0 | |
 | [musl](https://musl.libc.org/) | 1.2.6 | |
-| [linux](https://kernel.org/) | 6.18.45 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
+| [linux](https://kernel.org/) | 6.18.46 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 
 ### Chapter 2.3 - Installing Scripts
 
