@@ -90,7 +90,8 @@ Device drivers  --->
     [*] Bootup logo  --->
       [ ] Standard black and white Linux logo
       [ ] Standard 16-color Linux logo
-      [*] Standard 224-color Linux logo
+      [ ] Standard 224-color Linux logo
+      [*] 224-color Tux64 logo
 
   Input device support  --->
     [ ]   Keyboards  ----
