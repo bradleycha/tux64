@@ -102,6 +102,10 @@ Device drivers  --->
   [ ] Device Tree and Open Firmware support
   [ ] HID bus support
 
+Library routines  --->
+  [*] Select compiled-in fonts
+  [*]   OLED 6x8 font
+
 Kernel hacking  --->
   printk and dmesg options  --->
     [*] Show timing information on printk
