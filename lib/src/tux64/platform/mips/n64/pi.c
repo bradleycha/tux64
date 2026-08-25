@@ -9,6 +9,9 @@
 #include "tux64/tux64.h"
 #include "tux64/platform/mips/n64/pi.h"
 
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
 Tux64PlatformMipsN64PiBusAddress
 tux64_platform_mips_n64_pi_bus_address_dom1_free(
    Tux64UInt32 offset
@@ -43,4 +46,7 @@ tux64_platform_mips_n64_pi_bus_address_dom1_rom(
 ) {
    return offset + TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_PI_BUS_DOMAIN_OFFSET_DOM1_ROM);
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 

@@ -10,6 +10,9 @@
 
 #include "tux64/memory.h"
 
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
+
 Tux64UInt32
 tux64_string_length_null_terminated(
    const char * string
@@ -148,4 +151,7 @@ tux64_string_trim_whitespace(
 
    return trimmed;
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
 

@@ -13,6 +13,9 @@
 #include "tux64/memory.h"
 #include "tux64/endian.h"
 
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
+
 #define TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT \
    TUX64_ENDIAN_FORMAT_BIG
 
@@ -688,4 +691,7 @@ tux64_platform_mips_n64_kernel_parse(
 
    return tux64_platform_mips_n64_kernel_parse_elf_header(elf_data, elf_bytes, vtable);
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
 

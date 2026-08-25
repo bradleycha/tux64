@@ -14,6 +14,9 @@
 #if TUX64_PLATFORM_MIPS_VR4300_ENABLE
 /*----------------------------------------------------------------------------*/
 
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
 #define TUX64_PLATFORM_MIPS_VR4300_CACHE_OPERATION(target, type)\
    (target) | ((type) << 2u)
 
@@ -214,6 +217,9 @@ tux64_platform_mips_vr4300_cache_operation_data_hit_write_back(
 
    return;
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */

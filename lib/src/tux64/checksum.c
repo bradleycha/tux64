@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/checksum.c - Implementations for checksum functions.         */
@@ -10,6 +10,9 @@
 
 #include "tux64/memory.h"
 #include "tux64/endian.h"
+
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
 
 static void
 tux64_checksum_fletcher_64_32_initialize(
@@ -195,4 +198,7 @@ tux64_checksum_fletcher_64_32 = {
    .finalize      = tux64_checksum_fletcher_64_32_finalize,
    .digest_bytes  = TUX64_LITERAL_UINT8(TUX64_CHECKSUM_FLETCHER_64_32_DIGEST_BYTES)
 };
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
 

@@ -10,6 +10,9 @@
 
 #include "tux64/memory.h"
 
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
+
 static void
 tux64_endian_swap_inplace(
    Tux64UInt8 * restrict data,
@@ -85,6 +88,12 @@ tux64_endian_convert_copy(
    return;
 }
 
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
+
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
 Tux64UInt16
 tux64_endian_convert_uint16(
    Tux64UInt16 value,
@@ -120,4 +129,7 @@ tux64_endian_convert_uint64(
 
    return __builtin_bswap64(value);
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 

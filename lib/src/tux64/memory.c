@@ -10,6 +10,9 @@
 
 #include "tux64/math.h"
 
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
+
 #if TUX64_HAVE_STRING_H
 /*----------------------------------------------------------------------------*/
 
@@ -362,20 +365,6 @@ tux64_memory_fill(
    return;
 }
 
-Tux64Boolean
-tux64_memory_compare(
-   const void * restrict data_lhs,
-   const void * restrict data_rhs,
-   Tux64UInt32 bytes_lhs,
-   Tux64UInt32 bytes_rhs
-) {
-   if (bytes_lhs != bytes_rhs) {
-      return TUX64_BOOLEAN_FALSE;
-   }
-
-   return tux64_memory_compare_with_equal_lengths(data_lhs, data_rhs, bytes_lhs);
-}
-
 static Tux64Boolean
 tux64_memory_compare_with_equal_lengths_fallback(
    const void * restrict data_lhs,
@@ -501,4 +490,27 @@ tux64_memory_find(
    result.status = TUX64_MEMORY_FIND_STATUS_MISSING;
    return result;
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
+
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
+Tux64Boolean
+tux64_memory_compare(
+   const void * restrict data_lhs,
+   const void * restrict data_rhs,
+   Tux64UInt32 bytes_lhs,
+   Tux64UInt32 bytes_rhs
+) {
+   if (bytes_lhs != bytes_rhs) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   return tux64_memory_compare_with_equal_lengths(data_lhs, data_rhs, bytes_lhs);
+}
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 

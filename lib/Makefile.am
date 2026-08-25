@@ -8,14 +8,21 @@
 ACLOCAL_AMFLAGS = -I configdir/m4
 
 lib_LTLIBRARIES = \
-	libtux64.la
+	libtux64.la \
+	libtux64-core.la
 
-libtux64_la_CFLAGS = \
+AM_CFLAGS = \
 	-I$(top_srcdir)/src \
 	-std=c99 \
 	-Wall \
 	-Wextra \
 	-Wpedantic
+libtux64_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	-DTUX64_IMPLEMENTATION_LIB
+libtux64_core_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	-DTUX64_IMPLEMENTATION_CORE
 
 libtux64_la_SOURCES = \
 	src/tux64/bitwise.c \
@@ -34,6 +41,7 @@ libtux64_la_SOURCES = \
 	src/tux64/platform/mips/n64/kernel.c \
 	src/tux64/platform/mips/vr4300/cache.c \
 	src/tux64/platform/mips/vr4300/cop0.c
+libtux64_core_la_SOURCES = $(libtux64_la_SOURCES)
 
 libtux64_includedir = $(pkgincludedir)
 libtux64_parse_includedir = $(libtux64_includedir)/parse

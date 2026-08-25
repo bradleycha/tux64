@@ -14,6 +14,9 @@
 #include "tux64/bitwise.h"
 #include "tux64/log.h"
 
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
+
 void
 tux64_arguments_iterator_initialize_command_line(
    struct Tux64ArgumentsIterator * self,
@@ -783,4 +786,7 @@ tux64_arguments_log_result(
 
    return;
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
 

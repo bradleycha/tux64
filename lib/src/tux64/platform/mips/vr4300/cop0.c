@@ -14,6 +14,9 @@
 #if TUX64_PLATFORM_MIPS_VR4300_ENABLE
 /*----------------------------------------------------------------------------*/
 
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_ENCODE_REGISTER(identifier)\
    #identifier
 
@@ -642,6 +645,9 @@ tux64_platform_mips_vr4300_cop0_cause_exception_code(
 
    return (enum Tux64PlatformMipsVr4300Cop0ExceptionCode)code;
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */

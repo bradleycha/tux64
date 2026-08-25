@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/n64/memory-map.c - Implementations for memory  */
@@ -8,6 +8,9 @@
 
 #include "tux64/tux64.h"
 #include "tux64/platform/mips/n64/memory-map.h"
+
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
 
 const volatile void *
 tux64_platform_mips_n64_memory_map_physical_to_direct_cached(
@@ -82,4 +85,7 @@ tux64_platform_mips_n64_memory_map_direct_uncached_to_direct_cached(
 
    return retn;
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 

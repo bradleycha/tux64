@@ -8,6 +8,47 @@
 #include "tux64/tux64.h"
 #include "tux64/math.h"
 
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
+
+Tux64UInt64
+tux64_math_ceil_divide_uint64(
+   Tux64UInt64 dividend,
+   Tux64UInt64 divisor
+) {
+   if (dividend == TUX64_LITERAL_UINT64(0llu)) {
+      return TUX64_LITERAL_UINT64(0llu);
+   }
+
+   return TUX64_LITERAL_UINT64(1llu) + ((dividend - 1) / divisor);
+}
+
+Tux64UInt64
+tux64_math_align_forward_uint64(
+   Tux64UInt64 value,
+   Tux64UInt64 alignment
+) {
+   return tux64_math_ceil_divide_uint64(value, alignment) * alignment;
+}
+
+Tux64UInt64
+tux64_math_absolute_difference_uint64(
+   Tux64UInt64 lhs,
+   Tux64UInt64 rhs
+) {
+   if (rhs > lhs) {
+      return rhs - lhs;
+   }
+
+   return lhs - rhs;
+}
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
+
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
 Tux64UInt8
 tux64_math_ceil_divide_uint8(
    Tux64UInt8 dividend,
@@ -39,18 +80,6 @@ tux64_math_ceil_divide_uint32(
       (Tux64UInt64)dividend,
       (Tux64UInt64)divisor
    );
-}
-
-Tux64UInt64
-tux64_math_ceil_divide_uint64(
-   Tux64UInt64 dividend,
-   Tux64UInt64 divisor
-) {
-   if (dividend == TUX64_LITERAL_UINT64(0llu)) {
-      return TUX64_LITERAL_UINT64(0llu);
-   }
-
-   return TUX64_LITERAL_UINT64(1llu) + ((dividend - 1) / divisor);
 }
 
 Tux64UIntPtr
@@ -97,14 +126,6 @@ tux64_math_align_forward_uint32(
    );
 }
 
-Tux64UInt64
-tux64_math_align_forward_uint64(
-   Tux64UInt64 value,
-   Tux64UInt64 alignment
-) {
-   return tux64_math_ceil_divide_uint64(value, alignment) * alignment;
-}
-
 Tux64UIntPtr
 tux64_math_align_forward_uintptr(
    Tux64UIntPtr value,
@@ -149,18 +170,6 @@ tux64_math_absolute_difference_uint32(
    );
 }
 
-Tux64UInt64
-tux64_math_absolute_difference_uint64(
-   Tux64UInt64 lhs,
-   Tux64UInt64 rhs
-) {
-   if (rhs > lhs) {
-      return rhs - lhs;
-   }
-
-   return lhs - rhs;
-}
-
 Tux64UIntPtr
 tux64_math_absolute_difference_uintptr(
    Tux64UIntPtr lhs,
@@ -171,4 +180,7 @@ tux64_math_absolute_difference_uintptr(
       (Tux64UInt64)rhs
    );
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 

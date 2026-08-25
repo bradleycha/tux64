@@ -8,6 +8,9 @@
 #include "tux64/tux64.h"
 #include "tux64/bitwise.h"
 
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
 Tux64UInt8
 tux64_bitwise_rotate_left_uint8(
    Tux64UInt8 value,
@@ -277,4 +280,7 @@ tux64_bitwise_mask_set_all_low_uint64(
 ) {
    return TUX64_BITWISE_MASK_SET_ALL_LOW(bits, TUX64_LITERAL_UINT64(1u));
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
 

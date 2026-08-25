@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/parse/string-integer.c - Implementations for string integer  */
@@ -10,6 +10,9 @@
 #include "tux64/parse/string-integer.h"
 
 #include "tux64/bitwise.h"
+
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
 
 struct Tux64ParseStringIntegerResult
 tux64_parse_string_integer_hex_uint8(
@@ -152,4 +155,7 @@ tux64_parse_string_integer_hex_uint64(
    result.status = TUX64_PARSE_STRING_INTEGER_STATUS_OK;
    return result;
 }
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_LIB */
 
