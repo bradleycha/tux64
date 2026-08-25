@@ -87,6 +87,7 @@ AM_CPPFLAGS = \
 # dependencies, and because we get strange link issues if it's not first.
 LDADD = \
 	$(top_builddir)/libtux64-boot.a \
+	$(libdir)/libtux64-core.la \
 	$(libdir)/libtux64.la \
 	-lgcc
 
