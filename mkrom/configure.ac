@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------#
-#                           Copyright (c) Tux64 2025                           #
+#                        Copyright (c) Tux64 2025, 2026                        #
 #                     https://github.com/bradleycha/tux64                      #
 #------------------------------------------------------------------------------#
 # mkrom/configure.ac - GNU Autoconf script for tux64-mkrom.                    #
@@ -15,8 +15,10 @@ AC_CONFIG_HEADERS([configdir/config-noprefix.h])
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_MACRO_DIRS([configdir/m4])
 
 AC_PROG_CC
+LT_INIT
 
 AC_CHECK_HEADER([tux64/tux64.h])
 

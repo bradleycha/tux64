@@ -16,8 +16,10 @@ AC_CONFIG_HEADERS([configdir/config-noprefix.h])
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_MACRO_DIRS([configdir/m4])
 
 AC_PROG_CC
+LT_INIT
 
 AC_CHECK_HEADER([tux64/tux64.h])
 

@@ -5,6 +5,8 @@
 # boot/Makefile.am - GNU Automake script for the bootloader.			 			 #
 #------------------------------------------------------------------------------#
 
+ACLOCAL_AMFLAGS = -I configdir/m4
+
 noinst_LIBRARIES = \
 	libtux64-boot.a
 
@@ -81,12 +83,12 @@ AM_CPPFLAGS = \
 	-I $(top_srcdir)/src \
 	-I $(top_builddir)/configdir
 
+# we have to manually link libtux64-boot first both to ensure proper build
+# dependencies, and because we get strange link issues if it's not first.
 LDADD = \
-	-L $(top_srcdir)/src \
-	-L $(datadir) \
-	-lgcc \
 	$(top_builddir)/libtux64-boot.a \
-	$(libdir)/libtux64.a
+	$(libdir)/libtux64.la \
+	-lgcc
 
 libtux64_boot_a_SOURCES = \
 	src/tux64-boot/tux64-boot.h \

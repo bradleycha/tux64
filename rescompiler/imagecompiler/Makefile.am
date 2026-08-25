@@ -6,6 +6,8 @@
 #    tux64-imagecompiler. 	 	 																 #
 #------------------------------------------------------------------------------#
 
+ACLOCAL_AMFLAGS = -I configdir/m4
+
 bin_PROGRAMS = \
 	tux64-imagecompiler
 
@@ -16,7 +18,7 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic
 LDADD = \
-	$(libdir)/libtux64.a
+	$(libdir)/libtux64.la
 
 tux64_imagecompiler_SOURCES = \
 	src/tux64-imagecompiler/tux64-imagecompiler.c \

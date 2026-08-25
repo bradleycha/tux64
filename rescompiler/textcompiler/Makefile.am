@@ -6,6 +6,8 @@
 #    tux64-textcompiler. 	 	 																 #
 #------------------------------------------------------------------------------#
 
+ACLOCAL_AMFLAGS = -I configdir/m4
+
 bin_PROGRAMS = \
 	tux64-textcompiler
 
@@ -16,7 +18,7 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic
 LDADD = \
-	$(libdir)/libtux64.a
+	$(libdir)/libtux64.la
 
 tux64_textcompiler_SOURCES = \
 	src/tux64-textcompiler/tux64-textcompiler.c \

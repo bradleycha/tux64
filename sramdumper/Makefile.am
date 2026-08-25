@@ -5,6 +5,8 @@
 # sramdumper/Makefile.am - GNU Automake script for tux64-sramdumper.			 	 #
 #------------------------------------------------------------------------------#
 
+ACLOCAL_AMFLAGS = -I configdir/m4
+
 bin_PROGRAMS = \
 	tux64-sramdumper
 
@@ -15,7 +17,7 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic
 LDADD = \
-	$(libdir)/libtux64.a
+	$(libdir)/libtux64.la
 
 tux64_sramdumper_SOURCES = \
 	src/tux64-sramdumper/tux64-sramdumper.c \

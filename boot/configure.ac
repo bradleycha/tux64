@@ -71,12 +71,13 @@ AX_CHECK_COMPILE_FLAG([-mignore-interrupt-requirements], [], [
 
 AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_MACRO_DIRS([configdir/m4])
 AX_PREFIX_CONFIG_H(configdir/tux64-boot/config.h)
 
 AC_PROG_CC
 AM_PROG_AS
 AM_PROG_AR
-AC_PROG_RANLIB
+LT_INIT
 
 AC_CHECK_HEADER([stddef.h])
 AC_CHECK_HEADER([tux64/tux64.h])
