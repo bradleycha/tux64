@@ -90,7 +90,7 @@ AM_CPPFLAGS = \
 LDADD = \
 	$(top_builddir)/libtux64-boot.a \
 	$(libdir)/libtux64-core.a \
-	$(libdir)/libtux64.la
+	$(libdir)/libtux64.la \
 	-lgcc
 
 libtux64_boot_a_SOURCES = \
@@ -130,7 +130,9 @@ libtux64_boot_a_SOURCES = \
 	src/tux64-boot/load.ld.h \
 	src/tux64-boot/exec.c \
 	src/tux64-boot/exec.h \
-	src/tux64-boot/exec.ld.h
+	src/tux64-boot/exec.ld.h \
+	src/tux64-boot/rng.c \
+	src/tux64-boot/rng.h
 stage0_SOURCES = \
 	src/tux64-boot/stage0/stage0.S
 stage1_SOURCES = \

@@ -70,7 +70,7 @@
       4\
    ) /* TODO: compute alignment using AC_CHECK_ALIGNOF(...) */
 #define TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_BYTES\
-   (0x10) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
+   (0x14) /* TODO: generate this using AC_CHECK_SIZEOF(...) */
 
 /*----------------------------------------------------------------------------*/
 /* Stage-2 bootloader memory layout.                                          */

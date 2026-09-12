@@ -12,6 +12,7 @@
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/pif.h"
+#include "tux64-boot/rng.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/interrupt.h"
@@ -81,6 +82,7 @@ tux64_boot_stage1_main(
    Tux64UInt8 pif_rom_version,
    Tux64UInt32 memory_total,
    Tux64UInt32 memory_free,
+   Tux64UInt32 rng_seed,
    Tux64Boolean running_on_ique
 ) {
    enum Tux64BootStage1VideoPlatform video_platform;
@@ -92,6 +94,9 @@ tux64_boot_stage1_main(
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_MEMORY);
    tux64_boot_stage1_memory_initialize(memory_total, memory_free);
+
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_RNG);
+   tux64_boot_rng_initialize(rng_seed);
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT);
    tux64_boot_stage1_interrupt_initialize();

@@ -28,6 +28,7 @@ tux64_boot_stage1_start(void) {
    register Tux64UInt32    reset_type        __asm__("$s5");
    register Tux64UInt8     rom_cic_seed      __asm__("$s6");
    register Tux64UInt8     pif_rom_version   __asm__("$s7");
+   register Tux64UInt32    rng_seed          __asm__("$t8");
 
    tux64_boot_stage1_main(
       (enum Tux64BootIpl2RomType)rom_type,
@@ -37,6 +38,7 @@ tux64_boot_stage1_start(void) {
       pif_rom_version,
       memory_total,
       memory_free,
+      rng_seed,
       running_on_ique == TUX64_LITERAL_UINT32(0u)
          ? TUX64_BOOLEAN_FALSE
          : TUX64_BOOLEAN_TRUE

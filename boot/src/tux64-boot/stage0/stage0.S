@@ -87,6 +87,7 @@
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_CAUSE,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CAUSE
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGLO,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGLO
 .equ TUX64_BOOT_STAGE0_COP0_REGISTER_TAGHI,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_TAGHI
+.equ TUX64_BOOT_STAGE0_COP0_REGISTER_RANDOM,$TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_RANDOM
 
 .equ TUX64_BOOT_STAGE0_MI_MODE_REPEAT_16,0x010f
 .equ TUX64_BOOT_STAGE0_MI_VERSION_IQUE_HI,0x0202
@@ -1101,6 +1102,11 @@ tux64_boot_stage0_start:
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
    /*tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start*/
 
+   /* TODO: compute a random seed using hardware entropy.  either from ique's */
+   /* random register, or from the RDRAM init code.  for now, we just pick an */
+   /* unused register (which seems to be random on real hardware?) */
+   mfhi  $t8
+
    /* initialize the stack and start stage-1 */
    addiu $k0,$a2,%lo(TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) /* branch delay slot */
    jr    $k0
@@ -1111,7 +1117,7 @@ tux64_boot_stage0_start:
    /* when this code is finalized, as it takes long enough just to find one. */
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x00005e16
-   .word 0x4b1c3194
+   .word 0x000064ce
+   .word 0x80b7120a
 /*tux64_boot_stage0_cic*/
 

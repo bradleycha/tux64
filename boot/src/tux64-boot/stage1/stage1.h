@@ -25,6 +25,7 @@ tux64_boot_stage1_main(
    Tux64UInt8 pif_rom_version,
    Tux64UInt32 memory_total,
    Tux64UInt32 memory_available,
+   Tux64UInt32 rng_seed,
    Tux64Boolean running_on_ique
 )
 __attribute__((noreturn));

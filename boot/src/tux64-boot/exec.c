@@ -23,7 +23,8 @@ tux64_boot_exec_kernel_arguments_initialize(
    Tux64UInt32 initramfs_address,
    Tux64UInt32 initramfs_bytes,
    Tux64UInt32 command_line_address,
-   Tux64UInt32 total_memory
+   Tux64UInt32 total_memory,
+   Tux64UInt32 rng_seed
 ) {
    struct Tux64BootExecKernelArguments * arguments;
 
@@ -33,6 +34,7 @@ tux64_boot_exec_kernel_arguments_initialize(
    arguments->initramfs_bytes       = tux64_endian_convert_uint32(initramfs_bytes, TUX64_ENDIAN_FORMAT_BIG);
    arguments->command_line_address  = tux64_endian_convert_uint32(command_line_address, TUX64_ENDIAN_FORMAT_BIG);
    arguments->total_memory          = tux64_endian_convert_uint32(total_memory, TUX64_ENDIAN_FORMAT_BIG);
+   arguments->rng_seed              = tux64_endian_convert_uint32(rng_seed, TUX64_ENDIAN_FORMAT_BIG);
    return;
 }
 

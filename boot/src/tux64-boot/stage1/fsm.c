@@ -14,6 +14,7 @@
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/exec.h"
+#include "tux64-boot/rng.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/header.h"
 #include "tux64-boot/layout.h"
@@ -323,7 +324,8 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_sta
       tux64_boot_load_allocations.optional.initramfs.address,
       tux64_boot_header_file_initramfs()->length,
       tux64_boot_load_allocations.optional.command_line.address,
-      tux64_boot_stage1_memory_total()
+      tux64_boot_stage1_memory_total(),
+      tux64_boot_rng_random_uint32()
    );
 
    /* directly called to avoid unnecessary extra delay */
