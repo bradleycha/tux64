@@ -17,8 +17,8 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic
 LDADD = \
-	$(libdir)/libtux64-core.la \
-	$(libdir)/libtux64.la
+	$(libdir)/libtux64.la \
+	$(libdir)/libtux64-core.a
 
 tux64_mkrom_SOURCES = \
 	src/tux64-mkrom/tux64-mkrom.c \

@@ -18,8 +18,8 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic
 LDADD = \
-	$(libdir)/libtux64-core.la \
-	$(libdir)/libtux64.la
+	$(libdir)/libtux64.la \
+	$(libdir)/libtux64-core.a
 
 tux64_imagecompiler_SOURCES = \
 	src/tux64-imagecompiler/tux64-imagecompiler.c \

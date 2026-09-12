@@ -18,8 +18,8 @@ AM_CFLAGS = \
 	-Wextra \
 	-Wpedantic
 LDADD = \
-	$(libdir)/libtux64-core.la \
-	$(libdir)/libtux64.la
+	$(libdir)/libtux64.la \
+	$(libdir)/libtux64-core.a
 
 tux64_textcompiler_SOURCES = \
 	src/tux64-textcompiler/tux64-textcompiler.c \
