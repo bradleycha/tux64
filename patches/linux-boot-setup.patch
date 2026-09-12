@@ -83,10 +83,10 @@ index 66ec28ab4..098ee187a 100644
  void __init plat_time_init(void)
 diff --git a/arch/mips/n64/tux64-boot.c b/arch/mips/n64/tux64-boot.c
 new file mode 100644
-index 000000000..f532afff9
+index 000000000..936dc5040
 --- /dev/null
 +++ b/arch/mips/n64/tux64-boot.c
-@@ -0,0 +1,145 @@
+@@ -0,0 +1,152 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * tux64-boot.c: Kernel support for extended boot information provided by tux64-boot.
@@ -98,6 +98,7 @@ index 000000000..f532afff9
 +#include <linux/initrd.h>
 +#include <linux/memblock.h>
 +#include <linux/string.h>
++#include <linux/random.h>
 +
 +#include <asm/bootinfo.h>
 +
@@ -122,6 +123,7 @@ index 000000000..f532afff9
 +	uint32_t initrd_bytes;
 +	uint32_t command_line_address;
 +	uint32_t total_memory;
++	uint32_t rng_seed;
 +};
 +
 +static void __init tux64_load_boot_args(struct tux64_boot_args *args)
@@ -130,11 +132,15 @@ index 000000000..f532afff9
 +
 +	args_raw = (const struct tux64_boot_args *)CKSEG0ADDR(be32_to_cpu(fw_arg0));
 +
-+	/* args_raw is aligned by the bootloader. */
++	/*
++	 * args_raw is aligned by the bootloader.  we leave rng_seed in big-endian
++	 * form since we will be using it as a byte buffer for random init.
++	 */
 +	args->initrd_address		= be32_to_cpu(args_raw->initrd_address);
 +	args->initrd_bytes		= be32_to_cpu(args_raw->initrd_bytes);
 +	args->command_line_address	= be32_to_cpu(args_raw->command_line_address);
 +	args->total_memory		= be32_to_cpu(args_raw->total_memory);
++	args->rng_seed			= args_raw->rng_seed;
 +}
 +
 +static void __init tux64_prom_init_cmdline(void)
@@ -172,6 +178,7 @@ index 000000000..f532afff9
 +	}
 +
 +	system_memory = args.total_memory;
++	add_bootloader_randomness(&args.rng_seed, sizeof(args.rng_seed));
 +}
 +
 +void __init tux64_prom_init(void)
