@@ -23,6 +23,10 @@ libtux64_la_CFLAGS = \
 libtux64_core_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	-DTUX64_IMPLEMENTATION_CORE
+libtux64_la_LDFLAGS = \
+	-release $(PACKAGE_VERSION)
+libtux64_core_la_LDFLAGS = \
+	-release $(PACKAGE_VERSION)
 
 libtux64_la_SOURCES = \
 	src/tux64/bitwise.c \
