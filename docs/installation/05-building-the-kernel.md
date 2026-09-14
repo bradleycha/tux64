@@ -108,6 +108,7 @@ Device drivers  --->
 
   [ ] Device Tree and Open Firmware support
   [ ] HID bus support
+  [ ] Common Clock Framework
 
 Library routines  --->
   [*] Select compiled-in fonts
