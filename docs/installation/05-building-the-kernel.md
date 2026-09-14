@@ -69,6 +69,9 @@ Executable file formats  --->
   [*] Kernel support for ELF binaries
   [*] Kernel support for scripts starting with #!
 
+Memory Management options  --->
+  [*] Allow for memory compaction
+
 Device drivers  --->
   Character devices  --->
     [*] Enable TTY
