@@ -61,6 +61,7 @@ General setup  --->
 
   Configure standard kernel features (expert users)  --->
     [*] Enable support for printk
+    [*] Enable smaller-sized data structures for core
 
 Executable file formats  --->
   [*] Kernel support for ELF binaries
