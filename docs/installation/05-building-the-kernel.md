@@ -110,6 +110,12 @@ Device drivers  --->
   [ ] HID bus support
   [ ] Common Clock Framework
 
+Security options  --->
+  Kernel hardening options  --->
+    Memory initialization  --->
+      Initialize kernel stack variables at function entry
+        (X) no automatic stack variable initialization (weakest)
+
 Library routines  --->
   [*] Select compiled-in fonts
   [*]   OLED 6x8 font
