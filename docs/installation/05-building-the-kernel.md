@@ -115,6 +115,16 @@ Kernel hacking  --->
     [*] Show timing information on printk
 ```
 
+Additionally, if you are building a 32-bit kernel, or are intending on building
+a 64-bit kernel with the intent to use either N32 binaries (32/64-bit
+interworking) or O32 binaries (32-bit only), you will want to set the
+following configuration items:
+
+```
+General architecture-dependent options  --->
+  [*] Provide system calls for 32-bit time_t
+```
+
 Note that you don't necessarily have to use "-tux64" as the local version, but
 the branding is nice. :)
 
