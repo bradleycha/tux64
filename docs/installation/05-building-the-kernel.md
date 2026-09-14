@@ -50,8 +50,10 @@ General setup  --->
   Local version - append to kernel release
     -tux64
 
+  (12) Kernel log buffer size (16 => 64KB, 17 => 128KB)
+
   [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
-  [*] Support initial ramdisk/ramfs compressed using gzip
+  [ ] Support initial ramdisk/ramfs compressed using gzip
   [ ] Support initial ramdisk/ramfs compressed using bzip2
   [ ] Support initial ramdisk/ramfs compressed using LZMA
   [ ] Support initial ramdisk/ramfs compressed using XZ
@@ -60,7 +62,6 @@ General setup  --->
   [ ] Support initial ramdisk/ramfs compressed using ZSTD
 
   Configure standard kernel features (expert users)  --->
-    (12) Kernel log buffer size (16 => 64KB, 17 => 128KB)
     [*] Enable support for printk
     [*] Enable smaller-sized data structures for core
 
