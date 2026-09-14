@@ -60,6 +60,7 @@ General setup  --->
   [ ] Support initial ramdisk/ramfs compressed using ZSTD
 
   Configure standard kernel features (expert users)  --->
+    (12) Kernel log buffer size (16 => 64KB, 17 => 128KB)
     [*] Enable support for printk
     [*] Enable smaller-sized data structures for core
 
