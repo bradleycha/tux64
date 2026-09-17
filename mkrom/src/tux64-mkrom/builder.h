@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-mkrom/tux64-mkrom.h"
+#include <tux64/endian.h>
 #include <tux64/platform/mips/n64/boot.h>
 #include <tux64/platform/mips/n64/rom.h>
 
@@ -56,6 +57,7 @@ struct Tux64MkromBuilderInputFileKernel {
    Tux64UInt32 memory;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
+   enum Tux64EndianFormat endian_format;
 };
 
 struct Tux64MkromBuilderInputFiles {

@@ -10,6 +10,8 @@
 
 #include <tux64/log.h>
 #include <tux64/memory.h>
+#include <tux64/bitwise.h>
+#include <tux64/endian.h>
 #include <tux64/fs.h>
 #include <tux64/arguments.h>
 #include <tux64/string.h>
@@ -122,9 +124,6 @@ tux64_mkrom_exit_result_display_parse_kernel_error(
          break;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_BAD_VERSION:
          TUX64_LOG_ERROR_FMT("kernel image is the wrong ELF version (0x%08x)", self->reason.payload.bad_version.version);
-         break;
-      case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_ENDIANESS:
-         TUX64_LOG_ERROR("kernel image must be big-endian");
          break;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_TYPE:
          TUX64_LOG_ERROR_FMT("kernel image is not an executable, instead it's type 0x%08x", self->reason.payload.invalid_type.type);
@@ -804,6 +803,13 @@ tux64_mkrom_run_parsed_cmdline(
    input.kernel_command_line.characters = config_file_parsed.command_line.characters + TUX64_LITERAL_UINT32(1u);
    input.path_output = cmdline->path_output;
    input.boot_header_flags = config_file_parsed.boot_header_flags;
+
+   if (kernel->endian_format == TUX64_ENDIAN_FORMAT_LITTLE) {
+      input.boot_header_flags = tux64_bitwise_flags_set_uint32(
+         input.boot_header_flags,
+         TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_KERNEL_ENDIAN_FORMAT_LITTLE
+      );
+   }
 
    /* we can now safely free the config file since all data is owned */
    tux64_fs_file_unload(&config_file);
