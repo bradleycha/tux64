@@ -13,6 +13,7 @@
 #include <tux64/platform/mips/n64/memory-map.h>
 #include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
+#include "tux64-boot/halt.h"
 
 __attribute__((section(".kernel_arguments")))
 extern struct Tux64BootExecKernelArguments
@@ -40,7 +41,8 @@ tux64_boot_exec_kernel_arguments_initialize(
 
 void
 tux64_boot_exec_kernel(
-   const void * entrypoint
+   const void * entrypoint,
+   enum Tux64EndianFormat endian_format
 ) {
    Tux64UInt32 fw_arg0_u32;
    Tux64UInt32 fw_arg1_u32;
@@ -51,12 +53,19 @@ tux64_boot_exec_kernel(
    unsigned long fw_arg2;
    unsigned long fw_arg3;
 
+   /* TODO: add a configuration option to allow booting foreign endianesses. */
+   /* until we get this working, the only safe option is to halt. */
+   if (endian_format != TUX64_ENDIAN_FORMAT_NATIVE) {
+      tux64_boot_halt();
+      TUX64_UNREACHABLE;
+   }
+
    fw_arg0_u32 = (Tux64UIntPtr)&tux64_boot_exec_kernel_arguments;
    fw_arg1_u32 = TUX64_LITERAL_UINT32(0u);
    fw_arg2_u32 = TUX64_LITERAL_UINT32(0u);
    fw_arg3_u32 = TUX64_LITERAL_UINT32(0u);
 
-   /* theoretically the kernel could be a foreign endianess, so we do this. */
+   /* since the kernel can be a foreign endianess, we have to do this. */
    fw_arg0 = tux64_endian_convert_uint32(fw_arg0_u32, TUX64_ENDIAN_FORMAT_BIG);
    fw_arg1 = tux64_endian_convert_uint32(fw_arg1_u32, TUX64_ENDIAN_FORMAT_BIG);
    fw_arg2 = tux64_endian_convert_uint32(fw_arg2_u32, TUX64_ENDIAN_FORMAT_BIG);

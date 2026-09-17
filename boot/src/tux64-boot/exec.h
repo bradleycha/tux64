@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-boot/tux64-boot.h"
+#include <tux64/endian.h>
 #include "tux64-boot/load.h"
 
 /*----------------------------------------------------------------------------*/
@@ -44,7 +45,8 @@ tux64_boot_exec_kernel_arguments_initialize(
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_exec_kernel(
-   const void * entrypoint
+   const void * entrypoint,
+   enum Tux64EndianFormat endian_format
 )
 __attribute__((noreturn));
 

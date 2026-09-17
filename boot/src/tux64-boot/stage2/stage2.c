@@ -7,6 +7,7 @@
 
 #include "tux64-boot/tux64-boot.h"
 
+#include <tux64/endian.h>
 #include "tux64-boot/initialize.h"
 #include "tux64-boot/header.h"
 #include "tux64-boot/load.h"
@@ -18,10 +19,12 @@ __attribute__((noreturn))
 static void
 tux64_boot_stage2_start_kernel(void) {
    const void * entrypoint;
+   enum Tux64EndianFormat endian_format;
 
    entrypoint = (const void *)tux64_boot_header_file_kernel()->addr_entry;
+   endian_format = tux64_boot_header_file_kernel_endian_format();
 
-   tux64_boot_exec_kernel(entrypoint);
+   tux64_boot_exec_kernel(entrypoint, endian_format);
 }
 
 void

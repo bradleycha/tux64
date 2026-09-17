@@ -10,6 +10,7 @@
 #include "tux64-boot/stage1/fsm.h"
 
 #include <tux64/bitwise.h>
+#include <tux64/endian.h>
 #include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/load.h"
@@ -590,13 +591,15 @@ tux64_boot_stage1_fsm_reset_hardware(void) {
 
 TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_boot_kernel) {
    const void * entrypoint;
+   enum Tux64EndianFormat endian_format;
 
    entrypoint = (const void *)tux64_boot_header_file_kernel()->addr_entry;
+   endian_format = tux64_boot_header_file_kernel_endian_format();
 
    tux64_boot_stage1_fsm_reset_hardware();
 
    /* kernel arguments were initialized when we created our allocations. */
-   tux64_boot_exec_kernel(entrypoint);
+   tux64_boot_exec_kernel(entrypoint, endian_format);
 
    (void)fsm;
    TUX64_UNREACHABLE;

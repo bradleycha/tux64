@@ -10,6 +10,7 @@
 #include "tux64-boot/header.h"
 
 #include <tux64/platform/mips/n64/boot.h>
+#include <tux64/endian.h>
 #include <tux64/bitwise.h>
 #include <tux64/math.h>
 
@@ -25,6 +26,11 @@ tux64_boot_header_flag(
       tux64_boot_header.data.flags,
       bit
    );
+}
+
+Tux64Boolean
+tux64_boot_header_flag_kernel_endian_format_little(void) {
+   return tux64_boot_header_flag(TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_KERNEL_ENDIAN_FORMAT_LITTLE);
 }
 
 Tux64Boolean
@@ -50,6 +56,26 @@ tux64_boot_header_file_bootloader_stage2(void) {
 const struct Tux64PlatformMipsN64BootHeaderFileKernel *
 tux64_boot_header_file_kernel(void) {
    return &tux64_boot_header.data.files.kernel;
+}
+
+enum Tux64EndianFormat
+tux64_boot_header_file_kernel_endian_format(void) {
+   enum Tux64EndianFormat endian_format;
+
+   switch (tux64_boot_header_flag_kernel_endian_format_little()) {
+      case TUX64_BOOLEAN_FALSE:
+         endian_format = TUX64_ENDIAN_FORMAT_BIG;
+         break;
+
+      case TUX64_BOOLEAN_TRUE:
+         endian_format = TUX64_ENDIAN_FORMAT_LITTLE;
+         break;
+
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   return endian_format;
 }
 
 const struct Tux64PlatformMipsN64BootHeaderFile *

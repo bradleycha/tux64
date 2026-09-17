@@ -12,10 +12,13 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/boot.h>
+#include <tux64/endian.h>
 
 /*----------------------------------------------------------------------------*/
 /* Checks if various boot flags are set.                                      */
 /*----------------------------------------------------------------------------*/
+Tux64Boolean
+tux64_boot_header_flag_kernel_endian_format_little(void);
 Tux64Boolean
 tux64_boot_header_flag_no_checksum(void);
 Tux64Boolean
@@ -30,6 +33,8 @@ const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_header_file_bootloader_stage2(void);
 const struct Tux64PlatformMipsN64BootHeaderFileKernel *
 tux64_boot_header_file_kernel(void);
+enum Tux64EndianFormat
+tux64_boot_header_file_kernel_endian_format(void);
 const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_header_file_initramfs(void);
 const struct Tux64PlatformMipsN64BootHeaderFile *
