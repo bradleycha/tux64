@@ -26,12 +26,14 @@
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC_BYTES\
    (4u)
 
-#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_CHECKSUM\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_KERNEL_ENDIAN_FORMAT_LITTLE\
    (1u << 0u)
-#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_CHECKSUM\
    (1u << 1u)
-#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_DELAY\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_MEMORY_DISPLAY\
    (1u << 2u)
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_DELAY\
+   (1u << 3u)
 
 /*----------------------------------------------------------------------------*/
 /* The size of the boot header, in bytes.  Also provides a version aligned    */
