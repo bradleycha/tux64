@@ -11,6 +11,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64/tux64.h"
+#include "tux64/endian.h"
 
 /*----------------------------------------------------------------------------*/
 /* Describes the location of the kernel image data which needs to be loaded   */
@@ -37,20 +38,22 @@ struct Tux64PlatformMipsN64KernelImage {
 /* addr_load - Where in memory the kernel image must be loaded.               */
 /*                                                                            */
 /* addr_entry - The address which contains the start of executable code.      */
+/*                                                                            */
+/* endian_format - Whether the kernel is big-endian or little-endian.         */
 /*----------------------------------------------------------------------------*/
 struct Tux64PlatformMipsN64Kernel {
    struct Tux64PlatformMipsN64KernelImage image;
    Tux64UInt32 memory;
    Tux64UInt32 addr_load;
    Tux64UInt32 addr_entry;
+   enum Tux64EndianFormat endian_format;
 };
 
-#define TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_FIELD_COUNT 8u
+#define TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_FIELD_COUNT 7u
 enum Tux64PlatformMipsN64KernelParseStatus {
-   TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK,   
+   TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK,
    TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE,
    TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_BAD_VERSION,
-   TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_ENDIANESS,
    TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_TYPE,
    TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_MACHINE,
    TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_MAIN_SEGMENT_MISSING,

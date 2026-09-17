@@ -16,9 +16,6 @@
 #if TUX64_IMPLEMENTATION_LIB
 /*----------------------------------------------------------------------------*/
 
-#define TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT \
-   TUX64_ENDIAN_FORMAT_BIG
-
 /* since 32-bit and 64-bit ELF headers have different offsets/types, we have  */
 /* to parse them seperately.  to avoid code duplication, we use a vtable to   */
 /* handle reading types at different offsets and then upcast for 32-bit.      */
@@ -30,28 +27,35 @@ typedef Tux64UInt16 (*Tux64PlatformMipsN64KernelElfVTableFunctionEPhentsize)(
    const union Tux64ElfHeader * elf_header
 );
 typedef Tux64UInt64 (*Tux64PlatformMipsN64KernelElfVTableFunctionEEntry)(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 );
 typedef Tux64UInt64 (*Tux64PlatformMipsN64KernelElfVTableFunctionEPhoff)(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 );
 typedef Tux64UInt16 (*Tux64PlatformMipsN64KernelElfVTableFunctionEPhnum)(
    const union Tux64ElfHeader * elf_header
 );
 typedef Tux64UInt64 (*Tux64PlatformMipsN64KernelElfVTableFunctionPOffset)(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 );
 typedef Tux64UInt64 (*Tux64PlatformMipsN64KernelElfVTableFunctionPFilesz)(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 );
 typedef Tux64UInt64 (*Tux64PlatformMipsN64KernelElfVTableFunctionPMemsz)(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 );
 typedef Tux64UInt64 (*Tux64PlatformMipsN64KernelElfVTableFunctionPVaddr)(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 );
 typedef Tux64UInt64 (*Tux64PlatformMipsN64KernelElfVTableFunctionPAlign)(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 );
 
 struct Tux64PlatformMipsN64KernelElfVTableSize {
@@ -74,11 +78,12 @@ struct Tux64PlatformMipsN64KernelElfVTable {
 };
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_upcast_uint32(
-   Tux64UInt32 address
+   Tux64UInt32 address,
+   enum Tux64EndianFormat endian_format
 ) {
    /* since we save endian conversion for later, this needs to be done to */
    /* avoid having the hi and lo 32-bit words backwards. */
-   if (TUX64_ENDIAN_FORMAT_NATIVE != TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT) {
+   if (endian_format != TUX64_ENDIAN_FORMAT_NATIVE) {
       return (Tux64UInt64)address << TUX64_LITERAL_UINT8(32u);
    }
 
@@ -98,15 +103,23 @@ static Tux64UInt16 tux64_platform_mips_n64_kernel_elf_vtable_32_function_e_phent
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_32_function_e_entry(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(elf_header->elf32.e_entry);
+   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(
+      elf_header->elf32.e_entry,
+      endian_format
+   );
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_32_function_e_phoff(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(elf_header->elf32.e_phoff);
+   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(
+      elf_header->elf32.e_phoff,
+      endian_format
+   );
 }
 
 static Tux64UInt16 tux64_platform_mips_n64_kernel_elf_vtable_32_function_e_phnum(
@@ -116,33 +129,53 @@ static Tux64UInt16 tux64_platform_mips_n64_kernel_elf_vtable_32_function_e_phnum
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_32_function_p_offset(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(program_header->elf32.p_offset);
+   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(
+      program_header->elf32.p_offset,
+      endian_format
+   );
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_32_function_p_filesz(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(program_header->elf32.p_filesz);
+   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(
+      program_header->elf32.p_filesz,
+      endian_format
+   );
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_32_function_p_memsz(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(program_header->elf32.p_memsz);
+   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(
+      program_header->elf32.p_memsz,
+      endian_format
+   );
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_32_function_p_vaddr(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(program_header->elf32.p_vaddr);
+   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(
+      program_header->elf32.p_vaddr,
+      endian_format
+   );
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_32_function_p_align(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(program_header->elf32.p_align);
+   return tux64_platform_mips_n64_kernel_elf_upcast_uint32(
+      program_header->elf32.p_align,
+      endian_format
+   );
 }
 
 static Tux64UInt16 tux64_platform_mips_n64_kernel_elf_vtable_64_function_e_ehsize(
@@ -158,14 +191,18 @@ static Tux64UInt16 tux64_platform_mips_n64_kernel_elf_vtable_64_function_e_phent
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_64_function_e_entry(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 ) {
+   (void)endian_format;
    return elf_header->elf64.e_entry;
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_64_function_e_phoff(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 ) {
+   (void)endian_format;
    return elf_header->elf64.e_phoff;
 }
 
@@ -176,32 +213,42 @@ static Tux64UInt16 tux64_platform_mips_n64_kernel_elf_vtable_64_function_e_phnum
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_64_function_p_offset(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
+   (void)endian_format;
    return program_header->elf64.p_offset;
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_64_function_p_filesz(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
+   (void)endian_format;
    return program_header->elf64.p_filesz;
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_64_function_p_memsz(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
+   (void)endian_format;
    return program_header->elf64.p_memsz;
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_64_function_p_vaddr(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
+   (void)endian_format;
    return program_header->elf64.p_vaddr;
 }
 
 static Tux64UInt64 tux64_platform_mips_n64_kernel_elf_vtable_64_function_p_align(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
+   (void)endian_format;
    return program_header->elf64.p_align;
 }
 
@@ -243,131 +290,190 @@ tux64_platform_mips_n64_kernel_elf_vtable_64 = {
 
 static Tux64UInt16
 tux64_platform_mips_n64_kernel_elf_read_uint16(
-   Tux64UInt16 value
+   Tux64UInt16 value,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_endian_convert_uint16(value, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   return tux64_endian_convert_uint16(value, endian_format);
 }
 
 static Tux64UInt32
 tux64_platform_mips_n64_kernel_elf_read_uint32(
-   Tux64UInt32 value
+   Tux64UInt32 value,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_endian_convert_uint32(value, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   return tux64_endian_convert_uint32(value, endian_format);
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_elf_read_uint64(
-   Tux64UInt64 value
+   Tux64UInt64 value,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_endian_convert_uint64(value, TUX64_PLATFORM_MIPS_N64_KERNEL_ENDIAN_FORMAT);
+   return tux64_endian_convert_uint64(value, endian_format);
 }
 
 static Tux64UInt16
 tux64_platform_mips_n64_kernel_elf_header_read_e_type(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint16(elf_header->elf32.e_type);
+   return tux64_platform_mips_n64_kernel_elf_read_uint16(
+      elf_header->elf32.e_type,
+      endian_format
+   );
 }
 
 static Tux64UInt16
 tux64_platform_mips_n64_kernel_elf_header_read_e_machine(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint16(elf_header->elf32.e_machine);
+   return tux64_platform_mips_n64_kernel_elf_read_uint16(
+      elf_header->elf32.e_machine,
+      endian_format
+   );
 }
 
 static Tux64UInt32
 tux64_platform_mips_n64_kernel_elf_header_read_e_version(
-   const union Tux64ElfHeader * elf_header
+   const union Tux64ElfHeader * elf_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint32(elf_header->elf32.e_version);
+   return tux64_platform_mips_n64_kernel_elf_read_uint32(
+      elf_header->elf32.e_version,
+      endian_format
+   );
 }
 
 static Tux64UInt16
 tux64_platform_mips_n64_kernel_elf_header_read_e_ehsize(
    const union Tux64ElfHeader * elf_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint16(vtable->e_ehsize(elf_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint16(
+      vtable->e_ehsize(elf_header),
+      endian_format
+   );
 }
 
 static Tux64UInt16
 tux64_platform_mips_n64_kernel_elf_header_read_e_phentsize(
    const union Tux64ElfHeader * elf_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint16(vtable->e_phentsize(elf_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint16(
+      vtable->e_phentsize(elf_header),
+      endian_format
+   );
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_elf_header_read_e_entry(
    const union Tux64ElfHeader * elf_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint64(vtable->e_entry(elf_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint64(
+      vtable->e_entry(elf_header, endian_format),
+      endian_format
+   );
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_elf_header_read_e_phoff(
    const union Tux64ElfHeader * elf_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint64(vtable->e_phoff(elf_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint64(
+      vtable->e_phoff(elf_header, endian_format),
+      endian_format
+   );
 }
 
 static Tux64UInt16
 tux64_platform_mips_n64_kernel_elf_header_read_e_phnum(
    const union Tux64ElfHeader * elf_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint16(vtable->e_phnum(elf_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint16(
+      vtable->e_phnum(elf_header),
+      endian_format
+   );
 }
 
 static Tux64UInt32
 tux64_platform_mips_n64_kernel_program_header_read_p_type(
-   const union Tux64ElfProgramHeader * program_header
+   const union Tux64ElfProgramHeader * program_header,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint32(program_header->elf32.p_type);
+   return tux64_platform_mips_n64_kernel_elf_read_uint32(
+      program_header->elf32.p_type,
+      endian_format
+   );
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_program_header_read_p_offset(
    const union Tux64ElfProgramHeader * program_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint64(vtable->p_offset(program_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint64(
+      vtable->p_offset(program_header, endian_format),
+      endian_format
+   );
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_program_header_read_p_filesz(
    const union Tux64ElfProgramHeader * program_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint64(vtable->p_filesz(program_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint64(
+      vtable->p_filesz(program_header, endian_format),
+      endian_format
+   );
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_program_header_read_p_memsz(
    const union Tux64ElfProgramHeader * program_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint64(vtable->p_memsz(program_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint64(
+      vtable->p_memsz(program_header, endian_format),
+      endian_format
+   );
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_program_header_read_p_vaddr(
    const union Tux64ElfProgramHeader * program_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint64(vtable->p_vaddr(program_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint64(
+      vtable->p_vaddr(program_header, endian_format),
+      endian_format
+   );
 }
 
 static Tux64UInt64
 tux64_platform_mips_n64_kernel_program_header_read_p_align(
    const union Tux64ElfProgramHeader * program_header,
-   const struct Tux64PlatformMipsN64KernelElfVTable * vtable
+   const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
+   enum Tux64EndianFormat endian_format
 ) {
-   return tux64_platform_mips_n64_kernel_elf_read_uint64(vtable->p_align(program_header));
+   return tux64_platform_mips_n64_kernel_elf_read_uint64(
+      vtable->p_align(program_header, endian_format),
+      endian_format
+   );
 }
 
 static Tux64Boolean
@@ -424,7 +530,8 @@ tux64_platform_mips_n64_kernel_parse_main_segment(
    Tux64UInt64 filesz,
    Tux64UInt64 memsz,
    Tux64UInt64 vaddr,
-   Tux64UInt64 entry
+   Tux64UInt64 entry,
+   enum Tux64EndianFormat endian_format
 ) {
    struct Tux64PlatformMipsN64KernelParseResult result;
    struct Tux64PlatformMipsN64Kernel * kernel;
@@ -443,11 +550,12 @@ tux64_platform_mips_n64_kernel_parse_main_segment(
 
    /* woot woot! */
    kernel = &result.payload.ok;
-   kernel->image.offset = (Tux64UInt32)offset;
-   kernel->image.bytes  = (Tux64UInt32)filesz;
-   kernel->memory       = (Tux64UInt32)memsz;
-   kernel->addr_load    = (Tux64UInt32)vaddr;
-   kernel->addr_entry   = (Tux64UInt32)entry;
+   kernel->image.offset    = (Tux64UInt32)offset;
+   kernel->image.bytes     = (Tux64UInt32)filesz;
+   kernel->memory          = (Tux64UInt32)memsz;
+   kernel->addr_load       = (Tux64UInt32)vaddr;
+   kernel->addr_entry      = (Tux64UInt32)entry;
+   kernel->endian_format   = endian_format;
 
    result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK;
    return result;
@@ -461,6 +569,7 @@ static struct Tux64PlatformMipsN64KernelParseResult
 tux64_platform_mips_n64_kernel_parse_program_headers(
    const Tux64UInt8 * elf_data,
    Tux64UInt32 elf_bytes,
+   enum Tux64EndianFormat elf_endian_format,
    const struct Tux64PlatformMipsN64KernelElfVTable * vtable,
    Tux64UInt64 entry,
    Tux64UInt64 phoff,
@@ -489,7 +598,7 @@ tux64_platform_mips_n64_kernel_parse_program_headers(
       iter_program_headers += vtable->size.program_header;
       phnum--;
 
-      type = tux64_platform_mips_n64_kernel_program_header_read_p_type(&program_header);
+      type = tux64_platform_mips_n64_kernel_program_header_read_p_type(&program_header, elf_endian_format);
 
       /* we ignore all segments except for loadable segments */
       if (type != TUX64_ELF_PROGRAM_HEADER_TYPE_LOAD) {
@@ -503,11 +612,11 @@ tux64_platform_mips_n64_kernel_parse_program_headers(
       }
       main_segment_found = TUX64_BOOLEAN_TRUE;
 
-      offset   = tux64_platform_mips_n64_kernel_program_header_read_p_offset(&program_header, vtable);
-      filesz   = tux64_platform_mips_n64_kernel_program_header_read_p_filesz(&program_header, vtable);
-      memsz    = tux64_platform_mips_n64_kernel_program_header_read_p_memsz(&program_header, vtable);
-      vaddr    = tux64_platform_mips_n64_kernel_program_header_read_p_vaddr(&program_header, vtable);
-      align    = tux64_platform_mips_n64_kernel_program_header_read_p_align(&program_header, vtable);
+      offset   = tux64_platform_mips_n64_kernel_program_header_read_p_offset(&program_header, vtable, elf_endian_format);
+      filesz   = tux64_platform_mips_n64_kernel_program_header_read_p_filesz(&program_header, vtable, elf_endian_format);
+      memsz    = tux64_platform_mips_n64_kernel_program_header_read_p_memsz(&program_header, vtable, elf_endian_format);
+      vaddr    = tux64_platform_mips_n64_kernel_program_header_read_p_vaddr(&program_header, vtable, elf_endian_format);
+      align    = tux64_platform_mips_n64_kernel_program_header_read_p_align(&program_header, vtable, elf_endian_format);
    }
 
    /* now make sure we found the main segment */
@@ -534,7 +643,8 @@ tux64_platform_mips_n64_kernel_parse_program_headers(
       filesz,
       memsz,
       vaddr,
-      entry
+      entry,
+      elf_endian_format
    );
 }
 
@@ -542,6 +652,7 @@ static struct Tux64PlatformMipsN64KernelParseResult
 tux64_platform_mips_n64_kernel_parse_elf_header(
    const Tux64UInt8 * elf_data,
    Tux64UInt32 elf_bytes,
+   enum Tux64EndianFormat elf_endian_format,
    const struct Tux64PlatformMipsN64KernelElfVTable * vtable
 ) {
    struct Tux64PlatformMipsN64KernelParseResult result;
@@ -567,9 +678,9 @@ tux64_platform_mips_n64_kernel_parse_elf_header(
       vtable->size.elf_header
    );
 
-   type     = tux64_platform_mips_n64_kernel_elf_header_read_e_type(&elf_header);
-   machine  = tux64_platform_mips_n64_kernel_elf_header_read_e_machine(&elf_header);
-   version  = tux64_platform_mips_n64_kernel_elf_header_read_e_version(&elf_header);
+   type     = tux64_platform_mips_n64_kernel_elf_header_read_e_type(&elf_header, elf_endian_format);
+   machine  = tux64_platform_mips_n64_kernel_elf_header_read_e_machine(&elf_header, elf_endian_format);
+   version  = tux64_platform_mips_n64_kernel_elf_header_read_e_version(&elf_header, elf_endian_format);
 
    /* verify the ELF is an executable */
    if (type != TUX64_ELF_HEADER_TYPE_EXEC) {
@@ -592,8 +703,8 @@ tux64_platform_mips_n64_kernel_parse_elf_header(
       return result;
    }
 
-   ehsize      = tux64_platform_mips_n64_kernel_elf_header_read_e_ehsize(&elf_header, vtable);
-   phentsize   = tux64_platform_mips_n64_kernel_elf_header_read_e_phentsize(&elf_header, vtable);
+   ehsize      = tux64_platform_mips_n64_kernel_elf_header_read_e_ehsize(&elf_header, vtable, elf_endian_format);
+   phentsize   = tux64_platform_mips_n64_kernel_elf_header_read_e_phentsize(&elf_header, vtable, elf_endian_format);
 
    /* verify the given elf and program header sizes are correct */
    if (ehsize != vtable->size.elf_header) {
@@ -605,9 +716,9 @@ tux64_platform_mips_n64_kernel_parse_elf_header(
       return result;
    }
 
-   entry = tux64_platform_mips_n64_kernel_elf_header_read_e_entry(&elf_header, vtable);
-   phoff = tux64_platform_mips_n64_kernel_elf_header_read_e_phoff(&elf_header, vtable);
-   phnum = tux64_platform_mips_n64_kernel_elf_header_read_e_phnum(&elf_header, vtable);
+   entry = tux64_platform_mips_n64_kernel_elf_header_read_e_entry(&elf_header, vtable, elf_endian_format);
+   phoff = tux64_platform_mips_n64_kernel_elf_header_read_e_phoff(&elf_header, vtable, elf_endian_format);
+   phnum = tux64_platform_mips_n64_kernel_elf_header_read_e_phnum(&elf_header, vtable, elf_endian_format);
 
    /* verify we have the memory present for all program headers */
    if (tux64_platform_mips_n64_kernel_program_headers_present(
@@ -624,6 +735,7 @@ tux64_platform_mips_n64_kernel_parse_elf_header(
    return tux64_platform_mips_n64_kernel_parse_program_headers(
       elf_data,
       elf_bytes,
+      elf_endian_format,
       vtable,
       entry,
       phoff,
@@ -639,6 +751,7 @@ tux64_platform_mips_n64_kernel_parse(
    struct Tux64PlatformMipsN64KernelParseResult result;
    Tux64UInt8 elf_header_ident [TUX64_ELF_HEADER_IDENT_BYTES];
    const struct Tux64PlatformMipsN64KernelElfVTable * vtable;
+   enum Tux64EndianFormat elf_endian_format;
 
    /* first read in the "e_ident" field */
    if (elf_bytes < TUX64_LITERAL_UINT32(TUX64_ELF_HEADER_IDENT_BYTES)) {
@@ -661,10 +774,19 @@ tux64_platform_mips_n64_kernel_parse(
       return result;
    }
 
-   /* verify the header is big-endian */
-   if (elf_data[TUX64_ELF_HEADER_IDENT_INDEX_DATA] != TUX64_ELF_HEADER_IDENT_DATA_ENDIAN_BIG) {
-      result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_ENDIANESS;
-      return result;
+   /* determine the endianess of the kernel image */
+   switch (elf_data[TUX64_ELF_HEADER_IDENT_INDEX_DATA]) {
+      case TUX64_ELF_HEADER_IDENT_DATA_ENDIAN_BIG:
+         elf_endian_format = TUX64_ENDIAN_FORMAT_BIG;
+         break;
+
+      case TUX64_ELF_HEADER_IDENT_DATA_ENDIAN_LITTLE:
+         elf_endian_format = TUX64_ENDIAN_FORMAT_LITTLE;
+         break;
+
+      default:
+         result.status = TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE;
+         return result;
    }
 
    /* verify the ELF is the correct version */
@@ -689,7 +811,12 @@ tux64_platform_mips_n64_kernel_parse(
          return result;
    }
 
-   return tux64_platform_mips_n64_kernel_parse_elf_header(elf_data, elf_bytes, vtable);
+   return tux64_platform_mips_n64_kernel_parse_elf_header(
+      elf_data,
+      elf_bytes,
+      elf_endian_format,
+      vtable
+   );
 }
 
 /*----------------------------------------------------------------------------*/
