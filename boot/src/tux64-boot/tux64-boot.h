@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* boot/src/tux64-boot/tux64-boot.h - The project-wide header for tux64-boot. */
@@ -19,6 +19,10 @@
 #if !TUX64_CONFIG_PLATFORM_MIPS_VR4300
 #error "tux64-lib has TUX64_CONFIG_PLATFORM_MIPS_VR4300 disabled.  please rebuild tux64-lib with --enable-platform-mips-vr4300."
 #endif /* !TUX64_CONFIG_PLATFORM_MIPS_VR4300 */
+
+#if TUX64_ENDIAN_FORMAT_NATIVE != TUX64_ENDIAN_FORMAT_BIG
+#error "only big-endian bootloaders are currently supported.  please ensure your build configuration targets a big-endian system."
+#endif /* TUX64_ENDIAN_FORMAT_NATIVE != TUX64_ENDIAN_FORMAT_BIG */
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_H */
