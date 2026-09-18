@@ -84,7 +84,8 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       --enable-region-pal \
       --enable-region-ntsc \
       --enable-region-mpal \
-      --enable-ique
+      --enable-ique \
+      --enable-foreign-endian-kernels
 )
 
 make -j${TUX64_MAKEOPTS}
