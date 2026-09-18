@@ -301,6 +301,9 @@ tux64_platform_mips_vr4300_cop0_cause_exception_code(
 #define TUX64_PLATFORM_MIPS_VR4300_COP0_CAUSE_BIT_IP7\
    (1u << 15u)
 
+#define TUX64_PLATFORM_MIPS_VR4300_COP0_CONFIG_BIT_BE\
+   (1u << 15u)
+
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_PLATFORM_MIPS_VR4300_ENABLE */
 
