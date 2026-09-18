@@ -10,7 +10,9 @@
 #include "tux64-boot/exec.h"
 
 #include <tux64/endian.h>
+#include <tux64/bitwise.h>
 #include <tux64/platform/mips/n64/memory-map.h>
+#include <tux64/platform/mips/vr4300/cop0.h>
 #include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/halt.h"
@@ -44,6 +46,7 @@ tux64_boot_exec_kernel(
    const void * entrypoint,
    enum Tux64EndianFormat endian_format
 ) {
+   Tux64UInt32 c0_config;
    Tux64UInt32 fw_arg0_u32;
    Tux64UInt32 fw_arg1_u32;
    Tux64UInt32 fw_arg2_u32;
@@ -53,11 +56,18 @@ tux64_boot_exec_kernel(
    unsigned long fw_arg2;
    unsigned long fw_arg3;
 
-   /* TODO: add a configuration option to allow booting foreign endianesses. */
-   /* until we get this working, the only safe option is to halt. */
-   if (endian_format != TUX64_ENDIAN_FORMAT_NATIVE) {
-      tux64_boot_halt();
-      TUX64_UNREACHABLE;
+   if (TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS) {
+      c0_config = tux64_platform_mips_vr4300_cop0_register_read_config();
+      if (endian_format != TUX64_ENDIAN_FORMAT_NATIVE) {
+         c0_config = tux64_bitwise_flags_flip_uint32(
+            c0_config,
+            TUX64_PLATFORM_MIPS_VR4300_COP0_CONFIG_BIT_BE
+         );
+      }
+   } else {
+      /* assume the caller did the correct checks so ensure we're only */
+      /* executing native-endian kernels, as documented. */
+      (void)c0_config;
    }
 
    fw_arg0_u32 = (Tux64UIntPtr)&tux64_boot_exec_kernel_arguments;
@@ -76,8 +86,16 @@ tux64_boot_exec_kernel(
    __asm__ volatile (
       ".set noreorder\n"
       "jr %0\n"
+#if TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS
+      "mtc0 %1,$%2\n"
+#else /* TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS */
       "nop\n"
+#endif /* TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS */
       :: "r"      (entrypoint),
+#if TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS
+         "r"      (c0_config),
+         "K"      (TUX64_PLATFORM_MIPS_VR4300_COP0_REGISTER_CAUSE),
+#endif /* TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS */
          "{a0}"   (fw_arg0),
          "{a1}"   (fw_arg1),
          "{a2}"   (fw_arg2),

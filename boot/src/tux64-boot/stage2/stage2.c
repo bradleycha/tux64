@@ -10,6 +10,7 @@
 #include <tux64/endian.h>
 #include "tux64-boot/initialize.h"
 #include "tux64-boot/header.h"
+#include "tux64-boot/halt.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/exec.h"
 #include "tux64-boot/stage2/status.h"
@@ -24,6 +25,9 @@ tux64_boot_stage2_start_kernel(void) {
    entrypoint = (const void *)tux64_boot_header_file_kernel()->addr_entry;
    endian_format = tux64_boot_header_file_kernel_endian_format();
 
+   /* stage-1 check immediately if our kernel is a forien endianess and */
+   /* TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS == 0.  therefore, it's safe to */
+   /* assume that our kernel is bootable, regardless of endianess. */
    tux64_boot_exec_kernel(entrypoint, endian_format);
 }
 

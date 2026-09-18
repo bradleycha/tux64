@@ -152,6 +152,11 @@ AC_ARG_ENABLE([region-mpal],
    [tux64_boot_config_region_mpal=1],
    [tux64_boot_config_region_mpal=0]
 )
+AC_ARG_ENABLE([foreign-endian-kernels],
+   AS_HELP_STRING([--enable-foreign-endian-kernels], [Enable support for booting kernel images with a different endianess to the bootloader]),
+   [tux64_boot_config_foreign_endian_kernels=1],
+   [tux64_boot_config_foreign_endian_kernels=0]
+)
 
 if [[ -z "$CONFIG_COLOR_FOREGROUND" ]]; then
    CONFIG_COLOR_FOREGROUND="white"
@@ -278,6 +283,10 @@ AC_DEFINE_UNQUOTED([CONFIG_REGION_NTSC],
 AC_DEFINE_UNQUOTED([CONFIG_REGION_MPAL],
    [$tux64_boot_config_region_mpal],
    [Enable M-PAL region support]
+)
+AC_DEFINE_UNQUOTED([CONFIG_FOREIGN_ENDIAN_KERNELS],
+   [$tux64_boot_config_foreign_endian_kernels],
+   [Enable support for booting kernel images with a different endianess to the bootloader]
 )
 AC_DEFINE_UNQUOTED([CONFIG_COLOR_FOREGROUND],
    [$tux64_boot_config_color_foreground_enum],

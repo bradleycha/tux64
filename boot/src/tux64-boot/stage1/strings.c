@@ -104,6 +104,10 @@ TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_DATA
 );
 TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
+   tux64_boot_stage1_strings_error_unsupported_kernel_endian_format_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_UNSUPPORTED_KERNEL_ENDIAN_FORMAT_DATA
+);
+TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(
    tux64_boot_stage1_strings_boot_kernel_data,
    TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_DATA
 );
@@ -246,6 +250,11 @@ TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
    tux64_boot_stage1_strings_error_checksum,
    tux64_boot_stage1_strings_error_checksum_data,
    TUX64_BOOT_STAGE1_STRINGS_ERROR_CHECKSUM_LENGTH
+);
+TUX64_BOOT_STAGE1_STRINGS_TEXT_DEFINE(
+   tux64_boot_stage1_strings_error_unsupported_kernel_endian_format,
+   tux64_boot_stage1_strings_error_unsupported_kernel_endian_format_data,
+   TUX64_BOOT_STAGE1_STRINGS_ERROR_UNSUPPORTED_KERNEL_ENDIAN_FORMAT_LENGTH
 );
 TUX64_BOOT_STAGE1_STRINGS_TEXT_LABEL_DEFINE(
    tux64_boot_stage1_strings_boot_kernel,

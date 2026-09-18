@@ -41,7 +41,10 @@ tux64_boot_exec_kernel_arguments_initialize(
 /* Starts the linux kernel given by the entrypoint.  Assumes interrupts are   */
 /* disabled, the VI and AI are stopped, and there are no ongoing RSP, PI, or  */
 /* SI DMA transfers.  Kernel arguments must first be initialized using        */
-/* tux64_boot_exec_kernel_arguments_initialize() before executing.            */
+/* tux64_boot_exec_kernel_arguments_initialize() before executing.  If        */
+/* TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS is disabled, it is assumed that   */
+/* endian_format == TUX64_ENDIAN_FORMAT_NATIVE.  Otherwise, endian switching  */
+/* is done before executing the kernel.                                       */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_exec_kernel(

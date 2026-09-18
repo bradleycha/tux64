@@ -118,6 +118,11 @@
    .text                = "Corrupt file";
 }
 {
+   .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_ERROR_UNSUPPORTED_KERNEL_ENDIAN_FORMAT_DATA;
+   .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_ERROR_UNSUPPORTED_KERNEL_ENDIAN_FORMAT_LENGTH;
+   .text                = "Unsupported kernel endianess";
+}
+{
    .identifier_data     = TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_DATA;
    .identifier_length   = TUX64_BOOT_STAGE1_STRINGS_BOOT_KERNEL_LENGTH;
    .text                = "Starting linux";

@@ -329,6 +329,15 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_sta
       tux64_boot_rng_random_uint32()
    );
 
+   if (!TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS) {
+      /* we perform this check here so that we don't need to load all the */
+      /* boot files before erroring out. */
+      if (tux64_boot_header_file_kernel_endian_format() != TUX64_ENDIAN_FORMAT_NATIVE) {
+         tux64_boot_stage1_fsm_halt(fsm, &tux64_boot_stage1_strings_error_unsupported_kernel_endian_format);
+         return;
+      }
+   }
+
    /* directly called to avoid unnecessary extra delay */
    tux64_boot_stage1_fsm_transition_load_file_kernel(fsm);
    return;
@@ -539,7 +548,7 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_load_file) {
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boot_kernel) {
    (void)tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_boot_kernel);
-   
+
    /* for the same reason as we have in tux64_boot_stage1_fsm_halt(), we need */
    /* to delay for 1 frame so that the message below displays. */
    if (TUX64_BOOT_CONFIG_DELAY) {

@@ -53,6 +53,8 @@ extern const struct Tux64BootStage1FbconText
 tux64_boot_stage1_strings_error_io;
 extern const struct Tux64BootStage1FbconText
 tux64_boot_stage1_strings_error_checksum;
+extern const struct Tux64BootStage1FbconText
+tux64_boot_stage1_strings_error_unsupported_kernel_endian_format;
 extern const struct Tux64BootStage1FbconTextLabel
 tux64_boot_stage1_strings_boot_kernel;
 extern const struct Tux64BootStage1FbconTextLabel
