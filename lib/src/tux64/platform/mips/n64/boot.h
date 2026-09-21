@@ -11,13 +11,20 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64/tux64.h"
+#include "tux64/endian.h"
+
+/*----------------------------------------------------------------------------*/
+/* The native endianess of all multi-byte values in the boot header.          */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT\
+   TUX64_ENDIAN_FORMAT_BIG
 
 /* the number of bytes per word. we choose this so all data will be 2-byte */
 /* aligned, which is the smallest required alignment to work with PI DMA. */
 /* in addition, being 4-byte aligned means we don't have to deal with */
 /* unaligned or residual data when checksumming on the console, which */
 /* massively simplifies the code there. */
-#define TUX64_PLATFORM_MIPS_N64_BOOT_BYTES_PER_WORD\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ALIGNMENT\
    4u
 
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC\
