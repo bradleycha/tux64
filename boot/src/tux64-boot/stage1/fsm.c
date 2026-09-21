@@ -324,6 +324,8 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_sta
    tux64_boot_exec_kernel_arguments_initialize(
       tux64_boot_load_allocations.optional.initramfs.address,
       tux64_boot_header_file_initramfs()->length,
+      tux64_boot_header_file_rootfs()->addr_cart,
+      tux64_boot_header_file_rootfs()->length,
       tux64_boot_load_allocations.optional.command_line.address,
       tux64_boot_stage1_memory_total(),
       tux64_boot_rng_random_uint32()

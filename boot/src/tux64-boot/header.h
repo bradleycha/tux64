@@ -37,6 +37,8 @@ enum Tux64EndianFormat
 tux64_boot_header_file_kernel_endian_format(void);
 const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_header_file_initramfs(void);
+const struct Tux64PlatformMipsN64BootHeaderFileRootfs *
+tux64_boot_header_file_rootfs(void);
 const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_header_file_command_line(void);
 

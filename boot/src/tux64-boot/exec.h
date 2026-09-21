@@ -20,6 +20,8 @@
 struct Tux64BootExecKernelArguments {
    Tux64UInt32 initramfs_address;
    Tux64UInt32 initramfs_bytes;
+   Tux64UInt32 rootfs_cart_address;
+   Tux64UInt32 rootfs_bytes;
    Tux64UInt32 command_line_address;
    Tux64UInt32 total_memory;
    Tux64UInt32 rng_seed;
@@ -32,6 +34,8 @@ void
 tux64_boot_exec_kernel_arguments_initialize(
    Tux64UInt32 initramfs_address,
    Tux64UInt32 initramfs_bytes,
+   Tux64UInt32 rootfs_cart_address,
+   Tux64UInt32 rootfs_bytes,
    Tux64UInt32 command_line_address,
    Tux64UInt32 total_memory,
    Tux64UInt32 rng_seed

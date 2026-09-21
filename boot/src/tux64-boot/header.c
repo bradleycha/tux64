@@ -83,6 +83,11 @@ tux64_boot_header_file_initramfs(void) {
    return &tux64_boot_header.data.files.initramfs;
 }
 
+const struct Tux64PlatformMipsN64BootHeaderFileRootfs *
+tux64_boot_header_file_rootfs(void) {
+   return &tux64_boot_header.data.files.rootfs;
+}
+
 const struct Tux64PlatformMipsN64BootHeaderFile *
 tux64_boot_header_file_command_line(void) {
    return &tux64_boot_header.data.files.command_line;
