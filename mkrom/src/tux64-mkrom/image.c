@@ -450,6 +450,32 @@ tux64_mkrom_image_build_boot_header_files_initramfs(
 }
 
 static void
+tux64_mkrom_image_build_boot_header_files_rootfs(
+   const struct Tux64MkromLoadData * data,
+   const struct Tux64MkromImageLayout * layout,
+   struct Tux64PlatformMipsN64BootHeaderFileRootfs * rootfs
+) {
+   Tux64UInt32 addr_cart;
+   Tux64UInt32 length;
+   Tux64UInt32 empty;
+
+   if (data->rootfs.data == TUX64_NULLPTR) {
+      empty = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(0u), TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+
+      rootfs->addr_cart = empty;
+      rootfs->length    = empty;
+      return;
+   }
+
+   addr_cart   = tux64_platform_mips_n64_pi_bus_address_dom1_rom(layout->offsets.rootfs);
+   length      = data->rootfs.bytes;
+
+   rootfs->addr_cart = tux64_endian_convert_uint32(addr_cart, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   rootfs->length    = tux64_endian_convert_uint32(length, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   return;
+}
+
+static void
 tux64_mkrom_image_build_boot_header_files_command_line(
    const struct Tux64MkromArgumentsConfigFile * config,
    const struct Tux64MkromImageLayout * layout,
@@ -484,8 +510,6 @@ tux64_mkrom_image_build_boot_header_files(
    const struct Tux64MkromImageLayout * layout,
    struct Tux64PlatformMipsN64BootHeaderFiles * boot_header_files
 ) {
-   /* TODO: add similar code to initramfs building when we add the rootfs */
-   /* file to the boot header. */
    tux64_mkrom_image_build_boot_header_files_bootloader_stage1(
       data,
       &boot_header_files->bootloader.stage1
@@ -504,6 +528,11 @@ tux64_mkrom_image_build_boot_header_files(
       data,
       layout,
       &boot_header_files->initramfs
+   );
+   tux64_mkrom_image_build_boot_header_files_rootfs(
+      data,
+      layout,
+      &boot_header_files->rootfs
    );
    tux64_mkrom_image_build_boot_header_files_command_line(
       config,
