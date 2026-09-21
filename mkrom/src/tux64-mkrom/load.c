@@ -228,6 +228,19 @@ tux64_mkrom_load_data_initramfs(
 }
 
 static void
+tux64_mkrom_load_data_kernel_print_info(
+   const struct Tux64PlatformMipsN64Kernel * kernel
+) {
+   TUX64_LOG_INFO_FMT(
+      "kernel image is %" PRIu32 " bytes and will require %" PRIu32 " bytes of memory",
+      kernel->image.bytes,
+      kernel->memory
+   );
+   
+   return;
+}
+
+static void
 tux64_mkrom_load_data_kernel_auxdata(
    const struct Tux64PlatformMipsN64Kernel * kernel,
    struct Tux64MkromLoadData * load_data
@@ -279,6 +292,7 @@ tux64_mkrom_load_data_kernel(
 
    load_data->kernel = kernel_parse_result.payload.ok;
 
+   tux64_mkrom_load_data_kernel_print_info(&kernel_parse_result.payload.ok);
    tux64_mkrom_load_data_kernel_auxdata(&kernel_parse_result.payload.ok, load_data);
    tux64_mkrom_load_data_kernel_sanity_checks(&kernel_parse_result.payload.ok);
 
