@@ -21,19 +21,17 @@
 
 #include <stdlib.h>
 
-#define TUX64_MKROM_IMAGE_ALIGNMENT_ADDRESS\
+#define TUX64_MKROM_IMAGE_ALIGNMENT_ADDRESS_DEFAULT\
    2u /* aligned for PI DMA */
 #define TUX64_MKROM_IMAGE_ALIGNMENT_ROM_LENGTH\
    16u /* aligned for ares to not shit itself */
-#define TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT\
-   TUX64_ENDIAN_FORMAT_BIG
 
 static Tux64UInt32
 tux64_mkrom_image_checksum_endian_convert(
    Tux64UInt32 checksum
 ) {
    /* checksum implicitly converts to big-endian. */
-   if (TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT == TUX64_ENDIAN_FORMAT_BIG) {
+   if (TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT == TUX64_ENDIAN_FORMAT_BIG) {
       return checksum;
    }
 
@@ -165,15 +163,13 @@ tux64_mkrom_image_layout_iterator_initialize(
 }
 
 static Tux64Boolean
-tux64_mkrom_image_layout_iterator_attach(
+tux64_mkrom_image_layout_iterator_attach_with_alignment(
    struct Tux64MkromImageLayoutIterator * iter,
    Tux64UInt32 * output,
-   Tux64UInt32 bytes
+   Tux64UInt32 bytes,
+   Tux64UInt32 align
 ) {
-   Tux64UInt32 align;
    Tux64UInt32 bytes_aligned;
-
-   align = TUX64_LITERAL_UINT32(TUX64_MKROM_IMAGE_ALIGNMENT_ADDRESS);
 
    /* we need to do this so we can check for overflow without invoking */
    /* undefined behavior. */
@@ -201,6 +197,20 @@ tux64_mkrom_image_layout_iterator_attach(
    iter->offset += bytes_aligned;
 
    return TUX64_BOOLEAN_TRUE;
+}
+
+static Tux64Boolean
+tux64_mkrom_image_layout_iterator_attach(
+   struct Tux64MkromImageLayoutIterator * iter,
+   Tux64UInt32 * output,
+   Tux64UInt32 bytes
+) {
+   return tux64_mkrom_image_layout_iterator_attach_with_alignment(
+      iter,
+      output,
+      bytes,
+      TUX64_LITERAL_UINT32(TUX64_MKROM_IMAGE_ALIGNMENT_ADDRESS_DEFAULT)
+   );
 }
 
 static Tux64Boolean
@@ -256,10 +266,11 @@ tux64_mkrom_image_build_layout(
       &layout->offsets.bootloader_stage0,
       TUX64_LITERAL_UINT32(TUX64_MKROM_LOAD_DATA_BOOTLOADER_STAGE0_BYTES)
    );
-   (void)tux64_mkrom_image_layout_iterator_attach(
+   (void)tux64_mkrom_image_layout_iterator_attach_with_alignment(
       &iter,
       &layout->offsets.boot_header,
-      TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader))
+      TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64BootHeader)),
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ALIGNMENT)
    );
 
    /* now we must check for overflow. */
@@ -338,8 +349,8 @@ tux64_mkrom_image_build_boot_header_file(
    addr_cart = tux64_platform_mips_n64_pi_bus_address_dom1_rom(layout_offset);
 
    header->checksum  = tux64_mkrom_image_compute_checksum(data, bytes);
-   header->addr_cart = tux64_endian_convert_uint32(addr_cart, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
-   header->length    = tux64_endian_convert_uint32(bytes, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
+   header->addr_cart = tux64_endian_convert_uint32(addr_cart, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   header->length    = tux64_endian_convert_uint32(bytes, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
    return;
 }
 
@@ -367,8 +378,8 @@ tux64_mkrom_image_build_boot_header_file_optional(
    length      = TUX64_LITERAL_UINT32(0u);
 
    header->checksum  = checksum;
-   header->addr_cart = tux64_endian_convert_uint32(addr_cart, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
-   header->length    = tux64_endian_convert_uint32(length, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
+   header->addr_cart = tux64_endian_convert_uint32(addr_cart, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   header->length    = tux64_endian_convert_uint32(length, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
    return;
 }
 
@@ -384,8 +395,8 @@ tux64_mkrom_image_build_boot_header_files_bootloader_stage1(
    memory = length + data->bootloader.stage1_bss;
 
    stage1->checksum  = tux64_mkrom_image_compute_checksum_file(&data->bootloader.stage1);
-   stage1->length    = tux64_endian_convert_uint32(length, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
-   stage1->memory    = tux64_endian_convert_uint32(memory, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
+   stage1->length    = tux64_endian_convert_uint32(length, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   stage1->memory    = tux64_endian_convert_uint32(memory, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
    return;
 }
 
@@ -417,9 +428,9 @@ tux64_mkrom_image_build_boot_header_files_kernel(
       &kernel->image.file
    );
 
-   kernel->image.memory = tux64_endian_convert_uint32(data->kernel.memory, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
-   kernel->addr_load    = tux64_endian_convert_uint32(data->kernel.addr_load, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
-   kernel->addr_entry   = tux64_endian_convert_uint32(data->kernel.addr_entry, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
+   kernel->image.memory = tux64_endian_convert_uint32(data->kernel.memory, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   kernel->addr_load    = tux64_endian_convert_uint32(data->kernel.addr_load, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   kernel->addr_entry   = tux64_endian_convert_uint32(data->kernel.addr_entry, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
    return;
 }
 
@@ -449,7 +460,7 @@ tux64_mkrom_image_build_boot_header_files_command_line(
    Tux64UInt32 empty;
 
    if (config->command_line.characters == TUX64_LITERAL_UINT32(0u)) {
-      empty = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(0u), TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
+      empty = tux64_endian_convert_uint32(TUX64_LITERAL_UINT32(0u), TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
 
       command_line->checksum  = empty;
       command_line->addr_cart = empty;
@@ -461,8 +472,8 @@ tux64_mkrom_image_build_boot_header_files_command_line(
    length      = tux64_mkrom_image_command_line_bytes_null_terminated(&config->command_line);
 
    command_line->checksum  = tux64_mkrom_image_compute_checksum_command_line(&config->command_line);
-   command_line->addr_cart = tux64_endian_convert_uint32(addr_cart, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
-   command_line->length    = tux64_endian_convert_uint32(length, TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT);
+   command_line->addr_cart = tux64_endian_convert_uint32(addr_cart, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
+   command_line->length    = tux64_endian_convert_uint32(length, TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT);
    return;
 }
 
@@ -512,7 +523,7 @@ tux64_mkrom_image_build_boot_header_data(
 ) {
    boot_header_data->flags = tux64_endian_convert_uint32(
       data->bootloader.flags,
-      TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT
+      TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT
    );
    
    tux64_mkrom_image_build_boot_header_files(
@@ -543,7 +554,7 @@ tux64_mkrom_image_build_boot_header(
 
    magic.uint = tux64_endian_convert_uint32(
       TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_MAGIC),
-      TUX64_MKROM_IMAGE_BOOT_HEADER_ENDIAN_FORMAT
+      TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT
    );
 
    tux64_memory_copy(
