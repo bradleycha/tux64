@@ -83,10 +83,10 @@ index 66ec28ab4..098ee187a 100644
  void __init plat_time_init(void)
 diff --git a/arch/mips/n64/tux64-boot.c b/arch/mips/n64/tux64-boot.c
 new file mode 100644
-index 000000000..936dc5040
+index 000000000..e017d01bf
 --- /dev/null
 +++ b/arch/mips/n64/tux64-boot.c
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,180 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * tux64-boot.c: Kernel support for extended boot information provided by tux64-boot.
@@ -111,6 +111,9 @@ index 000000000..936dc5040
 +static const char __initdata *cmdline = NULL;
 +static uint32_t __initdata system_memory;
 +
++static uint32_t __initdata rootfs_cart_address;
++static uint32_t __initdata rootfs_bytes = 0;
++
 +struct tux64_boot_resource
 +{
 +	uint32_t address;
@@ -121,6 +124,8 @@ index 000000000..936dc5040
 +{
 +	uint32_t initrd_address;
 +	uint32_t initrd_bytes;
++	uint32_t rootfs_cart_address;
++	uint32_t rootfs_bytes;
 +	uint32_t command_line_address;
 +	uint32_t total_memory;
 +	uint32_t rng_seed;
@@ -138,6 +143,8 @@ index 000000000..936dc5040
 +	 */
 +	args->initrd_address		= be32_to_cpu(args_raw->initrd_address);
 +	args->initrd_bytes		= be32_to_cpu(args_raw->initrd_bytes);
++	args->rootfs_cart_address	= be32_to_cpu(args_raw->rootfs_cart_address);
++	args->rootfs_bytes		= be32_to_cpu(args_raw->rootfs_bytes);
 +	args->command_line_address	= be32_to_cpu(args_raw->command_line_address);
 +	args->total_memory		= be32_to_cpu(args_raw->total_memory);
 +	args->rng_seed			= args_raw->rng_seed;
@@ -167,10 +174,14 @@ index 000000000..936dc5040
 +
 +	tux64_load_boot_args(&args);
 +
-+	if (args.initrd_address != 0)
++	if (args.initrd_bytes != 0)
 +	{
-+		initrd_ptr	= (void *)CKSEG0ADDR(args.initrd_address);
-+		initrd_bytes	= args.initrd_bytes;
++		initrd_ptr = (void *)CKSEG0ADDR(args.initrd_address);
++		initrd_bytes = args.initrd_bytes;
++	}
++	if (args.rootfs_bytes != 0) {
++		rootfs_cart_address = args.rootfs_cart_address;
++		rootfs_bytes = args.rootfs_bytes;
 +	}
 +	if (args.command_line_address != 0)
 +	{
@@ -187,8 +198,25 @@ index 000000000..936dc5040
 +	tux64_prom_init_cmdline();
 +}
 +
++#ifdef CONFIG_N64CART
++static void __init tux64_platform_init_n64cart(void)
++{
++	if (rootfs_bytes == 0)
++		return;
++
++	/* TODO: attach rootfs from cartridge ROM if present */
++	pr_info("n64cart rootfs address: 0x%08x\n", rootfs_cart_address);
++	pr_info("n64cart rootfs bytes: %u\n", rootfs_bytes);
++}
++#else
++static void __init tux64_platform_init_n64cart(void)
++{
++}
++#endif
++
 +void __init tux64_platform_init(void)
 +{
++	tux64_platform_init_n64cart();
 +}
 +
 +static void __init tux64_plat_mem_setup_address_space(void)
