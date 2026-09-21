@@ -7,34 +7,34 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64-mkrom/tux64-mkrom.h"
-
+#include "tux64-mkrom/arguments.h"
+#include "tux64-mkrom/file.h"
+#include "tux64-mkrom/load.h"
+#include "tux64-mkrom/image.h"
 #include <tux64/log.h>
-#include <tux64/memory.h>
-#include <tux64/bitwise.h>
-#include <tux64/endian.h>
-#include <tux64/fs.h>
 #include <tux64/arguments.h>
+#include <tux64/fs.h>
 #include <tux64/string.h>
 #include <tux64/parse/string-integer.h>
-#include <tux64/platform/mips/n64/rom.h>
 #include <tux64/platform/mips/n64/kernel.h>
-#include "tux64-mkrom/arguments.h"
-#include "tux64-mkrom/builder.h"
 
-#include <stdlib.h>
 #include <inttypes.h>
 
-#define TUX64_MKROM_ARGC_MAX TUX64_UINT8_MAX
+#define TUX64_MKROM_ARGC_MAX \
+   TUX64_UINT8_MAX
 
 enum Tux64MkromExitStatus {
    TUX64_MKROM_EXIT_STATUS_OK = 0u,
    TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY,
-   TUX64_MKROM_EXIT_STATUS_FS_ERROR,
    TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS,
    TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR,
-   TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR,
-   TUX64_MKROM_EXIT_STATUS_PARSE_KERNEL_ERROR,
-   TUX64_MKROM_EXIT_STATUS_BUILDER_ERROR
+   TUX64_MKROM_EXIT_STATUS_FS_ERROR,
+   TUX64_MKROM_EXIT_STATUS_LOAD_ERROR,
+   TUX64_MKROM_EXIT_STATUS_IMAGE_BUILD_ERROR
+};
+
+struct Tux64MkromExitPayloadOutOfMemory {
+   const char * allocation_name;
 };
 
 struct Tux64MkromExitPayloadTooManyArguments {
@@ -46,35 +46,36 @@ struct Tux64MkromExitPayloadFsError {
    struct Tux64FsResult reason;
 };
 
-struct Tux64MkromExitPayloadArgumentsParseError {
-   struct Tux64ArgumentsParseResult result;
+struct Tux64MkromExitPayloadLoadError {
+   struct Tux64MkromLoadResult reason;
 };
 
-struct Tux64MkromExitPayloadParseStringIntegerError {
-   struct Tux64ParseStringIntegerResult reason;
-};
-
-struct Tux64MkromExitPayloadParseKernelError {
-   struct Tux64PlatformMipsN64KernelParseResult reason;
-};
-
-struct Tux64MkromExitPayloadBuilderError {
-   struct Tux64MkromBuilderMeasureResult reason;
+struct Tux64MkromExitPayloadImageBuildError {
+   struct Tux64MkromImageBuildResult reason;
 };
 
 union Tux64MkromExitPayload {
+   struct Tux64MkromExitPayloadOutOfMemory out_of_memory;
    struct Tux64MkromExitPayloadTooManyArguments too_many_arguments;
    struct Tux64MkromExitPayloadFsError fs_error;
-   struct Tux64MkromExitPayloadArgumentsParseError arguments_parse_error;
-   struct Tux64MkromExitPayloadParseStringIntegerError parse_string_integer_error;
-   struct Tux64MkromExitPayloadParseKernelError parse_kernel_error;
-   struct Tux64MkromExitPayloadBuilderError builder_error;
+   struct Tux64MkromExitPayloadLoadError load_error;
+   struct Tux64MkromExitPayloadImageBuildError image_build_error;
 };
 
 struct Tux64MkromExitResult {
    enum Tux64MkromExitStatus status;
    union Tux64MkromExitPayload payload;
 };
+
+static void
+tux64_mkrom_exit_result_display_out_of_memory(
+   const struct Tux64MkromExitPayloadOutOfMemory * self
+) {
+   TUX64_LOG_ERROR_FMT(
+      "ran out of memory during %s",
+      self->allocation_name
+   );
+}
 
 static void
 tux64_mkrom_exit_result_display_too_many_arguments(
@@ -85,25 +86,83 @@ tux64_mkrom_exit_result_display_too_many_arguments(
       self->argc_given,
       self->argc_max
    );
+}
+
+static void
+tux64_mkrom_exit_result_display_load_error_invalid_stage0_length(
+   const struct Tux64MkromLoadPayloadInvalidStage0Length * invalid_stage0_length
+) {
+   TUX64_LOG_ERROR_FMT(
+      "stage-0 bootloader binary must be less than %" PRIu32 " bytes, but provided binary is %" PRIu32 " bytes",
+      invalid_stage0_length->length_maximum,
+      invalid_stage0_length->length_provided
+   );
    return;
 }
 
 static void
-tux64_mkrom_exit_result_display_parse_string_integer_error(
-   const struct Tux64MkromExitPayloadParseStringIntegerError * self
+tux64_mkrom_exit_result_display_load_error_invalid_stage0_cic_length(
+   const struct Tux64MkromLoadPayloadInvalidStage0CicLength * invalid_stage0_cic_length
 ) {
-   switch (self->reason.status) {
+   TUX64_LOG_ERROR_FMT(
+      "expected stage-0 bootloader CIC data to be %" PRIu32 " bytes, but provided data is %" PRIu32 " bytes",
+      invalid_stage0_cic_length->length_expected,
+      invalid_stage0_cic_length->length_provided
+   );
+   return;
+}
+
+static void
+tux64_mkrom_exit_result_display_load_error_invalid_stage1_bss_hex_digit(
+   char c
+) {
+   switch (tux64_string_character_is_alphanumeric(c)) {
+      case TUX64_BOOLEAN_TRUE:
+         TUX64_LOG_ERROR_FMT(
+            "stage-1 bootloader BSS length contains invalid hex digit \'%c\'",
+            c
+         );
+         break;
+      case TUX64_BOOLEAN_FALSE:
+         TUX64_LOG_ERROR_FMT(
+            "stage-1 bootloader BSS length contains invalid hex digit code %" PRIu8 "/0x%02" PRIx8,
+            c,
+            (Tux64UInt8)c
+         );
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
+
+   return;
+}
+
+static void
+tux64_mkrom_exit_result_display_load_error_invalid_stage1_alignment(
+   const struct Tux64MkromLoadPayloadInvalidStage1Alignment * invalid_stage1_alignment
+) {
+   TUX64_LOG_ERROR_FMT(
+      "stage-1 bootloader of %" PRIu32 " bytes must be aligned to a %" PRIu32 "-byte boundary, however it is misaligned by %" PRIu32 " bytes",
+      invalid_stage1_alignment->length_provided,
+      invalid_stage1_alignment->alignment,
+      invalid_stage1_alignment->residual
+   );
+
+   return;
+}
+
+static void
+tux64_mkrom_exit_result_display_load_error_invalid_stage1_bss(
+   const struct Tux64MkromLoadPayloadInvalidStage1Bss * invalid_stage1_bss
+) {
+   switch (invalid_stage1_bss->reason.status) {
       case TUX64_PARSE_STRING_INTEGER_STATUS_OK:
          TUX64_UNREACHABLE;
       case TUX64_PARSE_STRING_INTEGER_STATUS_INVALID_DIGIT:
-         TUX64_LOG_ERROR_FMT(
-            "invalid string integer digit \'%c\' (hex: 0x%02x)",
-            self->reason.payload.invalid_digit.character,
-            (Tux64UInt32)self->reason.payload.invalid_digit.character
-         );
+         tux64_mkrom_exit_result_display_load_error_invalid_stage1_bss_hex_digit(invalid_stage1_bss->reason.payload.invalid_digit.character);
          break;
       case TUX64_PARSE_STRING_INTEGER_STATUS_OUT_OF_RANGE:
-         TUX64_LOG_ERROR("string integer out of range");
+         TUX64_LOG_ERROR("stage-1 bootloader BSS length is too large");
          break;
       default:
          TUX64_UNREACHABLE;
@@ -113,29 +172,38 @@ tux64_mkrom_exit_result_display_parse_string_integer_error(
 }
 
 static void
-tux64_mkrom_exit_result_display_parse_kernel_error(
-   const struct Tux64MkromExitPayloadParseKernelError * self
+tux64_mkrom_exit_result_display_load_error_kernel_parse_error(
+   const struct Tux64MkromLoadPayloadKernelParseError * kernel_parse_error
 ) {
-   switch (self->reason.status) {
+   switch (kernel_parse_error->reason.status) {
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK:
          TUX64_UNREACHABLE;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_CORRUPT_IMAGE:
-         TUX64_LOG_ERROR("kernel image is invalid or corrupt");
+         TUX64_LOG_ERROR("kernel image is either corrupted or malformed");
          break;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_BAD_VERSION:
-         TUX64_LOG_ERROR_FMT("kernel image is the wrong ELF version (0x%08x)", self->reason.payload.bad_version.version);
+         TUX64_LOG_ERROR_FMT(
+            "kernel image has an invalid ELF version 0x%08" PRIx32,
+            kernel_parse_error->reason.payload.bad_version.version
+         );
          break;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_TYPE:
-         TUX64_LOG_ERROR_FMT("kernel image is not an executable, instead it's type 0x%08x", self->reason.payload.invalid_type.type);
+         TUX64_LOG_ERROR_FMT(
+            "kernel image has an invalid ELF object type 0x%08" PRIx32,
+            kernel_parse_error->reason.payload.invalid_type.type
+         );
          break;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_INVALID_MACHINE:
-         TUX64_LOG_ERROR_FMT("kernel image is not for a MIPS processor, instead it's for machine 0x%08x", self->reason.payload.invalid_machine.machine);
+         TUX64_LOG_ERROR_FMT(
+            "kernel image has an invalid target machine 0x%08" PRIx32,
+            kernel_parse_error->reason.payload.invalid_machine.machine
+         );
          break;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_MAIN_SEGMENT_MISSING:
-         TUX64_LOG_ERROR("kernel image does not contain any loadable segments");
+         TUX64_LOG_ERROR("no executable code segment was found in the kernel image");
          break;
       case TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_MAIN_SEGMENT_DUPLICATE:
-         TUX64_LOG_ERROR("kernel image has more than one loadable segment, unable to choose the main segment");
+         TUX64_LOG_ERROR("multiple executable code segments were found in the kernel image");
          break;
       default:
          TUX64_UNREACHABLE;
@@ -144,32 +212,70 @@ tux64_mkrom_exit_result_display_parse_kernel_error(
    return;
 }
 
-static const char * const
-tux64_mkrom_exit_result_display_builder_error_string_table [TUX64_MKROM_BUILDER_MEASURE_STATUS_FIELD_COUNT - 1u] = {
-   "bootloader stage-0 code",
-   "bootloader stage-0 CIC data",
-   "bootloader stage-1 code",
-   "bootloader stage-2 code",
-   "bootloader stage-2 BSS data",
-   "bootloader stage-3",
-   "kernel",
-   "initramfs",
-   "kernel command-line"
-};
-
 static void
-tux64_mkrom_exit_result_display_builder_error(
-   const struct Tux64MkromExitPayloadBuilderError * self
+tux64_mkrom_exit_result_display_load_error(
+   const struct Tux64MkromExitPayloadLoadError * self
 ) {
-   const char * label;
+   switch (self->reason.status) {
+      case TUX64_MKROM_LOAD_STATUS_OK:
+      case TUX64_MKROM_LOAD_STATUS_OUT_OF_MEMORY:
+      case TUX64_MKROM_LOAD_STATUS_FS_ERROR:
+         TUX64_UNREACHABLE;
+      case TUX64_MKROM_LOAD_STATUS_INVALID_STAGE0_LENGTH:
+         tux64_mkrom_exit_result_display_load_error_invalid_stage0_length(&self->reason.payload.invalid_stage0_length);
+         break;
+      case TUX64_MKROM_LOAD_STATUS_INVALID_STAGE0_CIC_LENGTH:
+         tux64_mkrom_exit_result_display_load_error_invalid_stage0_cic_length(&self->reason.payload.invalid_stage0_cic_length);
+         break;
+      case TUX64_MKROM_LOAD_STATUS_INVALID_STAGE1_ALIGNMENT:
+         tux64_mkrom_exit_result_display_load_error_invalid_stage1_alignment(&self->reason.payload.invalid_stage1_alignment);
+         break;
+      case TUX64_MKROM_LOAD_STATUS_INVALID_STAGE1_BSS:
+         tux64_mkrom_exit_result_display_load_error_invalid_stage1_bss(&self->reason.payload.invalid_stage1_bss);
+         break;
+      case TUX64_MKROM_LOAD_STATUS_KERNEL_PARSE_ERROR:
+         tux64_mkrom_exit_result_display_load_error_kernel_parse_error(&self->reason.payload.kernel_parse_error);
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
 
-   label = tux64_mkrom_exit_result_display_builder_error_string_table[
-      (Tux64UInt8)self->reason.status -
-      (Tux64UInt8)TUX64_MKROM_BUILDER_MEASURE_STATUS_BAD_LENGTH_BOOTLOADER_STAGE0
-   ];
+   return;
+}
+   
+static void
+tux64_mkrom_exit_result_display_image_build_error(
+   const struct Tux64MkromExitPayloadImageBuildError * self
+) {
+   const char * offender;
 
-   TUX64_LOG_ERROR_FMT("%s is too big", label);
+   switch (self->reason.status) {
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OK:
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OUT_OF_MEMORY:
+         TUX64_UNREACHABLE;
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OVERFLOW_BOOTLOADER_STAGE1:
+         offender = "bootloader stage-1";
+         break;
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OVERFLOW_BOOTLOADER_STAGE2:
+         offender = "bootloader stage-2";
+         break;
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OVERFLOW_KERNEL:
+         offender = "kernel image";
+         break;
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OVERFLOW_INITRAMFS:
+         offender = "initramfs image";
+         break;
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OVERFLOW_ROOTFS:
+         offender = "rootfs image";
+         break;
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OVERFLOW_COMMAND_LINE:
+         offender = "kernel command-line";
+         break;
+      default:
+         TUX64_UNREACHABLE;
+   }
 
+   TUX64_LOG_ERROR_FMT("%s is too large", offender);
    return;
 }
 
@@ -180,26 +286,24 @@ tux64_mkrom_exit_result_display(
    switch (self->status) {
       case TUX64_MKROM_EXIT_STATUS_OK:
          break;
+      case TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY:
+         tux64_mkrom_exit_result_display_out_of_memory(&self->payload.out_of_memory);
+         break;
       case TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS:
          tux64_mkrom_exit_result_display_too_many_arguments(&self->payload.too_many_arguments);
          break;
-      case TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY:
-         TUX64_LOG_ERROR("out of memory");
+      case TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR:
+         /* we do the error reporting in-place to more cleanly solve issues */
+         /* with string lifetimes.  thus, no printing needs to be done here. */
          break;
       case TUX64_MKROM_EXIT_STATUS_FS_ERROR:
          tux64_fs_log_result(&self->payload.fs_error.reason);
          break;
-      case TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR:
-         tux64_arguments_log_result(&self->payload.arguments_parse_error.result);
+      case TUX64_MKROM_EXIT_STATUS_LOAD_ERROR:
+         tux64_mkrom_exit_result_display_load_error(&self->payload.load_error);
          break;
-      case TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR:
-         tux64_mkrom_exit_result_display_parse_string_integer_error(&self->payload.parse_string_integer_error);
-         break;
-      case TUX64_MKROM_EXIT_STATUS_PARSE_KERNEL_ERROR:
-         tux64_mkrom_exit_result_display_parse_kernel_error(&self->payload.parse_kernel_error);
-         break;
-      case TUX64_MKROM_EXIT_STATUS_BUILDER_ERROR:
-         tux64_mkrom_exit_result_display_builder_error(&self->payload.builder_error);
+      case TUX64_MKROM_EXIT_STATUS_IMAGE_BUILD_ERROR:
+         tux64_mkrom_exit_result_display_image_build_error(&self->payload.image_build_error);
          break;
       default:
          TUX64_UNREACHABLE;
@@ -208,639 +312,185 @@ tux64_mkrom_exit_result_display(
    return;
 }
 
-/* when we want to report errors, we run into a lifetime issue - what if the */
-/* string slice comes from data loaded from a file into memory, but then we */
-/* need to free that memory?  when do we do that?  i've decided to use a */
-/* stack which stores a list of items to clean up after printing error */
-/* information. */
-
-#define TUX64_MKROM_EXIT_CLEAN_LIST_ENTRY_TYPE_COUNT 1u
-enum Tux64MkromExitCleanListEntryType {
-   TUX64_MKROM_EXIT_CLEAN_LIST_ENTRY_TYPE_LOADED_FILE = 0u
-};
-
-union Tux64MkromExitCleanListEntryData {
-   struct Tux64FsLoadedFile loaded_file;
-};
-
-struct Tux64MkromExitCleanListEntry {
-   enum Tux64MkromExitCleanListEntryType type;
-   union Tux64MkromExitCleanListEntryData data;
-};
-
-#define TUX64_MKROM_EXIT_CLEAN_LIST_MAX_ENTRIES\
-   1u
-
-struct Tux64MkromExitCleanListEntry
-tux64_mkrom_exit_clean_list_table [TUX64_MKROM_EXIT_CLEAN_LIST_MAX_ENTRIES];
-
-Tux64UInt8
-tux64_mkrom_exit_clean_list_entries;
-
-static void
-tux64_mkrom_exit_clean_list_initialize(void) {
-   tux64_mkrom_exit_clean_list_entries = TUX64_LITERAL_UINT8(0u);
-   return;
-}
-
-typedef void (*Tux64MkromExitCleanListFreeEntryFunction)(
-   struct Tux64MkromExitCleanListEntry * entry
-);
-
-static void
-tux64_mkrom_exit_clean_list_free_entry_loaded_file(
-   struct Tux64MkromExitCleanListEntry * entry
-) {
-   struct Tux64FsLoadedFile * loaded_file;
-   
-   loaded_file = &entry->data.loaded_file;
-
-   tux64_fs_file_unload(loaded_file);
-
-   return;
-}
-
-static const Tux64MkromExitCleanListFreeEntryFunction
-tux64_mkrom_exit_clean_list_free_entry_functions [] = {
-   tux64_mkrom_exit_clean_list_free_entry_loaded_file
-};
-
-static void
-tux64_mkrom_exit_clean_list_free_entry(
-   struct Tux64MkromExitCleanListEntry * entry
-) {
-   tux64_mkrom_exit_clean_list_free_entry_functions[(Tux64UInt8)entry->type](entry);
-   return;
-}
-
-static void
-tux64_mkrom_exit_clean_list_free(void) {
-   struct Tux64MkromExitCleanListEntry * iter_entry;
-   Tux64UInt8 entries_remaining;
-
-   if (tux64_mkrom_exit_clean_list_entries == TUX64_LITERAL_UINT8(0u)) {
-      return;
-   }
-
-   /* make sure to iterate from top to bottom */
-   iter_entry = &tux64_mkrom_exit_clean_list_table[tux64_mkrom_exit_clean_list_entries - TUX64_LITERAL_UINT8(1u)];
-   entries_remaining = tux64_mkrom_exit_clean_list_entries;
-
-   do {
-      tux64_mkrom_exit_clean_list_free_entry(iter_entry);
-
-      iter_entry--;
-      entries_remaining--;
-   } while (entries_remaining != TUX64_LITERAL_UINT8(0u));
-
-   return;
-}
-
-static void
-tux64_mkrom_exit_clean_list_push(
-   const struct Tux64MkromExitCleanListEntry * entry
-) {
-   tux64_mkrom_exit_clean_list_table[tux64_mkrom_exit_clean_list_entries] = *entry;
-   tux64_mkrom_exit_clean_list_entries++;
-   return;
-}
-
-static void
-tux64_mkrom_exit_clean_list_push_loaded_file(
-   const struct Tux64FsLoadedFile * file
-) {
-   struct Tux64MkromExitCleanListEntry entry;
-
-   entry.type = TUX64_MKROM_EXIT_CLEAN_LIST_ENTRY_TYPE_LOADED_FILE;
-   entry.data.loaded_file = *file;
-
-   tux64_mkrom_exit_clean_list_push(&entry);
-   return;
-}
-
-/* canonicalizes a path from the command-line into a C-style path string. */
-/* the returned pointer must be freed manually, and this returns */
-/* TUX64_NULLPTR upon failure. */
-static char *
-tux64_mkrom_canonicalize_path_command_line(
-   const struct Tux64String * path
-) {
-   Tux64UInt32 characters;
-   char * ptr;
-
-   /* includes space for the null-terminator */
-   characters = path->characters + TUX64_LITERAL_UINT32(1u);
-   ptr = malloc(characters * sizeof(char));
-   if (ptr == NULL) {
-      return TUX64_NULLPTR;
-   }
-
-   tux64_memory_copy(ptr, path->ptr, path->characters * TUX64_LITERAL_UINT32(sizeof(char)));
-   ptr[characters - TUX64_LITERAL_UINT32(1u)] = '\0';
-
-   return ptr;
-}
-
-/* canonicalizes a path from the config file into a C-style path string. */
-/* the returned pointer must be freed manually, and this returns */
-/* TUX64_NULLPTR upon failure. */
-static char *
-tux64_mkrom_canonicalize_path_config_file(
-   const struct Tux64String * prefix,
-   const struct Tux64String * path
-) {
-   Tux64UInt32 characters;
-   char * ptr;
-
-   /* includes space for the null-terminator */
-   characters = prefix->characters + path->characters + TUX64_LITERAL_UINT32(1u);
-   ptr = malloc(characters * sizeof(char));
-   if (ptr == NULL) {
-      return TUX64_NULLPTR;
-   }
-
-   tux64_memory_copy(
-      ptr,
-      prefix->ptr,
-      prefix->characters * TUX64_LITERAL_UINT32(sizeof(char))
-   );
-   tux64_memory_copy(
-      ptr + prefix->characters,
-      path->ptr, path->characters * TUX64_LITERAL_UINT32(sizeof(char))
-   );
-   ptr[characters - TUX64_LITERAL_UINT32(1u)] = '\0';
-
-   return ptr;
-}
-
 static struct Tux64MkromExitResult
-tux64_mkrom_load_file(
-   const char * path_canonical,
-   const char * name,
-   struct Tux64FsLoadedFile * output
+tux64_mkrom_main_write_rom_image(
+   const struct Tux64MkromImage * image,
+   const struct Tux64String * path_output
 ) {
-   struct Tux64FsFileLoadResult load_result;
    struct Tux64MkromExitResult result;
-
-   TUX64_LOG_INFO_FMT("loading %s from %s", name, path_canonical);
-
-   load_result = tux64_fs_file_load(path_canonical);
-
-   switch (load_result.status) {
-      case TUX64_FS_STATUS_OK:
-         result.status = TUX64_MKROM_EXIT_STATUS_OK;
-         *output = load_result.payload.ok;
-         break;
-
-      case TUX64_FS_STATUS_NOT_FOUND:
-      case TUX64_FS_STATUS_PERMISSION_DENIED:
-      case TUX64_FS_STATUS_NOT_A_FILE:
-      case TUX64_FS_STATUS_UNKNOWN_ERROR:
-         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
-         result.payload.fs_error.reason.status = load_result.status;
-         result.payload.fs_error.reason.payload = load_result.payload.err;
-         break;
-
-      case TUX64_FS_STATUS_OUT_OF_MEMORY:
-         result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-         break;
-
-      default:
-         TUX64_UNREACHABLE;
-   }
-
-   return result;
-}
-
-static struct Tux64MkromExitResult
-tux64_mkrom_save_file(
-   const char * path_canonical,
-   const char * name,
-   const struct Tux64FsLoadedFile * file
-) {
    struct Tux64FsResult save_result;
-   struct Tux64MkromExitResult result;
 
-   TUX64_LOG_INFO_FMT("saving %s to %s", name, path_canonical);
+   TUX64_LOG_INFO_FMT(
+      "ROM image is %" PRIu32 " bytes",
+      image->bytes
+   );
 
-   save_result = tux64_fs_file_save(path_canonical, file);
+   TUX64_LOG_INFO_FMT(
+      "writing ROM image to %.*s",
+      path_output->characters,
+      path_output->ptr
+   );
 
+   save_result = tux64_mkrom_file_save(
+      path_output,
+      image->data,
+      image->bytes
+   );
    switch (save_result.status) {
       case TUX64_FS_STATUS_OK:
-         result.status = TUX64_MKROM_EXIT_STATUS_OK;
          break;
-
-      case TUX64_FS_STATUS_NOT_FOUND:
-      case TUX64_FS_STATUS_PERMISSION_DENIED:
-      case TUX64_FS_STATUS_NOT_A_FILE:
-      case TUX64_FS_STATUS_UNKNOWN_ERROR:
-         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
-         result.payload.fs_error.reason = save_result;
-         break;
-
       case TUX64_FS_STATUS_OUT_OF_MEMORY:
          result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-         break;
-
+         result.payload.out_of_memory.allocation_name = "ROM image writing";
+         return result;
       default:
-         TUX64_UNREACHABLE;
+         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
+         result.payload.fs_error.reason = save_result;
+         return result;
    }
 
+   /* we finally did it, and with no gotos or disgusting hacks this time! */
+   result.status = TUX64_MKROM_EXIT_STATUS_OK;
    return result;
 }
 
 static struct Tux64MkromExitResult
-tux64_mkrom_load_file_command_line(
-   const struct Tux64String * path,
-   const char * name,
-   struct Tux64FsLoadedFile * output
+tux64_mkrom_main_loaded_data(
+   const struct Tux64MkromArgumentsCommandLine * command_line,
+   const struct Tux64MkromArgumentsConfigFile * config,
+   const struct Tux64MkromLoadData * data
 ) {
    struct Tux64MkromExitResult result;
-   char * path_canonical;
+   struct Tux64MkromImageBuildResult image_build_result;
 
-   path_canonical = tux64_mkrom_canonicalize_path_command_line(path);
-   if (path_canonical == TUX64_NULLPTR) {
-      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      return result;
+   TUX64_LOG_INFO("building ROM image");
+
+   image_build_result = tux64_mkrom_image_build(config, data);
+   switch (image_build_result.status) {
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OK:
+         break;
+      case TUX64_MKROM_IMAGE_BUILD_STATUS_OUT_OF_MEMORY:
+         result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+         result.payload.out_of_memory.allocation_name = "ROM image building";
+         return result;
+      default:
+         result.status = TUX64_MKROM_EXIT_STATUS_IMAGE_BUILD_ERROR;
+         result.payload.image_build_error.reason = image_build_result;
+         return result;
    }
 
-   result = tux64_mkrom_load_file(path_canonical, name, output);
-   free(path_canonical);
-   return result;
-}
-
-static struct Tux64MkromExitResult
-tux64_mkrom_save_file_command_line(
-   const struct Tux64String * path,
-   const char * name,
-   const struct Tux64FsLoadedFile * file
-) {
-   struct Tux64MkromExitResult result;
-   char * path_canonical;
-
-   path_canonical = tux64_mkrom_canonicalize_path_command_line(path);
-   if (path_canonical == TUX64_NULLPTR) {
-      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      return result;
-   }
-
-   result = tux64_mkrom_save_file(path_canonical, name, file);
-   free(path_canonical);
-   return result;
-}
-
-static struct Tux64MkromExitResult
-tux64_mkrom_load_file_config_file(
-   const struct Tux64String * prefix,
-   const struct Tux64String * path,
-   const char * name,
-   struct Tux64FsLoadedFile * output
-) {
-   struct Tux64MkromExitResult result;
-   char * path_canonical;
-
-   path_canonical = tux64_mkrom_canonicalize_path_config_file(prefix, path);
-   if (path_canonical == TUX64_NULLPTR) {
-      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      return result;
-   }
-
-   result = tux64_mkrom_load_file(path_canonical, name, output);
-   free(path_canonical);
-   return result;
-}
-
-struct Tux64MkromInputFilesBootloader {
-   struct Tux64FsLoadedFile stage0;
-   struct Tux64FsLoadedFile stage0_cic;
-   struct Tux64FsLoadedFile stage1;
-   struct Tux64FsLoadedFile stage2;
-};
-
-struct Tux64MkromInputFilesKernelImage {
-   const Tux64UInt8 * data;
-   Tux64UInt32 bytes;
-};
-
-struct Tux64MkromInputFilesKernel {
-   struct Tux64MkromInputFilesKernelImage image;  
-   Tux64UInt32 memory;
-   Tux64UInt32 addr_load;
-   Tux64UInt32 addr_entry;
-};
-
-struct Tux64MkromInputFiles {
-   struct Tux64MkromInputFilesBootloader bootloader;
-   struct Tux64MkromInputFilesKernel kernel;
-   struct Tux64FsLoadedFile initramfs;
-};
-
-struct Tux64MkromInput {
-   struct Tux64MkromInputFiles files;
-   const struct Tux64PlatformMipsN64RomHeader * rom_header;
-   struct Tux64String kernel_command_line;
-   struct Tux64String path_output;
-   Tux64UInt32 boot_header_flags;
-   Tux64UInt32 stage1_bss_length;
-};
-
-static struct Tux64MkromExitResult
-tux64_mkrom_run_parsed_input(
-   const struct Tux64MkromInput * input
-) {
-   struct Tux64MkromExitResult result;
-   struct Tux64MkromBuilderInput builder_input;
-   struct Tux64MkromBuilderMeasureResult measure_result;
-   Tux64UInt8 * rom_file_data;
-   struct Tux64FsLoadedFile rom_file;
-
-   /* we do this to restrict mutable pointers and also work around previous */
-   /* bad code, and I don't feel like rewriting it because it's boring. */
-   builder_input.files.bootloader.stage0.data = input->files.bootloader.stage0.data;
-   builder_input.files.bootloader.stage0.bytes = input->files.bootloader.stage0.bytes;
-   builder_input.files.bootloader.stage0_cic.data = input->files.bootloader.stage0_cic.data;
-   builder_input.files.bootloader.stage0_cic.bytes = input->files.bootloader.stage0_cic.bytes;
-   builder_input.files.bootloader.stage1.data = input->files.bootloader.stage1.data;
-   builder_input.files.bootloader.stage1.bytes = input->files.bootloader.stage1.bytes;
-   builder_input.files.bootloader.stage2.data = input->files.bootloader.stage2.data;
-   builder_input.files.bootloader.stage2.bytes = input->files.bootloader.stage2.bytes;
-   builder_input.files.kernel.image.data = input->files.kernel.image.data;
-   builder_input.files.kernel.image.bytes = input->files.kernel.image.bytes;
-   builder_input.files.kernel.memory = input->files.kernel.memory;
-   builder_input.files.kernel.addr_load = input->files.kernel.addr_load;
-   builder_input.files.kernel.addr_entry = input->files.kernel.addr_entry;
-   builder_input.files.initramfs.data = input->files.initramfs.data;
-   builder_input.files.initramfs.bytes = input->files.initramfs.bytes;
-   tux64_memory_copy(&builder_input.rom_header, input->rom_header, TUX64_LITERAL_UINT32(sizeof(struct Tux64PlatformMipsN64RomHeader)));
-   builder_input.kernel_command_line = input->kernel_command_line;
-   builder_input.boot_header_flags = input->boot_header_flags;
-   builder_input.stage1_bss_length = input->stage1_bss_length;
-
-   TUX64_LOG_INFO("verifying input files and calculating ROM length");
-
-   measure_result = tux64_mkrom_builder_measure_and_verify(&builder_input);
-   if (measure_result.status != TUX64_MKROM_BUILDER_MEASURE_STATUS_OK) {
-      result.status = TUX64_MKROM_EXIT_STATUS_BUILDER_ERROR;
-      result.payload.builder_error.reason = measure_result;
-      return result;
-   }
-
-   TUX64_LOG_INFO_FMT("ROM will be %" PRIu32 " bytes", measure_result.payload.ok.rom_bytes);
-
-   rom_file_data = malloc(measure_result.payload.ok.rom_bytes * sizeof(Tux64UInt8));
-   if (rom_file_data == NULL) {
-      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      return result;
-   }
-
-   rom_file.data = rom_file_data;
-   rom_file.bytes = measure_result.payload.ok.rom_bytes;
-
-   TUX64_LOG_INFO("constructing ROM image");
-
-   tux64_mkrom_builder_construct(
-      &builder_input,
-      &measure_result.payload.ok,
-      rom_file.data
+   result = tux64_mkrom_main_write_rom_image(
+      &image_build_result.payload.ok,
+      &command_line->path_output
    );
-
-   result = tux64_mkrom_save_file_command_line(
-      &input->path_output,
-      "ROM image",
-      &rom_file
-   );
-   tux64_fs_file_unload(&rom_file);
+   tux64_mkrom_image_free(&image_build_result.payload.ok);
    return result;
 }
 
 static struct Tux64MkromExitResult
-tux64_mkrom_run_parsed_cmdline(
-   const struct Tux64MkromArgumentsCommandLine * cmdline
+tux64_mkrom_main_parsed_config_file(
+   const struct Tux64MkromArgumentsCommandLine * command_line,
+   const struct Tux64MkromArgumentsConfigFile * config
 ) {
    struct Tux64MkromExitResult result;
-   struct Tux64FsLoadedFile config_file;
-   struct Tux64String config_file_string;
-   struct Tux64ArgumentsIterator config_file_arguments_iterator;
-   struct Tux64ArgumentsParseResult config_file_parse_result;
-   struct Tux64MkromArgumentsConfigFile config_file_parsed;
-   struct Tux64MkromInput input;
-   struct Tux64FsLoadedFile stage1_bss_file;
-   struct Tux64FsLoadedFile kernel_elf_file;
-   struct Tux64String stage1_bss_string;
-   struct Tux64ParseStringIntegerResult stage1_bss_parse_result;
-   struct Tux64PlatformMipsN64KernelParseResult kernel_elf_parse_result;
-   struct Tux64PlatformMipsN64Kernel * kernel;
-   char * kernel_command_line_ptr;
-   Tux64Boolean config_file_loaded;
-   Tux64Boolean stage1_bss_file_loaded;
+   struct Tux64MkromLoadResult load_result;
 
-   /* attempt to load the config file into memory */
-   result = tux64_mkrom_load_file_command_line(
-      &cmdline->path_config,
-      "config file",
-      &config_file
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      return result;
+   TUX64_LOG_INFO("parsing boot files from configuration");
+
+   load_result = tux64_mkrom_load_data(config, &command_line->path_prefix);
+   switch (load_result.status) {
+      case TUX64_MKROM_LOAD_STATUS_OK:
+         break;
+      case TUX64_MKROM_LOAD_STATUS_OUT_OF_MEMORY:
+         result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+         result.payload.out_of_memory.allocation_name = "boot file parsing";
+         return result;
+      case TUX64_MKROM_LOAD_STATUS_FS_ERROR:
+         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
+         result.payload.fs_error.reason = load_result.payload.fs_error.reason;
+         return result;
+      default:
+         result.status = TUX64_MKROM_EXIT_STATUS_LOAD_ERROR;
+         result.payload.load_error.reason = load_result;
+         return result;
    }
-   config_file_loaded = TUX64_BOOLEAN_TRUE;
 
-   /* convert the raw data into a string */
-   config_file_string.ptr = (const char *)config_file.data;
-   config_file_string.characters =
-      config_file.bytes /
-      TUX64_LITERAL_UINT32(sizeof(char));
+   result = tux64_mkrom_main_loaded_data(
+      command_line,
+      config,
+      &load_result.payload.ok
+   );
+   tux64_mkrom_load_free_data(&load_result.payload.ok);
+   return result;
+}
 
-   /* set up the arguments iterator for the config file */
+static struct Tux64MkromExitResult
+tux64_mkrom_main_loaded_config_data(
+   const struct Tux64MkromArgumentsCommandLine * command_line,
+   const struct Tux64String * config_data
+) {
+   struct Tux64MkromExitResult result;
+   struct Tux64ArgumentsIterator config_iterator;
+   struct Tux64ArgumentsParseResult config_parse_result;
+   struct Tux64MkromArgumentsConfigFile config_parsed;
+
    tux64_arguments_iterator_initialize_config_file(
-      &config_file_arguments_iterator,
+      &config_iterator,
       &tux64_mkrom_arguments_config_file_iterator_options,
-      &config_file_string
+      config_data
    );
 
-   /* attempt to parse the config file */
-   /* note that we must wait until the end of the function to unload, as */
-   /* we have borrowed data passed around from it, and copying sucks. */
-   config_file_parse_result = tux64_mkrom_arguments_config_file_parse(
-      &config_file_arguments_iterator,
-      &config_file_parsed
+   config_parse_result = tux64_mkrom_arguments_config_file_parse(
+      &config_iterator,
+      &config_parsed
    );
-   switch (config_file_parse_result.status) {
+   switch (config_parse_result.status) {
       case TUX64_ARGUMENTS_PARSE_STATUS_OK:
          break;
       case TUX64_ARGUMENTS_PARSE_STATUS_EXIT:
          TUX64_UNREACHABLE;
       default:
-         /* save freeing until the end of the program due to lifetimes */
-         tux64_mkrom_exit_clean_list_push_loaded_file(&config_file);
+         tux64_arguments_log_result(&config_parse_result);
          result.status = TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR;
-         result.payload.arguments_parse_error.result = config_file_parse_result;
          return result;
    }
 
-   /* load all the files into memory */
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage0,
-      "bootloader stage-0 code",
-      &input.files.bootloader.stage0
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit0;
-   }
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage0_cic,
-      "bootloader stage-0 CIC data",
-      &input.files.bootloader.stage0_cic
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit1;
-   }
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage1,
-      "bootloader stage-1 code",
-      &input.files.bootloader.stage1
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit2;
-   }
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage1_bss,
-      "bootloader stage-1 BSS length",
-      &stage1_bss_file
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit3;
-   }
-   stage1_bss_file_loaded = TUX64_BOOLEAN_TRUE;
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_bootloader_stage2,
-      "bootloader stage-2 code",
-      &input.files.bootloader.stage2
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit4;
-   }
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_kernel,
-      "kernel image",
-      &kernel_elf_file
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit5;
-   }
-   result = tux64_mkrom_load_file_config_file(
-      &cmdline->path_prefix,
-      &config_file_parsed.path_initramfs,
-      "initramfs image",
-      &input.files.initramfs
-   );
-   if (result.status != TUX64_MKROM_EXIT_STATUS_OK) {
-      goto load_err_exit6;
-   }
+   return tux64_mkrom_main_parsed_config_file(command_line, &config_parsed);
+}
 
-   /* create an owned and null-terminated copy of the kernel command-line */
-   kernel_command_line_ptr = malloc((config_file_parsed.command_line.characters + 1u) * sizeof(char));
-   if (kernel_command_line_ptr == NULL) {
-      result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
-      goto load_err_exit7;
-   }
-   tux64_memory_copy(
-      kernel_command_line_ptr,
-      config_file_parsed.command_line.ptr,
-      config_file_parsed.command_line.characters * TUX64_LITERAL_UINT32(sizeof(char))
-   );
-   kernel_command_line_ptr[config_file_parsed.command_line.characters] = '\0';
+static struct Tux64MkromExitResult
+tux64_mkrom_main_parsed_command_line(
+   const struct Tux64MkromArgumentsCommandLine * command_line
+) {
+   struct Tux64MkromExitResult result;
+   struct Tux64FsFileLoadResult config_load_result;
+   struct Tux64String config_data;
 
-   /* attempt to parse the stage-1 BSS length file */
-   stage1_bss_string.ptr = (const char *)stage1_bss_file.data;
-   stage1_bss_string.characters = stage1_bss_file.bytes / TUX64_LITERAL_UINT32(sizeof(char));
-   stage1_bss_string = tux64_string_trim_whitespace(&stage1_bss_string);
-   stage1_bss_parse_result = tux64_parse_string_integer_hex_uint32(
-      &stage1_bss_string,
-      &input.stage1_bss_length
+   TUX64_LOG_INFO_FMT(
+      "reading configuration from %.*s",
+      command_line->path_config.characters,
+      command_line->path_config.ptr
    );
 
-   /* free the stage-1 BSS length file as we don't need it anymore */
-   tux64_fs_file_unload(&stage1_bss_file);
-   stage1_bss_file_loaded = TUX64_BOOLEAN_FALSE;
-
-   /* bail if parsing the length failed */
-   if (stage1_bss_parse_result.status != TUX64_PARSE_STRING_INTEGER_STATUS_OK) {
-      result.status = TUX64_MKROM_EXIT_STATUS_PARSE_STRING_INTEGER_ERROR;
-      result.payload.parse_string_integer_error.reason = stage1_bss_parse_result;
-      goto load_err_exit8;
+   config_load_result = tux64_mkrom_file_load(&command_line->path_config);
+   switch (config_load_result.status) {
+      case TUX64_FS_STATUS_OK:
+         break;
+      case TUX64_FS_STATUS_OUT_OF_MEMORY:
+         result.status = TUX64_MKROM_EXIT_STATUS_OUT_OF_MEMORY;
+         result.payload.out_of_memory.allocation_name = "configuration file loading";
+         return result;
+      default:
+         result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
+         result.payload.fs_error.reason = tux64_mkrom_file_load_result_to_fs_result(config_load_result);
+         return result;
    }
 
-   /* attempt to parse the kernel elf into its main segment and load metadata */
-   kernel_elf_parse_result = tux64_platform_mips_n64_kernel_parse(
-      kernel_elf_file.data,
-      kernel_elf_file.bytes
-   );
-   if (kernel_elf_parse_result.status != TUX64_PLATFORM_MIPS_N64_KERNEL_PARSE_STATUS_OK) {
-      result.status = TUX64_MKROM_EXIT_STATUS_PARSE_KERNEL_ERROR;
-      result.payload.parse_kernel_error.reason = kernel_elf_parse_result;
-      goto load_err_exit8;
-   }
-   kernel = &kernel_elf_parse_result.payload.ok;
+   config_data.ptr         = (const char *)config_load_result.payload.ok.data;
+   config_data.characters  = config_load_result.payload.ok.bytes / TUX64_LITERAL_UINT32(sizeof(char));
 
-   /* unwrap the parsed kernel image since we pass a straight pointer instead */
-   /* of a file offset.*/
-   input.files.kernel.image.data = &kernel_elf_file.data[kernel->image.offset];
-   input.files.kernel.image.bytes = kernel->image.bytes;
-   input.files.kernel.memory = kernel->memory;
-   input.files.kernel.addr_load = kernel->addr_load;
-   input.files.kernel.addr_entry = kernel->addr_entry;
-
-   /* initialize the rest of the fields for the input */
-   input.rom_header = &config_file_parsed.rom_header;
-   input.kernel_command_line.ptr = kernel_command_line_ptr;
-   input.kernel_command_line.characters = config_file_parsed.command_line.characters + TUX64_LITERAL_UINT32(1u);
-   input.path_output = cmdline->path_output;
-   input.boot_header_flags = config_file_parsed.boot_header_flags;
-
-   if (kernel->endian_format == TUX64_ENDIAN_FORMAT_LITTLE) {
-      input.boot_header_flags = tux64_bitwise_flags_set_uint32(
-         input.boot_header_flags,
-         TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_KERNEL_ENDIAN_FORMAT_LITTLE
-      );
-   }
-
-   /* we can now safely free the config file since all data is owned */
-   tux64_fs_file_unload(&config_file);
-   config_file_loaded = TUX64_BOOLEAN_FALSE;
-
-   /* and now we commence to the actual program, hoo-ray... */
-   result = tux64_mkrom_run_parsed_input(&input);
-
-   /* ...but don't forget to clean up after ourselves! */
-load_err_exit8:
-   free(kernel_command_line_ptr);
-load_err_exit7:
-   tux64_fs_file_unload(&input.files.initramfs);
-load_err_exit6:
-   tux64_fs_file_unload(&kernel_elf_file);
-load_err_exit5:
-   tux64_fs_file_unload(&input.files.bootloader.stage2);
-load_err_exit4:
-   if (stage1_bss_file_loaded == TUX64_BOOLEAN_TRUE) {
-      tux64_fs_file_unload(&stage1_bss_file);
-   }
-load_err_exit3:
-   tux64_fs_file_unload(&input.files.bootloader.stage1);
-load_err_exit2:
-   tux64_fs_file_unload(&input.files.bootloader.stage0_cic);
-load_err_exit1:
-   tux64_fs_file_unload(&input.files.bootloader.stage0);
-load_err_exit0:
-   if (config_file_loaded == TUX64_BOOLEAN_TRUE) {
-      tux64_fs_file_unload(&config_file);
-   }
+   result = tux64_mkrom_main_loaded_config_data(command_line, &config_data);
+   tux64_fs_file_unload(&config_load_result.payload.ok);
    return result;
 }
 
@@ -852,27 +502,23 @@ tux64_mkrom_main(
    struct Tux64MkromExitResult result;
    struct Tux64ArgumentsIterator args_iterator;
    struct Tux64ArgumentsParseResult args_parse_result;
-   struct Tux64MkromArgumentsCommandLine args_cmdline;
+   struct Tux64MkromArgumentsCommandLine args_parsed;
 
-   /* if the user is completely clueless, show them the help menu when no */
-   /* arguments are present */
    if (argc == TUX64_LITERAL_UINT8(1u)) {
       tux64_mkrom_arguments_command_line_print_menu_help();
       result.status = TUX64_MKROM_EXIT_STATUS_OK;
       return result;
    }
 
-   /* makes sure to skip over argv[0] */
    tux64_arguments_iterator_initialize_command_line(
       &args_iterator,
       argc - TUX64_LITERAL_UINT8(1u),
-      &argv[1]
+      &argv[1u]
    );
 
-   /* parse command-line arguments */
    args_parse_result = tux64_mkrom_arguments_command_line_parse(
       &args_iterator,
-      &args_cmdline
+      &args_parsed
    );
    switch (args_parse_result.status) {
       case TUX64_ARGUMENTS_PARSE_STATUS_OK:
@@ -881,18 +527,16 @@ tux64_mkrom_main(
          result.status = TUX64_MKROM_EXIT_STATUS_OK;
          return result;
       default:
+         tux64_arguments_log_result(&args_parse_result);
          result.status = TUX64_MKROM_EXIT_STATUS_ARGUMENTS_PARSE_ERROR;
-         result.payload.arguments_parse_error.result = args_parse_result;
          return result;
    }
 
-   return tux64_mkrom_run_parsed_cmdline(&args_cmdline);
+   return tux64_mkrom_main_parsed_command_line(&args_parsed);
 }
 
 int main(int argc, char ** argv) {
    struct Tux64MkromExitResult exit_result;
-
-   tux64_mkrom_exit_clean_list_initialize();
 
    if (argc > TUX64_LITERAL_UINT8(TUX64_MKROM_ARGC_MAX)) {
       exit_result.status = TUX64_MKROM_EXIT_STATUS_TOO_MANY_ARGUMENTS;
@@ -908,7 +552,6 @@ int main(int argc, char ** argv) {
 
 exit:
    tux64_mkrom_exit_result_display(&exit_result);
-   tux64_mkrom_exit_clean_list_free();
    return (int)exit_result.status;
 }
 

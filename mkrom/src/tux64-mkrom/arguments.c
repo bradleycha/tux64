@@ -524,6 +524,21 @@ tux64_mkrom_arguments_config_file_parser_initramfs(
 }
 
 static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_rootfs(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64MkromArgumentsConfigFile * arguments;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   return tux64_mkrom_arguments_parser_string(
+      parameter,
+      &arguments->path_rootfs
+   );
+}
+
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_config_file_parser_command_line(
    const struct Tux64String * parameter,
    void * context
@@ -779,6 +794,8 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    "kernel"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER\
    "initramfs"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROOTFS_IDENTIFIER\
+   "rootfs"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER\
    "command-line"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIER\
@@ -812,6 +829,8 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROOTFS_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROOTFS_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIER_CHARACTERS\
@@ -884,6 +903,14 @@ tux64_mkrom_arguments_config_file_option_initramfs_identifiers [] = {
    {
       .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER,
       .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_rootfs_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROOTFS_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROOTFS_IDENTIFIER_CHARACTERS)
    }
 };
 
@@ -973,6 +1000,8 @@ tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers [] = {
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_kernel_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_initramfs_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROOTFS_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rootfs_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_command_line_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_CHECKSUM_IDENTIFIERS_COUNT\
@@ -992,10 +1021,6 @@ tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers [] = {
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers)
 
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE\
-   ""
-#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE_CHARACTERS\
-   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE\
    0x80008135
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE_STRING\
@@ -1013,7 +1038,7 @@ tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers [] = {
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_DEFAULT_VALUE\
-   "NTXE"
+   "NLXE"
 
 static const struct Tux64ArgumentsOption
 tux64_mkrom_arguments_config_file_options_required [] = {
@@ -1058,18 +1083,25 @@ tux64_mkrom_arguments_config_file_options_required [] = {
       .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_KERNEL_IDENTIFIERS_COUNT),
       .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
       .parser                    = tux64_mkrom_arguments_config_file_parser_kernel
-   },
+   }
+};
+
+static const struct Tux64ArgumentsOption
+tux64_mkrom_arguments_config_file_options_optional [] = {
    {
       .identifiers_long          = tux64_mkrom_arguments_config_file_option_initramfs_identifiers,
       .identifiers_short         = TUX64_NULLPTR,
       .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_INITRAMFS_IDENTIFIERS_COUNT),
       .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
       .parser                    = tux64_mkrom_arguments_config_file_parser_initramfs
-   }
-};
-
-static const struct Tux64ArgumentsOption
-tux64_mkrom_arguments_config_file_options_optional [] = {
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_rootfs_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROOTFS_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_rootfs
+   },
    {
       .identifiers_long          = tux64_mkrom_arguments_config_file_option_command_line_identifiers,
       .identifiers_short         = TUX64_NULLPTR,
@@ -1257,10 +1289,10 @@ tux64_mkrom_arguments_config_file_initialize_optional(
 ) {
    tux64_mkrom_arguments_config_file_initialize_optional_rom_header(&output->rom_header);
 
-   output->command_line.ptr = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE;
-   output->command_line.characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE_CHARACTERS);
-   output->boot_header_flags = TUX64_LITERAL_UINT32(0u);
-
+   output->path_initramfs.characters   = TUX64_LITERAL_UINT32(0u);
+   output->path_rootfs.characters      = TUX64_LITERAL_UINT32(0u);
+   output->command_line.characters     = TUX64_LITERAL_UINT32(0u);
+   output->boot_header_flags           = TUX64_LITERAL_UINT32(0u);
    return;
 }
 
@@ -1349,11 +1381,15 @@ tux64_mkrom_arguments_config_file_parse(
    "\n"\
    "         The path to the kernel image.\n"\
    "\n"\
-   "      --initramfs=[path]\n"\
+   "      --initramfs=[path], default=(none)\n"\
    "\n"\
-   "         The path to the kernel's initramfs.\n"\
+   "         The path to the kernel's initramfs image.\n"\
    "\n"\
-   "      --command-line=[string], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_COMMAND_LINE_DEFAULT_VALUE "\"\n"\
+   "      --rootfs=[path], default=(none)\n"\
+   "\n"\
+   "         The path to the kernel's root filesystem.\n"\
+   "\n"\
+   "      --command-line=[string], default=(none)\n"\
    "\n"\
    "         The kernel command-line to boot the kernel image with.\n"\
    "\n"\

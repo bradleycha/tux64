@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* mkrom/src/tux64-mkrom/arguments.h - Header for arguments parsing.          */
@@ -25,6 +25,11 @@ tux64_mkrom_arguments_command_line_parse(
    struct Tux64MkromArgumentsCommandLine * output
 );
 
+/*----------------------------------------------------------------------------*/
+/* A parsed configuration file.  Strings have the same lifetime as the input  */
+/* arguments iterator.  path_initramfs and path_rootfs are optional, and if   */
+/* not present, will be an empty string.                                      */
+/*----------------------------------------------------------------------------*/
 struct Tux64MkromArgumentsConfigFile {
    struct Tux64PlatformMipsN64RomHeader rom_header;
    struct Tux64String path_bootloader_stage0;
@@ -34,6 +39,7 @@ struct Tux64MkromArgumentsConfigFile {
    struct Tux64String path_bootloader_stage2;
    struct Tux64String path_kernel;
    struct Tux64String path_initramfs;
+   struct Tux64String path_rootfs;
    struct Tux64String command_line;
    Tux64UInt32 boot_header_flags;
 };
@@ -49,7 +55,6 @@ tux64_mkrom_arguments_config_file_parse(
 
 void
 tux64_mkrom_arguments_command_line_print_menu_help(void);
-
 void
 tux64_mkrom_arguments_command_line_print_menu_version(void);
 
