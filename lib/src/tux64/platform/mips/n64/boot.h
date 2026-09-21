@@ -11,13 +11,6 @@
 /*----------------------------------------------------------------------------*/
 
 #include "tux64/tux64.h"
-#include "tux64/endian.h"
-
-/*----------------------------------------------------------------------------*/
-/* The native endianess of all multi-byte values in the boot header.          */
-/*----------------------------------------------------------------------------*/
-#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT\
-   TUX64_ENDIAN_FORMAT_BIG
 
 /* the number of bytes per word. we choose this so all data will be 2-byte */
 /* aligned, which is the smallest required alignment to work with PI DMA. */
@@ -47,7 +40,7 @@
 /* forward to the nearest 16-byte boundary.                                   */
 /*----------------------------------------------------------------------------*/
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_BYTES\
-   (0x54) /* TODO: compute this with AC_CHECK_SIZEOF(...) */
+   (0x5c) /* TODO: compute this with AC_CHECK_SIZEOF(...) */
 
 /*----------------------------------------------------------------------------*/
 /* The offset of each field in the boot header.                               */
@@ -90,8 +83,12 @@
    (4u + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_INITRAMFS_CHECKSUM)
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_INITRAMFS_LENGTH\
    (4u + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_INITRAMFS_ADDR_CART)
-#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_CHECKSUM\
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_ROOTFS_ADDR_CART\
    (4u + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_INITRAMFS_LENGTH)
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_ROOTFS_LENGTH\
+   (4u + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_ROOTFS_ADDR_CART)
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_CHECKSUM\
+   (4u + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_ROOTFS_LENGTH)
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_ADDR_CART\
    (4u + TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_CHECKSUM)
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_LENGTH\
@@ -99,6 +96,14 @@
 
 #if !TUX64_PREPROCESSOR_ONLY
 /*----------------------------------------------------------------------------*/
+
+#include "tux64/endian.h"
+
+/*----------------------------------------------------------------------------*/
+/* The native endianess of all multi-byte values in the boot header.          */
+/*----------------------------------------------------------------------------*/
+#define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT\
+   TUX64_ENDIAN_FORMAT_BIG
 
 struct Tux64PlatformMipsN64BootHeaderVersion {
    Tux64UInt8 major;
@@ -136,10 +141,19 @@ struct Tux64PlatformMipsN64BootHeaderFileKernel {
    Tux64UInt32 addr_entry;
 };
 
+/* we eliminate the checksum for rootfs because we aren't loading it all into */
+/* memory.  if we want safety, we can let linux's block/fs layer deal with */
+/* it.  this also saves a b1g 4 bytes. */
+struct Tux64PlatformMipsN64BootHeaderFileRootfs {
+   Tux64UInt32 addr_cart;
+   Tux64UInt32 length;
+};
+
 struct Tux64PlatformMipsN64BootHeaderFiles {
    struct Tux64PlatformMipsN64BootHeaderFileBootloader bootloader;
    struct Tux64PlatformMipsN64BootHeaderFileKernel kernel;
    struct Tux64PlatformMipsN64BootHeaderFile initramfs;
+   struct Tux64PlatformMipsN64BootHeaderFileRootfs rootfs;
    struct Tux64PlatformMipsN64BootHeaderFile command_line;
 };
 
@@ -187,6 +201,8 @@ TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_KERNEL
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_INITRAMFS_CHECKSUM       == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.initramfs.checksum));
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_INITRAMFS_ADDR_CART      == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.initramfs.addr_cart));
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_INITRAMFS_LENGTH         == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.initramfs.length));
+TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_ROOTFS_ADDR_CART         == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.rootfs.addr_cart));
+TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_ROOTFS_LENGTH            == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.rootfs.length));
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_CHECKSUM    == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.command_line.checksum));
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_ADDR_CART   == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.command_line.addr_cart));
 TUX64_ASSERT_STATIC(TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_OFFSET_DATA_FILES_COMMAND_LINE_LENGTH      == TUX64_OFFSET_OF(struct Tux64PlatformMipsN64BootHeader, data.files.command_line.length));
