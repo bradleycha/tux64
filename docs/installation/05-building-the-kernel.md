@@ -50,7 +50,6 @@ General setup  --->
   (-tux64) Local version - append to kernel release
   (/sbin/init) Default init path
   (tux64) Default hostname
-  (12) Kernel log buffer size (16 => 64KB, 17 => 128KB)
   [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
   [ ] Support initial ramdisk/ramfs compressed using gzip
   [ ] Support initial ramdisk/ramfs compressed using bzip2
@@ -64,10 +63,13 @@ General setup  --->
     [*] Enable support for printk
     [*] Enable smaller-sized data structures for core
 
+  (12) Kernel log buffer size (16 => 64KB, 17 => 128KB)
+
 [*] Enable the block layer  --->
   [ ] Legacy autoloading support
 
   Partition Types  --->
+    [*] Advanced partition selection
     [ ] PC BIOS (MSDOS partition tables) support
     [ ] EFI GUID Partition support
 
@@ -80,7 +82,6 @@ Executable file formats  --->
   [*] Kernel support for scripts starting with #!
 
 Memory Management options  --->
-  [ ] Support for paging of anonymous memory (swap)  ----
   [*] Allow for memory compaction
 
 Device drivers  --->
@@ -117,16 +118,12 @@ Device drivers  --->
     [ ]   Keyboards  ----
     [ ]   Mice  ----
 
-    Hardware I/O ports  --->
-      [ ] Serial I/O support
-
   [ ] Device Tree and Open Firmware support
   [ ] HID bus support
   [ ] Common Clock Framework
 
 File systems  --->
   [*] The Extended 4 (ext4) filesystem
-  [ ] Native language support
 
 Security options  --->
   Kernel hardening options  --->
