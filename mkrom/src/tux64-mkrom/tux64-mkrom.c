@@ -89,6 +89,24 @@ tux64_mkrom_exit_result_display_too_many_arguments(
 }
 
 static void
+tux64_mkrom_exit_result_display_bad_alignment(
+   const char * name,
+   Tux64UInt32 length_provided,
+   Tux64UInt32 alignment,
+   Tux64UInt32 residual
+) {
+   TUX64_LOG_ERROR_FMT(
+      "%s of %" PRIu32 " bytes must be aligned to a %" PRIu32 "-byte boundary, however it is misaligned by %" PRIu32 " bytes",
+      name,
+      length_provided,
+      alignment,
+      residual
+   );
+
+   return;
+}
+
+static void
 tux64_mkrom_exit_result_display_load_error_invalid_stage0_length(
    const struct Tux64MkromLoadPayloadInvalidStage0Length * invalid_stage0_length
 ) {
@@ -141,8 +159,8 @@ static void
 tux64_mkrom_exit_result_display_load_error_invalid_stage1_alignment(
    const struct Tux64MkromLoadPayloadInvalidStage1Alignment * invalid_stage1_alignment
 ) {
-   TUX64_LOG_ERROR_FMT(
-      "stage-1 bootloader of %" PRIu32 " bytes must be aligned to a %" PRIu32 "-byte boundary, however it is misaligned by %" PRIu32 " bytes",
+   tux64_mkrom_exit_result_display_bad_alignment(
+      "stage-1 bootloader",
       invalid_stage1_alignment->length_provided,
       invalid_stage1_alignment->alignment,
       invalid_stage1_alignment->residual
@@ -213,6 +231,20 @@ tux64_mkrom_exit_result_display_load_error_kernel_parse_error(
 }
 
 static void
+tux64_mkrom_exit_result_display_load_error_invalid_rootfs_alignment(
+   const struct Tux64MkromLoadPayloadInvalidRootfsAlignment * invalid_rootfs_alignment
+) {
+   tux64_mkrom_exit_result_display_bad_alignment(
+      "rootfs image",
+      invalid_rootfs_alignment->length_provided,
+      invalid_rootfs_alignment->alignment,
+      invalid_rootfs_alignment->residual
+   );
+
+   return;
+}
+
+static void
 tux64_mkrom_exit_result_display_load_error(
    const struct Tux64MkromExitPayloadLoadError * self
 ) {
@@ -235,6 +267,9 @@ tux64_mkrom_exit_result_display_load_error(
          break;
       case TUX64_MKROM_LOAD_STATUS_KERNEL_PARSE_ERROR:
          tux64_mkrom_exit_result_display_load_error_kernel_parse_error(&self->reason.payload.kernel_parse_error);
+         break;
+      case TUX64_MKROM_LOAD_STATUS_INVALID_ROOTFS_ALIGNMENT:
+         tux64_mkrom_exit_result_display_load_error_invalid_rootfs_alignment(&self->reason.payload.invalid_rootfs_alignment);
          break;
       default:
          TUX64_UNREACHABLE;

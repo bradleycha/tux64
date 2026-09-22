@@ -44,7 +44,8 @@ enum Tux64MkromLoadStatus {
    TUX64_MKROM_LOAD_STATUS_INVALID_STAGE0_CIC_LENGTH,
    TUX64_MKROM_LOAD_STATUS_INVALID_STAGE1_ALIGNMENT,
    TUX64_MKROM_LOAD_STATUS_INVALID_STAGE1_BSS,
-   TUX64_MKROM_LOAD_STATUS_KERNEL_PARSE_ERROR
+   TUX64_MKROM_LOAD_STATUS_KERNEL_PARSE_ERROR,
+   TUX64_MKROM_LOAD_STATUS_INVALID_ROOTFS_ALIGNMENT
 };
 
 struct Tux64MkromLoadPayloadFsError {
@@ -75,6 +76,12 @@ struct Tux64MkromLoadPayloadKernelParseError {
    struct Tux64PlatformMipsN64KernelParseResult reason;
 };
 
+struct Tux64MkromLoadPayloadInvalidRootfsAlignment {
+   Tux64UInt32 length_provided;
+   Tux64UInt32 alignment;
+   Tux64UInt32 residual;
+};
+
 union Tux64MkromLoadPayload {
    struct Tux64MkromLoadData ok;
    struct Tux64MkromLoadPayloadFsError fs_error;
@@ -83,6 +90,7 @@ union Tux64MkromLoadPayload {
    struct Tux64MkromLoadPayloadInvalidStage1Alignment invalid_stage1_alignment;
    struct Tux64MkromLoadPayloadInvalidStage1Bss invalid_stage1_bss;
    struct Tux64MkromLoadPayloadKernelParseError kernel_parse_error;
+   struct Tux64MkromLoadPayloadInvalidRootfsAlignment invalid_rootfs_alignment;
 };
 
 struct Tux64MkromLoadResult {

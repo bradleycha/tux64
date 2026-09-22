@@ -167,7 +167,25 @@ tux64_mkrom_load_data_rootfs_sanity_checks(
    const struct Tux64String * file_path_prefix,
    struct Tux64MkromLoadData * load_data
 ) {
-   /* in the future, we may add sanity checks.  but for now, we just continue. */
+   struct Tux64MkromLoadResult result;
+   Tux64UInt32 bytes;
+   Tux64UInt32 alignment;
+   Tux64UInt32 residual;
+
+   /* rootfs length must be aligned to a 4KiB boundary, as required by the */
+   /* n64cart kernel module. */
+   bytes       = load_data->rootfs.bytes;
+   alignment   = TUX64_LITERAL_UINT32(4u * 1024u);
+   residual    = bytes % alignment;
+
+   if (residual != TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_MKROM_LOAD_STATUS_INVALID_ROOTFS_ALIGNMENT;
+      result.payload.invalid_rootfs_alignment.length_provided = bytes;
+      result.payload.invalid_rootfs_alignment.alignment = alignment;
+      result.payload.invalid_rootfs_alignment.residual = residual;
+      return result;
+   }
+
    return tux64_mkrom_load_data_complete(
       config,
       file_path_prefix,
