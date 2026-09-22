@@ -19,23 +19,13 @@ tux64_checksum_fletcher_64_32_initialize(
    struct Tux64ChecksumContext * context
 ) {
    struct _Tux64ChecksumContextAlgorithmFletcher6432 * context_fletcher;
-   Tux64UInt8 sentinel_zero;
 
    context_fletcher = &context->algorithm.fletcher_64_32;
 
-   context_fletcher->sum_hi.uint = TUX64_LITERAL_UINT32(0u);
-   context_fletcher->sum_lo.uint = TUX64_LITERAL_UINT32(0u);
-
-   sentinel_zero = TUX64_LITERAL_UINT8(0x00);
-   tux64_memory_fill(
-      context_fletcher->word_buffer,
-      &sentinel_zero,
-      TUX64_LITERAL_UINT32(TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer)),
-      TUX64_LITERAL_UINT32(sizeof(sentinel_zero))
-   );
-
-   context_fletcher->word_buffer_capacity = TUX64_LITERAL_UINT8(TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer));
-
+   context_fletcher->sum_hi.uint       = TUX64_LITERAL_UINT32(0u);
+   context_fletcher->sum_lo.uint       = TUX64_LITERAL_UINT32(0u);
+   context_fletcher->word_buffer       = TUX64_LITERAL_UINT32(0u);
+   context_fletcher->word_buffer_bytes = TUX64_LITERAL_UINT8(0u);
    return;
 }
 
@@ -46,88 +36,66 @@ tux64_checksum_fletcher_64_32_digest_word(
 ) {
    context_fletcher->sum_hi.uint += word;
    context_fletcher->sum_lo.uint += context_fletcher->sum_hi.uint;
-
    return;
 }
 
 static void
-tux64_checksum_fletcher_64_32_flush_word_buffer(
+tux64_checksum_fletcher_64_32_word_buffer_digest(
    struct _Tux64ChecksumContextAlgorithmFletcher6432 * context_fletcher
 ) {
-   Tux64UInt8 sentinel_zero;
-   union Tux64Int32 word;
-
-   /* don't do anything if the buffer is empty */
-   if (context_fletcher->word_buffer_capacity == TUX64_LITERAL_UINT32(TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer))) {
-      return;
-   }
-
-   /* pad the buffer with zeroes */
-   sentinel_zero = TUX64_LITERAL_UINT8(0x00);
-   tux64_memory_fill(
-      &context_fletcher->word_buffer[TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer) - context_fletcher->word_buffer_capacity],
-      &sentinel_zero,
-      (Tux64UInt32)context_fletcher->word_buffer_capacity,
-      TUX64_LITERAL_UINT32(sizeof(sentinel_zero))
+   tux64_checksum_fletcher_64_32_digest_word(
+      context_fletcher,
+      context_fletcher->word_buffer
    );
-
-   /* take the word from the buffer and digest it */
-   tux64_endian_convert_copy(
-      word.bytes,
-      context_fletcher->word_buffer,
-      TUX64_LITERAL_UINT32(sizeof(context_fletcher->word_buffer)),
-      TUX64_ENDIAN_FORMAT_BIG
-   );
-   context_fletcher->word_buffer_capacity = TUX64_LITERAL_UINT8(TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer));
-
-   tux64_checksum_fletcher_64_32_digest_word(context_fletcher, word.uint);
-
+   
    return;
 }
 
-static Tux64UInt32
-tux64_checksum_fletcher_64_32_fill_word_buffer(
+#define TUX64_CHECKSUM_WORD_BUFFER_BYTES_MAX\
+   4u
+
+static void
+tux64_checksum_fletcher_64_32_word_buffer_add(
    struct _Tux64ChecksumContextAlgorithmFletcher6432 * context_fletcher,
-   const Tux64UInt8 * data,
-   Tux64UInt32 bytes
+   Tux64UInt8 byte
 ) {
-   Tux64UInt32 taken;
-   union Tux64Int32 word;
+   Tux64UInt8 position;
+   Tux64UInt32 word;
 
-   if (context_fletcher->word_buffer_capacity == TUX64_LITERAL_UINT32(TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer))) {
-      return TUX64_LITERAL_UINT32(0u);
+   /*-------------------------------------------------------------------------*/
+   /* let AA, BB, CC, DD be bytes.  we wish to shift them into the word       */
+   /* buffer as follows:                                                      */
+   /*                                                                         */
+   /*    00000000                                                             */
+   /*    AA000000                                                             */
+   /*    AABB0000                                                             */
+   /*    AABBCC00                                                             */
+   /*    AABBCCDD                                                             */
+   /*    (flush)                                                              */
+   /*    00000000                                                             */
+   /*      ....                                                               */
+   /*                                                                         */
+   /* this is nice because we don't need to worry about endianess as much.    */
+   /* additionally, we implicitly zero-pad lengths which are not aligned.     */
+   /* this means that when we finalize the checksum, we get zero padding for  */
+   /* free.                                                                   */
+   /*-------------------------------------------------------------------------*/
+
+   if (context_fletcher->word_buffer_bytes == TUX64_LITERAL_UINT32(TUX64_CHECKSUM_WORD_BUFFER_BYTES_MAX)) {
+      tux64_checksum_fletcher_64_32_word_buffer_digest(context_fletcher);
+      context_fletcher->word_buffer       = TUX64_LITERAL_UINT32(0u);
+      context_fletcher->word_buffer_bytes = TUX64_LITERAL_UINT32(0u);
    }
+   
+   position =
+      TUX64_LITERAL_UINT32(TUX64_CHECKSUM_WORD_BUFFER_BYTES_MAX - 1u)
+      - context_fletcher->word_buffer_bytes;
 
-   /* if we can't complete the word, simply copy into the word buffer */
-   if (bytes < context_fletcher->word_buffer_capacity) {
-      tux64_memory_copy(
-         &context_fletcher->word_buffer[TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer) - context_fletcher->word_buffer_capacity],
-         data,
-         bytes * TUX64_LITERAL_UINT32(sizeof(Tux64UInt8))
-      );
-      context_fletcher->word_buffer_capacity -= (Tux64UInt8)bytes;
+   word = (Tux64UInt32)byte << (position * TUX64_LITERAL_UINT32(8u));
 
-      return bytes;
-   }
-
-   /* fill the word buffer then digest the complete word */
-   taken = (Tux64UInt32)context_fletcher->word_buffer_capacity;
-   tux64_memory_copy(
-      &context_fletcher->word_buffer[TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer) - context_fletcher->word_buffer_capacity],
-      data,
-      (Tux64UInt32)context_fletcher->word_buffer_capacity
-   );
-   context_fletcher->word_buffer_capacity = TUX64_LITERAL_UINT8(TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer));
-   tux64_endian_convert_copy(
-      word.bytes,
-      context_fletcher->word_buffer,
-      TUX64_LITERAL_UINT32(sizeof(word)),
-      TUX64_ENDIAN_FORMAT_BIG
-   );
-
-   tux64_checksum_fletcher_64_32_digest_word(context_fletcher, word.uint);
-
-   return taken;
+   context_fletcher->word_buffer |= word;
+   context_fletcher->word_buffer_bytes++;
+   return;
 }
 
 static void
@@ -137,40 +105,16 @@ tux64_checksum_fletcher_64_32_digest(
    Tux64UInt32 bytes
 ) {
    struct _Tux64ChecksumContextAlgorithmFletcher6432 * context_fletcher;
-   const Tux64UInt8 * iter_data;
-   Tux64UInt32 bytes_taken;
-   union Tux64Int32 word;
 
    context_fletcher = &context->algorithm.fletcher_64_32;
-   iter_data = data;
 
-   /* attempt to complete the word buffer first */
-   bytes_taken = tux64_checksum_fletcher_64_32_fill_word_buffer(context_fletcher, iter_data, bytes);
-   iter_data += bytes_taken;
-   bytes -= bytes_taken;
-
-   /* digest all whole words */
-   while (bytes >= TUX64_LITERAL_UINT32(sizeof(Tux64UInt32))) {
-      tux64_endian_convert_copy(
-         word.bytes,
-         iter_data,
-         TUX64_LITERAL_UINT32(sizeof(Tux64UInt32)),
-         TUX64_ENDIAN_FORMAT_BIG
-      );
-
-      tux64_checksum_fletcher_64_32_digest_word(context_fletcher, word.uint);
-
-      iter_data += sizeof(Tux64UInt32);
-      bytes -= TUX64_LITERAL_UINT32(sizeof(Tux64UInt32));
+   /* we could prooooobablyyyyy optimize this to align to a 4-byte bounary */
+   /* and do aligned loads or whatever, but nah, don't feel like it. */
+   while (bytes != TUX64_LITERAL_UINT32(0u)) {
+      tux64_checksum_fletcher_64_32_word_buffer_add(context_fletcher, *data);
+      data++;
+      bytes--;
    }
-
-   /* copy any remaining bytes into the word buffer */
-   tux64_memory_copy(
-      context_fletcher->word_buffer,
-      iter_data,
-      bytes
-   );
-   context_fletcher->word_buffer_capacity = TUX64_LITERAL_UINT8(TUX64_ARRAY_ELEMENTS(context_fletcher->word_buffer)) - (Tux64UInt8)bytes;
 
    return;
 }
@@ -183,7 +127,7 @@ tux64_checksum_fletcher_64_32_finalize(
 
    context_fletcher = &context->algorithm.fletcher_64_32;
 
-   tux64_checksum_fletcher_64_32_flush_word_buffer(context_fletcher);
+   tux64_checksum_fletcher_64_32_word_buffer_digest(context_fletcher);
 
    context_fletcher->sum_hi.uint = context_fletcher->sum_lo.uint - context_fletcher->sum_hi.uint;
    context_fletcher->sum_hi.uint = tux64_endian_convert_uint32(context_fletcher->sum_hi.uint, TUX64_ENDIAN_FORMAT_BIG);

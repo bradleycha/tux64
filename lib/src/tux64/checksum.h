@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/checksum.h - Header for checksum functions.                  */
@@ -60,8 +60,8 @@ tux64_checksum_fletcher_64_32;
 struct _Tux64ChecksumContextAlgorithmFletcher6432 {
    union Tux64Int32 sum_hi;
    union Tux64Int32 sum_lo;
-   Tux64UInt8 word_buffer [sizeof(Tux64UInt32)];
-   Tux64UInt8 word_buffer_capacity;
+   Tux64UInt32 word_buffer;
+   Tux64UInt8 word_buffer_bytes;
 };
 
 union _Tux64ChecksumContextAlgorithm {
