@@ -11,5 +11,5 @@
 * [Chapter 7 - Creating The Root Filesystem](07-creating-the-root-filesystem.md)
 * [Chapter 8 - Building The Bootloader](08-building-the-bootloader.md)
 * [Chapter 9 - Creating The ROM Image](09-creating-the-rom-image.md)
-* [Chapter 10 - Installing The ROM Image And Root Filesystem](10-installing-the-rom-image-and-root-filesystem.md)
+* [Chapter 10 - Booting The ROM Image](10-booting-the-rom-image.md)
 
