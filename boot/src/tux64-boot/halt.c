@@ -13,6 +13,8 @@
 
 void
 tux64_boot_halt(void) {
+#if TUX64_BOOT_CONFIG_SAFETY
+/*----------------------------------------------------------------------------*/
    Tux64UIntPtr bogus;
 
    /* we idle the CPU because we want to ~efficiently~ crash! no performance */
@@ -30,5 +32,11 @@ tux64_boot_halt(void) {
    );
 
    TUX64_UNREACHABLE;
+/*----------------------------------------------------------------------------*/
+#else /* TUX64_BOOT_CONFIG_SAFETY */
+/*----------------------------------------------------------------------------*/
+   TUX64_UNREACHABLE;
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_BOOT_CONFIG_SAFETY */
 }
 

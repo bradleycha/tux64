@@ -123,6 +123,8 @@ tux64_boot_stage1_fsm_halt(
    struct Tux64BootStage1Fsm * fsm,
    const struct Tux64BootStage1FbconText * reason
 ) {
+#if TUX64_BOOT_CONFIG_SAFETY
+/*----------------------------------------------------------------------------*/
    Tux64BootStage1FbconLabel label;
    Tux64UInt8 characters;
 
@@ -143,6 +145,15 @@ tux64_boot_stage1_fsm_halt(
    }
 
    return;
+/*----------------------------------------------------------------------------*/
+#else /* TUX64_BOOT_CONFIG_SAFETY */
+/*----------------------------------------------------------------------------*/
+   (void)fsm;
+   (void)reason;
+   (void)tux64_boot_stage1_fsm_transition_halt;
+   TUX64_UNREACHABLE;
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_BOOT_CONFIG_SAFETY */
 }
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_halt) {

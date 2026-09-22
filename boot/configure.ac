@@ -82,6 +82,11 @@ LT_INIT
 AC_CHECK_HEADER([stddef.h])
 AC_CHECK_HEADER([tux64/tux64.h])
 
+AC_ARG_ENABLE([safety],
+   AS_HELP_STRING([--enable-safety], [Enable safety checks.  Otherwise, assume no errors will ever occur.]),
+   [tux64_boot_config_safety=1],
+   [tux64_boot_config_safety=0]
+)
 AC_ARG_ENABLE([debug],
    AS_HELP_STRING([--enable-debug], [Enable debug assertions]),
    [tux64_boot_config_debug=1],
@@ -228,6 +233,10 @@ tux64_boot_config_color_foreground_enum=$(tux64_boot_enumerate_color $CONFIG_COL
 tux64_boot_config_color_background_enum=$(tux64_boot_enumerate_color $CONFIG_COLOR_BACKGROUND "background") || exit $?
 tux64_boot_config_delay_ticks=$CONFIG_DELAY_TICKS
 
+AC_DEFINE_UNQUOTED([CONFIG_SAFETY],
+   [$tux64_boot_config_safety],
+   [Enable safety checks.  Otherwise, assume no errors will ever occur.]
+)
 AC_DEFINE_UNQUOTED([CONFIG_DEBUG],
    [$tux64_boot_config_debug],
    [Enable debug assertions]
