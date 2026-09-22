@@ -143,5 +143,41 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
+### Chapter 4.4 - Building `e2fsprogs`
+
+`e2fsprogs` provides utilities for ext2, ext3, and ext4 files systems.  This
+will be used later to create a root filesystem image with `mke2fs`.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/e2fsprogs
+cd ${TUX64_BUILD_ROOT}/builds/e2fsprogs
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
+   ../../sources/e2fsprogs-*/configure \
+      --host=${TUX64_TARGET_HOST} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      --sbindir=${TUX64_BUILD_ROOT}/tools/bin \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      --enable-lto \
+      --enable-year2038 \
+      --disable-debugfs \
+      --disable-imager \
+      --disable-resizer \
+      --disable-defrag \
+      --disable-uuidd \
+      --disable-fuse2fs
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+This will give errors about udev rules not being installable.  This is normal,
+and can be ignored.
+
 We will now proceed to [building the kernel](05-building-the-kernel.md).
 

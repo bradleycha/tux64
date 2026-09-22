@@ -41,7 +41,7 @@ We will now create our filesystem within the image and install the root
 filesystem.  We can accomplish this using the following command:
 
 ```
-mke2fs \
+${TUX64_BUILD_ROOT}/tools/bin/mke2fs \
     ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot/rootfs.img \
     -d ${TUX64_BUILD_ROOT}/rootfs \
     -t ext4 \
