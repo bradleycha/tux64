@@ -82,6 +82,7 @@ Executable file formats  --->
   [*] Kernel support for scripts starting with #!
 
 Memory Management options  --->
+  [ ] Support for paging of anonymous memory (swap)  ----
   [*] Allow for memory compaction
 
 Device drivers  --->
