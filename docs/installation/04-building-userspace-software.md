@@ -173,11 +173,14 @@ cd ${TUX64_BUILD_ROOT}/builds/e2fsprogs
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+cp misc/mke2fs ${TUX64_BUILD_ROOT}/tools/bin/mke2fs
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}-strip ${TUX64_BUILD_ROOT}/tools/bin/mke2fs
 ```
 
-This will give errors about udev rules not being installable.  This is normal,
-and can be ignored.
+Note that we manually install `mke2fs`.  This is because `e2fsprogs` contains
+many tools, but we only need `mke2fs`.  In fact, attempting to install all tools
+will give errors due to `e2fsprogs` attempting to install udev rules to the
+host's root filesystem.
 
 We will now proceed to [building the kernel](05-building-the-kernel.md).
 
