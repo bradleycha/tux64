@@ -77,6 +77,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       --enable-rsp-dma-double-buffering \
       --enable-status \
       --enable-checksum \
+      --enable-safety \
       --enable-delay \
       --enable-splash \
       --enable-logo \
