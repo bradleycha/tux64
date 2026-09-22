@@ -48,12 +48,23 @@ people:
 --kernel
 /boot/vmlinux
 
---initramfs
-/boot/initramfs.cpio
-
+# You can comment/uncomment these to configure various bootloader flags.
 --memory-display
 --no-delay
 #--no-checksum
+
+# Uncomment the two lines below if you would like to use an initramfs.
+#--initramfs
+#/boot/initramfs.cpio
+
+# Comment out the two lines below if you don't want to use a root filesystem.
+--rootfs
+/boot/rootfs.img
+
+# This tells Linux to use the n64cart block device as our root filesystem.  If
+# you aren't using a root filesystem, you can safely remove these two lines.
+--command-line
+root=/dev/n64cart
 ```
 
 ### Chapter 9.2 - Building The ROM Image
@@ -69,5 +80,5 @@ ${TUX64_BUILD_ROOT}/tools/bin/tux64-mkrom \
 
 Our final Tux64 ROM image should now be output to `tux64.n64`!
 
-We will now proceed to [installing the ROM image and root filesystem](10-installing-the-rom-image-and-root-filesystem.md).
+We will now proceed to [booting the ROM image](10-booting-the-rom-image.md).
 

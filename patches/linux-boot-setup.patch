@@ -83,10 +83,10 @@ index 66ec28ab4..098ee187a 100644
  void __init plat_time_init(void)
 diff --git a/arch/mips/n64/tux64-boot.c b/arch/mips/n64/tux64-boot.c
 new file mode 100644
-index 000000000..e017d01bf
+index 000000000..1cc4e773b
 --- /dev/null
 +++ b/arch/mips/n64/tux64-boot.c
-@@ -0,0 +1,180 @@
+@@ -0,0 +1,165 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * tux64-boot.c: Kernel support for extended boot information provided by tux64-boot.
@@ -102,6 +102,9 @@ index 000000000..e017d01bf
 +
 +#include <asm/bootinfo.h>
 +
++extern unsigned int __initdata n64cart_init_start;
++extern unsigned int __initdata n64cart_init_size;
++
 +void __init tux64_prom_init(void);
 +void __init tux64_platform_init(void);
 +void __init tux64_plat_mem_setup(void);
@@ -110,9 +113,6 @@ index 000000000..e017d01bf
 +static unsigned long __initdata initrd_bytes = 0;
 +static const char __initdata *cmdline = NULL;
 +static uint32_t __initdata system_memory;
-+
-+static uint32_t __initdata rootfs_cart_address;
-+static uint32_t __initdata rootfs_bytes = 0;
 +
 +struct tux64_boot_resource
 +{
@@ -179,10 +179,12 @@ index 000000000..e017d01bf
 +		initrd_ptr = (void *)CKSEG0ADDR(args.initrd_address);
 +		initrd_bytes = args.initrd_bytes;
 +	}
++	#ifdef CONFIG_N64CART
 +	if (args.rootfs_bytes != 0) {
-+		rootfs_cart_address = args.rootfs_cart_address;
-+		rootfs_bytes = args.rootfs_bytes;
++		n64cart_init_start = args.rootfs_cart_address;
++		n64cart_init_size = args.rootfs_bytes;
 +	}
++	#endif
 +	if (args.command_line_address != 0)
 +	{
 +		cmdline = (const char *)CKSEG0ADDR(args.command_line_address);
@@ -198,25 +200,8 @@ index 000000000..e017d01bf
 +	tux64_prom_init_cmdline();
 +}
 +
-+#ifdef CONFIG_N64CART
-+static void __init tux64_platform_init_n64cart(void)
-+{
-+	if (rootfs_bytes == 0)
-+		return;
-+
-+	/* TODO: attach rootfs from cartridge ROM if present */
-+	pr_info("n64cart rootfs address: 0x%08x\n", rootfs_cart_address);
-+	pr_info("n64cart rootfs bytes: %u\n", rootfs_bytes);
-+}
-+#else
-+static void __init tux64_platform_init_n64cart(void)
-+{
-+}
-+#endif
-+
 +void __init tux64_platform_init(void)
 +{
-+	tux64_platform_init_n64cart();
 +}
 +
 +static void __init tux64_plat_mem_setup_address_space(void)

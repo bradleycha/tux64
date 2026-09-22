@@ -1,0 +1,33 @@
+diff --git a/drivers/block/n64cart.c b/drivers/block/n64cart.c
+index b9fdeff31..287193b7d 100644
+--- a/drivers/block/n64cart.c
++++ b/drivers/block/n64cart.c
+@@ -31,6 +31,9 @@ enum {
+ 
+ static u32 __iomem *reg_base;
+ 
++unsigned int __initdata n64cart_init_start = 0;
++unsigned int __initdata n64cart_init_size = 0;
++
+ static unsigned int start;
+ module_param(start, uint, 0);
+ MODULE_PARM_DESC(start, "Start address of the cart block data");
+@@ -121,6 +124,9 @@ static int __init n64cart_probe(struct platform_device *pdev)
+ 	struct gendisk *disk;
+ 	int err = -ENOMEM;
+ 
++	start = n64cart_init_start;
++	size = n64cart_init_size;
++
+ 	if (!start || !size) {
+ 		pr_err("start or size not specified\n");
+ 		return -ENODEV;
+@@ -154,7 +160,7 @@ static int __init n64cart_probe(struct platform_device *pdev)
+ 	if (err)
+ 		goto out_cleanup_disk;
+ 
+-	pr_info("n64cart: %u kb disk\n", size / 1024);
++	pr_info("%u kb disk\n", size / 1024);
+ 
+ 	return 0;
+ 
