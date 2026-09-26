@@ -16,7 +16,7 @@ The process of obtaining sources is the same as the installation guide.
 
 | Package | Version | Notes |
 |---------|---------|-------|
-| [gdb](https://www.sourceware.org/gdb/) | 17.2 | |
+| [gdb](https://www.sourceware.org/gdb/) | 18.1 | |
 
 ### Building `gdb`
 
