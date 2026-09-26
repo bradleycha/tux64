@@ -278,8 +278,18 @@ kernel and userspace software.  This is the most tedious part, because we have
 to build `musl` to build the toolchain, but we need the toolchain to build
 `musl`.
 
-First we build `binutils` as we did for the previous parts, but now targetting
-Linux instead of the bootloader.
+First, we will install kernel headers.  These are required for various
+supporting `gcc` libraries.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/linux-headers
+cd ${TUX64_BUILD_ROOT}/builds/linux-headers
+
+${TUX64_BUILD_ROOT}/scripts/kernel-make.sh headers_install
+```
+
+We will now build `binutils` as we did for the previous parts, but now
+targetting Linux instead of the bootloader.
 
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-binutils
@@ -342,6 +352,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-bootstrap
       --with-tune=vr4300 \
       --with-abi=o64 \
       --disable-multilib \
+      --enable-static \
       --disable-shared \
       --disable-libssp \
       --disable-libgomp \
@@ -368,41 +379,101 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-musl-bootstrap
       --disable-dependency-tracking \
       --host=${TUX64_TARGET_N64_LINUX} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
-      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -fno-lto" \
+      --syslibdir=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s -fno-lto" \
       ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s -fno-lto" \
+      --enable-static \
       --disable-shared
 )
 
 make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
+make -j${TUX64_MAKEOPTS} install-headers
 ```
 
 Now we will return to the bootstrapping `gcc` build to build the rest of the
-toolchain.
+toolchain.  We only need `libgcc` to build, so we will skip all other
+libraries.
 
 ```
 cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-bootstrap
+make -j${TUX64_MAKEOPTS} all-target-libgcc
+make -j${TUX64_MAKEOPTS} install-target-libgcc
+```
+
+We now build `musl` as a shared object.  This is dependent on having `libgcc`
+present, however `libgcc` depends on having `musl` built.  This circular
+dependency is why we couldn't just build `musl` as a shared library right away.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-musl
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-musl
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/musl-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      --syslibdir=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s -fno-lto" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s -fno-lto" \
+      --enable-static \
+      --enable-shared
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+make -j${TUX64_MAKEOPTS} install-headers
+```
+
+Lastly, we will build the full `gcc` toolchain.  Notice that we will link
+against the shared libc object created by the previous step.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc
+cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST} \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/gcc-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_HOST} \
+      --target=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools \
+      CFLAGS="${TUX64_CFLAGS_HOST}" \
+      CXXFLAGS="${TUX64_CXXFLAGS_HOST}" \
+      ASFLAGS="${TUX64_ASFLAGS_HOST}" \
+      LDFLAGS="${TUX64_LDFLAGS_HOST}" \
+      CFLAGS_FOR_TARGET="${TUX64_CFLAGS_N64_LINUX} -fno-lto" \
+      CXXFLAGS_FOR_TARGET="${TUX64_CXXFLAGS_N64_LINUX} -fno-lto" \
+      ASFLAGS_FOR_TARGET="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS_FOR_TARGET="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
+      --disable-werror \
+      --enable-host-pie \
+      --enable-lto \
+      --disable-bootstrap \
+      --enable-languages=c,c++ \
+      --with-arch=vr4300 \
+      --with-tune=vr4300 \
+      --with-abi=o64 \
+      --disable-multilib \
+      --enable-static \
+      --enable-shared \
+      --disable-libsanitizer
+)
+
 make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
-We now have our bootstrapping toolchain.  We will use this to build the
-full-featured toolchain.
-
-First, we will install kernel headers.  These are required for various
-supporting `gcc` libraries.
-
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/linux-headers
-cd ${TUX64_BUILD_ROOT}/builds/linux-headers
-
-${TUX64_BUILD_ROOT}/scripts/kernel-make.sh headers_install
-```
-
-TODO: Build full `gcc` and `musl`.  We want to build both static and shared
-objects and also make use of LTO.  We also want to build the libraries above we
-disabled.
+We now have a fully bootstrapped cross-compiler which can build both the Linux
+kernel, as well as userspace software to run on the Nintendo 64!
 
 We will now proceed to [building userspace software](04-building-userspace-software.md).
 
