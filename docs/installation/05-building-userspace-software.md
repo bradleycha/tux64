@@ -40,7 +40,47 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
-TODO: build the rest of the system. ex: we definitely want coreutils and bash.
+### Chapter 5.2 - Building `coreutils`
+
+GNU Coreutils provides basic commands expected on unix-like operating systems,
+such as `cat`, `ls`, `whoami`, `uname`, etc.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/coreutils
+cd ${TUX64_BUILD_ROOT}/builds/coreutils
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/coreutils-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile \
+      --disable-threads \
+      --disable-acl \
+      --disable-assert \
+      --disable-libsmack \
+      --without-libsmack \
+      --disable-libcap \
+      --disable-nls \
+      --without-selinux \
+      --without-libgmp
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+TODO: Build OpenSSL and GMP so we can use shared code for the above instead of
+using duplicate fallback implementations.
+
+### Chapter 5.3 - Building `bash`
+
+TODO: document how to build `bash` so it doesn't immediately crash on startup.
 
 We will now proceed to [building the kernel](06-building-the-kernel.md).
 
