@@ -98,6 +98,8 @@ the format `[NAME]-[VERSION]`.
 | [musl](https://musl.libc.org/) | 1.2.6 | |
 | [linux](https://kernel.org/) | 6.18.54 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 | [e2fsprogs](https://e2fsprogs.sourceforge.net/) | 1.47.4 | Same note as for the kernel tarball.
+| [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
+| [bash](https://www.gnu.org/software/bash/) | 5.3 | |
 
 ### Chapter 2.3 - Installing Scripts
 
