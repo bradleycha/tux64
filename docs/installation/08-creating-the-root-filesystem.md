@@ -17,8 +17,94 @@ there tends to be many unnecessary build files which are installed by default,
 such as static libraries.  These do nothing but bloat our already limited root
 filesystem, thus we only install what needs to be installed.
 
-TODO: document how to install `musl`, `libgcc`, `tux64-lib`, and the rest
-of the userspace software.
+First, we need to create the base directory structure.
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs
+mkdir -p usr/bin usr/lib usr/libexec usr/share etc home root
+ln -s usr/bin bin
+ln -s usr/bin sbin
+ln -s usr/lib lib
+ln -s usr/libexec libexec
+```
+
+We will now start installing all of our built userspace software.
+
+#### Chapter 8.1.1 - Installing `gcc`
+
+While `gcc` is a compiler which runs on the host, it also contains support
+libraries which must be linked to userspace applications at runtime.
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libgcc*.so* ./
+```
+
+#### Chapter 8.1.2 - Installing `musl`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libc.so ./
+ln -s libc.so ld-musl-mips.so.1
+```
+
+#### Chapter 8.1.3 - Installing `tux64-lib`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libtux64-0.1.0+setup.so ./
+ln -s libtux64-0.1.0+setup.so libtux64.so
+```
+
+#### Chapter 8.1.4 - Installing `zlib`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libz.so.1.3.2 ./
+ln -s libz.so.1.3.2 libz.so.1
+ln -s libz.so.1.3.2 libz.so
+```
+
+#### Chapter 8.1.5 - Installing `openssl`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+for lib in libcrypto.so.4 libssl.so.4; do
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/$lib ./
+done
+ln -s libcrypto.so.4 libcrypto.so
+ln -s libssl.so.4 libssl.so
+```
+
+#### Chapter 8.1.6 - Installing `gmp`
+
+TODO: document this once we get `gmp` to build.
+
+#### Chapter 8.1.7 - Installing `coreutils`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs
+for bin in \[ b2sum base32 base64 basename basenc cat chgrp chmod chown chroot\
+    cksum comm cp csplit cut date dd df dir dircolors dirname du echo env\
+    expand expr factor false fmt fold groups head hostid id install join link\
+    ln logname ls md5sum mkdir mkfifo mknod mktemp mv nice nl nm nohup nproc\
+    numfmt od paste pathchk pinky pr printenv printf ptx pwd readlink realpath\
+    rm rmdir seq sha1sum sha224sum sha256sum sha384sum sha512sum shred shuf\
+    sleep sort split stat stdbuf stty sum sync tac tail tee test timeout touch\
+    tr true truncate tsort tty uname unexpand uniq unlink users vdir wc whoami\
+    yes; do
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/$bin ./bin/
+done
+cp -r ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/libexec/coreutils ./libexec/
+```
+
+#### Chapter 8.1.8 - Installing `bash`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/bin
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash ./
+ln -s bash sh
+```
 
 ### Chapter 8.2 - Configuring The Root Filesystem
 
