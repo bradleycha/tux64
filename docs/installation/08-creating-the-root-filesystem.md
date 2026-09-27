@@ -9,13 +9,25 @@
 We will now create our root filesystem which we will use to install the
 userspace software to the Nintendo 64.
 
-### Chapter 8.1 - Preparing The Root Filesystem
+### Chapter 8.1 - Installing The Userspace Software
 
-TODO: install all the components of our root filesystem once we get a rootfs
-on the cartridge working.  For now, we will assume that the rootfs directory
-structure is already created in `${TUX64_BUILD_ROOT}/rootfs`.
+We will now install all the software we built in
+[Chapter 5](05-building-userspace-software).  We manually install because there
+tends to be many unnecessary build files which are installed by default, such
+as static libraries.  These do nothing but bloat our already limited root
+filesystem, thus we only install what needs to be installed.
 
-### Chapter 8.2 - Creating The Root Filesystem Image
+TODO: document how to install `musl`, `libgcc`, `tux64-lib`, and the rest
+of the userspace software.
+
+### Chapter 8.2 - Configuring The Root Filesystem
+
+We now need to create configuration files which will be used by our userspace
+software.
+
+TODO: document configuration, such as `.bashrc`.
+
+### Chapter 8.3 - Creating The Root Filesystem Image
 
 To use our root filesystem with Linux on the Nintendo 64, we need to embed it
 as an image file into the cartridge.  Thus, we need to create a disk image.
