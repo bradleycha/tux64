@@ -100,6 +100,8 @@ the format `[NAME]-[VERSION]`.
 | [e2fsprogs](https://e2fsprogs.sourceforge.net/) | 1.47.4 | Same note as for the kernel tarball.
 | [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
 | [bash](https://www.gnu.org/software/bash/) | 5.3 | |
+| [openssl](https://openssl-library.org/) | 4.0.2 | |
+| [gmp](https://gmplib.org/) | 6.3.0 | |
 
 ### Chapter 2.3 - Installing Scripts
 
