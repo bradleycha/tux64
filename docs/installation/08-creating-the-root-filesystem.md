@@ -12,9 +12,9 @@ userspace software to the Nintendo 64.
 ### Chapter 8.1 - Installing The Userspace Software
 
 We will now install all the software we built in
-[Chapter 5](05-building-userspace-software).  We manually install because there
-tends to be many unnecessary build files which are installed by default, such
-as static libraries.  These do nothing but bloat our already limited root
+[Chapter 5](05-building-userspace-software.md).  We manually install because
+there tends to be many unnecessary build files which are installed by default,
+such as static libraries.  These do nothing but bloat our already limited root
 filesystem, thus we only install what needs to be installed.
 
 TODO: document how to install `musl`, `libgcc`, `tux64-lib`, and the rest
