@@ -40,7 +40,64 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
-### Chapter 5.2 - Building `coreutils`
+### Chapter 5.2 - Building `gmp`
+
+`gmp` is the GNU Multi Precision library, and it allows for math on
+arbitrarily-large numbers.  It is an optional dependency for `coreutils`, which
+we can build as a shared library to reduce memory usage across other packages
+which may use `gmp` in the future.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/gmp
+cd ${TUX64_BUILD_ROOT}/builds/gmp
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/gmp-*/configure \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}"
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+TODO: this does not work as we get "long long reliability" issues during
+configuration.
+
+### Chapter 5.3 - Building `openssl`
+
+`openssl` provides cryptography and network communication functions which are
+used by many different packages.  Note that if you are compiling a 64-bit
+userland, you will need to replace `linux-mips32` with `linux-mips64`.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/openssl
+cd ${TUX64_BUILD_ROOT}/builds/openssl
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/openssl-*/config \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s" \
+      linux-mips32 \
+      no-threads \
+      no-zlib \
+      no-egd
+)
+
+make -j${TUX64_MAKEOPTS} build_libs
+make -j${TUX64_MAKEOPTS} install_dev
+```
+
+### Chapter 5.4 - Building `coreutils`
 
 GNU Coreutils provides basic commands expected on unix-like operating systems,
 such as `cat`, `ls`, `whoami`, `uname`, etc.
@@ -68,17 +125,17 @@ cd ${TUX64_BUILD_ROOT}/builds/coreutils
       --disable-libcap \
       --disable-nls \
       --without-selinux \
-      --without-libgmp
+      --without-libgmp \
+      --with-openssl=yes
 )
 
 make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
-TODO: Build OpenSSL and GMP so we can use shared code for the above instead of
-using duplicate fallback implementations.
+TODO: Build/link against `gmp` once we get it building.
 
-### Chapter 5.3 - Building `bash`
+### Chapter 5.5 - Building `bash`
 
 TODO: document how to build `bash` so it doesn't immediately crash on startup.
 
