@@ -137,7 +137,36 @@ TODO: Build/link against `gmp` once we get it building.
 
 ### Chapter 5.5 - Building `bash`
 
-TODO: document how to build `bash` so it doesn't immediately crash on startup.
+`bash` is a standard POSIX-compliant shell which provides the standard
+"command-line" across most Linux distributions.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/bash
+cd ${TUX64_BUILD_ROOT}/builds/bash
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/bash-*/configure \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile \
+      --disable-nls \
+      --disable-threads \
+      --enable-year2038 \
+      --with-gnu-ld
+)
+
+make -j${TUX64_MAKEOPTS}
+cp bash ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}-strip ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash
+```
+
+TODO: this crashes immediately with malloc issues.  I haven't yet debugged why
+this is, so we'll need to look into this more.
 
 We will now proceed to [building the kernel](06-building-the-kernel.md).
 
