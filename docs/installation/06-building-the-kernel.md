@@ -1,10 +1,10 @@
 # Tux64 Installation Guide
 <img src="../logo.png" width="156" height="156"/>
 
-* Previous Page: [Chapter 4 - Building Userspace Software](04-building-userspace-software.md)
-* Next Page: [Chapter 6 - Creating The Initramfs](06-creating-the-initramfs.md)
+* Previous Page: [Chapter 5 - Building Userspace Software](05-building-userspace-software.md)
+* Next Page: [Chapter 7 - Creating The Initramfs](07-creating-the-initramfs.md)
 
-## Chapter 5 - Building The Kernel
+## Chapter 6 - Building The Kernel
 
 Now is the time you've been waiting for!  Time to build a Linux kernel for the
 Nintendo 64!
@@ -15,7 +15,7 @@ every time we run a make command.  To mitigate this, we'll make use of the
 `kernel-make` script.  If you'd like to customize your kernel make command, take
 a look at `${TUX64_BUILD_ROOT}/scripts/kernel-make.sh`.
 
-### Chapter 5.1 - Configuring The Kernel
+### Chapter 6.1 - Configuring The Kernel
 
 First, we'll set up our build directory and generate a minimal config.
 
@@ -157,7 +157,7 @@ the branding is nice. :)
 Make sure to save the kernel config before exiting.  You are now ready to build
 a kernel image.
 
-### Chapter 5.2 - Building The Kernel
+### Chapter 6.2 - Building The Kernel
 
 Building the kernel should be as simple as a single `make` command:
 
@@ -171,7 +171,7 @@ decompresses itself at runtime.  While this may sound good, the decompression
 code uses a (relatively) huge amount of memory, and is not recommended to use
 over the standard kernel image.
 
-### Chapter 5.3 - Installing The Kernel
+### Chapter 6.3 - Installing The Kernel
 
 Now we need to install the kernel image and modules.  The kernel image will be
 used by the bootloader, while the modules will be used once we are already
@@ -192,5 +192,5 @@ following:
 ${TUX64_BUILD_ROOT}/scripts/kernel-make.sh modules_install
 ```
 
-We will now proceed to [creating the initramfs](06-creating-the-initramfs.md).
+We will now proceed to [creating the initramfs](07-creating-the-initramfs.md).
 

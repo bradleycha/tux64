@@ -2,20 +2,18 @@
 <img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 3 - Building The Toolchains](03-building-the-toolchains.md)
-* Next Page: [Chapter 5 - Building The Kernel](05-building-the-kernel.md)
+* Next Page: [Chapter 5 - Building Userspace Software](05-building-userspace-software.md)
 
-## Chapter 4 - Building Userspace Software
+## Chapter 4 - Building Host Software
 
-We will now build userspace programs and libraries which are used on both the
-host and Nintendo 64.
+We will now build supporting software which will run on the host system to
+provide required tools and libraries for building the rest of the system.
 
-### Chapter 4.1 - Building `tux64-lib`
+### Chapter 4.1 - Building `tux64-lib` For The Host
 
 `tux64-lib` is a library for Tux64 programs which contains globally-shared
 functionality.  This is required for all platforms which will run Tux64-specific
-programs.
-
-First we'll build `tux64-lib` for our host platform:
+programs.  For now, we only need to build it for our host target.
 
 ```
 mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
@@ -32,58 +30,6 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST}" \
       --enable-platform-cpu-signed-integer-format-twos-complement \
-      --enable-log \
-      --enable-log-ansi
-)
-
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
-```
-
-Next, we'll build `tux64-lib` for the bootloader:
-
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
-
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER}
-   ../../sources/tux64-*/lib/configure \
-      --disable-dependency-tracking \
-      --host=${TUX64_TARGET_N64_BOOTLOADER} \
-      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER} \
-      CFLAGS="${TUX64_CFLAGS_N64_BOOTLOADER}" \
-      ASFLAGS="${TUX64_ASFLAGS_N64_BOOTLOADER}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_BOOTLOADER}" \
-      --enable-platform-cpu-signed-integer-format-twos-complement \
-      --enable-platform-mips-n64 \
-      --enable-platform-mips-vr4300
-)
-
-make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
-```
-
-Finally, we'll build `tux64-lib` for the Nintendo 64 userspace:
-
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-tux64-lib
-cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-tux64-lib
-
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
-   ../../sources/tux64-*/lib/configure \
-      --disable-dependency-tracking \
-      --host=${TUX64_TARGET_N64_LINUX} \
-      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
-      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
-      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
-      --enable-platform-cpu-signed-integer-format-twos-complement \
-      --enable-platform-mips-n64 \
-      --enable-platform-mips-vr4300 \
       --enable-log \
       --enable-log-ansi
 )
@@ -182,5 +128,5 @@ many tools, but we only need `mke2fs`.  In fact, attempting to install all tools
 will give errors due to `e2fsprogs` attempting to install udev rules to the
 host's root filesystem.
 
-We will now proceed to [building the kernel](05-building-the-kernel.md).
+We will now proceed to [building userspace software](05-building-userspace-software.md).
 

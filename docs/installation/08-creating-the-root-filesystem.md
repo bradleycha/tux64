@@ -1,21 +1,21 @@
 # Tux64 Installation Guide
 <img src="../logo.png" width="156" height="156"/>
 
-* Previous Page: [Chapter 6 - Creating The Initramfs](06-creating-the-initramfs.md)
-* Next Page: [Chapter 8 - Building The Bootloader](08-building-the-bootloader.md)
+* Previous Page: [Chapter 7 - Creating The Initramfs](07-creating-the-initramfs.md)
+* Next Page: [Chapter 9 - Building The Bootloader](09-building-the-bootloader.md)
 
-## Chapter 7 - Creating The Root Filesystem
+## Chapter 8 - Creating The Root Filesystem
 
 We will now create our root filesystem which we will use to install the
 userspace software to the Nintendo 64.
 
-### Chapter 7.1 - Preparing The Root Filesystem
+### Chapter 8.1 - Preparing The Root Filesystem
 
 TODO: install all the components of our root filesystem once we get a rootfs
 on the cartridge working.  For now, we will assume that the rootfs directory
 structure is already created in `${TUX64_BUILD_ROOT}/rootfs`.
 
-### Chapter 7.2 - Creating The Root Filesystem Image
+### Chapter 8.2 - Creating The Root Filesystem Image
 
 To use our root filesystem with Linux on the Nintendo 64, we need to embed it
 as an image file into the cartridge.  Thus, we need to create a disk image.
@@ -61,5 +61,5 @@ recommended to read the manpages for `mke2fs`.
 We now have our root filesystem image created, and ready to be installed.
 However, we still need a way to boot our kernel image with our root filesystem.
 
-We will now proceed to [building the bootloader](08-building-the-bootloader.md).
+We will now proceed to [building the bootloader](09-building-the-bootloader.md).
 

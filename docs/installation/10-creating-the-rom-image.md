@@ -1,16 +1,16 @@
 # Tux64 Installation Guide
 <img src="../logo.png" width="156" height="156"/>
 
-* Previous Page: [Chapter 8 - Building The Bootloader](08-building-the-bootloader.md)
-* Next Page: [Chapter 10 - Installing The ROM Image and Root Filesystem](10-installing-the-rom-image-and-root-filesystem.md)
+* Previous Page: [Chapter 9 - Building The Bootloader](09-building-the-bootloader.md)
+* Next Page: [Chapter 11 - Booting The ROM Image](11-booting-the-rom-image.md)
 
-## Chapter 9 - Creating The ROM Image
+## Chapter 10 - Creating The ROM Image
 
 We are now ready to create a bootable ROM image which contains all of the
 necessary components to boot Linux on the Nintendo 64.  This is the file we will
 be loading either into an emulator or onto a flashcart to boot Linux.
 
-### Chapter 9.1 - Configuring The ROM Image
+### Chapter 10.1 - Configuring The ROM Image
 
 We will be creating a bootable ROM image using `tux64-mkrom`.  This tool has
 various options to confiure the output ROM, all of which can be seen by running
@@ -67,7 +67,7 @@ people:
 root=/dev/n64cart
 ```
 
-### Chapter 9.2 - Building The ROM Image
+### Chapter 10.2 - Building The ROM Image
 
 We now have all the pieces to build the ROM image.  Build it with the following:
 
@@ -80,5 +80,5 @@ ${TUX64_BUILD_ROOT}/tools/bin/tux64-mkrom \
 
 Our final Tux64 ROM image should now be output to `tux64.n64`!
 
-We will now proceed to [booting the ROM image](10-booting-the-rom-image.md).
+We will now proceed to [booting the ROM image](11-booting-the-rom-image.md).
 

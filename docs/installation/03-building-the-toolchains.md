@@ -2,7 +2,7 @@
 <img src="../logo.png" width="156" height="156"/>
 
 * Previous Page: [Chapter 2 - Obtaining Sources](02-obtaining-sources.md)
-* Next Page: [Chapter 4 - Building Userspace Software](04-building-userspace-software.md)
+* Next Page: [Chapter 4 - Building Host Software](04-building-host-software.md)
 
 ## Chapter 3 - Building The Toolchains
 
@@ -475,5 +475,5 @@ make -j${TUX64_MAKEOPTS} install-strip
 We now have a fully bootstrapped cross-compiler which can build both the Linux
 kernel, as well as userspace software to run on the Nintendo 64!
 
-We will now proceed to [building userspace software](04-building-userspace-software.md).
+We will now proceed to [building host software](04-building-host-software.md).
 
