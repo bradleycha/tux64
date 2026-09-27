@@ -40,7 +40,56 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install-strip
 ```
 
-### Chapter 5.2 - Building `gmp`
+### Chapter 5.2 - Building `zlib`
+
+`zlib` is a compression library used by various standard tools.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/zlib
+cd ${TUX64_BUILD_ROOT}/builds/zlib
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s" \
+   LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s" \
+   ../../sources/zlib-*/configure \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install-strip
+```
+
+### Chapter 5.3 - Building `openssl`
+
+`openssl` provides cryptography and network communication functions which are
+used by many different packages.  Note that if you are compiling a 64-bit
+userland, you will need to replace `linux-mips32` with `linux-mips64`.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/openssl
+cd ${TUX64_BUILD_ROOT}/builds/openssl
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/openssl-*/config \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s" \
+      linux-mips32 \
+      zlib-dynamic \
+      no-threads \
+      no-egd
+)
+
+make -j${TUX64_MAKEOPTS} build_libs
+make -j${TUX64_MAKEOPTS} install_dev
+```
+
+### Chapter 5.4 - Building `gmp`
 
 `gmp` is the GNU Multi Precision library, and it allows for math on
 arbitrarily-large numbers.  It is an optional dependency for `coreutils`, which
@@ -69,35 +118,7 @@ make -j${TUX64_MAKEOPTS} install-strip
 TODO: this does not work as we get "long long reliability" issues during
 configuration.
 
-### Chapter 5.3 - Building `openssl`
-
-`openssl` provides cryptography and network communication functions which are
-used by many different packages.  Note that if you are compiling a 64-bit
-userland, you will need to replace `linux-mips32` with `linux-mips64`.
-
-```
-mkdir ${TUX64_BUILD_ROOT}/builds/openssl
-cd ${TUX64_BUILD_ROOT}/builds/openssl
-
-(
-   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
-      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
-   ../../sources/openssl-*/config \
-      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
-      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s" \
-      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s" \
-      linux-mips32 \
-      no-threads \
-      no-zlib \
-      no-egd
-)
-
-make -j${TUX64_MAKEOPTS} build_libs
-make -j${TUX64_MAKEOPTS} install_dev
-```
-
-### Chapter 5.4 - Building `coreutils`
+### Chapter 5.5 - Building `coreutils`
 
 GNU Coreutils provides basic commands expected on unix-like operating systems,
 such as `cat`, `ls`, `whoami`, `uname`, etc.
@@ -135,7 +156,7 @@ make -j${TUX64_MAKEOPTS} install-strip
 
 TODO: Build/link against `gmp` once we get it building.
 
-### Chapter 5.5 - Building `bash`
+### Chapter 5.6 - Building `bash`
 
 `bash` is a standard POSIX-compliant shell which provides the standard
 "command-line" across most Linux distributions.

@@ -95,13 +95,14 @@ the format `[NAME]-[VERSION]`.
 | [tux64](https://github.com/bradleycha/tux64/) | master | Currently no stable release.  Use `git` to clone the latest version of the 'master' branch.  If cloning directly from GitHub, you must run ```autoreconf -i```  for each sub-project which contains a GNU Autoconf script (```configure.ac```) |
 | [binutils](https://www.gnu.org/software/binutils/) | 2.47 | |
 | [gcc](https://gcc.gnu.org/) | 16.2.0 | |
-| [musl](https://musl.libc.org/) | 1.2.6 | |
-| [linux](https://kernel.org/) | 6.18.54 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
 | [e2fsprogs](https://e2fsprogs.sourceforge.net/) | 1.47.4 | Same note as for the kernel tarball.
-| [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
-| [bash](https://www.gnu.org/software/bash/) | 5.3 | |
+| [linux](https://kernel.org/) | 6.18.54 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
+| [musl](https://musl.libc.org/) | 1.2.6 | |
+| [zlib](https://zlib.net/) | 1.3.2 | |
 | [openssl](https://openssl-library.org/) | 4.0.2 | |
 | [gmp](https://gmplib.org/) | 6.3.0 | |
+| [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
+| [bash](https://www.gnu.org/software/bash/) | 5.3 | |
 
 ### Chapter 2.3 - Installing Scripts
 
