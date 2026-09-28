@@ -21,7 +21,7 @@ First, we need to create the base directory structure.
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs
-mkdir -p usr/bin usr/lib usr/libexec usr/share etc home root
+mkdir -p usr/bin usr/lib usr/libexec usr/share etc home root dev proc sys
 ln -s usr/bin bin
 ln -s usr/bin sbin
 ln -s usr/lib lib
