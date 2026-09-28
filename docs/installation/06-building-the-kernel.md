@@ -86,6 +86,9 @@ Memory Management options  --->
   [*] Allow for memory compaction
 
 Device drivers  --->
+  Generic Driver Options  --->
+    [*] Maintain a devtmpfs filesystem to mount at /dev
+
   [*] Block devices  --->
     [*] N64 cart support
 
@@ -125,6 +128,12 @@ Device drivers  --->
 
 File systems  --->
   [*] The Extended 4 (ext4) filesystem
+
+  Pseudo filesystems  --->
+    [*] /proc file system support
+    [ ] Sysctl support (/proc/sys)
+    [ ] Enable /proc page monitoring
+    [*] sysfs file system support
 
 Security options  --->
   Kernel hardening options  --->
