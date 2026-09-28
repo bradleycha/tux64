@@ -28,10 +28,11 @@ tux64_init_main(void) {
 
    /* TODO: implement the rest of init.  the following is our TODO list:      */
    /*                                                                         */
-   /* - read fstab, if present, and mount filesystem in there                 */
-   /* - implement a configuration script to set startup processes             */
-   /* - start startup processes                                               */
-   /* - drop the user to a shell of their choice (usually bash)               */
+   /* - read the configuration file (to be defined)                           */
+   /* - load required kernel modules                                          */
+   /* - mount filesystems (done for pseudo filesystems)                       */
+   /* - run startup processes                                                 */
+   /* - drop the user to a shell greeter of their choice                      */
    TUX64_LOG_WARNING("TODO: implement rest of init");
    return;
 }
