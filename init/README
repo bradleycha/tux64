@@ -1,0 +1,2 @@
+tux64-init is a minimal init system intended for the Nintedo 64.  It does only
+the absolute bare minimum to bootstrap a system and start required processes.
