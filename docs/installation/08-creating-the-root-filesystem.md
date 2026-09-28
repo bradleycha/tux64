@@ -56,6 +56,14 @@ cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libtux64-0.1.0+setup.
 ln -s libtux64-0.1.0+setup.so libtux64.so
 ```
 
+#### Chapter 8.1.3 - Installing `tux64-init`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/sbin
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/tux64-init ./
+ln -s tux64-init init
+```
+
 #### Chapter 8.1.4 - Installing `zlib`
 
 ```
