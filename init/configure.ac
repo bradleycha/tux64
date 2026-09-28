@@ -28,10 +28,28 @@ AC_ARG_ENABLE([startup-system-info],
    [tux64_init_startup_system_info=1],
    [tux64_init_startup_system_info=0]
 )
+AC_ARG_ENABLE([procfs],
+AS_HELP_STRING([--enable-procfs], [Enable procfs pseudo filesystem support.]),
+   [tux64_init_procfs=1],
+   [tux64_init_procfs=0]
+)
+AC_ARG_ENABLE([sysfs],
+AS_HELP_STRING([--enable-sysfs], [Enable sysfs pseudo filesystem support.]),
+   [tux64_init_sysfs=1],
+   [tux64_init_sysfs=0]
+)
 
 AC_DEFINE_UNQUOTED([CONFIG_STARTUP_SYSTEM_INFO],
    [$tux64_init_startup_system_info],
    [Enable printing system information on startup.]
+)
+AC_DEFINE_UNQUOTED([CONFIG_PROCFS],
+   [$tux64_init_procfs],
+   [Enable procfs pseudo filesystem support.]
+)
+AC_DEFINE_UNQUOTED([CONFIG_SYSFS],
+   [$tux64_init_sysfs],
+   [Enable sysfs pseudo filesystem support.]
 )
 
 AC_OUTPUT

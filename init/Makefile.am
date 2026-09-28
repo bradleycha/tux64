@@ -24,5 +24,7 @@ tux64_init_SOURCES = \
 	src/tux64-init/tux64-init.c \
 	src/tux64-init/tux64-init.h \
 	src/tux64-init/system-info.c \
-	src/tux64-init/system-info.h
+	src/tux64-init/system-info.h \
+	src/tux64-init/mount.c \
+	src/tux64-init/mount.h
 

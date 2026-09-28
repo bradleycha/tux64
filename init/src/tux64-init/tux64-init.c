@@ -8,6 +8,7 @@
 
 #include "tux64-init/tux64-init.h"
 #include "tux64-init/system-info.h"
+#include "tux64-init/mount.h"
 
 #include <tux64/log.h>
 
@@ -22,14 +23,15 @@ tux64_init_main(void) {
       tux64_init_system_info_print();
    }
 
-   /* TODO: implement actual init system.  at the very least, we need to do   */
-   /* the following:                                                          */
+   TUX64_LOG_INFO("Mounting pseudo filesystems");
+   tux64_init_mount_pseudo_filesystems();
+
+   /* TODO: implement the rest of init.  the following is our TODO list:      */
    /*                                                                         */
-   /* - mount pseudo filesystems (/dev, /proc, /sys)                          */
    /* - read fstab, if present, and mount filesystem in there                 */
    /* - implement a configuration script to set startup processes             */
    /* - start startup processes                                               */
-   /* - drop the user to a shell of their choice                              */
+   /* - drop the user to a shell of their choice (usually bash)               */
    TUX64_LOG_WARNING("TODO: implement rest of init");
    return;
 }
