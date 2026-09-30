@@ -20,7 +20,7 @@ tux64_boot_err_log() {
    >&2 echo configure.ac: error: $1
 }
 
-if [[ "$host_cpu" != "mips64" ]] || [[ "$host_os" != "elf" ]]; then
+if [[ "$host_cpu" != "mips" && "$host_cpu" != "mips32" && "$host_cpu" != "mips64" ]] || [[ "$host_os" != "elf" ]]; then
    $(tux64_boot_err_log "expected host system type mips64-elf, found ${host}")
    exit 1
 fi
