@@ -15,9 +15,10 @@
 #include "src/tux64-boot/stage1/strings.bin.c"
 
 /* alignment manually set to '1' to remove unnecessary padding added for each */
-/* individual slab of data. */
+/* individual slab of data.  we also need to manually specify the link */
+/* section to prevent weird link issues with gp-relative data. */
 #define TUX64_BOOT_STAGE1_STRINGS_DATA_DEFINE(identifier, data) \
-   __attribute__((aligned(1))) \
+   __attribute__((aligned(1), section(".rodata.tux64_boot.stage1.strings.data"))) \
    static const Tux64BootStage1FbconLabelCharacter \
    identifier [] = { \
       data \
