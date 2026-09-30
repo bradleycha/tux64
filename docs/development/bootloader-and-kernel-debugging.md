@@ -45,7 +45,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gdb
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 Next, we will build `gdb` targetting Linux.  This will be used to debug the
@@ -74,7 +74,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gdb
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Debugging in an Emulator
@@ -118,8 +118,8 @@ cd ${TUX64_BUILD_ROOT}/builds/ares
    cmake \
       -DCMAKE_INSTALL_PREFIX=${TUX64_BUILD_ROOT}/tools \
       -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_C_FLAGS="${TUX64_CFLAGS_HOST} -s" \
-      -DCMAKE_CXX_FLAGS="${TUX64_CXXFLAGS_HOST} -s" \
+      -DCMAKE_C_FLAGS="${TUX64_CFLAGS_HOST}" \
+      -DCMAKE_CXX_FLAGS="${TUX64_CXXFLAGS_HOST}" \
       -DARES_CORES=n64 \
       -S ../../sources/ares-*
 )
@@ -247,7 +247,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-sramdumper
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 #### Building `sc64deployer`

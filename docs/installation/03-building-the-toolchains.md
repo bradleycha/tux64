@@ -51,12 +51,14 @@ This will compile `binutils`, but not install it to our tools directory.  We can
 do that with the following:
 
 ```
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
-This will strip the binaries and then install them.  We strip the binaries
-because there is almost no use for program symbols and unused sections for
-end-users, and they end up wasting disk space.
+This will install the compiled binaries for `binutils` to our tools directory.
+Note that as part of the default `buildconf.sh`, we have the `-s` flag.  This
+strips unused code and data from the final built binaries.  This produces more
+efficient binaries, but removes important information for debugging.  We aren't
+debugging, so we can strip binaries without consequence.
 
 We now have `binutils` installed for bootstrapping the rest of the toolchain.
 Next we configure and build `gcc`.  This process takes 3 stages:
@@ -106,7 +108,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-gcc-bootstrap
    --enable-languages=c,c++
 
 make -j${TUX64_MAKEOPTS} all
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 This will build the aforementioned non-LTO build of `gcc`.  Before we continue
@@ -156,7 +158,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-gcc
 )
 
 make -j${TUX64_MAKEOPTS} all
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 Once `gcc` finally finishes building and installing, we will have a fully built
@@ -185,7 +187,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-binutils
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 If successful so far, you now have a fully built host toolchain!
@@ -221,7 +223,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-binutils
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 Next, we will build `gcc`.  We don't need to build the full toolchain since we
@@ -264,7 +266,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-gcc
 )
 
 make -j${TUX64_MAKEOPTS} all-gcc
-make -j${TUX64_MAKEOPTS} install-strip-gcc
+make -j${TUX64_MAKEOPTS} install-gcc
 make -j${TUX64_MAKEOPTS} all-target-libgcc
 make -j${TUX64_MAKEOPTS} install-target-libgcc
 ```
@@ -315,7 +317,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-binutils
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 Next, we build the bootstrapping `gcc`.  This will be used to compile `musl`,
@@ -361,7 +363,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-bootstrap
 )
 
 make -j${TUX64_MAKEOPTS} all-gcc
-make -j${TUX64_MAKEOPTS} install-strip-gcc
+make -j${TUX64_MAKEOPTS} install-gcc
 ```
 
 Once this completes, we need to configure `musl` and install its headers and
@@ -380,9 +382,9 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-musl-bootstrap
       --host=${TUX64_TARGET_N64_LINUX} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
       --syslibdir=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib \
-      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s -fno-lto" \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -fno-lto" \
       ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s -fno-lto" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
       --enable-static \
       --disable-shared
 )
@@ -418,9 +420,9 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-musl
       --host=${TUX64_TARGET_N64_LINUX} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
       --syslibdir=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib \
-      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s -fno-lto" \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -fno-lto" \
       ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s -fno-lto" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
       --enable-static \
       --enable-shared
 )
@@ -469,7 +471,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 We now have a fully bootstrapped cross-compiler which can build both the Linux

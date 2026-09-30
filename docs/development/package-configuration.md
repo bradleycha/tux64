@@ -13,10 +13,10 @@ debugging:
 
 | Name | Value |
 |------|-------|
-| TUX64_CFLAGS_HOST | -pipe -march=native -O0 -g -fsanitize=undefined |
-| TUX64_LDFLAGS_HOST | -g |
-| TUX64_CFLAGS_N64_COMMON |  -pipe -march=vr4300 -mfix4300 -O0 -g |
-| TUX64_LDFLAGS_N64_COMMON | -g |
+| TUX64_CFLAGS_COMMON | -pipe -O0 -g |
+| TUX64_LDFLAGS_COMMON |  |
+| TUX64_CFLAGS_HOST | ${TUX64_CFLAGS_COMMON} -march=native |
+| TUX64_CFLAGS_N64_COMMON | ${TUX64_CFLAGS_COMMON} -march=vr4300 -mfix4300 |
 | TUX64_CFLAGS_N64_BOOTLOADER | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 |
 
 You may either overwrite `buildconf.sh`, or save the modified version to a new

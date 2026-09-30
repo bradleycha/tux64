@@ -147,7 +147,7 @@ Library routines  --->
 
 Kernel hacking  --->
   printk and dmesg options  --->
-    [*] Show timing information on printk
+    [*] Show timing information on printks
 ```
 
 Additionally, if you are building a 32-bit kernel, or are intending on building

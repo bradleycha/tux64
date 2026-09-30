@@ -95,11 +95,11 @@ the format `[NAME]-[VERSION]`.
 | [tux64](https://github.com/bradleycha/tux64/) | master | Currently no stable release.  Use `git` to clone the latest version of the 'master' branch.  If cloning directly from GitHub, you must run ```autoreconf -i```  for each sub-project which contains a GNU Autoconf script (```configure.ac```) |
 | [binutils](https://www.gnu.org/software/binutils/) | 2.47 | |
 | [gcc](https://gcc.gnu.org/) | 16.2.0 | |
-| [e2fsprogs](https://e2fsprogs.sourceforge.net/) | 1.47.4 | Same note as for the kernel tarball.
-| [linux](https://kernel.org/) | 6.18.54 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress linux-*.tar.xz && gpg --verify linux-*.tar.sign`). |
-| [musl](https://musl.libc.org/) | 1.2.6 | |
+| [e2fsprogs](https://e2fsprogs.sourceforge.net/) | 1.47.4 | Signatures should be checked against the uncompressed tarball, not the compressed one (i.e. `xz --decompress e2fsprogs-*.tar.xz && gpg --verify e2fsprogs-*.tar.sign`). |
+| [linux](https://kernel.org/) | 6.18.54 | Same note as for `e2fsprogs`. |
+| [musl](https://musl.libc.org/) | 1.2.6 | It is highly recommended to apply the security patches listed on the homepage.  You can download the patch file (link is the underlined "patch"/"patched") and apply it with `cd musl-* && git apply [patch]`. |
 | [zlib](https://zlib.net/) | 1.3.2 | |
-| [openssl](https://openssl-library.org/) | 4.0.2 | |
+| [openssl](https://openssl-library.org/) | 4.0.3 | |
 | [gmp](https://gmplib.org/) | 6.3.0 | |
 | [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
 | [bash](https://www.gnu.org/software/bash/) | 5.3 | |
@@ -116,84 +116,43 @@ cp [TUX64 BUILD ROOT]/sources/tux64-*/scripts/*.sh [TUX64 BUILD ROOT]/scripts/
 This will copy the helper scripts to a more convenient location, and also allow
 us to configure them for our system.  Speaking of which, the `buildconf.sh`
 script is used to set various global configuration options for the entire Tux64
-build.  The following environment variables are provided:
+build.  The variables should be self-explanatory, but there are some which
+warrant additional explanation.
 
-| Name | Description | Default Value |
-|------|-------------|---------------|
-| TUX64_BUILD_ROOT | The absolute path to \[TUX64 BUILD ROOT\]. | |
-| TUX64_MAKEOPTS | The number of parallel make jobs to run. | $(nproc) |
-| TUX64_TARGET_HOST | The target system for the host. | |
-| TUX64_TARGET_N64_BOOTLOADER | The target system for the Nintendo 64's bootloader. | mips64-elf |
-| TUX64_TARGET_N64_LINUX | The target system for the Nintendo 64's kernel and userspace programs. | mips-linux-musl |
-| TUX64_CFLAGS_HOST | Flags to pass to the host's C compiler. | -pipe -march=native -O2 -flto |
-| TUX64_CXXFLAGS_HOST | Flags to pass to the host's C++ compiler. | ${TUX64_CFLAGS_HOST} |
-| TUX64_ASFLAGS_HOST | Flags to pass to the host's assembler. | |
-| TUX64_LDFLAGS_HOST | Flags to pass to the host's linker. | -Wl,--gc-sections -flto |
-| TUX64_CFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C compilers. | -pipe -march=vr4300 -mfix4300 -Oz -flto -fno-stack-protector |
-| TUX64_CXXFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's C++ compilers. | ${TUX64_CFLAGS_N64_COMMON} |
-| TUX64_ASFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's assemblers. | -march=vr4300 -mtune=vr4300 |
-| TUX64_LDFLAGS_N64_COMMON | Shared flags to pass to the Nintendo 64's linkers. | -Wl,--gc-sections -flto |
-| TUX64_CFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader C compiler. | ${TUX64_CFLAGS_N64_COMMON} -mabi=o64 -G65536 -mexplicit-relocs=none -mno-check-zero-division |
-| TUX64_ASFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
-| TUX64_LDFLAGS_N64_BOOTLOADER | Flags to pass to the Nintendo 64's bootloader linker. | ${TUX64_LDFLAGS_N64_COMMON} |
-| TUX64_CFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel C compiler. | ${TUX64_CFLAGS_N64_COMMON} -fno-lto |
-| TUX64_ASFLAGS_N64_KERNEL | Flags to pass to the Nintendo 64's kernel assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
-| TUX64_CFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C compiler. | ${TUX64_CFLAGS_N64_COMMON} -mabi=32 |
-| TUX64_CXXFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace C++ compiler. | ${TUX64_CFLAGS_N64_LINUX} |
-| TUX64_ASFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace assembler. | ${TUX64_ASFLAGS_N64_COMMON} |
-| TUX64_LDFLAGS_N64_LINUX | Flags to pass to the Nintendo 64's userspace linker. | ${TUX64_LDFLAGS_N64_COMMON} |
+`${TUX64_BUILD_ROOT}` is the absolute path to the build root.  This must be
+specified manually.
 
-A couple of these warrant additional explanation.
+`${TUX64_TARGET_HOST}` is the target triple of the host.  For example, for a
+64-bit Intel or AMD computer running Linux with Glibc, the target triple would
+be `x86_64-pc-linux-gnu`.  This needs to be specified manually.  If confused,
+running `gcc -dumpmachine` usually provides the correct target triple.  For more
+information, click [here](https://wiki.osdev.org/Target_Triplet).
 
-`${TUX64_BUILD_ROOT}` is the absolute path to the build root for Tux64, and must
-be set manually.  This is required due to issues with relative directories
-messing up certain `configure` scripts.
+`${TUX64_MAKEOPTS}` specifies the number of parallel build jobs to run when
+compiling software with `make`.  By default, this is set to `$(nproc)`, which
+uses all available threads (nproc = Number of Processors, how about that!?).
+Since this can run multiple jobs at once, memory usage will increase
+proportionally with the number of parallel jobs.  If you are having memory
+issues, you may want to manually reduce this.  Additionally, you may want to
+reduce this if you would like to not pin your CPU at 100% for hours at a time.
 
-`${TUX64_MAKEOPTS}` is the number of parallel jobs to run when building
-software.  This can be thought of as the number of threads to compile software
-on.  The default is to use `$(nproc)`, which means it will build on all
-available CPU cores.  This drastically decreases the build time, but also uses
-significantly more memory and also prevents using other software while building.
-If you are having issues running out of memory or want to use other software
-while building, try manually setting this value to a lower number.
+`${TUX64_CFLAGS_COMMON}` sets C compiler flags which are used for all build
+targets.  In particular, `-pipe` and `-flto` are used.  `-pipe` uses in-memory
+pipes instead of the filesystem to handle passing of temporary files between
+stages of compilation.  This speeds up compilation, but and uses more memory.
+If you are having issues with running out of memory, you may want to remove
+`-pipe`.  Additionally, `-flto` enables Link-Time Optimization (LTO).  LTO
+allows optimization of an entire program, producing more efficient code.
+However, LTO tends to increase memory usage and compilation time.  If either of
+these are problems, you may want to remove this flag.
 
-`${TUX64_TARGET_HOST}` is the target for the host machine.  This needs to be set
-manually as there's no easy way to detect this automatically in a simple shell
-script.  This follows the format `[arch][sub]-[vendor]-[sys]-[env]`.  For
-example, Linux running glibc on a 64-bit Intel or AMD processor would have the
-target triple `x86_64-pc-linux-gnu`.  For more information, refer to
-[this website](https://clang.llvm.org/docs/CrossCompilation.html).
+`${TUX64_CFLAGS_N64_LINUX}` sets the C compiler flags for all userspace software
+running under Linux on the Nintendo 64.  Notice that `-mabi=32` is specified.
+32-bit code tends to be smaller on-average to 64-bit code, therefore 32-bit code
+is generated by default.  If you would like to use 64-bit code, you must also
+update the kernel configuration to support 64-bit binaries.
 
-`${TUX64_TARGET_N64_BOOTLOADER}` is set to target 64-bit MIPS to make use of
-GCC's O64 ABI, which provides 32-bit addresses with 64-bit registers.  As the
-VR4300's virtual address space is only 32-bit, there is no purpose to 64-bit
-pointers.  In the future, the kernel and userspace will also be built with
-`-mabi=o64`, but currently it's unsupported outside of the bootloader.
-
-`${TUX64_TARGET_N64_LINUX}` is set to use 32-bit MIPS because 32-bit code is
-smaller on-average than 64-bit code.  Also, 64-bit kernels are currently broken
-and crash when attempting to run any userspace programs.  If you want, you are
-welcome to try setting this to `mips64-linux-musl` instead to see what happens.
-Just make sure to update `TUX64_CFLAGS_N64_LINUX` to use `-mabi=64`, and select
-`64-bit kernel` for the kernel configuration.
-
-`${TUX64_LDFLAGS_HOST}` and `${TUX64_LDFLAGS_N64_COMMON}` include
-`-Wl,--gc-sections`.  This is a flag which removes unused sections when linking
-programs.  This can help with dead code elimination, thus producing smaller
-binaries.
-
-`${TUX64_CFLAGS_N64_COMMON}` includes `-mfix4300`.  This is a flag which patches
-code to work around hardware bugs in early N64 CPU revisions, at the cost of
-code size and performance.  We include this flag by default for compatibility
-with all N64 revisions.  However if you are planning on only running Tux64 on
-NUS-CPU-04 and later revisions, you should be able to safely remove this flag
-for improved performance and smaller code size.
-
-`${TUX64_CFLAGS_N64_BOOTLOADER}` includes `-mabi=o64`.  This uses GCC's MIPS O64
-ABI, as documented above.  A few other CFLAGS are also included which make the
-bootloader smaller, but are generally unsafe to use outside of the bootloader.
-
-After reviewing and setting the required environment variables, these can be
+After reviewing and setting the given environment variables, these can be
 exported to the current shell with the following command:
 
 ```

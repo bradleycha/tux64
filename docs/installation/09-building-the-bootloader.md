@@ -37,7 +37,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_BOOTLOADER}-tux64-lib
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Chapter 9.2 - Building `tux64-boot`

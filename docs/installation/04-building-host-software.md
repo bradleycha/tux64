@@ -35,7 +35,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Chapter 4.2 - Building `tux64-mkrom`
@@ -60,7 +60,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-mkrom
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Chapter 4.3 - Building `tux64-rescompiler`
@@ -86,7 +86,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-rescompiler
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Chapter 4.4 - Building `e2fsprogs`
@@ -120,7 +120,6 @@ cd ${TUX64_BUILD_ROOT}/builds/e2fsprogs
 
 make -j${TUX64_MAKEOPTS}
 cp misc/mke2fs ${TUX64_BUILD_ROOT}/tools/bin/mke2fs
-${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}-strip ${TUX64_BUILD_ROOT}/tools/bin/mke2fs
 ```
 
 Note that we manually install `mke2fs`.  This is because `e2fsprogs` contains

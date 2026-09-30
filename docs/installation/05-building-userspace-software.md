@@ -37,7 +37,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-tux64-lib
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Chapter 5.2 - Building `tux64-init`
@@ -65,7 +65,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-init
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Chapter 5.3 - Building `zlib`
@@ -79,14 +79,14 @@ cd ${TUX64_BUILD_ROOT}/builds/zlib
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
-   CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s" \
-   LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s" \
+   CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+   LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
    ../../sources/zlib-*/configure \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 ### Chapter 5.4 - Building `openssl`
@@ -104,9 +104,9 @@ cd ${TUX64_BUILD_ROOT}/builds/openssl
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
    ../../sources/openssl-*/config \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
-      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -s" \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
       ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
-      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -s" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
       linux-mips32 \
       zlib-dynamic \
       no-threads \
@@ -140,7 +140,7 @@ cd ${TUX64_BUILD_ROOT}/builds/gmp
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 TODO: this does not work as we get "long long reliability" issues during
@@ -179,7 +179,7 @@ cd ${TUX64_BUILD_ROOT}/builds/coreutils
 )
 
 make -j${TUX64_MAKEOPTS}
-make -j${TUX64_MAKEOPTS} install-strip
+make -j${TUX64_MAKEOPTS} install
 ```
 
 TODO: Build/link against `gmp` once we get it building.
@@ -211,7 +211,6 @@ cd ${TUX64_BUILD_ROOT}/builds/bash
 
 make -j${TUX64_MAKEOPTS}
 cp bash ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash
-${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}-strip ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash
 ```
 
 TODO: this crashes immediately with malloc issues.  I haven't yet debugged why
