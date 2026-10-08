@@ -429,7 +429,7 @@ tux64_boot_stage1_video_vi_register_array_mpal = {.regs = {
 }};
 #endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL */
 
-#if TUX64_BOOT_CONFIG_IQUE
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_ique = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_IQUE),
@@ -447,7 +447,7 @@ tux64_boot_stage1_video_vi_register_array_ique = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
-#endif /* TUX64_BOOT_CONFIG_IQUE */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE */
 
 static const union Tux64BootStage1VideoViRegisterArray *
 tux64_boot_stage1_video_vi_choose_register_array(
@@ -476,11 +476,11 @@ tux64_boot_stage1_video_vi_choose_register_array(
 #endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL */
 
       case TUX64_BOOT_CONSOLE_TYPE_IQUE:
-#if TUX64_BOOT_CONFIG_IQUE
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE
          return &tux64_boot_stage1_video_vi_register_array_ique;
-#else /* TUX64_BOOT_CONFIG_IQUE */
+#else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE */
          break;
-#endif /* TUX64_BOOT_CONFIG_IQUE */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE */
 
       default:
          TUX64_UNREACHABLE;
