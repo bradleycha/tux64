@@ -352,7 +352,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc-bootstrap
       --enable-languages=c,c++ \
       --with-arch=vr4300 \
       --with-tune=vr4300 \
-      --with-abi=o64 \
+      --with-abi=32 \
       --disable-multilib \
       --enable-static \
       --disable-shared \
@@ -463,7 +463,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-gcc
       --enable-languages=c,c++ \
       --with-arch=vr4300 \
       --with-tune=vr4300 \
-      --with-abi=o64 \
+      --with-abi=32 \
       --disable-multilib \
       --enable-static \
       --enable-shared \
