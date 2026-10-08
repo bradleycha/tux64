@@ -43,19 +43,19 @@ make -j${TUX64_MAKEOPTS} install
 ### Chapter 9.2 - Building `tux64-boot`
 
 We will now build the bootloader.  For this, we have to choose which console
-region we want to support, or include support for multiple regions if desired.
-We can either support PAL (European N64s), NTSC (American and Japanese N64s), or
-M-PAL (Brazilian N64s?), or alternatively only support the iQue player, which is
-treated as its own "region".  Including support for multiple regions is useful
-if you want a single unified bootloader that supports all regions and consoles,
-at the cost of some slight bloat.
+types we want to support, or include support for multiple console types if
+desired.  We can either support PAL (European N64s), NTSC (American and Japanese
+N64s), M-PAL (Brazilian N64s?), or the iQue player.  Including support for
+multiple console types is useful if you want a single unified bootloader that
+works with all consoles, at the cost of some slight bloat.
 
 For most people, you will only need NTSC support.  To do this, configure with
-`--enable-region-ntsc`.  For other regions, refer to the help menu from the
-`configure` script with `--help`.
+`--enable-console-type-ntsc`.  For other console types, refer to the help menu
+from the `configure` script with `--help`.
 
 **Important note**:  If you try to use the bootloader with an unsupported
-console region, you will get a black screen.
+console type, you will get a black screen.  For example, a bootloader configured
+with only NTSC support running on a PAL console will not work.
 
 In addition, you can configure the color palette for the on-screen console.  By
 default, it uses white text on a black background.  To customize this, set the
@@ -113,10 +113,10 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       --enable-splash \
       --enable-logo \
       --enable-memory-display \
-      --enable-region-pal \
-      --enable-region-ntsc \
-      --enable-region-mpal \
-      --enable-ique \
+      --enable-console-type-pal \
+      --enable-console-type-ntsc \
+      --enable-console-type-mpal \
+      --enable-console-type-ique \
       --enable-foreign-endian-kernels
 )
 
