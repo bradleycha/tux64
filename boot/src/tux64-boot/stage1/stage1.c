@@ -54,16 +54,16 @@ tux64_boot_stage1_choose_video_palette(void) {
    return palette;
 }
 
-static enum Tux64BootStage1VideoPlatform
-tux64_boot_stage1_choose_video_platform(
+static enum Tux64BootConsoleType
+tux64_boot_stage1_choose_console_type(
    enum Tux64BootIpl2VideoStandard video_standard,
    Tux64Boolean running_on_ique
 ) {
    if (running_on_ique == TUX64_BOOLEAN_TRUE) {
-      return TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE;
+      return TUX64_BOOT_CONSOLE_TYPE_IQUE;
    }
 
-   return (enum Tux64BootStage1VideoPlatform)video_standard;
+   return (enum Tux64BootConsoleType)video_standard;
 }
 
 /* we store the FSM in a global variable because its state can be huge (think */
@@ -85,7 +85,7 @@ tux64_boot_stage1_main(
    Tux64UInt32 rng_seed,
    Tux64Boolean running_on_ique
 ) {
-   enum Tux64BootStage1VideoPlatform video_platform;
+   enum Tux64BootConsoleType console_type;
    struct Tux64BootStage1Palette video_palette;
 
    tux64_boot_initialize();
@@ -103,7 +103,7 @@ tux64_boot_stage1_main(
 
    video_palette = tux64_boot_stage1_choose_video_palette();
 
-   video_platform = tux64_boot_stage1_choose_video_platform(
+   console_type = tux64_boot_stage1_choose_console_type(
       video_standard,
       running_on_ique
    );
@@ -111,7 +111,7 @@ tux64_boot_stage1_main(
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(
-      video_platform,
+      console_type,
       video_palette.background
    );
    tux64_boot_stage1_interrupt_vi_enable();

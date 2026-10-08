@@ -20,7 +20,7 @@ tux64_boot_err_log() {
    >&2 echo configure.ac: error: $1
 }
 
-if [[ "$host_cpu" != "mips" && "$host_cpu" != "mips32" && "$host_cpu" != "mips64" ]] || [[ "$host_os" != "elf" ]]; then
+if [[[ "$host_cpu" != "mips" && "$host_cpu" != "mips32" && "$host_cpu" != "mips64" ]] || [[ "$host_os" != "elf" ]]]; then
    $(tux64_boot_err_log "expected host system type mips64-elf, found ${host}")
    exit 1
 fi
@@ -137,31 +137,40 @@ AC_ARG_ENABLE([memory-display],
    [tux64_boot_config_memory_display=1],
    [tux64_boot_config_memory_display=0]
 )
-AC_ARG_ENABLE([ique],
-   AS_HELP_STRING([--enable-ique], [Enable iQue player support]),
-   [tux64_boot_config_ique=1],
-   [tux64_boot_config_ique=0]
+AC_ARG_ENABLE([console-type-ique],
+   AS_HELP_STRING([--enable-console-type-ique], [Enable iQue player support]),
+   [tux64_boot_config_console_type_ique=1],
+   [tux64_boot_config_console_type_ique=0]
 )
-AC_ARG_ENABLE([region-pal],
-   AS_HELP_STRING([--enable-region-pal], [Enable PAL region support]),
-   [tux64_boot_config_region_pal=1],
-   [tux64_boot_config_region_pal=0]
+AC_ARG_ENABLE([console-type-pal],
+   AS_HELP_STRING([--enable-console-type-pal], [Enable PAL console support]),
+   [tux64_boot_config_console_type_pal=1],
+   [tux64_boot_config_console_type_pal=0]
 )
-AC_ARG_ENABLE([region-ntsc],
-   AS_HELP_STRING([--enable-region-ntsc], [Enable NTSC region support]),
-   [tux64_boot_config_region_ntsc=1],
-   [tux64_boot_config_region_ntsc=0]
+AC_ARG_ENABLE([console-type-ntsc],
+   AS_HELP_STRING([--enable-console-type-ntsc], [Enable NTSC console support]),
+   [tux64_boot_config_console_type_ntsc=1],
+   [tux64_boot_config_console_type_ntsc=0]
 )
-AC_ARG_ENABLE([region-mpal],
-   AS_HELP_STRING([--enable-region-mpal], [Enable M-PAL region support]),
-   [tux64_boot_config_region_mpal=1],
-   [tux64_boot_config_region_mpal=0]
+AC_ARG_ENABLE([console-type-mpal],
+   AS_HELP_STRING([--enable-console-type-mpal], [Enable M-PAL console support]),
+   [tux64_boot_config_console_type_mpal=1],
+   [tux64_boot_config_console_type_mpal=0]
 )
 AC_ARG_ENABLE([foreign-endian-kernels],
    AS_HELP_STRING([--enable-foreign-endian-kernels], [Enable support for booting kernel images with a different endianess to the bootloader]),
    [tux64_boot_config_foreign_endian_kernels=1],
    [tux64_boot_config_foreign_endian_kernels=0]
 )
+
+# we have code which expects at least one console configuration to always be
+# enabled.  thus, that code will break if nothing is enabled.  the best thing to
+# do here is block bad configurations immediately.  we also have a header guard
+# for this, but that doesn't always terminate compilation and leads to false hope.
+if [[[ $tux64_boot_config_console_type_ique == 0 ]] && [[ $tux64_boot_config_console_type_pal == 0 ]] && [[ $tux64_boot_config_console_type_ntsc == 0 ]] && [[ $tux64_boot_config_console_type_mpal == 0 ]]]; then
+   $(tux64_boot_err_log "all console types are disabled.  please reconfigure with at least one console type using --enable-console-type-[[type]]")
+   exit 1
+fi
 
 if [[ -z "$CONFIG_COLOR_FOREGROUND" ]]; then
    CONFIG_COLOR_FOREGROUND="white"
@@ -277,21 +286,21 @@ AC_DEFINE_UNQUOTED([CONFIG_MEMORY_DISPLAY],
    [$tux64_boot_config_memory_display],
    [Enable support for the display of memory information on startup]
 )
-AC_DEFINE_UNQUOTED([CONFIG_IQUE],
-   [$tux64_boot_config_ique],
+AC_DEFINE_UNQUOTED([CONFIG_CONSOLE_TYPE_IQUE],
+   [$tux64_boot_config_console_type_ique],
    [Enable iQue player support]
 )
-AC_DEFINE_UNQUOTED([CONFIG_REGION_PAL],
-   [$tux64_boot_config_region_pal],
-   [Enable PAL region support]
+AC_DEFINE_UNQUOTED([CONFIG_CONSOLE_TYPE_PAL],
+   [$tux64_boot_config_console_type_pal],
+   [Enable PAL console support]
 )
-AC_DEFINE_UNQUOTED([CONFIG_REGION_NTSC],
-   [$tux64_boot_config_region_ntsc],
-   [Enable NTSC region support]
+AC_DEFINE_UNQUOTED([CONFIG_CONSOLE_TYPE_NTSC],
+   [$tux64_boot_config_console_type_ntsc],
+   [Enable NTSC console support]
 )
-AC_DEFINE_UNQUOTED([CONFIG_REGION_MPAL],
-   [$tux64_boot_config_region_mpal],
-   [Enable M-PAL region support]
+AC_DEFINE_UNQUOTED([CONFIG_CONSOLE_TYPE_MPAL],
+   [$tux64_boot_config_console_type_mpal],
+   [Enable M-PAL console support]
 )
 AC_DEFINE_UNQUOTED([CONFIG_FOREIGN_ENDIAN_KERNELS],
    [$tux64_boot_config_foreign_endian_kernels],

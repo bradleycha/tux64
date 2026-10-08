@@ -18,19 +18,6 @@
 #include "tux64-boot/cache.h"
 #include "tux64-boot/stage1/interrupt.h"
 
-#define TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION \
-   !( \
-      TUX64_BOOT_CONFIG_REGION_PAL  || \
-      TUX64_BOOT_CONFIG_REGION_NTSC || \
-      TUX64_BOOT_CONFIG_REGION_MPAL || \
-      TUX64_BOOT_CONFIG_IQUE \
-   )
-
-/* we need this to prevent misconfigurations from exploding at runtime. */
-#if TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION
-#error unable to determine video configurations parameters.  please reconfigure with at least one region supported with --enable-region-[region], or enable iQue player support with --enable-ique
-#endif /* TUX64_BOOT_STAGE1_VIDEO_UNKNOWN_CONFIGURATION */
-
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (2u) /* double-buffered */
 
@@ -380,7 +367,7 @@ union Tux64BootStage1VideoViRegisterArray {
 /* we have a bit of duplication, but the code required to iterate seperately */
 /* and avoid duplication outweighs the benefits. */
 
-#if TUX64_BOOT_CONFIG_REGION_PAL
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_pal = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
@@ -398,9 +385,9 @@ tux64_boot_stage1_video_vi_register_array_pal = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
-#endif /* TUX64_BOOT_CONFIG_REGION_PAL */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL */
 
-#if TUX64_BOOT_CONFIG_REGION_NTSC
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_ntsc = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
@@ -418,11 +405,11 @@ tux64_boot_stage1_video_vi_register_array_ntsc = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
-#endif /* TUX64_BOOT_CONFIG_REGION_NTSC */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC */
 
 /* TODO: make sure all below constants are correct for MPAL */
 
-#if TUX64_BOOT_CONFIG_REGION_MPAL
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL
 static const union Tux64BootStage1VideoViRegisterArray
 tux64_boot_stage1_video_vi_register_array_mpal = {.regs = {
    .ctrl          = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_CTRL_STANDARD),
@@ -440,7 +427,7 @@ tux64_boot_stage1_video_vi_register_array_mpal = {.regs = {
    .x_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE),
    .y_scale       = TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE)
 }};
-#endif /* TUX64_BOOT_CONFIG_REGION_MPAL */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL */
 
 #if TUX64_BOOT_CONFIG_IQUE
 static const union Tux64BootStage1VideoViRegisterArray
@@ -464,31 +451,31 @@ tux64_boot_stage1_video_vi_register_array_ique = {.regs = {
 
 static const union Tux64BootStage1VideoViRegisterArray *
 tux64_boot_stage1_video_vi_choose_register_array(
-   enum Tux64BootStage1VideoPlatform platform
+   enum Tux64BootConsoleType console_type
 ) {
-   switch (platform) {
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_PAL:
-#if TUX64_BOOT_CONFIG_REGION_PAL
+   switch (console_type) {
+      case TUX64_BOOT_CONSOLE_TYPE_PAL:
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL
          return &tux64_boot_stage1_video_vi_register_array_pal;
-#else /* TUX64_BOOT_CONFIG_REGION_PAL */
+#else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL */
          break;
-#endif /* TUX64_BOOT_CONFIG_REGION_PAL */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL */
 
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_NTSC:
-#if TUX64_BOOT_CONFIG_REGION_NTSC
+      case TUX64_BOOT_CONSOLE_TYPE_NTSC:
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC
          return &tux64_boot_stage1_video_vi_register_array_ntsc;
-#else /* TUX64_BOOT_CONFIG_REGION_NTSC */
+#else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC */
          break;
-#endif /* TUX64_BOOT_CONFIG_REGION_NTSC */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC */
 
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_N64_MPAL:
-#if TUX64_BOOT_CONFIG_REGION_MPAL
+      case TUX64_BOOT_CONSOLE_TYPE_MPAL:
+#if TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL
          return &tux64_boot_stage1_video_vi_register_array_mpal;
-#else /* TUX64_BOOT_CONFIG_REGION_MPAL */
+#else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL */
          break;
-#endif /* TUX64_BOOT_CONFIG_REGION_MPAL */
+#endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL */
 
-      case TUX64_BOOT_STAGE1_VIDEO_PLATFORM_IQUE:
+      case TUX64_BOOT_CONSOLE_TYPE_IQUE:
 #if TUX64_BOOT_CONFIG_IQUE
          return &tux64_boot_stage1_video_vi_register_array_ique;
 #else /* TUX64_BOOT_CONFIG_IQUE */
@@ -506,14 +493,14 @@ tux64_boot_stage1_video_vi_choose_register_array(
 
 static void
 tux64_boot_stage1_video_initialize_vi(
-   enum Tux64BootStage1VideoPlatform platform
+   enum Tux64BootConsoleType console_type
 ) {
    const union Tux64BootStage1VideoViRegisterArray * register_array;
    const Tux64UInt32 * iter_register_words;
    volatile Tux64UInt32 * iter_vi;
    Tux64UInt8 i;
 
-   register_array = tux64_boot_stage1_video_vi_choose_register_array(platform);
+   register_array = tux64_boot_stage1_video_vi_choose_register_array(console_type);
 
    iter_register_words = register_array->words;
    iter_vi = (volatile Tux64UInt32 *)&tux64_platform_mips_n64_mmio_registers_vi;
@@ -537,13 +524,13 @@ tux64_boot_stage1_video_initialize_vi(
 
 void
 tux64_boot_stage1_video_initialize(
-   enum Tux64BootStage1VideoPlatform platform,
+   enum Tux64BootConsoleType console_type,
    Tux64BootStage1VideoPixel clear_color
 ) {
    /* must initialize VI first, so that the context initialization can set */
    /* the correct framebuffer.  otherwise, the first frame displayed will be */
    /* garbage. */
-   tux64_boot_stage1_video_initialize_vi(platform);
+   tux64_boot_stage1_video_initialize_vi(console_type);
    tux64_boot_stage1_video_initialize_context(clear_color);
    return;
 }
