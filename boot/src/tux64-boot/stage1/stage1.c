@@ -125,7 +125,14 @@ tux64_boot_stage1_main(
       video_palette.background
    );
 
-   tux64_boot_stage1_fsm_initialize(&tux64_boot_stage1_fsm);
+   tux64_boot_stage1_fsm_initialize(
+      &tux64_boot_stage1_fsm,
+      console_type,
+      rom_type,
+      reset_type,
+      rom_cic_seed,
+      pif_rom_version
+   );
 
    /* we used to execute this at the end of stage-0, but we moved it to here. */
    /* the reason is we want to wait as late into the boot process to          */

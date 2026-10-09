@@ -11,6 +11,7 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/endian.h>
+#include "tux64-boot/ipl2.h"
 #include "tux64-boot/load.h"
 
 /*----------------------------------------------------------------------------*/
@@ -25,6 +26,23 @@ struct Tux64BootExecKernelArguments {
    Tux64UInt32 command_line_address;
    Tux64UInt32 total_memory;
    Tux64UInt32 rng_seed;
+   Tux64UInt32 metadata;
+};
+
+struct Tux64BootExecKernelMetadataIpl2 {
+   enum Tux64BootIpl2RomType rom_type;
+   enum Tux64BootIpl2ResetType reset_type;
+   Tux64UInt8 rom_cic_seed;
+   Tux64UInt8 pif_rom_version;
+};
+
+/*----------------------------------------------------------------------------*/
+/* Bootloader and hardware metadata intended primarily for informative and    */
+/* diagnostic purposes.                                                       */
+/*----------------------------------------------------------------------------*/
+struct Tux64BootExecKernelMetadata {
+   enum Tux64BootConsoleType console_type;
+   struct Tux64BootExecKernelMetadataIpl2 ipl2;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -38,7 +56,8 @@ tux64_boot_exec_kernel_arguments_initialize(
    Tux64UInt32 rootfs_bytes,
    Tux64UInt32 command_line_address,
    Tux64UInt32 total_memory,
-   Tux64UInt32 rng_seed
+   Tux64UInt32 rng_seed,
+   const struct Tux64BootExecKernelMetadata * metadata
 );
 
 /*----------------------------------------------------------------------------*/

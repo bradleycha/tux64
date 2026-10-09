@@ -13,6 +13,7 @@
 #include <tux64/bitwise.h>
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/vr4300/cop0.h>
+#include "tux64-boot/ipl2.h"
 #include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/halt.h"
@@ -20,6 +21,26 @@
 __attribute__((section(".kernel_arguments")))
 extern struct Tux64BootExecKernelArguments
 tux64_boot_exec_kernel_arguments;
+
+static Tux64UInt32
+tux64_boot_exec_kernel_arguments_initialize_metadata_word(
+   const struct Tux64BootExecKernelMetadata * metadata
+) {
+   Tux64UInt32 word;
+
+   word = TUX64_LITERAL_UINT32(0u);
+
+   /* we may assume that our enums are always well-defined, i.e. we don't */
+   /* ever have invalid enums.  if that's the case, either our bootloader is */
+   /* bugged, or the hardware is faulty and should be fixed.  therefore, we */
+   /* may use bit tricks to pack our metadata efficiently. */
+   word |= (((Tux64UInt32)metadata->console_type)           << TUX64_LITERAL_UINT8(0u));  /* 2 bits */
+   word |= (((Tux64UInt32)metadata->ipl2.rom_type)          << TUX64_LITERAL_UINT8(2u));  /* 1 bit  */
+   word |= (((Tux64UInt32)metadata->ipl2.reset_type)        << TUX64_LITERAL_UINT8(3u));  /* 1 bit  */
+   word |= (((Tux64UInt32)metadata->ipl2.rom_cic_seed)      << TUX64_LITERAL_UINT8(4u));  /* 8 bits */
+   word |= (((Tux64UInt32)metadata->ipl2.pif_rom_version)   << TUX64_LITERAL_UINT8(12u)); /* 8 bits */
+   return word;
+}
 
 void
 tux64_boot_exec_kernel_arguments_initialize(
@@ -29,11 +50,15 @@ tux64_boot_exec_kernel_arguments_initialize(
    Tux64UInt32 rootfs_bytes,
    Tux64UInt32 command_line_address,
    Tux64UInt32 total_memory,
-   Tux64UInt32 rng_seed
+   Tux64UInt32 rng_seed,
+   const struct Tux64BootExecKernelMetadata * metadata
 ) {
    struct Tux64BootExecKernelArguments * arguments;
+   Tux64UInt32 metadata_word;
 
    arguments = &tux64_boot_exec_kernel_arguments;
+
+   metadata_word = tux64_boot_exec_kernel_arguments_initialize_metadata_word(metadata);
 
    arguments->initramfs_address     = tux64_endian_convert_uint32(initramfs_address, TUX64_ENDIAN_FORMAT_BIG);
    arguments->initramfs_bytes       = tux64_endian_convert_uint32(initramfs_bytes, TUX64_ENDIAN_FORMAT_BIG);
@@ -42,6 +67,7 @@ tux64_boot_exec_kernel_arguments_initialize(
    arguments->command_line_address  = tux64_endian_convert_uint32(command_line_address, TUX64_ENDIAN_FORMAT_BIG);
    arguments->total_memory          = tux64_endian_convert_uint32(total_memory, TUX64_ENDIAN_FORMAT_BIG);
    arguments->rng_seed              = tux64_endian_convert_uint32(rng_seed, TUX64_ENDIAN_FORMAT_BIG);
+   arguments->metadata              = tux64_endian_convert_uint32(metadata_word, TUX64_ENDIAN_FORMAT_BIG);
    return;
 }
 

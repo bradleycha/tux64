@@ -21,6 +21,7 @@
 #include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/flag.h"
+#include "tux64-boot/ipl2.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/preempt.h"
@@ -339,7 +340,8 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_sta
       tux64_boot_header_file_rootfs()->length,
       tux64_boot_load_allocations.optional.command_line.address,
       tux64_boot_stage1_memory_total(),
-      tux64_boot_rng_random_uint32()
+      tux64_boot_rng_random_uint32(),
+      &fsm->globals.kernel_metadata
    );
 
    if (!TUX64_BOOT_CONFIG_FOREIGN_ENDIAN_KERNELS) {
@@ -701,11 +703,42 @@ tux64_boot_stage1_fsm_initialize_checksum(void) {
    return;
 }
 
+static void
+tux64_boot_stage1_fsm_initialize_kernel_metadata(
+   struct Tux64BootExecKernelMetadata * metadata,
+   enum Tux64BootConsoleType console_type,
+   enum Tux64BootIpl2RomType rom_type,
+   enum Tux64BootIpl2ResetType reset_type,
+   Tux64UInt8 rom_cic_seed,
+   Tux64UInt8 pif_rom_version
+) {
+   metadata->console_type           = console_type;
+   metadata->ipl2.rom_type          = rom_type;
+   metadata->ipl2.reset_type        = reset_type;
+   metadata->ipl2.rom_cic_seed      = rom_cic_seed;
+   metadata->ipl2.pif_rom_version   = pif_rom_version;
+   return;
+}
+
 void
 tux64_boot_stage1_fsm_initialize(
-   struct Tux64BootStage1Fsm * fsm
+   struct Tux64BootStage1Fsm * fsm,
+   enum Tux64BootConsoleType console_type,
+   enum Tux64BootIpl2RomType rom_type,
+   enum Tux64BootIpl2ResetType reset_type,
+   Tux64UInt8 rom_cic_seed,
+   Tux64UInt8 pif_rom_version
 ) {
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_START);
+
+   tux64_boot_stage1_fsm_initialize_kernel_metadata(
+      &fsm->globals.kernel_metadata,
+      console_type,
+      rom_type,
+      reset_type,
+      rom_cic_seed,
+      pif_rom_version
+   );
 
    if (TUX64_BOOT_CONFIG_SPLASH) {
       tux64_boot_stage1_fsm_initialize_splash();
