@@ -83,10 +83,10 @@ index 66ec28ab4..098ee187a 100644
  void __init plat_time_init(void)
 diff --git a/arch/mips/n64/tux64-boot.c b/arch/mips/n64/tux64-boot.c
 new file mode 100644
-index 000000000..ff8eb9936
+index 000000000..a003a7412
 --- /dev/null
 +++ b/arch/mips/n64/tux64-boot.c
-@@ -0,0 +1,316 @@
+@@ -0,0 +1,322 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * tux64-boot.c: Kernel support for extended boot information provided by tux64-boot.
@@ -109,17 +109,19 @@ index 000000000..ff8eb9936
 +#define MI_VERSION_ADDRESS CKSEG1ADDR(0x04300004)
 +
 +#define N64_PROC_FS_ENUM_CHARACTERS_MAX 7
-+#define N64_PROC_FS_HEX8_CHARACTERS_MAX 3
-+#define N64_PROC_FS_HEX32_CHARACTERS_MAX 9
++#define N64_PROC_FS_HEX_BYTE_CHARACTERS_MAX 3
 +
 +struct n64_boot_metadata_procfs
 +{
-+	char mi_version[N64_PROC_FS_HEX32_CHARACTERS_MAX];
 +	char console_type[N64_PROC_FS_ENUM_CHARACTERS_MAX];
 +	char rom_type[N64_PROC_FS_ENUM_CHARACTERS_MAX];
 +	char reset_type[N64_PROC_FS_ENUM_CHARACTERS_MAX];
-+	char rom_cic_seed[N64_PROC_FS_HEX8_CHARACTERS_MAX];
-+	char pif_rom_version[N64_PROC_FS_HEX8_CHARACTERS_MAX];
++	char rom_cic_seed[N64_PROC_FS_HEX_BYTE_CHARACTERS_MAX];
++	char pif_rom_version[N64_PROC_FS_HEX_BYTE_CHARACTERS_MAX];
++	char rsp_version[N64_PROC_FS_HEX_BYTE_CHARACTERS_MAX];
++	char rdp_version[N64_PROC_FS_HEX_BYTE_CHARACTERS_MAX];
++	char rac_version[N64_PROC_FS_HEX_BYTE_CHARACTERS_MAX];
++	char io_version[N64_PROC_FS_HEX_BYTE_CHARACTERS_MAX];
 +};
 +
 +extern unsigned int __initdata n64cart_init_start;
@@ -194,12 +196,15 @@ index 000000000..ff8eb9936
 +
 +static void __init tux64_load_boot_metadata(uint32_t metadata, uint32_t mi_version)
 +{
-+	n64_boot_metadata.mi_version		= mi_version;
 +	n64_boot_metadata.console_type		= metadata & 0x3;
 +	n64_boot_metadata.rom_type		= (metadata >> 2) & 0x1;
 +	n64_boot_metadata.reset_type		= (metadata >> 3) & 0x1;
 +	n64_boot_metadata.rom_cic_seed		= (metadata >> 4) & 0xff;
 +	n64_boot_metadata.pif_rom_version	= (metadata >> 12) & 0xff;
++	n64_boot_metadata.rsp_version		= (mi_version >> 24) & 0xff;
++	n64_boot_metadata.rdp_version		= (mi_version >> 16) & 0xff;
++	n64_boot_metadata.rac_version		= (mi_version >> 8) & 0xff;
++	n64_boot_metadata.io_version		= mi_version & 0xff;
 +}
 +
 +static void __init tux64_prom_init_args(void)
@@ -253,14 +258,9 @@ index 000000000..ff8eb9936
 +	sprintf(buf, "%x %s", v, s);
 +}
 +
-+static void __init tux64_procfs_format_hex8(char buf[], unsigned x)
++static void __init tux64_procfs_format_hex_byte(char buf[], unsigned x)
 +{
 +	sprintf(buf, "%02x", x);
-+}
-+
-+static void __init tux64_procfs_format_hex32(char buf[], unsigned x)
-+{
-+	sprintf(buf, "%08x", x);
 +}
 +
 +static void __init tux64_procfs_init_boot_metadata(struct n64_boot_metadata_procfs *md)
@@ -317,12 +317,15 @@ index 000000000..ff8eb9936
 +			break;
 +	}
 +
-+	tux64_procfs_format_hex32(md->mi_version, n64_boot_metadata.mi_version);
 +	tux64_procfs_format_enum(md->console_type, n64_boot_metadata.console_type, s_console_type);
 +	tux64_procfs_format_enum(md->rom_type, n64_boot_metadata.rom_type, s_rom_type);
 +	tux64_procfs_format_enum(md->reset_type, n64_boot_metadata.reset_type, s_reset_type);
-+	tux64_procfs_format_hex8(md->rom_cic_seed, n64_boot_metadata.rom_cic_seed);
-+	tux64_procfs_format_hex8(md->pif_rom_version, n64_boot_metadata.pif_rom_version);
++	tux64_procfs_format_hex_byte(md->rom_cic_seed, n64_boot_metadata.rom_cic_seed);
++	tux64_procfs_format_hex_byte(md->pif_rom_version, n64_boot_metadata.pif_rom_version);
++	tux64_procfs_format_hex_byte(md->rsp_version, n64_boot_metadata.rsp_version);
++	tux64_procfs_format_hex_byte(md->rdp_version, n64_boot_metadata.rdp_version);
++	tux64_procfs_format_hex_byte(md->rac_version, n64_boot_metadata.rac_version);
++	tux64_procfs_format_hex_byte(md->io_version, n64_boot_metadata.io_version);
 +}
 +
 +static void __init tux64_procfs_init(void)
@@ -337,12 +340,15 @@ index 000000000..ff8eb9936
 +		return;
 +	};
 +
-+	proc_create_single_data("mi_version", S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.mi_version);
-+	proc_create_single_data("console_type", S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.console_type);
-+	proc_create_single_data("reset_type", S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.reset_type);
-+	proc_create_single_data("rom_type", S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_type);
-+	proc_create_single_data("rom_cic_seed", S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_cic_seed);
-+	proc_create_single_data("pif_rom_version", S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.pif_rom_version);
++	proc_create_single_data("console_type",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.console_type);
++	proc_create_single_data("reset_type",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.reset_type);
++	proc_create_single_data("rom_type",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_type);
++	proc_create_single_data("rom_cic_seed",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_cic_seed);
++	proc_create_single_data("pif_rom_version",	S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.pif_rom_version);
++	proc_create_single_data("rsp_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rsp_version);
++	proc_create_single_data("rdp_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rdp_version);
++	proc_create_single_data("rac_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rac_version);
++	proc_create_single_data("io_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.io_version);
 +}
 +#else
 +static void __init tux64_procfs_init(void)
@@ -405,10 +411,10 @@ index 000000000..ff8eb9936
 +}
 diff --git a/arch/mips/n64/tux64-boot.h b/arch/mips/n64/tux64-boot.h
 new file mode 100644
-index 000000000..ccc0e736b
+index 000000000..fdac76d19
 --- /dev/null
 +++ b/arch/mips/n64/tux64-boot.h
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,51 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Data and structures specific to tux64-boot.
@@ -444,12 +450,15 @@ index 000000000..ccc0e736b
 + */
 +struct n64_boot_metadata
 +{
-+	uint32_t mi_version;
 +	enum n64_console_type console_type;
 +	enum n64_rom_type rom_type;
 +	enum n64_reset_type reset_type;
 +	uint8_t rom_cic_seed;
 +	uint8_t pif_rom_version;
++	uint8_t rsp_version;
++	uint8_t rdp_version;
++	uint8_t rac_version;
++	uint8_t io_version;
 +};
 +
 +#if CONFIG_MIPS_TUX64
