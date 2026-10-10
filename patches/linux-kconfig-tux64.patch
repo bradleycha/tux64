@@ -1,8 +1,8 @@
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 83a6b68d8..4bba21f21 100644
+index 83a6b68d8..f22b67850 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -3005,6 +3005,15 @@ choice
+@@ -3005,8 +3005,28 @@ choice
  		bool "Extend builtin kernel arguments with bootloader arguments"
  endchoice
  
@@ -15,6 +15,19 @@ index 83a6b68d8..4bba21f21 100644
 +	  parameters. This introduces breaking changes for existing bootloaders.
 +
 +	  If unsure, say n.
++
++config TUX64_PROC_FS
++	bool "Provide N64 system information via /proc/n64"
++	depends on MIPS_TUX64 && PROC_FS
++	default y
++	help
++	  Provides system information such as console type, boot information, and
++	  hardware revision to userspace applications via /proc/n64/.
++
  endmenu
  
++
++
  config LOCKDEP_SUPPORT
+ 	bool
+ 	default y
