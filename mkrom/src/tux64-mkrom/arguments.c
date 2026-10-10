@@ -1426,7 +1426,7 @@ tux64_mkrom_arguments_config_file_parse(
    "         The name of the ROM as stored in the ROM header.  This must be no\n"\
    "         more than 20 characters. \n"\
    "\n"\
-   "      --rom-header-game-code=[string], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_TITLE_DEFAULT_VALUE "\"\n"\
+   "      --rom-header-game-code=[string], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_GAME_CODE_DEFAULT_VALUE "\"\n"\
    "\n"\
    "         The game code field stored in the ROM header.  This must be a 4\n"\
    "         character string. \n"\
