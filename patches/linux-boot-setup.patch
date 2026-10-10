@@ -83,10 +83,10 @@ index 66ec28ab4..098ee187a 100644
  void __init plat_time_init(void)
 diff --git a/arch/mips/n64/tux64-boot.c b/arch/mips/n64/tux64-boot.c
 new file mode 100644
-index 000000000..a003a7412
+index 000000000..1269e6b43
 --- /dev/null
 +++ b/arch/mips/n64/tux64-boot.c
-@@ -0,0 +1,322 @@
+@@ -0,0 +1,330 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * tux64-boot.c: Kernel support for extended boot information provided by tux64-boot.
@@ -260,7 +260,7 @@ index 000000000..a003a7412
 +
 +static void __init tux64_procfs_format_hex_byte(char buf[], unsigned x)
 +{
-+	sprintf(buf, "%02x", x);
++	sprintf(buf, "%x", x);
 +}
 +
 +static void __init tux64_procfs_init_boot_metadata(struct n64_boot_metadata_procfs *md)
@@ -330,25 +330,33 @@ index 000000000..a003a7412
 +
 +static void __init tux64_procfs_init(void)
 +{
-+	struct proc_dir_entry *root;
++	struct proc_dir_entry *n64;
++	struct proc_dir_entry *version;
 +
 +	tux64_procfs_init_boot_metadata(&n64_boot_metadata_procfs);
 +
-+	root = proc_mkdir("n64", NULL);
-+	if (!root) {
-+		pr_err("Failed to create base directory for /proc/n64");
++	n64 = proc_mkdir("n64", NULL);
++	if (!n64) {
++		pr_err("Failed to create directory for /proc/n64");
 +		return;
 +	};
++	version = proc_mkdir("version", n64);
++	if (!version) {
++		pr_err("Failed to create directory for /proc/n64/version");
++		proc_remove(n64);
++		return;
++	}
 +
-+	proc_create_single_data("console_type",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.console_type);
-+	proc_create_single_data("reset_type",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.reset_type);
-+	proc_create_single_data("rom_type",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_type);
-+	proc_create_single_data("rom_cic_seed",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_cic_seed);
-+	proc_create_single_data("pif_rom_version",	S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.pif_rom_version);
-+	proc_create_single_data("rsp_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rsp_version);
-+	proc_create_single_data("rdp_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rdp_version);
-+	proc_create_single_data("rac_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.rac_version);
-+	proc_create_single_data("io_version",		S_IRUGO, root, tux64_procfs_show_string, n64_boot_metadata_procfs.io_version);
++	proc_create_single_data("console_type",	S_IRUGO, n64, tux64_procfs_show_string, n64_boot_metadata_procfs.console_type);
++	proc_create_single_data("reset_type",	S_IRUGO, n64, tux64_procfs_show_string, n64_boot_metadata_procfs.reset_type);
++	proc_create_single_data("rom_type",	S_IRUGO, n64, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_type);
++	proc_create_single_data("rom_cic_seed",	S_IRUGO, n64, tux64_procfs_show_string, n64_boot_metadata_procfs.rom_cic_seed);
++
++	proc_create_single_data("pif_rom",	S_IRUGO, version, tux64_procfs_show_string, n64_boot_metadata_procfs.pif_rom_version);
++	proc_create_single_data("rsp",		S_IRUGO, version, tux64_procfs_show_string, n64_boot_metadata_procfs.rsp_version);
++	proc_create_single_data("rdp",		S_IRUGO, version, tux64_procfs_show_string, n64_boot_metadata_procfs.rdp_version);
++	proc_create_single_data("rac",		S_IRUGO, version, tux64_procfs_show_string, n64_boot_metadata_procfs.rac_version);
++	proc_create_single_data("io",		S_IRUGO, version, tux64_procfs_show_string, n64_boot_metadata_procfs.io_version);
 +}
 +#else
 +static void __init tux64_procfs_init(void)
