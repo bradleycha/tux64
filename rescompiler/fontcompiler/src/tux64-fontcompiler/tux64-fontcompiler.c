@@ -117,37 +117,13 @@ tux64_fontcompiler_exit_result_display(
    return;
 }
 
-static char *
-tux64_fontcompiler_format_cstr(
-   const struct Tux64String * string
-) {
-   char * cstr;
-
-   cstr = (char *)malloc((string->characters + 1u) * sizeof(char));
-   if (cstr == NULL) {
-      return NULL;
-   }
-
-   tux64_memory_copy(
-      cstr,
-      string->ptr,
-      string->characters * TUX64_LITERAL_UINT32(sizeof(char))
-   );
-   cstr[string->characters] = '\0';
-
-   return cstr;
-}
-
 static struct Tux64FontCompilerExitResult
 tux64_fontcompiler_main_parsed_args(
    const struct Tux64FontCompilerArguments * args
 ) {
    struct Tux64FontCompilerExitResult result;
-   char * path_input_cstr;
    struct Tux64FsFileLoadResult input_file_load_result;
    struct Tux64FontCompilerGeneratorParseResult generator_parse_result;
-   char * path_output_cstr;
-   struct Tux64FsLoadedFile output_file;
    struct Tux64FsResult output_file_save_result;
 
    TUX64_LOG_INFO_FMT(
@@ -156,15 +132,7 @@ tux64_fontcompiler_main_parsed_args(
       args->path_input.ptr
    );
 
-   /* have to do this crap because libc stinks... */
-   path_input_cstr = tux64_fontcompiler_format_cstr(&args->path_input);
-   if (path_input_cstr == NULL) {
-      result.status = TUX64_FONTCOMPILER_EXIT_STATUS_OUT_OF_MEMORY;
-      return result;
-   }
-
-   input_file_load_result = tux64_fs_file_load(path_input_cstr);
-   free(path_input_cstr);
+   input_file_load_result = tux64_fs_file_load(&args->path_input);
 
    switch (input_file_load_result.status) {
       case TUX64_FS_STATUS_OK:
@@ -177,8 +145,7 @@ tux64_fontcompiler_main_parsed_args(
       case TUX64_FS_STATUS_NOT_A_FILE:
       case TUX64_FS_STATUS_UNKNOWN_ERROR:
          result.status = TUX64_FONTCOMPILER_EXIT_STATUS_FS_ERROR;
-         result.payload.fs_error.reason.status = input_file_load_result.status;
-         result.payload.fs_error.reason.payload = input_file_load_result.payload.err;
+         result.payload.fs_error.reason = tux64_fs_file_load_result_to_fs_result(input_file_load_result);
          return result;
       default:
          TUX64_UNREACHABLE;
@@ -216,20 +183,11 @@ tux64_fontcompiler_main_parsed_args(
       args->path_output.ptr
    );
 
-   /* have to do this crap again */
-   path_output_cstr = tux64_fontcompiler_format_cstr(&args->path_output);
-   if (path_output_cstr == NULL) {
-      result.status = TUX64_FONTCOMPILER_EXIT_STATUS_OUT_OF_MEMORY;
-      goto exit;
-   }
-
-   output_file.data = generator_parse_result.payload.ok.data;
-   output_file.bytes = generator_parse_result.payload.ok.bytes;
-   output_file_save_result = tux64_fs_file_save(
-      path_output_cstr,
-      &output_file
+   output_file_save_result = tux64_fs_file_save_data(
+      &args->path_output,
+      generator_parse_result.payload.ok.data,
+      generator_parse_result.payload.ok.bytes
    );
-   free(path_output_cstr);
 
    switch (output_file_save_result.status) {
       case TUX64_FS_STATUS_OK:
@@ -242,16 +200,15 @@ tux64_fontcompiler_main_parsed_args(
       case TUX64_FS_STATUS_NOT_A_FILE:
       case TUX64_FS_STATUS_UNKNOWN_ERROR:
          result.status = TUX64_FONTCOMPILER_EXIT_STATUS_FS_ERROR;
-         result.payload.fs_error.reason.status = output_file_save_result.status;
-         result.payload.fs_error.reason.payload = output_file_save_result.payload;
+         result.payload.fs_error.reason = output_file_save_result;
          return result;
       default:
          TUX64_UNREACHABLE;
    }
 
-   result.status = TUX64_FONTCOMPILER_EXIT_STATUS_OK;
-exit:
    free(generator_parse_result.payload.ok.data);
+
+   result.status = TUX64_FONTCOMPILER_EXIT_STATUS_OK;
    return result;
 }
 
