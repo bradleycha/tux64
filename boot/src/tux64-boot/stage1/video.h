@@ -11,6 +11,7 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/platform/mips/n64/vi.h>
+#include <tux64/platform/mips/n64/boot.h>
 
 #define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_X\
    (320u)
@@ -48,7 +49,7 @@ struct Tux64BootStage1VideoFramebuffer {
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_initialize(
-   enum Tux64BootConsoleType console_type,
+   enum Tux64PlatformMipsN64BootConsoleType console_type,
    Tux64BootStage1VideoPixel clear_color
 );
 

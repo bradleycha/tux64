@@ -8,6 +8,8 @@
 #include "tux64-boot/tux64-boot.h"
 #include "tux64-boot/stage1/stage1.h"
 
+#include <tux64/platform/mips/n64/boot.h>
+
 #include "tux64-boot/initialize.h"
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/rsp.h"
@@ -54,16 +56,16 @@ tux64_boot_stage1_choose_video_palette(void) {
    return palette;
 }
 
-static enum Tux64BootConsoleType
+static enum Tux64PlatformMipsN64BootConsoleType
 tux64_boot_stage1_choose_console_type(
    enum Tux64BootIpl2VideoStandard video_standard,
    Tux64Boolean running_on_ique
 ) {
    if (running_on_ique == TUX64_BOOLEAN_TRUE) {
-      return TUX64_BOOT_CONSOLE_TYPE_IQUE;
+      return TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_IQUE;
    }
 
-   return (enum Tux64BootConsoleType)video_standard;
+   return (enum Tux64PlatformMipsN64BootConsoleType)video_standard;
 }
 
 /* we store the FSM in a global variable because its state can be huge (think */
@@ -85,7 +87,7 @@ tux64_boot_stage1_main(
    Tux64UInt32 rng_seed,
    Tux64Boolean running_on_ique
 ) {
-   enum Tux64BootConsoleType console_type;
+   enum Tux64PlatformMipsN64BootConsoleType console_type;
    struct Tux64BootStage1Palette video_palette;
 
    tux64_boot_initialize();

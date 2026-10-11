@@ -706,7 +706,7 @@ tux64_boot_stage1_fsm_initialize_checksum(void) {
 static void
 tux64_boot_stage1_fsm_initialize_kernel_metadata(
    struct Tux64BootExecKernelMetadata * metadata,
-   enum Tux64BootConsoleType console_type,
+   enum Tux64PlatformMipsN64BootConsoleType console_type,
    enum Tux64BootIpl2RomType rom_type,
    enum Tux64BootIpl2ResetType reset_type,
    Tux64UInt8 rom_cic_seed,
@@ -723,7 +723,7 @@ tux64_boot_stage1_fsm_initialize_kernel_metadata(
 void
 tux64_boot_stage1_fsm_initialize(
    struct Tux64BootStage1Fsm * fsm,
-   enum Tux64BootConsoleType console_type,
+   enum Tux64PlatformMipsN64BootConsoleType console_type,
    enum Tux64BootIpl2RomType rom_type,
    enum Tux64BootIpl2ResetType reset_type,
    Tux64UInt8 rom_cic_seed,

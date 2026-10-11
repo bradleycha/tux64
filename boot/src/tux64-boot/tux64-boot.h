@@ -42,14 +42,6 @@
 #error all console types are disabled.  please reconfigure with at least one console type using --enable-console-type-[type]
 #endif /* TUX64_BOOT_CONSOLE_TYPE_UNKNOWN */
 
-enum Tux64BootConsoleType {
-   /* manually define for compatability with IPL2 video standard enum */
-   TUX64_BOOT_CONSOLE_TYPE_PAL   = 0u,
-   TUX64_BOOT_CONSOLE_TYPE_NTSC  = 1u,
-   TUX64_BOOT_CONSOLE_TYPE_MPAL  = 2u,
-   TUX64_BOOT_CONSOLE_TYPE_IQUE  = 3u
-};
-
 /*----------------------------------------------------------------------------*/
 #endif /* !TUX64_PREPROCESSOR_ONLY */
 

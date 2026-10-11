@@ -10,6 +10,7 @@
 
 #include <tux64/platform/mips/n64/mmio.h>
 #include <tux64/platform/mips/n64/vi.h>
+#include <tux64/platform/mips/n64/boot.h>
 #include <tux64/bitwise.h>
 #include <tux64/endian.h>
 #include "tux64-boot/halt.h"
@@ -451,31 +452,31 @@ tux64_boot_stage1_video_vi_register_array_ique = {.regs = {
 
 static const union Tux64BootStage1VideoViRegisterArray *
 tux64_boot_stage1_video_vi_choose_register_array(
-   enum Tux64BootConsoleType console_type
+   enum Tux64PlatformMipsN64BootConsoleType console_type
 ) {
    switch (console_type) {
-      case TUX64_BOOT_CONSOLE_TYPE_PAL:
+      case TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_PAL:
 #if TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL
          return &tux64_boot_stage1_video_vi_register_array_pal;
 #else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL */
          break;
 #endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL */
 
-      case TUX64_BOOT_CONSOLE_TYPE_NTSC:
+      case TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_NTSC:
 #if TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC
          return &tux64_boot_stage1_video_vi_register_array_ntsc;
 #else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC */
          break;
 #endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC */
 
-      case TUX64_BOOT_CONSOLE_TYPE_MPAL:
+      case TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_MPAL:
 #if TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL
          return &tux64_boot_stage1_video_vi_register_array_mpal;
 #else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL */
          break;
 #endif /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL */
 
-      case TUX64_BOOT_CONSOLE_TYPE_IQUE:
+      case TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_IQUE:
 #if TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE
          return &tux64_boot_stage1_video_vi_register_array_ique;
 #else /* TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE */
@@ -493,7 +494,7 @@ tux64_boot_stage1_video_vi_choose_register_array(
 
 static void
 tux64_boot_stage1_video_initialize_vi(
-   enum Tux64BootConsoleType console_type
+   enum Tux64PlatformMipsN64BootConsoleType console_type
 ) {
    const union Tux64BootStage1VideoViRegisterArray * register_array;
    const Tux64UInt32 * iter_register_words;
@@ -524,7 +525,7 @@ tux64_boot_stage1_video_initialize_vi(
 
 void
 tux64_boot_stage1_video_initialize(
-   enum Tux64BootConsoleType console_type,
+   enum Tux64PlatformMipsN64BootConsoleType console_type,
    Tux64BootStage1VideoPixel clear_color
 ) {
    /* must initialize VI first, so that the context initialization can set */

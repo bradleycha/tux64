@@ -100,6 +100,19 @@
 #include "tux64/endian.h"
 
 /*----------------------------------------------------------------------------*/
+/* The console type from the bootloader.  These are safe to directly cast to  */
+/* and from Tux64PlatformMipsN64Ipl2TvType for all variants except            */
+/* TUX64_PLATFORM_MIPS_64_BOOT_CONSOLE_TYPE_IQUE.                             */
+/*----------------------------------------------------------------------------*/
+enum Tux64PlatformMipsN64BootConsoleType {
+   /* defined directly to allow safe direct casting. */
+   TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_PAL   = 0u,
+   TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_NTSC  = 1u,
+   TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_MPAL  = 2u,
+   TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_IQUE  = 3u
+};
+
+/*----------------------------------------------------------------------------*/
 /* The native endianess of all multi-byte values in the boot header.          */
 /*----------------------------------------------------------------------------*/
 #define TUX64_PLATFORM_MIPS_N64_BOOT_HEADER_ENDIAN_FORMAT\

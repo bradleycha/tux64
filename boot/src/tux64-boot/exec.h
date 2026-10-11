@@ -11,6 +11,7 @@
 
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/endian.h>
+#include <tux64/platform/mips/n64/boot.h>
 #include "tux64-boot/ipl2.h"
 #include "tux64-boot/load.h"
 
@@ -41,7 +42,7 @@ struct Tux64BootExecKernelMetadataIpl2 {
 /* diagnostic purposes.                                                       */
 /*----------------------------------------------------------------------------*/
 struct Tux64BootExecKernelMetadata {
-   enum Tux64BootConsoleType console_type;
+   enum Tux64PlatformMipsN64BootConsoleType console_type;
    struct Tux64BootExecKernelMetadataIpl2 ipl2;
 };
 
