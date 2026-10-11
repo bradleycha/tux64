@@ -15,6 +15,7 @@
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/pif.h"
 #include "tux64-boot/rng.h"
+#include "tux64-boot/halt.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/interrupt.h"
@@ -68,6 +69,29 @@ tux64_boot_stage1_choose_console_type(
    return (enum Tux64PlatformMipsN64BootConsoleType)video_standard;
 }
 
+static void
+tux64_boot_stage1_verify_console_type(
+   enum Tux64PlatformMipsN64BootConsoleType console_type
+) {
+   /* we do this so we only have to check once that this configuration is */
+   /* supported, and then LTO can handle removal of dead code. */
+   if (TUX64_BOOT_CONFIG_CONSOLE_TYPE_PAL && console_type == TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_PAL) {
+      return;
+   }
+   if (TUX64_BOOT_CONFIG_CONSOLE_TYPE_NTSC && console_type == TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_NTSC) {
+      return;
+   }
+   if (TUX64_BOOT_CONFIG_CONSOLE_TYPE_MPAL && console_type == TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_MPAL) {
+      return;
+   }
+   if (TUX64_BOOT_CONFIG_CONSOLE_TYPE_IQUE && console_type == TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_IQUE) {
+      return;
+   }
+
+   tux64_boot_halt();
+   TUX64_UNREACHABLE;
+}
+
 /* we store the FSM in a global variable because its state can be huge (think */
 /* DMA buffers).  if we try to store it on the stack, it will overflow 100%   */
 /* and crash our program.  storing in .bss via a global variable doesn't have */
@@ -109,6 +133,8 @@ tux64_boot_stage1_main(
       video_standard,
       running_on_ique
    );
+
+   tux64_boot_stage1_verify_console_type(console_type);
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
 
