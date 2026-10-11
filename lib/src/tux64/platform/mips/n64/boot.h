@@ -34,6 +34,8 @@
    (1u << 2u)
 #define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_NO_DELAY\
    (1u << 3u)
+#define TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_AUDIO_BEEPS\
+   (1u << 4u)
 
 /*----------------------------------------------------------------------------*/
 /* The size of the boot header, in bytes.  Also provides a version aligned    */
