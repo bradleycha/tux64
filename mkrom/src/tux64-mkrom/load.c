@@ -75,7 +75,7 @@ tux64_mkrom_load_format_fs_error(
          break;
       default:
          result.status = TUX64_MKROM_LOAD_STATUS_FS_ERROR;
-         result.payload.fs_error.reason = tux64_mkrom_file_load_result_to_fs_result(reason);
+         result.payload.fs_error.reason = tux64_fs_file_load_result_to_fs_result(reason);
          break;
    }
 

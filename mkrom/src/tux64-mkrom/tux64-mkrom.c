@@ -366,7 +366,7 @@ tux64_mkrom_main_write_rom_image(
       path_output->ptr
    );
 
-   save_result = tux64_mkrom_file_save(
+   save_result = tux64_fs_file_save_data(
       path_output,
       image->data,
       image->bytes
@@ -507,7 +507,7 @@ tux64_mkrom_main_parsed_command_line(
       command_line->path_config.ptr
    );
 
-   config_load_result = tux64_mkrom_file_load(&command_line->path_config);
+   config_load_result = tux64_fs_file_load(&command_line->path_config);
    switch (config_load_result.status) {
       case TUX64_FS_STATUS_OK:
          break;
@@ -517,7 +517,7 @@ tux64_mkrom_main_parsed_command_line(
          return result;
       default:
          result.status = TUX64_MKROM_EXIT_STATUS_FS_ERROR;
-         result.payload.fs_error.reason = tux64_mkrom_file_load_result_to_fs_result(config_load_result);
+         result.payload.fs_error.reason = tux64_fs_file_load_result_to_fs_result(config_load_result);
          return result;
    }
 
