@@ -36,3 +36,13 @@ tux64_boot_flag_memory_display(void) {
 
    return (tux64_boot_header_flag_memory_display() == TUX64_BOOLEAN_TRUE);
 }
+
+Tux64Boolean
+tux64_boot_flag_audio_beeps(void) {
+   if (!TUX64_BOOT_CONFIG_AUDIO_BEEPS) {
+      return TUX64_BOOLEAN_FALSE;
+   }
+
+   return (tux64_boot_header_flag_audio_beeps() == TUX64_BOOLEAN_TRUE);
+}
+

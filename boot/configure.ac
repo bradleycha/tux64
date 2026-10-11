@@ -137,6 +137,11 @@ AC_ARG_ENABLE([memory-display],
    [tux64_boot_config_memory_display=1],
    [tux64_boot_config_memory_display=0]
 )
+AC_ARG_ENABLE([audio-beeps],
+   AS_HELP_STRING([--enable-audio-beeps], [Enable support for playing audio beeps on startup and on fatal errors.]),
+   [tux64_boot_config_audio_beeps=1],
+   [tux64_boot_config_audio_beeps=0]
+)
 AC_ARG_ENABLE([console-type-ique],
    AS_HELP_STRING([--enable-console-type-ique], [Enable iQue player support]),
    [tux64_boot_config_console_type_ique=1],
@@ -285,6 +290,10 @@ AC_DEFINE_UNQUOTED([CONFIG_DELAY],
 AC_DEFINE_UNQUOTED([CONFIG_MEMORY_DISPLAY],
    [$tux64_boot_config_memory_display],
    [Enable support for the display of memory information on startup]
+)
+AC_DEFINE_UNQUOTED([CONFIG_AUDIO_BEEPS],
+   [$tux64_boot_config_audio_beeps],
+   [Enable support for playing audio beeps on startup and on fatal errors.]
 )
 AC_DEFINE_UNQUOTED([CONFIG_CONSOLE_TYPE_IQUE],
    [$tux64_boot_config_console_type_ique],

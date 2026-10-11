@@ -21,6 +21,8 @@ Tux64Boolean
 tux64_boot_flag_delay(void);
 Tux64Boolean
 tux64_boot_flag_memory_display(void);
+Tux64Boolean
+tux64_boot_flag_audio_beeps(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_FLAG_H */

@@ -25,6 +25,8 @@ Tux64Boolean
 tux64_boot_header_flag_memory_display(void);
 Tux64Boolean
 tux64_boot_header_flag_no_delay(void);
+Tux64Boolean
+tux64_boot_header_flag_audio_beeps(void);
 
 /*----------------------------------------------------------------------------*/
 /* Gets the information of various boot files.                                */
