@@ -11,14 +11,63 @@
 #if _TUX64_FS_ENABLE
 /*----------------------------------------------------------------------------*/
 
-#if TUX64_IMPLEMENTATION_LIB
-/*----------------------------------------------------------------------------*/
-
-#include <tux64/log.h>
+#include "tux64/log.h"
+#include "tux64/string.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
+struct Tux64FsResult
+tux64_fs_file_save_cstr(
+   const char * path,
+   const struct Tux64FsLoadedFile * file
+) {
+   return tux64_fs_file_save_data_cstr(path, file->data, file->bytes);
+}
+
+struct Tux64FsResult
+tux64_fs_file_save(
+   const struct Tux64String * path,
+   const struct Tux64FsLoadedFile * file
+) {
+   return tux64_fs_file_save_data(path, file->data, file->bytes);
+}
+
+void
+tux64_fs_file_unload(
+   struct Tux64FsLoadedFile * file
+) {
+   free(file->data);
+   return;
+}
+
+struct Tux64FsResult
+tux64_fs_file_load_result_to_fs_result(
+   struct Tux64FsFileLoadResult file_load_result
+) {
+   struct Tux64FsResult fs_result;
+
+   fs_result.status = file_load_result.status;
+
+   /* needed to prevent invoking undefined behavior by copying uninitialized */
+   /* data.  ideally, the compiler should optimize this out because it */
+   /* doesn't matter, but i haven't bothered to check this. */
+   if (fs_result.status == TUX64_FS_STATUS_UNKNOWN_ERROR) {
+      fs_result.payload.unknown_error = file_load_result.payload.err.unknown_error;
+   }
+
+   return fs_result;
+}
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
+
+#if TUX64_IMPLEMENTATION_LIB
+/*----------------------------------------------------------------------------*/
 
 static struct Tux64FsResult
 tux64_fs_errno_to_fs_result(
@@ -196,7 +245,7 @@ tux64_fs_file_load_open(
 }
 
 struct Tux64FsFileLoadResult
-tux64_fs_file_load(
+tux64_fs_file_load_cstr(
    const char * path
 ) {
    struct Tux64FsFileLoadResult result;
@@ -213,18 +262,37 @@ tux64_fs_file_load(
    return result;
 }
 
+struct Tux64FsFileLoadResult
+tux64_fs_file_load(
+   const struct Tux64String * path
+) {
+   struct Tux64FsFileLoadResult result;
+   char * path_cstr;
+
+   path_cstr = tux64_string_allocate_and_format_cstr(path);
+   if (path_cstr == TUX64_NULLPTR) {
+      result.status = TUX64_FS_STATUS_OUT_OF_MEMORY;
+      return result;
+   }
+
+   result = tux64_fs_file_load_cstr(path_cstr);
+   free(path_cstr);
+   return result;
+}
+
 static struct Tux64FsResult
 tux64_fs_file_save_open(
    FILE * file_dest,
-   const struct Tux64FsLoadedFile * file_src
+   const Tux64UInt8 data[],
+   Tux64UInt32 bytes
 ) {
    struct Tux64FsResult result;
    const Tux64UInt8 * iter_write_buffer;
    Tux64UInt32 write_bytes_remaining;
    Tux64UInt32 written_bytes;
 
-   iter_write_buffer = file_src->data;
-   write_bytes_remaining = file_src->bytes;
+   iter_write_buffer = data;
+   write_bytes_remaining = bytes;
 
    while (write_bytes_remaining != TUX64_LITERAL_UINT32(0u)) {
       written_bytes = fwrite(
@@ -247,16 +315,17 @@ tux64_fs_file_save_open(
 }
 
 struct Tux64FsResult
-tux64_fs_file_save(
+tux64_fs_file_save_data_cstr(
    const char * path,
-   const struct Tux64FsLoadedFile * file
+   const Tux64UInt8 data[],
+   Tux64UInt32 bytes
 ) {
    struct Tux64FsResult result;
    FILE * file_dest;
 
    file_dest = fopen(path, "w");
    if (file_dest != NULL) {
-      result = tux64_fs_file_save_open(file_dest, file);
+      result = tux64_fs_file_save_open(file_dest, data, bytes);
       (void)fclose(file_dest);
       return result;
    }
@@ -265,12 +334,24 @@ tux64_fs_file_save(
    return result;
 }
 
-void
-tux64_fs_file_unload(
-   struct Tux64FsLoadedFile * file
+struct Tux64FsResult
+tux64_fs_file_save_data(
+   const struct Tux64String * path,
+   const Tux64UInt8 data[],
+   Tux64UInt32 bytes
 ) {
-   free(file->data);
-   return;
+   struct Tux64FsResult result;
+   char * path_cstr;
+
+   path_cstr = tux64_string_allocate_and_format_cstr(path);
+   if (path_cstr == TUX64_NULLPTR) {
+      result.status = TUX64_FS_STATUS_OUT_OF_MEMORY;
+      return result;
+   }
+
+   result = tux64_fs_file_save_data_cstr(path_cstr, data, bytes);
+   free(path_cstr);
+   return result;
 }
 
 void

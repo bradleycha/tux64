@@ -55,12 +55,44 @@ struct Tux64FsFileLoadResult {
 };
 
 /*----------------------------------------------------------------------------*/
-/* Attempts to load a file into memory from the given path.  The file must be */
-/* freed using tux64_fs_file_unload() once no longer needed.                  */
+/* Attempts to load a file into memory from the given path, represented as a  */
+/* null-terminated C-string.  The file must be freed using                    */
+/* tux64_fs_file_unload() once no longer needed.                              */
 /*----------------------------------------------------------------------------*/
 struct Tux64FsFileLoadResult
 tux64_fs_file_load(
+   const struct Tux64String * path
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to load a file into memory from the given path, represented as a  */
+/* null-terminated C-string.  The file must be freed using                    */
+/* tux64_fs_file_unload() once no longer needed.                              */
+/*----------------------------------------------------------------------------*/
+struct Tux64FsFileLoadResult
+tux64_fs_file_load_cstr(
    const char * path
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to write an array of bytes to the given path.                     */
+/*----------------------------------------------------------------------------*/
+struct Tux64FsResult
+tux64_fs_file_save_data(
+   const struct Tux64String * path,
+   const Tux64UInt8 data[],
+   Tux64UInt32 bytes
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to write an array of bytes to the given path, represented as a    */
+/* null-terminated C-string.                                                  */
+/*----------------------------------------------------------------------------*/
+struct Tux64FsResult
+tux64_fs_file_save_data_cstr(
+   const char * path,
+   const Tux64UInt8 data[],
+   Tux64UInt32 bytes
 );
 
 /*----------------------------------------------------------------------------*/
@@ -68,6 +100,16 @@ tux64_fs_file_load(
 /*----------------------------------------------------------------------------*/
 struct Tux64FsResult
 tux64_fs_file_save(
+   const struct Tux64String * path,
+   const struct Tux64FsLoadedFile * file
+);
+
+/*----------------------------------------------------------------------------*/
+/* Attempts to write a loaded file to the given path, represented as a        */
+/* null-terminated C-string.                                                  */
+/*----------------------------------------------------------------------------*/
+struct Tux64FsResult
+tux64_fs_file_save_cstr(
    const char * path,
    const struct Tux64FsLoadedFile * file
 );
@@ -87,6 +129,14 @@ tux64_fs_file_unload(
 void
 tux64_fs_log_result(
    const struct Tux64FsResult * result
+);
+
+/*----------------------------------------------------------------------------*/
+/* Converts a file load result into a generic file result.                    */
+/*----------------------------------------------------------------------------*/
+struct Tux64FsResult
+tux64_fs_file_load_result_to_fs_result(
+   struct Tux64FsFileLoadResult file_load_result
 );
 
 /*----------------------------------------------------------------------------*/
