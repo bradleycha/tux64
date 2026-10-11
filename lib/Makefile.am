@@ -43,6 +43,7 @@ libtux64_la_SOURCES = \
 	src/tux64/platform/mips/n64/pi.c \
 	src/tux64/platform/mips/n64/boot.c \
 	src/tux64/platform/mips/n64/kernel.c \
+	src/tux64/platform/mips/n64/procfs.c \
 	src/tux64/platform/mips/vr4300/cache.c \
 	src/tux64/platform/mips/vr4300/cop0.c
 libtux64_core_la_SOURCES = $(libtux64_la_SOURCES)
@@ -89,7 +90,8 @@ libtux64_platform_mips_n64_include_HEADERS = \
 	src/tux64/platform/mips/n64/rom.h \
 	src/tux64/platform/mips/n64/ipl2.h \
 	src/tux64/platform/mips/n64/boot.h \
-	src/tux64/platform/mips/n64/kernel.h
+	src/tux64/platform/mips/n64/kernel.h \
+	src/tux64/platform/mips/n64/procfs.h
 libtux64_platform_mips_vr4300_include_HEADERS = \
 	src/tux64/platform/mips/vr4300/vr4300.h \
 	src/tux64/platform/mips/vr4300/cache.h \

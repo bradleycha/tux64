@@ -40,6 +40,7 @@ tux64_config_platform_cpu_signed_integer_format_ones_complement=0
 tux64_config_platform_cpu_signed_integer_format_twos_complement=1
 tux64_config_platform_cpu_isa_mips=0
 tux64_config_platform_mips_n64=0
+tux64_config_platform_mips_n64_procfs=0
 tux64_config_platform_mips_vr4300=0
 tux64_config_log=0
 tux64_config_log_origin=0
@@ -70,6 +71,11 @@ AC_ARG_ENABLE([platform-mips-n64],
    AS_HELP_STRING([--enable-platform-mips-n64], [Enable N64-specific features]),
    [tux64_config_platform_mips_n64=1],
    [tux64_config_platform_mips_n64=0]
+)
+AC_ARG_ENABLE([platform-mips-n64-procfs],
+   AS_HELP_STRING([--enable-platform-mips-n64-procfs], [Enable N64-specific proc filesystem wrappers]),
+   [tux64_config_platform_mips_n64_procfs=1],
+   [tux64_config_platform_mips_n64_procfs=0]
 )
 AC_ARG_ENABLE([platform-mips-vr4300],
    AS_HELP_STRING([--enable-platform-mips-vr4300], [Enable MIPS VR4300-specific features]),
@@ -111,6 +117,10 @@ AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_CPU_ISA_MIPS],
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_MIPS_N64],
    [$tux64_config_platform_mips_n64],
    [Enable N64-specific features]
+)
+AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_MIPS_N64_PROCFS],
+   [$tux64_config_platform_mips_n64_procfs],
+   [Enable N64-specific proc filesystem wrappers]
 )
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_MIPS_VR4300],
    [$tux64_config_platform_mips_vr4300],
