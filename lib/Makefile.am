@@ -87,6 +87,7 @@ libtux64_platform_mips_n64_include_HEADERS = \
 	src/tux64/platform/mips/n64/pif.h \
 	src/tux64/platform/mips/n64/rdram.h \
 	src/tux64/platform/mips/n64/rom.h \
+	src/tux64/platform/mips/n64/ipl2.h \
 	src/tux64/platform/mips/n64/boot.h \
 	src/tux64/platform/mips/n64/kernel.h
 libtux64_platform_mips_vr4300_include_HEADERS = \

@@ -12,7 +12,7 @@
 #include "tux64-boot/tux64-boot.h"
 #include <tux64/endian.h>
 #include <tux64/platform/mips/n64/boot.h>
-#include "tux64-boot/ipl2.h"
+#include <tux64/platform/mips/n64/ipl2.h>
 #include "tux64-boot/load.h"
 
 /*----------------------------------------------------------------------------*/
@@ -31,8 +31,8 @@ struct Tux64BootExecKernelArguments {
 };
 
 struct Tux64BootExecKernelMetadataIpl2 {
-   enum Tux64BootIpl2RomType rom_type;
-   enum Tux64BootIpl2ResetType reset_type;
+   enum Tux64PlatformMipsN64Ipl2RomType rom_type;
+   enum Tux64PlatformMipsN64Ipl2ResetType reset_type;
    Tux64UInt8 rom_cic_seed;
    Tux64UInt8 pif_rom_version;
 };

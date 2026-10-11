@@ -12,6 +12,7 @@
 #include <tux64/bitwise.h>
 #include <tux64/endian.h>
 #include <tux64/platform/mips/n64/boot.h>
+#include <tux64/platform/mips/n64/ipl2.h>
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/exec.h"
@@ -21,7 +22,6 @@
 #include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/flag.h"
-#include "tux64-boot/ipl2.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/preempt.h"
@@ -707,8 +707,8 @@ static void
 tux64_boot_stage1_fsm_initialize_kernel_metadata(
    struct Tux64BootExecKernelMetadata * metadata,
    enum Tux64PlatformMipsN64BootConsoleType console_type,
-   enum Tux64BootIpl2RomType rom_type,
-   enum Tux64BootIpl2ResetType reset_type,
+   enum Tux64PlatformMipsN64Ipl2RomType rom_type,
+   enum Tux64PlatformMipsN64Ipl2ResetType reset_type,
    Tux64UInt8 rom_cic_seed,
    Tux64UInt8 pif_rom_version
 ) {
@@ -724,8 +724,8 @@ void
 tux64_boot_stage1_fsm_initialize(
    struct Tux64BootStage1Fsm * fsm,
    enum Tux64PlatformMipsN64BootConsoleType console_type,
-   enum Tux64BootIpl2RomType rom_type,
-   enum Tux64BootIpl2ResetType reset_type,
+   enum Tux64PlatformMipsN64Ipl2RomType rom_type,
+   enum Tux64PlatformMipsN64Ipl2ResetType reset_type,
    Tux64UInt8 rom_cic_seed,
    Tux64UInt8 pif_rom_version
 ) {

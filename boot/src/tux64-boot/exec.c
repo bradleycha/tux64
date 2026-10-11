@@ -12,9 +12,9 @@
 #include <tux64/endian.h>
 #include <tux64/bitwise.h>
 #include <tux64/platform/mips/n64/boot.h>
+#include <tux64/platform/mips/n64/ipl2.h>
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/vr4300/cop0.h>
-#include "tux64-boot/ipl2.h"
 #include "tux64-boot/layout.h"
 #include "tux64-boot/load.h"
 #include "tux64-boot/halt.h"

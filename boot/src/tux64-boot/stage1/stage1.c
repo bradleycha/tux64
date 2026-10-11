@@ -9,9 +9,9 @@
 #include "tux64-boot/stage1/stage1.h"
 
 #include <tux64/platform/mips/n64/boot.h>
+#include <tux64/platform/mips/n64/ipl2.h>
 
 #include "tux64-boot/initialize.h"
-#include "tux64-boot/ipl2.h"
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/pif.h"
 #include "tux64-boot/rng.h"
@@ -58,7 +58,7 @@ tux64_boot_stage1_choose_video_palette(void) {
 
 static enum Tux64PlatformMipsN64BootConsoleType
 tux64_boot_stage1_choose_console_type(
-   enum Tux64BootIpl2VideoStandard video_standard,
+   enum Tux64PlatformMipsN64Ipl2VideoStandard video_standard,
    Tux64Boolean running_on_ique
 ) {
    if (running_on_ique == TUX64_BOOLEAN_TRUE) {
@@ -77,9 +77,9 @@ tux64_boot_stage1_fsm;
 
 void
 tux64_boot_stage1_main(
-   enum Tux64BootIpl2RomType rom_type,
-   enum Tux64BootIpl2VideoStandard video_standard,
-   enum Tux64BootIpl2ResetType reset_type,
+   enum Tux64PlatformMipsN64Ipl2RomType rom_type,
+   enum Tux64PlatformMipsN64Ipl2VideoStandard video_standard,
+   enum Tux64PlatformMipsN64Ipl2ResetType reset_type,
    Tux64UInt8 rom_cic_seed,
    Tux64UInt8 pif_rom_version,
    Tux64UInt32 memory_total,
