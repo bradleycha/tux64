@@ -676,8 +676,10 @@ tux64_boot_stage1_fsm_initialize_memory_display(
    tux64_boot_stage1_format_mib(label, kernel_length);
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_memory);
    tux64_boot_stage1_format_mib(label, kernel_memory);
-   label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_initramfs_image);
-   tux64_boot_stage1_format_mib(label, initramfs_length);
+   if (initramfs_length != TUX64_LITERAL_UINT32(0u)) {
+      label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_initramfs_image);
+      tux64_boot_stage1_format_mib(label, initramfs_length);
+   }
    tux64_boot_stage1_fbcon_skip_line();
 
    label = tux64_boot_stage1_fbcon_label_push(&tux64_boot_stage1_strings_kernel_address_load);
