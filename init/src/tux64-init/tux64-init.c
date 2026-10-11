@@ -19,12 +19,12 @@ static void
 tux64_init_main(void) {
    TUX64_LOG_INFO(TUX64_INIT_PACKAGE_NAME " version " TUX64_INIT_PACKAGE_VERSION);
 
+   TUX64_LOG_INFO("Mounting pseudo filesystems");
+   tux64_init_mount_pseudo_filesystems();
+
    if (TUX64_INIT_CONFIG_STARTUP_SYSTEM_INFO) {
       tux64_init_system_info_print();
    }
-
-   TUX64_LOG_INFO("Mounting pseudo filesystems");
-   tux64_init_mount_pseudo_filesystems();
 
    /* TODO: implement the rest of init.  the following is our TODO list:      */
    /*                                                                         */

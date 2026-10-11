@@ -13,7 +13,8 @@
 #include "tux64-init/tux64-init.h"
 
 /*----------------------------------------------------------------------------*/
-/* Print information about the package, kernel, memory, etc.                  */
+/* Print information about the package, kernel, memory, etc.  Requires procfs */
+/* to be mounted prior to calling, if enabled.                                */
 /*----------------------------------------------------------------------------*/
 void
 tux64_init_system_info_print(void);
