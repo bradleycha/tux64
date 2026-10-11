@@ -103,7 +103,7 @@ tux64_boot_stage1_main(
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT);
    tux64_boot_stage1_interrupt_initialize();
 
-   video_palette = tux64_boot_stage1_choose_video_palette();
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_CHOOSE_CONSOLE_TYPE);
 
    console_type = tux64_boot_stage1_choose_console_type(
       video_standard,
@@ -111,6 +111,9 @@ tux64_boot_stage1_main(
    );
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
+
+   video_palette = tux64_boot_stage1_choose_video_palette();
+
    tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(
       console_type,
