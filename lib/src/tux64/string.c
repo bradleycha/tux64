@@ -10,6 +10,31 @@
 
 #include "tux64/memory.h"
 
+#if _TUX64_STRING_ALLOCATE_CSTR_ENABLE
+#include <stdlib.h>
+#endif /* _TUX64_STRING_ALLOCATE_CSTR_ENABLE */
+
+#if TUX64_IMPLEMENTATION_CORE
+/*----------------------------------------------------------------------------*/
+
+void
+tux64_string_format_cstr(
+   const struct Tux64String * string,
+   char buffer[]
+) {
+   tux64_memory_copy(
+      buffer,
+      string->ptr,
+      string->characters * TUX64_LITERAL_UINT32(sizeof(char))
+   );
+   buffer[string->characters] = '\0';
+
+   return;
+}
+
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_IMPLEMENTATION_CORE */
+
 #if TUX64_IMPLEMENTATION_LIB
 /*----------------------------------------------------------------------------*/
 
@@ -151,6 +176,29 @@ tux64_string_trim_whitespace(
 
    return trimmed;
 }
+
+#if _TUX64_STRING_ALLOCATE_CSTR_ENABLE
+/*----------------------------------------------------------------------------*/
+
+char *
+tux64_string_allocate_and_format_cstr(
+   const struct Tux64String * string
+) {
+   Tux64UInt32 characters;
+   char * buffer;
+
+   characters = string->characters + TUX64_LITERAL_UINT32(1u);
+
+   buffer = (char *)malloc(characters * TUX64_LITERAL_UINT32(sizeof(char)));
+   if (buffer == NULL) return TUX64_NULLPTR;
+
+   tux64_string_format_cstr(string, buffer);
+
+   return buffer;
+}
+
+/*----------------------------------------------------------------------------*/
+#endif /* _TUX64_STRING_ALLOCATE_CSTR_ENABLE */
 
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_IMPLEMENTATION_LIB */
