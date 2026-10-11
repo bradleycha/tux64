@@ -626,6 +626,30 @@ tux64_mkrom_arguments_config_file_parser_memory_display(
 }
 
 static struct Tux64ArgumentsParseOptionResult
+tux64_mkrom_arguments_config_file_parser_audio_beeps(
+   const struct Tux64String * parameter,
+   void * context
+) {
+   struct Tux64ArgumentsParseOptionResult result;
+   struct Tux64MkromArgumentsConfigFile * arguments;
+
+   arguments = (struct Tux64MkromArgumentsConfigFile *)context;
+
+   if (parameter->characters != TUX64_LITERAL_UINT32(0u)) {
+      result.status = TUX64_ARGUMENTS_PARSE_STATUS_PARAMETER_UNEXPECTED;
+      return result;
+   }
+
+   arguments->boot_header_flags = tux64_bitwise_flags_set_uint32(
+      arguments->boot_header_flags,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_BOOT_FLAG_AUDIO_BEEPS)
+   );
+
+   result.status = TUX64_ARGUMENTS_PARSE_STATUS_OK;
+   return result;
+}
+
+static struct Tux64ArgumentsParseOptionResult
 tux64_mkrom_arguments_config_file_parser_rom_header_clock_rate(
    const struct Tux64String * parameter,
    void * context
@@ -804,6 +828,8 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    "no-delay"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER\
    "memory-display"
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_AUDIO_BEEPS_IDENTIFIER\
+   "audio-beeps"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER\
    "rom-header-clock-rate"
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER\
@@ -839,6 +865,8 @@ tux64_mkrom_arguments_config_file_parser_rom_header_game_code(
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_NO_DELAY_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIER)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_AUDIO_BEEPS_IDENTIFIER_CHARACTERS\
+   TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_AUDIO_BEEPS_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER_CHARACTERS\
    TUX64_STRING_CHARACTERS(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIER_CHARACTERS\
@@ -947,6 +975,14 @@ tux64_mkrom_arguments_config_file_option_memory_display_identifiers [] = {
 };
 
 static const struct Tux64String
+tux64_mkrom_arguments_config_file_option_audio_beeps_identifiers [] = {
+   {
+      .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_AUDIO_BEEPS_IDENTIFIER,
+      .characters = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_AUDIO_BEEPS_IDENTIFIER_CHARACTERS)
+   }
+};
+
+static const struct Tux64String
 tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers [] = {
    {
       .ptr        = TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIER,
@@ -1010,6 +1046,8 @@ tux64_mkrom_arguments_config_file_option_rom_header_game_code_identifiers [] = {
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_no_delay_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_memory_display_identifiers)
+#define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_AUDIO_BEEPS_IDENTIFIERS_COUNT\
+   TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_audio_beeps_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_IDENTIFIERS_COUNT\
    TUX64_ARRAY_ELEMENTS(tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers)
 #define TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_BOOT_ADDRESS_IDENTIFIERS_COUNT\
@@ -1129,6 +1167,13 @@ tux64_mkrom_arguments_config_file_options_optional [] = {
       .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_MEMORY_DISPLAY_IDENTIFIERS_COUNT),
       .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
       .parser                    = tux64_mkrom_arguments_config_file_parser_memory_display
+   },
+   {
+      .identifiers_long          = tux64_mkrom_arguments_config_file_option_audio_beeps_identifiers,
+      .identifiers_short         = TUX64_NULLPTR,
+      .identifiers_long_count    = TUX64_LITERAL_UINT32(TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_AUDIO_BEEPS_IDENTIFIERS_COUNT),
+      .identifiers_short_count   = TUX64_LITERAL_UINT32(0u),
+      .parser                    = tux64_mkrom_arguments_config_file_parser_audio_beeps
    },
    {
       .identifiers_long          = tux64_mkrom_arguments_config_file_option_rom_header_clock_rate_identifiers,
@@ -1404,6 +1449,10 @@ tux64_mkrom_arguments_config_file_parse(
    "      --memory-display, default is off\n"\
    "\n"\
    "         Display memory usage information on startup\n"\
+   "\n"\
+   "      --audio-beeps, default is off\n"\
+   "\n"\
+   "         Play audio beeps on startup and on boot failure.\n"\
    "\n"\
    "      --rom-header-clock-rate=[value], default=\"" TUX64_MKROM_ARGUMENTS_CONFIG_FILE_OPTION_ROM_HEADER_CLOCK_RATE_DEFAULT_VALUE_STRING "\"\n"\
    "\n"\
