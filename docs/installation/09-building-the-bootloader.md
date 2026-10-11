@@ -113,6 +113,7 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-boot
       --enable-splash \
       --enable-logo \
       --enable-memory-display \
+      --enable-audio-beeps \
       --enable-console-type-pal \
       --enable-console-type-ntsc \
       --enable-console-type-mpal \

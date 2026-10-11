@@ -52,6 +52,7 @@ people:
 --memory-display
 --no-delay
 #--no-checksum
+--audio-beeps
 
 # Uncomment the two lines below if you would like to use an initramfs.
 #--initramfs
