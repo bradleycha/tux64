@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*                          Copyright (C) Tux64 2025                          */
+/*                       Copyright (C) Tux64 2025, 2026                       */
 /*                    https://github.com/bradleycha/tux64                     */
 /*----------------------------------------------------------------------------*/
 /* lib/src/tux64/platform/mips/n64/mmio.h - Memory-mapped I/O (MMIO).         */
@@ -61,12 +61,12 @@ struct Tux64PlatformMipsN64MmioRegistersVi {
 };
 
 struct Tux64PlatformMipsN64MmioRegistersAi {
-   Tux64UInt32       dram_addr;
-   Tux64UInt32       length;
-   Tux64UInt32       control;
-   const Tux64UInt32 status;
-   Tux64UInt32       dac_rate;
-   Tux64UInt32       bit_rate;
+   Tux64UInt32 dram_addr;
+   Tux64UInt32 length;
+   Tux64UInt32 control;
+   Tux64UInt32 status;
+   Tux64UInt32 dac_rate;
+   Tux64UInt32 bit_rate;
 };
 
 struct Tux64PlatformMipsN64MmioRegistersPiBsdDom {
@@ -111,13 +111,13 @@ struct Tux64PlatformMipsN64MmioRegistersRi {
 };
 
 struct Tux64PlatformMipsN64MmioRegistersSi {
-   Tux64UInt32       dram_addr;
-   Tux64UInt32       pif_ad_rd64b;
-   Tux64UInt32       pif_ad_wr4b;
-   Tux64UInt8        __pad_000c [0x04];
-   Tux64UInt32       pif_ad_wr64b;
-   Tux64UInt32       pif_ad_rd4b;
-   const Tux64UInt32 status;
+   Tux64UInt32 dram_addr;
+   Tux64UInt32 pif_ad_rd64b;
+   Tux64UInt32 pif_ad_wr4b;
+   Tux64UInt8  __pad_000c [0x04];
+   Tux64UInt32 pif_ad_wr64b;
+   Tux64UInt32 pif_ad_rd4b;
+   Tux64UInt32 status;
 };
 
 /* Memory-mapped I/O registers which can be directly accessed.  These will be */
