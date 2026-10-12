@@ -13,42 +13,81 @@
 #include <tux64/platform/mips/n64/mmio.h>
 #include <tux64/platform/mips/n64/mi.h>
 #include <tux64/platform/mips/vr4300/cop0.h>
-#include <tux64/platform/mips/vr4300/cache.h>
 #include <tux64/endian.h>
 #include <tux64/bitwise.h>
 #include "tux64-boot/halt.h"
+#include "tux64-boot/flag.h"
+#include "tux64-boot/cache.h"
 #include "tux64-boot/stage1/video.h"
+#include "tux64-boot/stage1/audio.h"
+
+/* we store the desired MI_MASK value in a seperate register because we can't */
+/* simply read/modify/write the register directly, as reading corresponds to */
+/* a different operation than writing, resulting in a corrupted mask.  we */
+/* then have to apply our mask all at once. */
+static Tux64UInt32
+tux64_boot_stage1_interrupt_mi_mask = TUX64_LITERAL_UINT32(0u);
 
 static void
-tux64_boot_stage1_interrupt_handler_vi(void) {
-   tux64_boot_stage1_video_vblank_handler();
-
-   /* clears the VI interrupt */
+tux64_boot_stage1_interrupt_clear_vi(void) {
    tux64_platform_mips_n64_mmio_registers_vi.v_current = TUX64_LITERAL_UINT32(0u);
-
    return;
 }
 
 static void
+tux64_boot_stage1_interrupt_clear_ai(void) {
+   tux64_platform_mips_n64_mmio_registers_ai.status = TUX64_LITERAL_UINT32(0u);
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_handler_vi(void) {
+   tux64_boot_stage1_video_vblank_handler();
+   tux64_boot_stage1_interrupt_clear_vi();
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_handler_ai(void) {
+   tux64_boot_stage1_audio_queue_buffer();
+   tux64_boot_stage1_interrupt_clear_ai();
+   return;
+}
+
+static Tux64Boolean
 tux64_boot_stage1_interrupt_handler_mi(void) {
    Tux64UInt32 mi_interrupt;
+   Tux64UInt32 interrupt_handled;
 
    mi_interrupt = tux64_platform_mips_n64_mmio_registers_mi.interrupt;
+   interrupt_handled = TUX64_BOOLEAN_FALSE;
 
    if (tux64_bitwise_flags_check_one_uint32(
       mi_interrupt,
       TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_VI
    )) {
       tux64_boot_stage1_interrupt_handler_vi();
-      return;
+      interrupt_handled |= TUX64_BOOLEAN_TRUE;
+   }
+   if (tux64_boot_flag_audio_beeps() && tux64_bitwise_flags_check_one_uint32(
+      mi_interrupt,
+      TUX64_PLATFORM_MIPS_N64_MI_INTERRUPT_BIT_AI
+   )) {
+      tux64_boot_stage1_interrupt_handler_ai();
+      interrupt_handled |= TUX64_BOOLEAN_TRUE;
    }
    
-   return;
+   return interrupt_handled;
 }
 
 static void
 tux64_boot_stage1_interrupt_handler_unhandled(void) {
-   tux64_boot_halt();
+   if (TUX64_BOOT_CONFIG_DEBUG) {
+      /* we should never have unhandled interrupts with correct code, but we */
+      /* should still be made aware of them in debug builds. */
+      tux64_boot_halt();
+   }
+
    TUX64_UNREACHABLE;
 }
 
@@ -71,8 +110,7 @@ tux64_boot_stage1_interrupt_handler(void) {
       cause,
       TUX64_PLATFORM_MIPS_VR4300_COP0_CAUSE_BIT_IP2
    )) {
-      tux64_boot_stage1_interrupt_handler_mi();
-      interrupt_handled = TUX64_BOOLEAN_TRUE;
+      interrupt_handled |= tux64_boot_stage1_interrupt_handler_mi();
    }
 
    if (interrupt_handled == TUX64_BOOLEAN_FALSE) {
@@ -137,16 +175,21 @@ union Tux64BootStage1InterruptJumpTarget {
 static void
 tux64_boot_stage1_interrupt_initialize_handler(void) {
    union Tux64BootStage1InterruptJumpTarget jump_target;
-   Tux64UInt64 * service_routine_address;
+   Tux64UInt64 * service_routine_address_uncached;
+   Tux64UInt64 * service_routine_address_cached;
    Tux64UInt64 service_routine_code;
 
    jump_target.function = tux64_boot_stage1_interrupt_handler;
 
-   /* we use the uncached address because we have to invalidate instruction */
-   /* cache anyways, so there's no point in caching the write in data cache. */
-   /* in fact, that could cause further issues that can be easily avoided. */
-   service_routine_address = (Tux64UInt64 *)TUX64_LITERAL_UINTPTR(
+   /* we use the uncached segment because since we are writing data, this */
+   /* write is invisible to icache.  therefore, we would have to first write */
+   /* back dcache, then invalidate icache.  it's easier to just write to the */
+   /* uncached segment to eliminate the first cache operation. */
+   service_routine_address_uncached = (Tux64UInt64 *)TUX64_LITERAL_UINTPTR(
       TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_UNCACHED
+   );
+   service_routine_address_cached = (Tux64UInt64 *)TUX64_LITERAL_UINTPTR(
+      TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_CACHED
    );
 
    /* insert the address of the service handler into the machine code */
@@ -155,18 +198,15 @@ tux64_boot_stage1_interrupt_initialize_handler(void) {
    );
 
    /* correct for endianess...aaaand boom! just like magic! */
-   *service_routine_address = tux64_endian_convert_uint64(
+   *service_routine_address_uncached = tux64_endian_convert_uint64(
       service_routine_code,
       TUX64_ENDIAN_FORMAT_BIG
    );
 
-   /* don't forget to tell the CPU what we just did, as instruction cache */
-   /* isn't aware of what's going in in data cache (which we aren't using */
-   /* anyways) */
-   tux64_platform_mips_vr4300_cache_operation_instruction_hit_invalidate(
-      (const void *)TUX64_LITERAL_UINTPTR(
-         TUX64_BOOT_STAGE1_INTERRUPT_SERVICE_ROUTINE_ADDRESS_CACHED
-      )
+   /* see documentation above. */
+   tux64_boot_cache_invalidate_instruction(
+      service_routine_address_cached,
+      TUX64_LITERAL_UINT32(sizeof(service_routine_code))
    );
 
    return;
@@ -212,7 +252,6 @@ tux64_boot_stage1_interrupt_initialize(void) {
    
    tux64_boot_stage1_interrupt_disable_status(status);
    tux64_boot_stage1_interrupt_initialize_handler();
-   tux64_boot_stage1_interrupt_enable_status(status);
 
    return;
 }
@@ -238,9 +277,15 @@ tux64_boot_stage1_interrupt_disable(void) {
 }
 
 void
+tux64_boot_stage1_interrupt_rcp_update_mask(void) {
+   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_boot_stage1_interrupt_mi_mask;
+   return;
+}
+
+void
 tux64_boot_stage1_interrupt_vi_enable(void) {
-   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_bitwise_flags_set_uint32(
-      tux64_platform_mips_n64_mmio_registers_mi.mask,
+   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
+      tux64_boot_stage1_interrupt_mi_mask,
       TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_VI
    );
 
@@ -249,9 +294,29 @@ tux64_boot_stage1_interrupt_vi_enable(void) {
 
 void
 tux64_boot_stage1_interrupt_vi_disable(void) {
-   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_bitwise_flags_set_uint32(
-      tux64_platform_mips_n64_mmio_registers_mi.mask,
+   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
+      tux64_boot_stage1_interrupt_mi_mask,
       TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_VI
+   );
+
+   return;
+}
+
+void
+tux64_boot_stage1_interrupt_ai_enable(void) {
+   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
+      tux64_boot_stage1_interrupt_mi_mask,
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_AI
+   );
+
+   return;
+}
+
+void
+tux64_boot_stage1_interrupt_ai_disable(void) {
+   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
+      tux64_boot_stage1_interrupt_mi_mask,
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_AI
    );
 
    return;

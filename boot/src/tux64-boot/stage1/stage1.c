@@ -16,11 +16,13 @@
 #include "tux64-boot/pif.h"
 #include "tux64-boot/rng.h"
 #include "tux64-boot/halt.h"
+#include "tux64-boot/flag.h"
 #include "tux64-boot/stage1/status.h"
 #include "tux64-boot/stage1/memory.h"
 #include "tux64-boot/stage1/interrupt.h"
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/fbcon.h"
+#include "tux64-boot/stage1/audio.h"
 #include "tux64-boot/stage1/logo.h"
 #include "tux64-boot/stage1/fsm.h"
 
@@ -140,7 +142,6 @@ tux64_boot_stage1_main(
 
    video_palette = tux64_boot_stage1_choose_video_palette();
 
-   tux64_boot_stage1_interrupt_vi_disable();
    tux64_boot_stage1_video_initialize(
       console_type,
       video_palette.background
@@ -156,6 +157,12 @@ tux64_boot_stage1_main(
       video_palette.background
    );
 
+   if (tux64_boot_flag_audio_beeps()) {
+      tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
+      tux64_boot_stage1_audio_initialize(console_type);
+      tux64_boot_stage1_interrupt_ai_enable();
+   }
+
    tux64_boot_stage1_fsm_initialize(
       &tux64_boot_stage1_fsm,
       console_type,
@@ -164,6 +171,11 @@ tux64_boot_stage1_main(
       rom_cic_seed,
       pif_rom_version
    );
+
+   /* we wait until all subsystems have been initialized before we enable */
+   /* receiving interrupts. */
+   tux64_boot_stage1_interrupt_rcp_update_mask();
+   tux64_boot_stage1_interrupt_enable();
 
    /* we used to execute this at the end of stage-0, but we moved it to here. */
    /* the reason is we want to wait as late into the boot process to          */

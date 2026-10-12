@@ -14,13 +14,15 @@
 
 /*----------------------------------------------------------------------------*/
 /* Initializes the interrupt service routines, setting up the handler and     */
-/* initializing the processor state.                                          */
+/* initializing the processor state.  Interrupts remain disabled after        */
+/* initialization until enabled manually.                                     */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_interrupt_initialize(void);
 
 /*----------------------------------------------------------------------------*/
-/* Enable or disable all interrupts.                                          */
+/* Enable or disable acknowledgement of interrupts from the CPU or external   */
+/* sources.                                                                   */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_interrupt_enable(void);
@@ -28,12 +30,25 @@ void
 tux64_boot_stage1_interrupt_disable(void);
 
 /*----------------------------------------------------------------------------*/
-/* Enable or disable VI interrupts.                                           */
+/* Update the mask for the RCP's various interrupt sources.  This will enable */
+/* receiving interrupts from the RCP based on the current mask.  By default,  */
+/* all interrupt sources are masked.                                          */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_interrupt_rcp_update_mask(void);
+
+/*----------------------------------------------------------------------------*/
+/* Enable or disable various interrupts sent by the RCP.  Changes won't take  */
+/* effect until calling tux64_boot_stage1_interrupt_rcp_update_mask().        */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_interrupt_vi_enable(void);
 void
 tux64_boot_stage1_interrupt_vi_disable(void);
+void
+tux64_boot_stage1_interrupt_ai_enable(void);
+void
+tux64_boot_stage1_interrupt_ai_disable(void);
 
 /*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_STAGE1_INTERRUPT_H */

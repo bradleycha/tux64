@@ -153,6 +153,8 @@ stage1_SOURCES = \
 	src/tux64-boot/stage1/format.h \
 	src/tux64-boot/stage1/video.c \
 	src/tux64-boot/stage1/video.h \
+	src/tux64-boot/stage1/audio.c \
+	src/tux64-boot/stage1/audio.h \
 	src/tux64-boot/stage1/fbcon.c \
 	src/tux64-boot/stage1/fbcon.h \
 	src/tux64-boot/stage1/logo.c \

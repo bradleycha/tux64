@@ -28,6 +28,7 @@
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/interrupt.h"
 #include "tux64-boot/stage1/fbcon.h"
+#include "tux64-boot/stage1/audio.h"
 #include "tux64-boot/stage1/strings.h"
 #include "tux64-boot/stage1/format.h"
 
@@ -42,11 +43,13 @@
 
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_delay);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_halt);
+TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_halt_after_sound);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_load_file);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_boot_kernel);
 TUX64_BOOT_STAGE1_FSM_STATE_DECLARATION(tux64_boot_stage1_fsm_state_boot_stage2);
 
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_halt);
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_halt_after_sound);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_start);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_kernel);
 TUX64_BOOT_STAGE1_FSM_TRANSITION_DECLARATION(tux64_boot_stage1_fsm_transition_load_file_initramfs);
@@ -128,21 +131,32 @@ tux64_boot_stage1_fsm_halt(
 /*----------------------------------------------------------------------------*/
    Tux64BootStage1FbconLabel label;
    Tux64UInt8 characters;
+   Tux64BootStage1FsmPfnTransition transition;
+   Tux64BootStage1FsmPfnTransition state;
 
    characters = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_FORMAT_BUFFER_CHARACTERS_ERROR) + reason->length;
    label = tux64_boot_stage1_fbcon_label_allocate(characters);
    tux64_boot_stage1_format_error(label, reason);
+
+   if (tux64_boot_flag_audio_beeps()) {
+      tux64_boot_stage1_audio_play(TUX64_BOOT_STAGE1_AUDIO_SOUND_FATAL_ERROR);
+      transition  = tux64_boot_stage1_fsm_transition_halt_after_sound;
+      state       = tux64_boot_stage1_fsm_state_halt_after_sound;
+   } else {
+      transition  = tux64_boot_stage1_fsm_transition_halt;
+      state       = tux64_boot_stage1_fsm_state_halt;
+   }
 
    /* we try to delay for one tick, even if --no-delay is passed, so we have */
    /* time to render the frame before halting the CPU.  we only respect no */
    /* delay when it's compiled out because at that point, it's clear the */
    /* user knows what they're doing. */
    if (TUX64_BOOT_CONFIG_DELAY) {
-      tux64_boot_stage1_fsm_delay_one(fsm, tux64_boot_stage1_fsm_transition_halt);
+      tux64_boot_stage1_fsm_delay_one(fsm, transition);
    } else {
       /* this works for all but the initial state because we are already in a */
       /* state, so the halt state only gets executed on the next tick. */
-      fsm->state = tux64_boot_stage1_fsm_state_halt;
+      fsm->state = state;
    }
 
    return;
@@ -166,6 +180,21 @@ TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_halt) {
    /* halting is its own dedicated state so that we have time to render error */
    /* messages or other diagnostic information before halting the CPU.  this  */
    /* is preferable to directly calling tux64_boot_halt() wherever possible.  */
+   (void)fsm;
+   tux64_boot_halt();
+   TUX64_UNREACHABLE;
+}
+
+TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_halt_after_sound) {
+   fsm->state = tux64_boot_stage1_fsm_state_halt_after_sound;
+   return;
+}
+
+TUX64_BOOT_STAGE1_FSM_STATE_DEFINITION(tux64_boot_stage1_fsm_state_halt_after_sound) {
+   if (tux64_boot_stage1_audio_is_playing()) {
+      return;
+   }
+
    (void)fsm;
    tux64_boot_halt();
    TUX64_UNREACHABLE;
@@ -605,10 +634,10 @@ TUX64_BOOT_STAGE1_FSM_TRANSITION_DEFINITION(tux64_boot_stage1_fsm_transition_boo
 
 static void
 tux64_boot_stage1_fsm_reset_hardware(void) {
-   /* since we're coming from either the start of a new frame or after */
-   /* loading a file, no DMA engines should be active.  thus, all we need to */
-   /* do is disable video output and disable interrupts. */
    tux64_boot_stage1_video_display_output(TUX64_BOOLEAN_FALSE);
+   if (tux64_boot_flag_audio_beeps()) {
+      tux64_boot_stage1_audio_halt();
+   }
    tux64_boot_stage1_interrupt_disable();
    return;
 }
@@ -732,6 +761,10 @@ tux64_boot_stage1_fsm_initialize(
    Tux64UInt8 pif_rom_version
 ) {
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_MAIN_STATE_START);
+
+   if (tux64_boot_flag_audio_beeps()) {
+      tux64_boot_stage1_audio_play(TUX64_BOOT_STAGE1_AUDIO_SOUND_STARTUP);
+   }
 
    tux64_boot_stage1_fsm_initialize_kernel_metadata(
       &fsm->globals.kernel_metadata,
