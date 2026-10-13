@@ -21,6 +21,7 @@ tux64_boot_stage1_audio_initialize(
    enum Tux64PlatformMipsN64BootConsoleType console_type
 );
 
+#define TUX64_BOOT_STAGE1_AUDIO_SOUND_FIELD_COUNT 2u
 enum Tux64BootStage1AudioSound {
    TUX64_BOOT_STAGE1_AUDIO_SOUND_STARTUP,
    TUX64_BOOT_STAGE1_AUDIO_SOUND_FATAL_ERROR

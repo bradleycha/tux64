@@ -24,6 +24,21 @@ tux64_boot_sync_fence_initialize(
 );
 
 /*----------------------------------------------------------------------------*/
+/* Initializes the fence to be signaled.  Internally, a volatile flag is used */
+/* to track the fence state.  Thus, the compiler won't optimize out something */
+/* like the following:                                                        */
+/*                                                                            */
+/*    tux64_boot_sync_fence_initialize();                                     */
+/*    tux64_boot_sync_fence_signal();                                         */
+/*                                                                            */
+/* In this case, you should replace the above with a call to this function.   */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_sync_fence_initialize_signaled(
+   struct Tux64BootSyncFence * fence
+);
+
+/*----------------------------------------------------------------------------*/
 /* Waits in a low-power spinlock until the fence is signaled.                 */
 /*----------------------------------------------------------------------------*/
 void

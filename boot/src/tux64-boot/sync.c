@@ -20,6 +20,14 @@ tux64_boot_sync_fence_initialize(
 }
 
 void
+tux64_boot_sync_fence_initialize_signaled(
+   struct Tux64BootSyncFence * fence
+) {
+   fence->flag = TUX64_BOOLEAN_TRUE;
+   return;
+}
+
+void
 tux64_boot_sync_fence_wait(
    struct Tux64BootSyncFence * fence
 ) {
