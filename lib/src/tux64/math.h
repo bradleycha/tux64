@@ -19,6 +19,14 @@
    (((dividend) + (divisor) - 1) / (divisor))
 
 /*----------------------------------------------------------------------------*/
+/* Performs integer rounding/nearest divison on literals.  Only use this if   */
+/* you can't use the non-preprocessor functions, for example in #define       */
+/* statements.                                                                */
+/*----------------------------------------------------------------------------*/
+#define TUX64_MATH_NEAREST_DIVIDE(dividend, divisor)\
+   ((((2 * dividend) + 1) / divisor) / 2)
+
+/*----------------------------------------------------------------------------*/
 /* Aligns a value forward to a boundary on literals.  Only use this if you    */
 /* can't use the non-preprocessor functions, for example in #define           */
 /* statements.                                                                */
@@ -54,6 +62,35 @@ tux64_math_ceil_divide_uint64(
 );
 Tux64UIntPtr
 tux64_math_ceil_divide_uintptr(
+   Tux64UIntPtr dividend,
+   Tux64UIntPtr divisor
+);
+
+/*----------------------------------------------------------------------------*/
+/* Performs integer rounding/nearest division.                                */
+/*----------------------------------------------------------------------------*/
+Tux64UInt8
+tux64_math_nearest_divide_uint8(
+   Tux64UInt8 dividend,
+   Tux64UInt8 divisor
+);
+Tux64UInt16
+tux64_math_nearest_divide_uint16(
+   Tux64UInt16 dividend,
+   Tux64UInt16 divisor
+);
+Tux64UInt32
+tux64_math_nearest_divide_uint32(
+   Tux64UInt32 dividend,
+   Tux64UInt32 divisor
+);
+Tux64UInt64
+tux64_math_nearest_divide_uint64(
+   Tux64UInt64 dividend,
+   Tux64UInt64 divisor
+);
+Tux64UIntPtr
+tux64_math_nearest_divide_uintptr(
    Tux64UIntPtr dividend,
    Tux64UIntPtr divisor
 );

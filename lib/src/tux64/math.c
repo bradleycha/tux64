@@ -24,6 +24,22 @@ tux64_math_ceil_divide_uint64(
 }
 
 Tux64UInt64
+tux64_math_nearest_divide_uint64(
+   Tux64UInt64 dividend,
+   Tux64UInt64 divisor
+) {
+   Tux64UInt64 dividend_shifted;
+   Tux64UInt64 result_shifted;
+   Tux64UInt64 result;
+
+   dividend_shifted  = (TUX64_LITERAL_UINT64(2u) * dividend) + TUX64_LITERAL_UINT64(1u);
+   result_shifted    = dividend_shifted / divisor;
+   result            = result_shifted / TUX64_LITERAL_UINT64(2u);
+
+   return result;
+}
+
+Tux64UInt64
 tux64_math_align_forward_uint64(
    Tux64UInt64 value,
    Tux64UInt64 alignment
@@ -88,6 +104,50 @@ tux64_math_ceil_divide_uintptr(
    Tux64UIntPtr divisor
 ) {
    return (Tux64UIntPtr)tux64_math_ceil_divide_uint64(
+      (Tux64UInt64)dividend,
+      (Tux64UInt64)divisor
+   );
+}
+
+Tux64UInt8
+tux64_math_nearest_divide_uint8(
+   Tux64UInt8 dividend,
+   Tux64UInt8 divisor
+) {
+   return (Tux64UInt8)tux64_math_nearest_divide_uint64(
+      (Tux64UInt64)dividend,
+      (Tux64UInt64)divisor
+   );
+}
+
+Tux64UInt16
+tux64_math_nearest_divide_uint16(
+   Tux64UInt16 dividend,
+   Tux64UInt16 divisor
+) {
+   return (Tux64UInt16)tux64_math_nearest_divide_uint64(
+      (Tux64UInt64)dividend,
+      (Tux64UInt64)divisor
+   );
+}
+
+Tux64UInt32
+tux64_math_nearest_divide_uint32(
+   Tux64UInt32 dividend,
+   Tux64UInt32 divisor
+) {
+   return (Tux64UInt32)tux64_math_nearest_divide_uint64(
+      (Tux64UInt64)dividend,
+      (Tux64UInt64)divisor
+   );
+}
+
+Tux64UIntPtr
+tux64_math_nearest_divide_uintptr(
+   Tux64UIntPtr dividend,
+   Tux64UIntPtr divisor
+) {
+   return (Tux64UIntPtr)tux64_math_nearest_divide_uint64(
       (Tux64UInt64)dividend,
       (Tux64UInt64)divisor
    );
