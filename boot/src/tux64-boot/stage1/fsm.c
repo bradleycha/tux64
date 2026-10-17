@@ -212,11 +212,14 @@ tux64_boot_stage1_fsm_allocate_kernel(
 
    /* the kernel is a special case because it's the only boot file which has */
    /* to be loaded at a specific address.  the rest of the boot files can be */
-   /* loaded anywhere. */
+   /* loaded anywhere.  also note that the allocation size is the total */
+   /* memory used, not just the image size.  this is because if we use the */
+   /* image size, we may end up allocating other boot files into the kernel's */
+   /* BSS sections. */
 
    kernel_file       = tux64_boot_header_file_kernel();
    kernel_address    = kernel_file->addr_load;
-   kernel_bytes      = kernel_file->image.file.length;
+   kernel_bytes      = kernel_file->image.memory;
 
    kernel_allocation = &tux64_boot_load_allocations.required.kernel;
    result            = TUX64_BOOLEAN_FALSE;
