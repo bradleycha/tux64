@@ -16,6 +16,7 @@
 #include <tux64/endian.h>
 #include <tux64/bitwise.h>
 #include "tux64-boot/halt.h"
+#include "tux64-boot/idle.h"
 #include "tux64-boot/flag.h"
 #include "tux64-boot/cache.h"
 #include "tux64-boot/stage1/video.h"
@@ -103,6 +104,8 @@ tux64_boot_stage1_interrupt_handler(void) {
    Tux64UInt32 cause;
    Tux64Boolean interrupt_handled;
 
+   tux64_boot_idle_push();
+
    cause = tux64_platform_mips_vr4300_cop0_register_read_cause();
    interrupt_handled = TUX64_BOOLEAN_FALSE;
 
@@ -116,6 +119,8 @@ tux64_boot_stage1_interrupt_handler(void) {
    if (interrupt_handled == TUX64_BOOLEAN_FALSE) {
       tux64_boot_stage1_interrupt_handler_unhandled();
    }
+
+   tux64_boot_idle_pop();
 
    return;
 }

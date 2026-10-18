@@ -13,10 +13,17 @@
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/bitwise.h>
 
+static Tux64Boolean
+tux64_boot_idle_scheduled_to_resume;
+
 static void
 tux64_boot_idle_rp_bit_flip(void) {
    volatile Tux64UInt32 * halt_sysad;
    Tux64UInt32 status;
+
+   if (!TUX64_BOOT_CONFIG_POWER_MANAGEMENT) {
+      return;
+   }
 
    /* bogus read to uncached memory to make sure SysAD isn't active */
    halt_sysad = (volatile Tux64UInt32 *)TUX64_LITERAL_UINTPTR(
@@ -33,12 +40,24 @@ tux64_boot_idle_rp_bit_flip(void) {
    tux64_platform_mips_vr4300_cop0_register_write_status(status);
 }
 
-void
-tux64_boot_idle_enter(void) {
+static Tux64Boolean
+tux64_boot_idle_rp_bit_is_set(void) {
+   Tux64UInt32 status;
+
    if (!TUX64_BOOT_CONFIG_POWER_MANAGEMENT) {
-      return;
+      return TUX64_BOOLEAN_FALSE;
    }
 
+   status = tux64_platform_mips_vr4300_cop0_register_read_status();
+
+   return tux64_bitwise_flags_check_one_uint32(
+      status,
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_VR4300_COP0_STATUS_BIT_RP)
+   );
+}
+
+void
+tux64_boot_idle_enter(void) {
    /* normally we would have to configure the memory refresh rate if it were */
    /* based on pclock cycles, but RDRAM refresh, when set to automatic */
    /* refresh, refreshes based on the VI timings, *not* the CPU, so all we */
@@ -51,11 +70,29 @@ tux64_boot_idle_enter(void) {
 
 void
 tux64_boot_idle_exit(void) {
-   if (!TUX64_BOOT_CONFIG_POWER_MANAGEMENT) {
+   /* see above documentation about memory timings. */
+   tux64_boot_idle_rp_bit_flip();
+   return;
+}
+
+void
+tux64_boot_idle_push(void) {
+   tux64_boot_idle_scheduled_to_resume = tux64_boot_idle_rp_bit_is_set();
+
+   if (tux64_boot_idle_scheduled_to_resume == TUX64_BOOLEAN_FALSE) {
       return;
    }
 
-   /* see above documentation about memory timings. */
+   tux64_boot_idle_rp_bit_flip();
+   return;
+}
+
+void
+tux64_boot_idle_pop(void) {
+   if (tux64_boot_idle_scheduled_to_resume == TUX64_BOOLEAN_FALSE) {
+      return;
+   }
+
    tux64_boot_idle_rp_bit_flip();
    return;
 }
