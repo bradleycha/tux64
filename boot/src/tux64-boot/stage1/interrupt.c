@@ -24,12 +24,26 @@
 #include "tux64-boot/stage1/video.h"
 #include "tux64-boot/stage1/audio.h"
 
+/* we default to explicitly clear all interrupt sources because we could be */
+/* coming from reset, where MI_MASK is already set with potentially */
+/* undesirable interrupt sources. */
+#define TUX64_BOOT_STAGE1_INTERRUPT_MI_MASK_DEFAULT\
+   (\
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_DP |\
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_PI |\
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_VI |\
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_AI |\
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_SI |\
+      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_SP\
+   )
+
 /* we store the desired MI_MASK value in a seperate register because we can't */
 /* simply read/modify/write the register directly, as reading corresponds to */
 /* a different operation than writing, resulting in a corrupted mask.  we */
 /* then have to apply our mask all at once. */
 static Tux64UInt32
-tux64_boot_stage1_interrupt_mi_mask = TUX64_LITERAL_UINT32(0u);
+tux64_boot_stage1_interrupt_mi_mask =
+TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_INTERRUPT_MI_MASK_DEFAULT);
 
 static void
 tux64_boot_stage1_interrupt_clear_dp(void) {
@@ -308,7 +322,7 @@ tux64_boot_stage1_interrupt_initialize(void) {
    
    tux64_boot_stage1_interrupt_disable_status(status);
    tux64_boot_stage1_interrupt_initialize_handler();
-   tux64_boot_stage1_interrupt_rcp_clear();
+   tux64_boot_stage1_interrupt_reset();
 
    return;
 }
@@ -334,54 +348,84 @@ tux64_boot_stage1_interrupt_disable(void) {
 }
 
 void
-tux64_boot_stage1_interrupt_rcp_update_mask(void) {
-   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_boot_stage1_interrupt_mi_mask;
-   return;
-}
-
-void
-tux64_boot_stage1_interrupt_rcp_clear(void) {
+tux64_boot_stage1_interrupt_reset(void) {
    tux64_boot_stage1_interrupt_clear_mi();
    return;
 }
 
 void
-tux64_boot_stage1_interrupt_vi_enable(void) {
+tux64_boot_stage1_interrupt_rcp_update_mask(void) {
+   tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_boot_stage1_interrupt_mi_mask;
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_mi_enable(
+   Tux64UInt32 bitflag_set,
+   Tux64UInt32 bitflag_clear
+) {
    tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
       tux64_boot_stage1_interrupt_mi_mask,
-      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_VI
+      bitflag_set
+   );
+   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_clear_uint32(
+      tux64_boot_stage1_interrupt_mi_mask,
+      bitflag_clear
    );
 
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_mi_disable(
+   Tux64UInt32 bitflag_set,
+   Tux64UInt32 bitflag_clear
+) {
+   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
+      tux64_boot_stage1_interrupt_mi_mask,
+      bitflag_clear
+   );
+   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_clear_uint32(
+      tux64_boot_stage1_interrupt_mi_mask,
+      bitflag_set
+   );
+
+   return;
+}
+
+void
+tux64_boot_stage1_interrupt_vi_enable(void) {
+   tux64_boot_stage1_interrupt_mi_enable(
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_VI),
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_VI)
+   );
    return;
 }
 
 void
 tux64_boot_stage1_interrupt_vi_disable(void) {
-   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
-      tux64_boot_stage1_interrupt_mi_mask,
-      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_VI
+   tux64_boot_stage1_interrupt_mi_disable(
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_VI),
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_VI)
    );
-
    return;
 }
 
 void
 tux64_boot_stage1_interrupt_ai_enable(void) {
-   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
-      tux64_boot_stage1_interrupt_mi_mask,
-      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_AI
+   tux64_boot_stage1_interrupt_mi_enable(
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_AI),
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_AI)
    );
-
    return;
 }
 
 void
 tux64_boot_stage1_interrupt_ai_disable(void) {
-   tux64_boot_stage1_interrupt_mi_mask = tux64_bitwise_flags_set_uint32(
-      tux64_boot_stage1_interrupt_mi_mask,
-      TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_AI
+   tux64_boot_stage1_interrupt_mi_disable(
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_SET_AI),
+      TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MASK_BIT_CLEAR_AI)
    );
-
    return;
 }
 

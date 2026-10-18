@@ -30,18 +30,18 @@ void
 tux64_boot_stage1_interrupt_disable(void);
 
 /*----------------------------------------------------------------------------*/
+/* Reset and clear interrupt sources to a defined state.                      */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_interrupt_reset(void);
+
+/*----------------------------------------------------------------------------*/
 /* Update the mask for the RCP's various interrupt sources.  This will enable */
 /* receiving interrupts from the RCP based on the current mask.  By default,  */
 /* all interrupt sources are masked.                                          */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_interrupt_rcp_update_mask(void);
-
-/*----------------------------------------------------------------------------*/
-/* CLear all pending interrupts originating from the RCP.                     */
-/*----------------------------------------------------------------------------*/
-void
-tux64_boot_stage1_interrupt_rcp_clear(void);
 
 /*----------------------------------------------------------------------------*/
 /* Enable or disable various interrupts sent by the RCP.  Changes won't take  */

@@ -643,7 +643,7 @@ tux64_boot_stage1_fsm_reset_hardware(void) {
       tux64_boot_stage1_audio_halt();
    }
    tux64_boot_stage1_interrupt_disable();
-   tux64_boot_stage1_interrupt_rcp_clear();
+   tux64_boot_stage1_interrupt_reset();
    return;
 }
 
