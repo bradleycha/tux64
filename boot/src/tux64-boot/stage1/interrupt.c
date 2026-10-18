@@ -12,6 +12,8 @@
 #include <tux64/platform/mips/n64/memory-map.h>
 #include <tux64/platform/mips/n64/mmio.h>
 #include <tux64/platform/mips/n64/mi.h>
+#include <tux64/platform/mips/n64/pi.h>
+#include <tux64/platform/mips/n64/sp.h>
 #include <tux64/platform/mips/vr4300/cop0.h>
 #include <tux64/endian.h>
 #include <tux64/bitwise.h>
@@ -30,6 +32,16 @@ static Tux64UInt32
 tux64_boot_stage1_interrupt_mi_mask = TUX64_LITERAL_UINT32(0u);
 
 static void
+tux64_boot_stage1_interrupt_clear_pi(void) {
+   Tux64UInt32 clear_interrupt;
+
+   clear_interrupt = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_CLEAR_INTERRUPT);
+
+   tux64_platform_mips_n64_mmio_registers_pi.status = clear_interrupt;
+   return;
+}
+
+static void
 tux64_boot_stage1_interrupt_clear_vi(void) {
    tux64_platform_mips_n64_mmio_registers_vi.v_current = TUX64_LITERAL_UINT32(0u);
    return;
@@ -38,6 +50,32 @@ tux64_boot_stage1_interrupt_clear_vi(void) {
 static void
 tux64_boot_stage1_interrupt_clear_ai(void) {
    tux64_platform_mips_n64_mmio_registers_ai.status = TUX64_LITERAL_UINT32(0u);
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_clear_si(void) {
+   tux64_platform_mips_n64_mmio_registers_si.status = TUX64_LITERAL_UINT32(0u);
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_clear_sp(void) {
+   Tux64UInt32 clear_interrupt;
+
+   clear_interrupt = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_SP_STATUS_BIT_CLR_INTR);
+
+   tux64_platform_mips_n64_mmio_registers_sp.status = clear_interrupt;
+   return;
+}
+
+static void
+tux64_boot_stage1_interrupt_clear_mi(void) {
+   tux64_boot_stage1_interrupt_clear_pi();
+   tux64_boot_stage1_interrupt_clear_vi();
+   tux64_boot_stage1_interrupt_clear_ai();
+   tux64_boot_stage1_interrupt_clear_si();
+   tux64_boot_stage1_interrupt_clear_sp();
    return;
 }
 
@@ -257,6 +295,7 @@ tux64_boot_stage1_interrupt_initialize(void) {
    
    tux64_boot_stage1_interrupt_disable_status(status);
    tux64_boot_stage1_interrupt_initialize_handler();
+   tux64_boot_stage1_interrupt_clear_mi();
 
    return;
 }
