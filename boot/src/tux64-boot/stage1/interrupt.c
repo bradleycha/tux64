@@ -32,6 +32,18 @@ static Tux64UInt32
 tux64_boot_stage1_interrupt_mi_mask = TUX64_LITERAL_UINT32(0u);
 
 static void
+tux64_boot_stage1_interrupt_clear_dp(void) {
+   Tux64UInt32 clear_interrupt;
+
+   clear_interrupt = TUX64_LITERAL_UINT32(TUX64_PLATFORM_MIPS_N64_MI_MODE_BIT_CLEAR_DP);
+
+   tux64_platform_mips_n64_mmio_registers_mi.mode = clear_interrupt;
+   return;
+
+   return;
+}
+
+static void
 tux64_boot_stage1_interrupt_clear_pi(void) {
    Tux64UInt32 clear_interrupt;
 
@@ -71,6 +83,7 @@ tux64_boot_stage1_interrupt_clear_sp(void) {
 
 static void
 tux64_boot_stage1_interrupt_clear_mi(void) {
+   tux64_boot_stage1_interrupt_clear_dp();
    tux64_boot_stage1_interrupt_clear_pi();
    tux64_boot_stage1_interrupt_clear_vi();
    tux64_boot_stage1_interrupt_clear_ai();
