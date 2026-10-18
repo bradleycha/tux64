@@ -38,6 +38,12 @@ void
 tux64_boot_stage1_interrupt_rcp_update_mask(void);
 
 /*----------------------------------------------------------------------------*/
+/* CLear all pending interrupts originating from the RCP.                     */
+/*----------------------------------------------------------------------------*/
+void
+tux64_boot_stage1_interrupt_rcp_clear(void);
+
+/*----------------------------------------------------------------------------*/
 /* Enable or disable various interrupts sent by the RCP.  Changes won't take  */
 /* effect until calling tux64_boot_stage1_interrupt_rcp_update_mask().        */
 /*----------------------------------------------------------------------------*/

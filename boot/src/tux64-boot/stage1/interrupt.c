@@ -295,7 +295,7 @@ tux64_boot_stage1_interrupt_initialize(void) {
    
    tux64_boot_stage1_interrupt_disable_status(status);
    tux64_boot_stage1_interrupt_initialize_handler();
-   tux64_boot_stage1_interrupt_clear_mi();
+   tux64_boot_stage1_interrupt_rcp_clear();
 
    return;
 }
@@ -323,6 +323,12 @@ tux64_boot_stage1_interrupt_disable(void) {
 void
 tux64_boot_stage1_interrupt_rcp_update_mask(void) {
    tux64_platform_mips_n64_mmio_registers_mi.mask = tux64_boot_stage1_interrupt_mi_mask;
+   return;
+}
+
+void
+tux64_boot_stage1_interrupt_rcp_clear(void) {
+   tux64_boot_stage1_interrupt_clear_mi();
    return;
 }
 
