@@ -166,6 +166,7 @@ tux64_boot_stage1_fsm_halt(
    (void)fsm;
    (void)reason;
    (void)tux64_boot_stage1_fsm_transition_halt;
+   (void)tux64_boot_stage1_fsm_transition_halt_after_sound;
    TUX64_UNREACHABLE;
 /*----------------------------------------------------------------------------*/
 #endif /* TUX64_BOOT_CONFIG_SAFETY */
