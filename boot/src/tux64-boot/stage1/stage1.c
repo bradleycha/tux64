@@ -158,7 +158,7 @@ tux64_boot_stage1_main(
    );
 
    if (tux64_boot_flag_audio_beeps()) {
-      tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_VIDEO);
+      tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_AUDIO);
       tux64_boot_stage1_audio_initialize(console_type);
       tux64_boot_stage1_interrupt_ai_enable();
    }
