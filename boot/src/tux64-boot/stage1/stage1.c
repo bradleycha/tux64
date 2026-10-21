@@ -218,10 +218,6 @@ tux64_boot_stage1_main(
       tux64_boot_stage1_video_vblank_end();
    }
 
-   (void)rom_type;
-   (void)reset_type;
-   (void)rom_cic_seed;
-   (void)pif_rom_version;
    TUX64_UNREACHABLE;
 }
 
