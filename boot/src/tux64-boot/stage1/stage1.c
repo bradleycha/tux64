@@ -14,6 +14,7 @@
 #include "tux64-boot/initialize.h"
 #include "tux64-boot/rsp.h"
 #include "tux64-boot/pif.h"
+#include "tux64-boot/ique.h"
 #include "tux64-boot/rng.h"
 #include "tux64-boot/halt.h"
 #include "tux64-boot/flag.h"
@@ -94,6 +95,21 @@ tux64_boot_stage1_verify_console_type(
    TUX64_UNREACHABLE;
 }
 
+static Tux64UInt32
+tux64_boot_stage1_ique_rng_seed(void) {
+   Tux64UInt32 seed;
+   Tux64UInt8 rounds;
+
+   seed     = TUX64_LITERAL_UINT32(0u);
+   rounds   = TUX64_LITERAL_UINT32(sizeof(seed) * 8u);
+   do {
+      seed <<= TUX64_LITERAL_UINT8(1u);
+      seed |= tux64_boot_ique_random_bit();
+   } while (rounds != TUX64_LITERAL_UINT8(0u));
+
+   return seed;
+}
+
 /* we store the FSM in a global variable because its state can be huge (think */
 /* DMA buffers).  if we try to store it on the stack, it will overflow 100%   */
 /* and crash our program.  storing in .bss via a global variable doesn't have */
@@ -127,11 +143,15 @@ tux64_boot_stage1_main(
       running_on_ique
    );
 
-   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_MEMORY);
-   tux64_boot_stage1_memory_initialize(memory_total, memory_free);
+   if (console_type == TUX64_PLATFORM_MIPS_N64_BOOT_CONSOLE_TYPE_IQUE) {
+      rng_seed = tux64_boot_stage1_ique_rng_seed();
+   }
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_RNG);
    tux64_boot_rng_initialize(rng_seed);
+
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_MEMORY);
+   tux64_boot_stage1_memory_initialize(memory_total, memory_free);
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT);
    tux64_boot_stage1_interrupt_initialize();
