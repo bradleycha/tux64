@@ -120,6 +120,13 @@ tux64_boot_stage1_main(
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_BEGIN);
 
+   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_CHOOSE_CONSOLE_TYPE);
+
+   console_type = tux64_boot_stage1_choose_console_type(
+      video_standard,
+      running_on_ique
+   );
+
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_MEMORY);
    tux64_boot_stage1_memory_initialize(memory_total, memory_free);
 
@@ -128,13 +135,6 @@ tux64_boot_stage1_main(
 
    tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_INITIALIZE_INTERRUPT);
    tux64_boot_stage1_interrupt_initialize();
-
-   tux64_boot_stage1_status_code_write(TUX64_BOOT_STAGE1_STATUS_CODE_CHOOSE_CONSOLE_TYPE);
-
-   console_type = tux64_boot_stage1_choose_console_type(
-      video_standard,
-      running_on_ique
-   );
 
    tux64_boot_stage1_verify_console_type(console_type);
 

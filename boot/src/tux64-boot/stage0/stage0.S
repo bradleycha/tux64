@@ -158,6 +158,11 @@ tux64_boot_stage0_float.2pt2f:
 tux64_boot_stage0_float.0pt5f:
    .word 0x3f000000 /* 0.5f */
 
+   .section .data
+tux64_boot_stage0_entropy:
+   .word 0x00000000
+/*tux64_boot_stage0_entropy*/
+
    .section .text
 tux64_boot_stage0_halt:
    /* set the processor into low-power mode so we don't waste power before */
@@ -454,17 +459,6 @@ tux64_boot_stage0_start:
    jal   tux64_boot_stage0_status_code_write
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_RDRAM_INITIALIZE
 
-   /* TODO: this does not work.  something is messed up with the RDRAM init */
-   /* code.  theoretically this is just a manually compiled version of the */
-   /* libdragon rdram.c, but when run on real hardware, it fails to detect */
-   /* and configure any memory chips, thus we always boot with no memory */
-   /* configured.  this will be extra fun debugging because not only is it */
-   /* highly optimized assembly for a complicated process, but we also have */
-   /* no easy way to debug this since ares doesn't accurately emulate rdram.  */
-   /* thus, our only option is to either write information to sram, or attach */
-   /* a logic analyzer to the sysad bus on a real N64 and watch the reads and */
-   /* writes from the MI, RI, and RDRAM MMIO registers. */
-
    /* reserve $s1 for the RI base address until the end of RDRAM */
    /* initialization */
    lui   $s1,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RI)
@@ -500,9 +494,9 @@ tux64_boot_stage0_start:
    /* bytes.  note that we double $a2 because in the chip initialization  */
    /* loop, we access only increments of 2 chips at a time, so we save an */
    /* instruction by doubling the constant here. */
-   lui   $k0,%hi(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL * 0x200)
+   lui   $k0,(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL * 0x200) >> 16
    addiu $t0,$zero,1
-   ori   $k0,$k0,%lo(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL * 0x200)
+   ori   $k0,$k0,(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INITIAL * 0x200) & 0xffff
    beq   $t0,$s0,tux64_boot_stage0_start.rdram_hw1
    addiu $a2,$zero,(0x200 * 2) /* branch delay slot */
    sll   $k0,$k0,1
@@ -592,9 +586,9 @@ tux64_boot_stage0_start:
 
          /* perform a memory test to measure accuracy at this cc value */
          sll      $t2,$a1,20
-         daddiu   $t0,$zero,10  /* loop count */
+         addiu    $t0,$zero,10  /* loop count */
          lui      $t6,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
-         daddiu   $t1,$zero,0   /* total counted accurate bits */
+         addiu    $t1,$zero,0   /* total counted accurate bits */
          addu     $t6,$t6,$t2   /* memory test base address */
          tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test:
             /* write 8 "0xff" bytes to the start of the current chip's memory */
@@ -603,21 +597,25 @@ tux64_boot_stage0_start:
             sw    $t2,4($t6)
 
             /* now read back one byte and count the number of set bits */
-            lb    $t2,5($t6)
-            andi  $t2,$t2,0xff
+            lbu   $t2,5($t6)
             tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt:
                beq   $t2,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt.exit
-               dsll  $t3,$t2,63
-               dsrl  $t3,$t3,63
-               daddu $t1,$t1,$t3
+               andi  $t3,$t2,1
+               srl   $t2,$t2,1
                b     tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt
-               srl   $t2,$t2,1 /* branch delay slot */
+               addu  $t1,$t1,$t3 /* branch delay slot */
             /*tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt*/
             tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test.popcnt.exit:
 
-            daddiu   $t0,$t0,-1
-            bne      $t0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test
+            addiu $t0,$t0,-1
+            bne   $t0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test
          /*tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test*/
+
+         /* we use the number of set bits as a source of entropy for rng */
+         /* seeding. */
+         lw    $t2,%lo(tux64_boot_stage0_entropy)($gp)
+         addu  $t2,$t2,$t1
+         sw    $t2,%lo(tux64_boot_stage0_entropy)($gp)
 
          /* calculate accuracy as a percentage and accumulate weighted sum, */
          /* with a thousand nops because of stupid pipeline details and */
@@ -625,7 +623,7 @@ tux64_boot_stage0_start:
          mtc1     $t1,$f3 /* branch delay slot */
          mtc1     $a0,$f5
          cvt.s.w  $f3,$f3
-         cvt.s.w  $f5,$f5     /* $f4 = (float)cc       */
+         cvt.s.w  $f5,$f5     /* $f5 = (float)cc       */
          mul.s    $f3,$f3,$f2 /* $f3 = (float)accuracy */
          nop
          nop
@@ -757,7 +755,7 @@ tux64_boot_stage0_start:
       andi  $t4,$t4,0x000f /* BankBits */
       bne   $t4,$t1,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
       andi  $t5,$t5,0x000f /* RowBits */
-      bne   $t5,$t9,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
+      bne   $t5,$t2,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
       andi  $t6,$t6,0x000f /* ColumnBits */
       bne   $t6,$t3,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
       andi  $t7,$t7,0x0001 /* Bn */
@@ -862,9 +860,11 @@ tux64_boot_stage0_start:
          /* read the current calibration value */
          jal   tux64_boot_stage0_rdram_wait
          nop /* branch delay slot */
+         sw    $t8,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
          lw    $zero,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3)
+         lw    $v0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3)
          jr    $at
-         lw    $v0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3) /* branch delay slot */
+         sw    $t9,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp) /* branch delay slot */
       /*tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic*/
       
    /*tux64_boot_stage0_start.rdram_initialize_chip*/
@@ -1102,10 +1102,9 @@ tux64_boot_stage0_start:
       bne   $at,$zero,tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start
    /*tux64_boot_stage0_start.pi_io_dma_spinlock.payload_stage1_start*/
 
-   /* TODO: compute a random seed using hardware entropy.  either from ique's */
-   /* random register, or from the RDRAM init code.  for now, we just pick an */
-   /* unused register (which seems to be random on real hardware?) */
-   mfhi  $t8
+   /* pass along the entropy we've gathered from rdram initialization.  if */
+   /* we're running on ique, stage-1 will use MI_BB_RANDOM to seed its RNG. */
+   lw    $t8,%lo(tux64_boot_stage0_entropy)($gp)
 
    /* initialize the stack and start stage-1 */
    addiu $k0,$a2,%lo(TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) /* branch delay slot */
@@ -1117,7 +1116,7 @@ tux64_boot_stage0_start:
    /* when this code is finalized, as it takes long enough just to find one. */
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x00003010
-   .word 0x5f6aba7f
+   .word 0x000011bc
+   .word 0x20a92221
 /*tux64_boot_stage0_cic*/
 
