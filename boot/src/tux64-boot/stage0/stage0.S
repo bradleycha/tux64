@@ -98,8 +98,8 @@
 .equ TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION,0x0040
 .equ TUX64_BOOT_STAGE0_RI_RX_TX_TIMINGS,0x0014
 .equ TUX64_BOOT_STAGE0_RI_MODE_STANDARD,0x000e
-.equ TUX64_BOOT_STAGE0_RI_REFRESH_CLEANDELAY,(52)
-.equ TUX64_BOOT_STAGE0_RI_REFRESH_DIRTYDELAY,(54 << 8)
+.equ TUX64_BOOT_STAGE0_RI_REFRESH_CLEANDELAY,52
+.equ TUX64_BOOT_STAGE0_RI_REFRESH_DIRTYDELAY,54 << 8
 .equ TUX64_BOOT_STAGE0_RI_REFRESH_BASE,(TUX64_PLATFORM_MIPS_N64_RI_REFRESH_BIT_OPTIMIZE | TUX64_PLATFORM_MIPS_N64_RI_REFRESH_BIT_ENABLE | TUX64_BOOT_STAGE0_RI_REFRESH_CLEANDELAY | TUX64_BOOT_STAGE0_RI_REFRESH_DIRTYDELAY)
 
 .equ TUX64_BOOT_STAGE0_RDRAM_DELAY_TIMING,0x18082838
@@ -773,14 +773,14 @@ tux64_boot_stage0_start:
 
       /* if the manufacturer isn't NEC and the En bit isn't set, then */
       /* use slower timings.  otherwise, use default timings. */
-      addiu $t2,$zero,0x0005 /* NEC's manufacturer ID */
-      srl   $t1,$t1,24 /* extract least significant byte */
+      addiu $t2,$zero,0x0500 /* NEC's manufacturer ID, byteswapped */
+      andi  $t1,$t1,0xffff /* isolate manufacturer ID bits */
       lui   $t3,%hi(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_DEFAULT)
       beq   $t1,$t2,tux64_boot_stage0_start.rdram_initialize_chip.default_ras_interval
       ori   $t3,$t3,%lo(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_DEFAULT) /* branch delay slot */
       bne   $t0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.default_ras_interval
       lui   $t4,%hi(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_UNKNOWN) /* branch delay slot */
-      ori   $t3,$t4,%lo(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_UNKNOWN) /* branch delay slot */
+      ori   $t3,$t4,%lo(TUX64_BOOT_STAGE0_RDRAM_RAS_INTERVAL_UNKNOWN)
       tux64_boot_stage0_start.rdram_initialize_chip.default_ras_interval:
 
       /* set the RasInterval using our selected timings */
@@ -788,17 +788,19 @@ tux64_boot_stage0_start:
 
       /* settle timing circuits, also reserves $s0 for the total amount of */
       /* detected memory for the rest of stage-0. */
-      lui   $t0,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
-      sll   $s0,$a1,20 /* chip_id * 1MiB */
-      lui   $t1,((512 * 1024) >> 16)
-      addiu $t2,$zero,4
-      add   $t0,$t0,$s0
+      addiu $t0,$a1,2
+      lui   $t1,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
+      sll   $s0,$t0,20              /* $s0 = total memory = (chip_id + 2) * 1MiB */
+      sll   $t0,$a1,20
+      addiu $t2,$zero,4             /* $t2 = bank count */
+      addu  $t0,$t0,$t1             /* $t0 = ptr = RDRAM + (chip_id * 1024 * 1024) */
+      lui   $t1,(512 * 1024) >> 16  /* $t1 = bank memory iterator */
       tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits:
          lw    $zero,0($t0)
          lw    $zero,4($t0)
          addiu $t2,$t2,-1
          bne   $t2,$zero,tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits
-         addu  $t0,$t0,$t1 /* branch delay slot */
+         addu  $t0,$t1 /* branch delay slot */
       /*tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits*/
 
       /* move to next chip */
@@ -878,12 +880,14 @@ tux64_boot_stage0_start:
    tux64_boot_stage0_start.rdram_initialize_chip.exit:
 
    /* configure RI refresh rate and skip past memory detection */
-   addiu $t1,$a1,-1
-   lui   $t0,%hi(TUX64_BOOT_STAGE0_RI_REFRESH_BASE)
-   andi  $t1,$t1,0x000f
-   ori   $t0,$t0,%lo(TUX64_BOOT_STAGE0_RI_REFRESH_BASE)
-   sll   $t1,$t1,19
-   or    $t0,$t0,$t1
+   addiu $t0,$zero,1
+   srl   $t1,$a1,1
+   lui   $t2,%hi(TUX64_BOOT_STAGE0_RI_REFRESH_BASE)
+   sllv  $t0,$t0,$t1
+   ori   $t2,$t2,%lo(TUX64_BOOT_STAGE0_RI_REFRESH_BASE)
+   addiu $t0,$t0,-1
+   sll   $t0,$t0,19
+   or    $t0,$t0,$t2
    sw    $t0,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_REFRESH)($s1)
    b     tux64_boot_stage0_start.skip_detect_total_memory
    lw    $zero,%lo(TUX64_PLATFORM_MIPS_N64_RI_ADDRESS_REFRESH)($s1) /* branch delay slot */
@@ -1116,7 +1120,7 @@ tux64_boot_stage0_start:
    /* when this code is finalized, as it takes long enough just to find one. */
    .section .cic
 tux64_boot_stage0_cic:
-   .word 0x000011bc
-   .word 0x20a92221
+   .word 0x0000307a
+   .word 0x7fb107eb
 /*tux64_boot_stage0_cic*/
 
