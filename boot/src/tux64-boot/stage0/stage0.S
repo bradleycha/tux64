@@ -535,6 +535,12 @@ tux64_boot_stage0_start:
    addiu $t8,$zero,TUX64_PLATFORM_MIPS_N64_MI_MODE_BIT_UPPER_SET
    addiu $t9,$zero,TUX64_PLATFORM_MIPS_N64_MI_MODE_BIT_UPPER_CLEAR
 
+   /* load floating-point constants which will be used throughout the chip */
+   /* initialization loop */
+   lwc1  $f0,%lo(tux64_boot_stage0_float.1div80f)($gp)   /* $f0 = 1.0f/80.0f  */
+   lwc1  $f1,%lo(tux64_boot_stage0_float.2pt2f)($gp)     /* $f1 = 2.2f        */
+   lwc1  $f2,%lo(tux64_boot_stage0_float.0pt5f)($gp)     /* $f2 = 0.5f        */
+
    /* start initializing all chips, reserving $a1 for chip_id until the end */
    /* of rdram initialization and $a3 for the address of the current chip's */
    /* rdram registers. */
@@ -575,10 +581,11 @@ tux64_boot_stage0_start:
 
       /* now we start current calibration.  we first configure the chips */
       /* manually and see the lowest cc value which gives us full accuracy. */
+      /* we also reserve $k1 for the chip's entropy until after manual cc. */
       addiu $a0,$zero,0                                     /* $a0 = cc, also branch delay slot */
-      mtc1  $zero,$f0                                       /* $f0 = weighted_sum               */
-      mtc1  $zero,$f1                                       /* $f1 = prev_accuracy              */
-      lwc1  $f2,%lo(tux64_boot_stage0_float.1div80f)($gp)   /* $f2 = 1.0f/80.0f                 */
+      mtc1  $zero,$f3                                       /* $f3 = weighted_sum               */
+      mtc1  $zero,$f4                                       /* $f4 = prev_accuracy              */
+      lw    $k1,%lo(tux64_boot_stage0_entropy)($gp)         /* $k1 = tux64_boot_stage0_entropy  */
       tux64_boot_stage0_start.rdram_initialize_chip.cc_manual:
          /* configure the chip for the current cc value */
          jal   tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_manual
@@ -611,35 +618,32 @@ tux64_boot_stage0_start:
             bne   $t0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test
          /*tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.memory_test*/
 
-         /* we use the number of set bits as a source of entropy for rng */
-         /* seeding. */
-         lw    $t2,%lo(tux64_boot_stage0_entropy)($gp)
-         addu  $t2,$t2,$t1
-         sw    $t2,%lo(tux64_boot_stage0_entropy)($gp)
+         /* use the number of set bits as a source of entropy. */
+         addu  $k1,$k1,$t1
 
          /* calculate accuracy as a percentage and accumulate weighted sum, */
          /* with a thousand nops because of stupid pipeline details and */
          /* hardware bugs. */
-         mtc1     $t1,$f3 /* branch delay slot */
-         mtc1     $a0,$f5
-         cvt.s.w  $f3,$f3
-         cvt.s.w  $f5,$f5     /* $f5 = (float)cc       */
-         mul.s    $f3,$f3,$f2 /* $f3 = (float)accuracy */
+         mtc1     $t1,$f5 /* branch delay slot */
+         mtc1     $a0,$f6
+         cvt.s.w  $f5,$f5
+         cvt.s.w  $f6,$f6     /* $f6 = (float)cc       */
+         mul.s    $f5,$f5,$f0 /* $f5 = (float)accuracy */
          nop
          nop
-         sub.s    $f6,$f3,$f1
+         sub.s    $f7,$f5,$f4
          nop
-         mul.s    $f6,$f6,$f5
+         mul.s    $f7,$f7,$f6
          nop
          nop
-         add.s    $f0,$f0,$f6 /* $f0 += (accuracy - prev_accuracy) * cc */
+         add.s    $f3,$f3,$f7 /* $f3 += (accuracy - prev_accuracy) * cc */
 
          /* exit if we have full accuracy */
          addiu $t2,80
          beq   $t1,$t2,tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.exit
 
          /* store the current accuracy as prev_accuracy */
-         mov.s    $f1,$f3 /* branch delay slot */
+         mov.s    $f4,$f5 /* branch delay slot */
 
          /* move to the next cc value */
          addiu $t3,64
@@ -649,17 +653,18 @@ tux64_boot_stage0_start:
       /*tux64_boot_stage0_start.rdram_initialize_chip.cc_manual*/
       tux64_boot_stage0_start.rdram_initialize_chip.cc_manual.exit:
 
+      /* store the computed entropy for the next chip. */
+      sw    $k1,%lo(tux64_boot_stage0_entropy)($gp)
+
       /* compute target_cc and invalidate the chip if it's zero, reserving */
       /* $a0 for target_cc until the end of current calibration. */
-      lwc1        $f1,%lo(tux64_boot_stage0_float.2pt2f)($gp) /* $f1 = 2.2f */
-      lwc1        $f2,%lo(tux64_boot_stage0_float.0pt5f)($gp) /* $f2 = 0.5f */
-      mul.s       $f1,$f0,$f1
+      mul.s       $f3,$f3,$f1
       nop
       nop
-      add.s       $f1,$f1,$f2
+      add.s       $f3,$f3,$f2
       nop
-      trunc.w.s   $f1,$f1
-      mfc1        $a0,$f1
+      trunc.w.s   $f3,$f3
+      mfc1        $a0,$f3
 
       /* check to make sure target_cc is valid */
       beq   $a0,$zero,tux64_boot_stage0_start.rdram_initialize_chip.err_exit
@@ -786,21 +791,18 @@ tux64_boot_stage0_start:
       /* set the RasInterval using our selected timings */
       sw    $t3,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_RAS_INTERVAL($a3)
 
-      /* settle timing circuits, also reserves $s0 for the total amount of */
-      /* detected memory for the rest of stage-0. */
-      addiu $t0,$a1,2
-      lui   $t1,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
-      sll   $s0,$t0,20              /* $s0 = total memory = (chip_id + 2) * 1MiB */
+      /* settle timing circuits (whatever that means...) */
       sll   $t0,$a1,20
+      lui   $t1,%hi(TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RDRAM_UNCACHED)
       addiu $t2,$zero,4             /* $t2 = bank count */
       addu  $t0,$t0,$t1             /* $t0 = ptr = RDRAM + (chip_id * 1024 * 1024) */
-      lui   $t1,(512 * 1024) >> 16  /* $t1 = bank memory iterator */
+      lui   $t3,(512 * 1024) >> 16  /* $t3 = bank memory iterator */
       tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits:
          lw    $zero,0($t0)
          lw    $zero,4($t0)
          addiu $t2,$t2,-1
          bne   $t2,$zero,tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits
-         addu  $t0,$t1 /* branch delay slot */
+         addu  $t0,$t3 /* branch delay slot */
       /*tux64_boot_stage0_start.rdram_initialize_chip.settle_timing_circuits*/
 
       /* move to next chip */
@@ -878,6 +880,9 @@ tux64_boot_stage0_start:
    ori   $t0,$t0,%lo(TUX64_BOOT_STAGE0_RDRAM_DEVICEID_INVALID_ENCODED)
    sw    $t0,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_DEVICE_ID($a3)
    tux64_boot_stage0_start.rdram_initialize_chip.exit:
+
+   /* compute the total memory using the chip ID, reserving $s0 */
+   sll   $s0,$a1,20 /* chip_id * 1MiB */
 
    /* configure RI refresh rate and skip past memory detection */
    addiu $t0,$zero,1
