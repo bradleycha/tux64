@@ -347,10 +347,23 @@ union Tux64BootStage1VideoViRegisterArray {
      (0x1u << TUX64_PLATFORM_MIPS_N64_VI_PIXEL_ADVANCE_BIT_OFFSET) \
    )
 
+/*----------------------------------------------------------------------------*/
+/* this has a very important errata.  since we are disabling resampling and   */
+/* anti-aliasing, setting X_SCALE to 0x200 will cause a really annoying       */
+/* hardware bug which causes the screen to have only 1/5 the screen drawn     */
+/* correctly.  the second 1/5 will be garbage vertical lines, and the rest of */
+/* the screen is a mirror of the first 2/5.  fortunately, we can have our     */
+/* cake and eat it too.  the workaround is to use a scale of 0x201, which     */
+/* leads to a pixel-perfect replica, but without the garbage.  for more       */
+/* information, read here:                                                    */
+/*                                                                            */
+/*              https://n64brew.dev/wiki/Video_Interface#Errata               */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
 #define TUX64_BOOT_STAGE1_VIDEO_VI_X_SCALE \
    ( \
       (0u      << TUX64_PLATFORM_MIPS_N64_VI_X_OFFSET_BIT_OFFSET) | \
-      (0x200u  << TUX64_PLATFORM_MIPS_N64_VI_X_SCALE_BIT_OFFSET) \
+      (0x201u  << TUX64_PLATFORM_MIPS_N64_VI_X_SCALE_BIT_OFFSET) \
    )
 
 #define TUX64_BOOT_STAGE1_VIDEO_VI_Y_SCALE \

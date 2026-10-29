@@ -8,7 +8,7 @@ index b64a05ae2..dfae324a7 100644
  obj-y := init.o irq.o
 +obj-$(CONFIG_MIPS_TUX64) += tux64-boot.o
 diff --git a/arch/mips/n64/init.c b/arch/mips/n64/init.c
-index 66ec28ab4..098ee187a 100644
+index 66ec28ab4..9b9bc80cf 100644
 --- a/arch/mips/n64/init.c
 +++ b/arch/mips/n64/init.c
 @@ -3,6 +3,7 @@
@@ -36,7 +36,7 @@ index 66ec28ab4..098ee187a 100644
  }
  
  #define W 320
-@@ -60,7 +67,7 @@ static void __init n64rdp_write_reg(const u8 reg, const u32 value)
+@@ -60,10 +67,10 @@ static void __init n64rdp_write_reg(const u8 reg, const u32 value)
  #undef REG_BASE
  
  static const u32 ntsc_320[] __initconst = {
@@ -44,7 +44,11 @@ index 66ec28ab4..098ee187a 100644
 +	0x00003302, 0x00000000, 0x00000140, 0x00000200,
  	0x00000000, 0x03e52239, 0x0000020d, 0x00000c15,
  	0x0c150c15, 0x006c02ec, 0x002501ff, 0x000e0204,
- 	0x00000200, 0x00000400
+-	0x00000200, 0x00000400
++	0x00000201, 0x00000400
+ };
+ 
+ #define MI_REG_BASE 0x4300000
 @@ -75,8 +82,15 @@ static const u32 ntsc_320[] __initconst = {
  #define SI_REG_BASE 0x4800000
  #define NUM_SI_REGS 7
