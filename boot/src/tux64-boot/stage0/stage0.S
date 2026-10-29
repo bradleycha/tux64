@@ -95,7 +95,7 @@
 
 .equ TUX64_BOOT_STAGE0_PI_STATUS_BIT_MASK_DMA_IO_BUSY,(TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_DMA_BUSY | TUX64_PLATFORM_MIPS_N64_PI_STATUS_BIT_IO_BUSY)
 
-.equ TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION,0x0040
+.equ TUX64_BOOT_STAGE0_RI_CONFIG_AUTO_CURRENT_CALIBRATION,0x0020
 .equ TUX64_BOOT_STAGE0_RI_RX_TX_TIMINGS,0x0014
 .equ TUX64_BOOT_STAGE0_RI_MODE_STANDARD,0x000e
 .equ TUX64_BOOT_STAGE0_RI_REFRESH_CLEANDELAY,52
@@ -705,20 +705,20 @@ tux64_boot_stage0_start:
 
          /* compute err into $t2 */
          sltu  $t1,$t0,$a0
-         beq   $t1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.err_geq
-         subu  $t2,$t0,$a0
+         beq   $t1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.err_geq
+         subu  $t2,$t0,$a0 /* branch delay slot */
          subu  $t2,$a0,$t0
-         tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.err_geq:
+         tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.err_geq:
 
          /* check if we should set minerr and autocc */
-         beq   $sp,$zero,tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.advance
+         beq   $sp,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.advance
          sltu  $t1,$t2,$v1 /* branch delay slot */
-         beq   $t1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.no_advance
+         beq   $t1,$zero,tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.no_advance
          nop /* branch delay slot */
-         tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.advance:
+         tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.advance:
          addiu $v1,$t2,0 /* minerr = err */
          addiu $k1,$sp,0 /* autocc = cc  */
-         tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode_automatic.no_advance:
+         tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic.no_advance:
 
          /* check if cc_readback > target_cc */
          sltu  $t1,$a0,$t0
@@ -726,7 +726,7 @@ tux64_boot_stage0_start:
 
          /* move to next cc value */
          addiu $sp,$sp,1 /* branch delay slot */
-         addiu $t0,$t0,64
+         addiu $t0,$zero,64
          bne   $sp,$t0,tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic
          nop /* branch delay slot */
       /*tux64_boot_stage0_start.rdram_initialize_chip.cc_automatic*/
@@ -832,18 +832,18 @@ tux64_boot_stage0_start:
          andi  $t5,$t0,(1 << 3)
          andi  $t6,$t0,(1 << 4)
          andi  $t7,$t0,(1 << 5)
-         sll   $t2,$t2,6
-         sll   $t3,$t3,13
-         sll   $t4,$t4,20
-         sll   $t5,$t5,4
-         sll   $t6,$t6,11
-         sll   $t7,$t7,18
+         sll   $t2,$t2,6   /* bit 0 -> bit  6 */
+         sll   $t3,$t3,13  /* bit 1 -> bit 14 */
+         sll   $t4,$t4,20  /* bit 2 -> bit 22 */
+         sll   $t5,$t5,4   /* bit 3 -> bit  7 */
+         sll   $t6,$t6,11  /* bit 4 -> bit 15 */
+         sll   $t7,$t7,18  /* bit 5 -> bit 23 */
+         or    $t2,$t2,$t3
+         or    $t4,$t4,$t5
+         or    $t6,$t6,$t7
+         or    $t2,$t2,$t4
+         or    $t1,$t1,$t6
          or    $t1,$t1,$t2
-         or    $t3,$t3,$t4
-         or    $t5,$t5,$t6
-         or    $t1,$t1,$t7
-         or    $t3,$t3,$t5
-         or    $t1,$t1,$t3
          jr    $ra
          sw    $t1,TUX64_PLATFORM_MIPS_N64_RDRAM_OFFSET_MODE($a3) /* branch delay slot */
       /*tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode*/
@@ -861,7 +861,12 @@ tux64_boot_stage0_start:
          jal   tux64_boot_stage0_start.rdram_initialize_chip.write_reg_mode
          lui   $t1,(TUX64_BOOT_STAGE0_RDRAM_MODE_CURRENT_CALIBRATE_AUTOMATIC << 8) /* branch delay slot */
 
-         /* read the current calibration value */
+         /* read the current calibration value.  note that the way the code */
+         /* is written in libdragon, this is supposed to clear and then */
+         /* immediately set MI Upper Mode between each read of the Mode */
+         /* register.  this doesn't affect anything, so we skip this.  this */
+         /* should be the only difference between our code and libdragon's */
+         /* code. */
          jal   tux64_boot_stage0_rdram_wait
          nop /* branch delay slot */
          sw    $t8,%lo(TUX64_PLATFORM_MIPS_N64_MI_ADDRESS_MODE)($fp)
