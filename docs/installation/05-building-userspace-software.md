@@ -236,7 +236,60 @@ make -j${TUX64_MAKEOPTS} install
 
 TODO: Build/link against `gmp` once we get it building.
 
-### Chapter 5.8 - Building `bash`
+### Chapter 5.8 - Building `util-linux`
+
+`util-linux` provides many standard Linux utilities such as `cal`, `lsblk`,
+`more`, `dmesg`, and `hexdump`.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/util-linux
+cd ${TUX64_BUILD_ROOT}/builds/util-linux
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/util-linux-*/configure \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile \
+      --disable-assert \
+      --disable-nls \
+      --disable-asciidoc \
+      --disable-poman \
+      --disable-tls \
+      --disable-widechar \
+      --disable-liblastlog2 \
+      --disable-pam-lastlog2 \
+      --disable-plymouth_support \
+      --disable-cramfs \
+      --disable-bfs \
+      --disable-setpriv \
+      --disable-raw \
+      --disable-chfn-chsh \
+      --disable-login \
+      --disable-mount \
+      --disable-su \
+      --disable-runuser \
+      --disable-wall \
+      --disable-minix \
+      --disable-hwclock-cmos \
+      --disable-pylibmount \
+      --disable-year2038 \
+      --without-ncursesw \
+      --with-ncurses \
+      --without-btrfs \
+      --without-systemd \
+      --without-python
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
+### Chapter 5.9 - Building `bash`
 
 `bash` is a standard POSIX-compliant shell which provides the standard
 "command-line" across most Linux distributions.

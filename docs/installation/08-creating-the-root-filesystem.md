@@ -132,7 +132,39 @@ done
 cp -r ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/libexec/coreutils ./libexec/
 ```
 
-#### Chapter 8.1.9 - Installing `bash`
+#### Chapter 8.1.9 - Installing `util-linux`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+for lib in blkid fdisk smartcols; do
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/lib${lib}.so.1.1.0 ./
+    ln -sf lib${lib}.so.1.1.0 lib${lib}.so.1
+    ln -sf lib${lib}.so.1 lib${lib}.so
+done
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libuuid.so.1.3.0 ./
+ln -sf libuuid.so.1.3.0 libuuid.so.1
+ln -sf libuuid.so.1 libuuid.so
+
+cd ${TUX64_BUILD_ROOT}/rootfs/bin
+for bin in bits cal chmem choom chrt colcrt colrm column copyfilerange\
+    coresched dmesg eject enosys exch fadvise fallocate fincore findmnt flock\
+    getino getopt hardlink hexdump ionice ipcmk ipcrm ipcs irqtop isosize kill\
+    last logger look lsblk lsclocks lscpu lsfd lsipc lsirq lslocks lslogins\
+    lsmem lsns mcookie mesg more mountpoint namei nsenter pipesz prlimit rename\
+    renice rev script scriptlive scriptreplay setarch setpgid setsid setterm\
+    taskset uclampset ul umount unshare utmpdump uuidgen uuidparse waitpid\
+    wdctl whereis; do
+    
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/$bin ./
+done
+
+for link in linux32 linux64 mips mips32 mips64 uname26; do
+    ln -sf setarch $link
+done
+ln -sf last lastb
+```
+
+#### Chapter 8.1.10 - Installing `bash`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin

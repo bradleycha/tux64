@@ -103,6 +103,7 @@ the format `[NAME]-[VERSION]`.
 | [gmp](https://gmplib.org/) | 6.3.0 | |
 | [ncurses](https://invisible-island.net/ncurses/) | 6.6 | Signed tarballs are not available.  Older package versions can be found [here](https://invisible-island.net/archives/ncurses/). |
 | [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
+| [util-linux](https://kernel.org/pub/linux/utils/util-linux/) | 2.42.4 | |
 | [bash](https://www.gnu.org/software/bash/) | 5.3 | |
 
 ### Chapter 2.3 - Installing Scripts
