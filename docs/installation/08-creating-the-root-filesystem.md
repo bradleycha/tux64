@@ -232,6 +232,13 @@ for bin in gunzip gzexe gzip uncompress zcat zcmp zdiff zegrep zfgrep zforce\
 done
 ```
 
+#### Chapter 8.1.17 - Installing `time`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/bin
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/time ./
+```
+
 ### Chapter 8.2 - Configuring The Root Filesystem
 
 We now need to create configuration files which will be used by our userspace

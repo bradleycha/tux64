@@ -496,5 +496,30 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
+### Chapter 5.16 - Building `time`
+
+`time` is a program which runs another program, then reports how long it took
+to execute the program.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/time
+cd ${TUX64_BUILD_ROOT}/builds/time
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/time-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
 We will now proceed to [building the kernel](06-building-the-kernel.md).
 

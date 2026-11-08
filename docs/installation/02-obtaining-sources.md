@@ -111,6 +111,7 @@ the format `[NAME]-[VERSION]`.
 | [bc](https://www.gnu.org/software/bc/) | 1.08.2 | |
 | [tar](https://www.gnu.org/software/tar/) | 1.35 | |
 | [gzip](https://www.gnu.org/software/gzip/) | 1.15 | |
+| [time](https://www.gnu.org/software/time/) | 1.10 | |
 
 ### Chapter 2.3 - Installing Scripts
 
