@@ -214,6 +214,14 @@ for bin in bc dc; do
 done
 ```
 
+#### Chapter 8.1.15 - Installing `tar`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/tar ./bin/
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/libexec/rmt ./libexec/
+```
+
 ### Chapter 8.2 - Configuring The Root Filesystem
 
 We now need to create configuration files which will be used by our userspace

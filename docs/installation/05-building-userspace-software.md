@@ -441,5 +441,35 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
+### Chapter 5.14 - Building `tar`
+
+`tar` is a tool for creating, extracting, and inspecting tape archives, also
+called tarballs.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/tar
+cd ${TUX64_BUILD_ROOT}/builds/tar
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/tar-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile \
+      --disable-acl \
+      --disable-nls \
+      --disable-year2038 \
+      --without-selinux \
+      --with-gnu-ld
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
 We will now proceed to [building the kernel](06-building-the-kernel.md).
 
