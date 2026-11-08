@@ -164,7 +164,24 @@ done
 ln -sf last lastb
 ```
 
-#### Chapter 8.1.10 - Installing `bash`
+#### Chapter 8.1.10 - Installing `procps`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs
+for bin in free hugetop kill pgrep pidof pidwait pkill pmap ps pwdx slabtop\
+   tload top uptime vmstat w watch; do
+   cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/$bin ./bin/
+done
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/sbin/sysctl ./sbin/
+
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libproc2.so.1.0.2 ./
+${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}-strip libproc2.so.1.0.2
+ln -sf libproc2.so.1.0.2 libproc2.so.1
+ln -sf libproc2.so.1.0.2 libproc2.so
+```
+
+#### Chapter 8.1.11 - Installing `bash`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin

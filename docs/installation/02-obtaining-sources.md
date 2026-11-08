@@ -104,6 +104,7 @@ the format `[NAME]-[VERSION]`.
 | [ncurses](https://invisible-island.net/ncurses/) | 6.6 | Signed tarballs are not available.  Older package versions can be found [here](https://invisible-island.net/archives/ncurses/). |
 | [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
 | [util-linux](https://kernel.org/pub/linux/utils/util-linux/) | 2.42.4 | |
+| [procps](https://gitlab.com/procps-ng/procps/) | 4.0.7 | Signed tarballs are not available.  Make sure to generate build scripts with `autogen.sh` in the extracted tarball. |
 | [bash](https://www.gnu.org/software/bash/) | 5.3 | |
 
 ### Chapter 2.3 - Installing Scripts

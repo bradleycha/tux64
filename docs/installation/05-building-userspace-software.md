@@ -289,7 +289,41 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.9 - Building `bash`
+### Chapter 5.9 - Building `procps`
+
+`procps` provides many command-line utilities for interacting with Linux's
+proc filesystem, such as `ps`, `free`, and `top`.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/procps
+cd ${TUX64_BUILD_ROOT}/builds/procps
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/procps-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile \
+      --disable-nls \
+      --disable-assert \
+      --disable-static \
+      --enable-shared \
+      --disable-numa \
+      --without-libintl-prefix
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
+TODO: `top` segfaults on start.  This needs to be fixed.
+
+### Chapter 5.10 - Building `bash`
 
 `bash` is a standard POSIX-compliant shell which provides the standard
 "command-line" across most Linux distributions.
