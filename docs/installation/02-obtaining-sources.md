@@ -110,6 +110,7 @@ the format `[NAME]-[VERSION]`.
 | [sed](https://www.gnu.org/software/sed/) | 4.9 | |
 | [bc](https://www.gnu.org/software/bc/) | 1.08.2 | |
 | [tar](https://www.gnu.org/software/tar/) | 1.35 | |
+| [gzip](https://www.gnu.org/software/gzip/) | 1.15 | |
 
 ### Chapter 2.3 - Installing Scripts
 

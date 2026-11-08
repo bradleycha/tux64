@@ -222,6 +222,16 @@ cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/tar ./bin/
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/libexec/rmt ./libexec/
 ```
 
+#### Chapter 8.1.16 - Installing `gzip`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/bin
+for bin in gunzip gzexe gzip uncompress zcat zcmp zdiff zegrep zfgrep zforce\
+    zgrep zless zmore znew; do
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/$bin ./
+done
+```
+
 ### Chapter 8.2 - Configuring The Root Filesystem
 
 We now need to create configuration files which will be used by our userspace
