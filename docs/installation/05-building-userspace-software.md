@@ -368,6 +368,7 @@ cd ${TUX64_BUILD_ROOT}/builds/grep
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
    ../../sources/grep-*/configure \
+      --disable-dependency-tracking \
       --host=${TUX64_TARGET_N64_LINUX} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
       CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
@@ -377,6 +378,38 @@ cd ${TUX64_BUILD_ROOT}/builds/grep
       --disable-nls \
       --disable-perl-regexp \
       --disable-largefile \
+      --with-gnu-ld
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
+### Chapter 5.12 - Building `sed`
+
+`sed` is a stream editor which is often used in bash scripts for preforming
+transformations on text streams.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/sed
+cd ${TUX64_BUILD_ROOT}/builds/sed
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/sed-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile \
+      --disable-year2038 \
+      --disable-threads \
+      --disable-acl \
+      --disable-nls \
+      --disable-i18n \
+      --without-selinux \
       --with-gnu-ld
 )
 
