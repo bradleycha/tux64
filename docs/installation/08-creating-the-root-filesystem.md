@@ -160,7 +160,7 @@ dd \
     if=/dev/zero \
     of=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_BOOTLOADER}/boot/rootfs.img \
     bs=1M \
-    count=32
+    count=48
 ```
 
 This will create a 32MiB image file.  This should be plently enough for most
