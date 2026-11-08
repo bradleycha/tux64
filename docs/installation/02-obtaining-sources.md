@@ -106,6 +106,7 @@ the format `[NAME]-[VERSION]`.
 | [util-linux](https://kernel.org/pub/linux/utils/util-linux/) | 2.42.4 | |
 | [procps](https://gitlab.com/procps-ng/procps/) | 4.0.7 | Signed tarballs are not available.  Make sure to generate build scripts with `autogen.sh` in the extracted tarball. |
 | [bash](https://www.gnu.org/software/bash/) | 5.3 | |
+| [grep](https://www.gnu.org/software/grep/) | 3.9 | |
 
 ### Chapter 2.3 - Installing Scripts
 

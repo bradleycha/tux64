@@ -355,5 +355,34 @@ cp bash ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash
 TODO: this crashes immediately with malloc issues.  I haven't yet debugged why
 this is, so we'll need to look into this more.
 
+### Chapter 5.11 - Building `grep`
+
+`grep` is a tool which allows searching for text in files via regular
+expressions.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/grep
+cd ${TUX64_BUILD_ROOT}/builds/grep
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/grep-*/configure \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-threads \
+      --disable-assert \
+      --disable-nls \
+      --disable-perl-regexp \
+      --disable-largefile \
+      --with-gnu-ld
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
 We will now proceed to [building the kernel](06-building-the-kernel.md).
 
