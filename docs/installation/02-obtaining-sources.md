@@ -101,6 +101,7 @@ the format `[NAME]-[VERSION]`.
 | [zlib](https://zlib.net/) | 1.3.2 | |
 | [openssl](https://openssl-library.org/) | 4.0.3 | |
 | [gmp](https://gmplib.org/) | 6.3.0 | |
+| [ncurses](https://invisible-island.net/ncurses/) | 6.6 | Signed tarballs are not available.  Older package versions can be found [here](https://invisible-island.net/archives/ncurses/). |
 | [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
 | [bash](https://www.gnu.org/software/bash/) | 5.3 | |
 

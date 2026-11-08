@@ -22,10 +22,10 @@ First, we need to create the base directory structure.
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs
 mkdir -p usr/bin usr/lib usr/libexec usr/share etc home root dev proc sys
-ln -s usr/bin bin
-ln -s usr/bin sbin
-ln -s usr/lib lib
-ln -s usr/libexec libexec
+ln -sf usr/bin bin
+ln -sf usr/bin sbin
+ln -sf usr/lib lib
+ln -sf usr/libexec libexec
 ```
 
 We will now start installing all of our built userspace software.
@@ -45,7 +45,7 @@ cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libgcc*.so* ./
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/lib
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libc.so ./
-ln -s libc.so ld-musl-mips.so.1
+ln -sf libc.so ld-musl-mips.so.1
 ```
 
 #### Chapter 8.1.3 - Installing `tux64-lib`
@@ -53,7 +53,7 @@ ln -s libc.so ld-musl-mips.so.1
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/lib
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libtux64-0.1.0+setup.so ./
-ln -s libtux64-0.1.0+setup.so libtux64.so
+ln -sf libtux64-0.1.0+setup.so libtux64.so
 ```
 
 #### Chapter 8.1.3 - Installing `tux64-init`
@@ -61,7 +61,7 @@ ln -s libtux64-0.1.0+setup.so libtux64.so
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/sbin
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/tux64-init ./
-ln -s tux64-init init
+ln -sf tux64-init init
 ```
 
 #### Chapter 8.1.4 - Installing `zlib`
@@ -69,8 +69,8 @@ ln -s tux64-init init
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/lib
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/libz.so.1.3.2 ./
-ln -s libz.so.1.3.2 libz.so.1
-ln -s libz.so.1.3.2 libz.so
+ln -sf libz.so.1.3.2 libz.so.1
+ln -sf libz.so.1.3.2 libz.so
 ```
 
 #### Chapter 8.1.5 - Installing `openssl`
@@ -80,15 +80,41 @@ cd ${TUX64_BUILD_ROOT}/rootfs/lib
 for lib in libcrypto.so.4 libssl.so.4; do
     cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/$lib ./
 done
-ln -s libcrypto.so.4 libcrypto.so
-ln -s libssl.so.4 libssl.so
+ln -sf libcrypto.so.4 libcrypto.so
+ln -sf libssl.so.4 libssl.so
 ```
 
 #### Chapter 8.1.6 - Installing `gmp`
 
 TODO: document this once we get `gmp` to build.
 
-#### Chapter 8.1.7 - Installing `coreutils`
+#### Chapter 8.1.7 - Installing `ncurses`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/bin
+for bin in clear infocmp ncurses6-config tabs tic toe tput tset; do
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/$bin ./
+done
+ln -sf tic captoinfo
+ln -sf tic infotocap
+ln -sf tset reset
+
+cd ${TUX64_BUILD_ROOT}/rootfs/lib
+for lib in ncurses ncursesw ncurses++ ncurses++w form formw menu menuw panel\
+    panelw; do
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/lib/lib${lib}.so.6.6 ./
+    ln -sf lib${lib}.so.6.6 lib${lib}.so.6
+    ln -sf lib${lib}.so.6 lib${lib}.so
+done
+
+cd ${TUX64_BUILD_ROOT}/rootfs/usr/share
+for dir in tabset terminfo; do
+    rm -rf $dir
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/share/$dir ./ -r
+done
+```
+
+#### Chapter 8.1.8 - Installing `coreutils`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs
@@ -106,12 +132,12 @@ done
 cp -r ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/libexec/coreutils ./libexec/
 ```
 
-#### Chapter 8.1.8 - Installing `bash`
+#### Chapter 8.1.9 - Installing `bash`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash ./
-ln -s bash sh
+ln -sf bash sh
 ```
 
 ### Chapter 8.2 - Configuring The Root Filesystem

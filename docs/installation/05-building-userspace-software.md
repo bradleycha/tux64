@@ -147,7 +147,58 @@ make -j${TUX64_MAKEOPTS} install
 TODO: this does not work as we get "long long reliability" issues during
 configuration.
 
-### Chapter 5.6 - Building `coreutils`
+### Chapter 5.6 - Building `ncurses`
+
+Ncurses is a library which provides terminal control and textual user
+interfaces inside a terminal.  It is a dependency for many terminal
+applications which provide on-screen menus.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/ncurses
+cd ${TUX64_BUILD_ROOT}/builds/ncurses
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/ncurses-*/configure \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -fno-lto" \
+      CXXFLAGS="${TUX64_CXXFLAGS_N64_LINUX} -fno-lto" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX} -fno-lto" \
+      --with-shared \
+      --with-cxx-shared \
+      --without-ada \
+      --without-manpages \
+      --disable-big-core \
+      --disable-lp64 \
+      --disable-largefile \
+      --without-develop \
+      --disable-stripping \
+      --enable-overwrite
+)
+```
+
+Next, we need to manually edit the configuration header to specify the `terminfo`
+directory for our installed root.  Without this, programs which use `ncurses`
+will fail to start, giving errors about a missing terminals database.
+Unfortunately, this seems to be the cleanest way to accomplish this.  Edit
+`lib/ncurses_cfg.h` to replace `TERMINFO_DIRS` and `TERMINFO` to look like the
+following:
+
+```
+#define TERMINFO_DIRS "/usr/share/terminfo"
+#define TERMINFO "/usr/share/terminfo"
+```
+
+We can now build and install `ncurses`.
+
+```
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
+### Chapter 5.7 - Building `coreutils`
 
 GNU Coreutils provides basic commands expected on unix-like operating systems,
 such as `cat`, `ls`, `whoami`, `uname`, etc.
@@ -185,7 +236,7 @@ make -j${TUX64_MAKEOPTS} install
 
 TODO: Build/link against `gmp` once we get it building.
 
-### Chapter 5.7 - Building `bash`
+### Chapter 5.8 - Building `bash`
 
 `bash` is a standard POSIX-compliant shell which provides the standard
 "command-line" across most Linux distributions.
