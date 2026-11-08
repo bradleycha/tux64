@@ -205,6 +205,15 @@ cd ${TUX64_BUILD_ROOT}/rootfs/bin
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/sed ./
 ```
 
+#### Chapter 8.1.14 - Installing `bc`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/bin
+for bin in bc dc; do
+    cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/$bin ./
+done
+```
+
 ### Chapter 8.2 - Configuring The Root Filesystem
 
 We now need to create configuration files which will be used by our userspace

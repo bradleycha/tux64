@@ -417,5 +417,29 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
+### Chapter 5.13 - Building `bc`
+
+`bc` is an arbitrary precision calculator with scripting support.  It can be
+useful for performing basic arithmetic from the command line.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/bc
+cd ${TUX64_BUILD_ROOT}/builds/bc
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/bc-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX} -D__GNU_LIBRARY__" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}"
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
 We will now proceed to [building the kernel](06-building-the-kernel.md).
 

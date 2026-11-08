@@ -108,6 +108,7 @@ the format `[NAME]-[VERSION]`.
 | [bash](https://www.gnu.org/software/bash/) | 5.3 | |
 | [grep](https://www.gnu.org/software/grep/) | 3.9 | |
 | [sed](https://www.gnu.org/software/sed/) | 4.9 | |
+| [bc](https://www.gnu.org/software/bc/) | 1.08.2 | |
 
 ### Chapter 2.3 - Installing Scripts
 
