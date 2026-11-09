@@ -112,6 +112,7 @@ the format `[NAME]-[VERSION]`.
 | [tar](https://www.gnu.org/software/tar/) | 1.35 | |
 | [gzip](https://www.gnu.org/software/gzip/) | 1.15 | |
 | [time](https://www.gnu.org/software/time/) | 1.10 | |
+| [nano](https://www.nano-editor.org/) | 9.3 | |
 
 ### Chapter 2.3 - Installing Scripts
 

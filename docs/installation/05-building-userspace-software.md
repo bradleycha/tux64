@@ -521,5 +521,48 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
+### Chapter 5.17 - Building `nano`
+
+`nano` is a simple terminal-based text editor useful for memory-constrained
+environment (such as a Nintendo 64!).
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/nano
+cd ${TUX64_BUILD_ROOT}/builds/nano
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/nano-*/configure \
+      --disable-dependency-tracking \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-largefile \
+      --disable-threads \
+      --disable-nls \
+      --disable-browser \
+      --disable-comment \
+      --disable-extra \
+      --disable-formatter \
+      --disable-help \
+      --disable-histories \
+      --disable-justify \
+      --disable-libmagic \
+      --disable-linter \
+      --disable-mouse \
+      --disable-speller \
+      --disable-tabcomp \
+      --disable-wordcomp \
+      --disable-wrapping \
+      --enable-tiny \
+      --with-gnu-ld
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
 We will now proceed to [building the kernel](06-building-the-kernel.md).
 
