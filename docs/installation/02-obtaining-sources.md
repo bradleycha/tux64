@@ -105,7 +105,7 @@ the format `[NAME]-[VERSION]`.
 | [coreutils](https://www.gnu.org/software/coreutils/) | 9.12 | |
 | [util-linux](https://kernel.org/pub/linux/utils/util-linux/) | 2.42.4 | |
 | [procps](https://gitlab.com/procps-ng/procps/) | 4.0.7 | Signed tarballs are not available.  Make sure to generate build scripts with `autogen.sh` in the extracted tarball. |
-| [bash](https://www.gnu.org/software/bash/) | 5.3 | |
+| [dash](http://gondor.apana.org.au/~herbert/dash/) | 5.13.5 | Signatures are contained in `dash-*.tar.*.sha512sum`. |
 | [grep](https://www.gnu.org/software/grep/) | 3.9 | |
 | [sed](https://www.gnu.org/software/sed/) | 4.9 | |
 | [bc](https://www.gnu.org/software/bc/) | 1.08.2 | |

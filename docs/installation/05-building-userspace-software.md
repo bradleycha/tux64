@@ -323,37 +323,30 @@ make -j${TUX64_MAKEOPTS} install
 
 TODO: `top` segfaults on start.  This needs to be fixed.
 
-### Chapter 5.10 - Building `bash`
+### Chapter 5.10 - Building `dash`
 
-`bash` is a standard POSIX-compliant shell which provides the standard
-"command-line" across most Linux distributions.
+`dash` is a minimal POSIX-compliant shell which is designed for embedded or
+otherwise memory-restricted systems.
 
 ```
-mkdir ${TUX64_BUILD_ROOT}/builds/bash
-cd ${TUX64_BUILD_ROOT}/builds/bash
+mkdir ${TUX64_BUILD_ROOT}/builds/dash
+cd ${TUX64_BUILD_ROOT}/builds/dash
 
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
-   ../../sources/bash-*/configure \
+   ../../sources/dash-*/configure \
       --host=${TUX64_TARGET_N64_LINUX} \
       --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
       CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
       ASFLAGS="${TUX64_ASFLAGS_N64_LINUX}" \
       LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
-      --disable-largefile \
-      --disable-nls \
-      --disable-threads \
-      --enable-year2038 \
-      --with-gnu-ld
+      --enable-fnmatch
 )
 
 make -j${TUX64_MAKEOPTS}
-cp bash ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash
+make -j${TUX64_MAKEOPTS} install
 ```
-
-TODO: this crashes immediately with malloc issues.  I haven't yet debugged why
-this is, so we'll need to look into this more.
 
 ### Chapter 5.11 - Building `grep`
 

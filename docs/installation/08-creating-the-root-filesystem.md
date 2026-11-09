@@ -181,12 +181,12 @@ ln -sf libproc2.so.1.0.2 libproc2.so.1
 ln -sf libproc2.so.1.0.2 libproc2.so
 ```
 
-#### Chapter 8.1.11 - Installing `bash`
+#### Chapter 8.1.11 - Installing `dash`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
-cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/bash ./
-ln -sf bash sh
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/dash ./
+ln -sf dash sh
 ```
 
 #### Chapter 8.1.12 - Installing `grep`
