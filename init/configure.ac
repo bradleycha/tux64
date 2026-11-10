@@ -34,9 +34,14 @@ AS_HELP_STRING([--enable-procfs], [Enable procfs pseudo filesystem support.]),
    [tux64_init_procfs=0]
 )
 AC_ARG_ENABLE([sysfs],
-AS_HELP_STRING([--enable-sysfs], [Enable sysfs pseudo filesystem support.]),
+   AS_HELP_STRING([--enable-sysfs], [Enable sysfs pseudo filesystem support.]),
    [tux64_init_sysfs=1],
    [tux64_init_sysfs=0]
+)
+AC_ARG_ENABLE([pseudo-terminals],
+   AS_HELP_STRING([--enable-pseudo-terminals], [Enable pseudo terminals for running background tasks.]),
+   [tux64_init_pseudo_terminals=1],
+   [tux64_init_pseudo_terminals=0]
 )
 
 AC_DEFINE_UNQUOTED([CONFIG_STARTUP_SYSTEM_INFO],
@@ -50,6 +55,10 @@ AC_DEFINE_UNQUOTED([CONFIG_PROCFS],
 AC_DEFINE_UNQUOTED([CONFIG_SYSFS],
    [$tux64_init_sysfs],
    [Enable sysfs pseudo filesystem support.]
+)
+AC_DEFINE_UNQUOTED([CONFIG_PSEUDO_TERMINALS],
+   [$tux64_init_pseudo_terminals],
+   [Enable pseudo terminals for running background tasks.]
 )
 
 AC_OUTPUT
