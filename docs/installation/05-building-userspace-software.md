@@ -62,7 +62,8 @@ cd ${TUX64_BUILD_ROOT}/builds/tux64-init
       LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
       --enable-startup-system-info \
       --enable-procfs \
-      --enable-sysfs
+      --enable-sysfs \
+      --enable-pseudo-terminals
 )
 
 make -j${TUX64_MAKEOPTS}
