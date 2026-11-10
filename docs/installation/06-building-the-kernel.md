@@ -97,7 +97,7 @@ Device drivers  --->
     [*]   Virtual terminal
     [ ]     Enable character translations in console
     [*]     Support for console on virtual terminal
-    [ ]   Unix98 PTY support
+    [*]   Unix98 PTY support
     [ ]   Legacy (BSD) PTY support
     [ ]   Allow legacy TIOCSTI usage
     [ ]   Automatically load TTY Line Disciplines
