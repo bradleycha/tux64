@@ -121,6 +121,8 @@ Device drivers  --->
   Input device support  --->
     [ ]   Keyboards  ----
     [ ]   Mice  ----
+    [*]  Joysticks/Gamepads  --->
+      [*]  N64 Controller
 
   [ ] Device Tree and Open Firmware support
   [ ] HID bus support
