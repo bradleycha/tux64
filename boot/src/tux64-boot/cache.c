@@ -22,13 +22,18 @@ tux64_boot_cache_operation(
    Tux64BootCacheOperation cache_operation
 ) {
    const Tux64UInt8 * iter;
+   Tux64UInt32 modulus;
    Tux64UInt32 align_delta;
 
    iter = (const Tux64UInt8 *)address;
 
+   /* bit hack which avoid a divu instruction.  note that this only works */
+   /* because we know bytes_per_line will always be a power of two. */
+   modulus     = bytes_per_line - TUX64_LITERAL_UINT32(1u);
+   align_delta = (Tux64UInt32)(Tux64UIntPtr)address & modulus;
+
    /* align backward so the address starts on a cache line. */
-   align_delta = (Tux64UIntPtr)address % bytes_per_line;
-   iter -= align_delta;
+   iter  -= align_delta;
    bytes += align_delta;
 
    while (bytes >= bytes_per_line) {
