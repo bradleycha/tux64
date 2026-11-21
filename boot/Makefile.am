@@ -70,6 +70,7 @@ AM_CFLAGS = \
 	-I $(top_srcdir)/src \
 	-std=c99 \
 	-ffreestanding \
+	-fno-zero-initialized-in-bss \
 	-mignore-interrupt-requirements \
 	-Wall \
 	-Wextra \
