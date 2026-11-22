@@ -65,6 +65,10 @@ General setup  --->
 
   (12) Kernel log buffer size (16 => 64KB, 17 => 128KB)
 
+[*] Enable loadable module support  --->
+  [*] Module unloading
+  [*] Trim unused exported kernel symbols
+
 [*] Enable the block layer  --->
   [ ] Legacy autoloading support
 
@@ -74,12 +78,12 @@ General setup  --->
     [ ] EFI GUID Partition support
 
   IO Schedulers  --->
-    [ ] MQ deadline I/O scheduler
-    [ ] Kyber I/O scheduler
+    < > MQ deadline I/O scheduler
+    < > Kyber I/O scheduler
 
 Executable file formats  --->
   [*] Kernel support for ELF binaries
-  [*] Kernel support for scripts starting with #!
+  <M> Kernel support for scripts starting with #!
 
 Memory Management options  --->
   [ ] Support for paging of anonymous memory (swap)  ----
@@ -104,8 +108,8 @@ Device drivers  --->
 
   Graphics support  --->
     Frame buffer Devices  --->
-      [*] Support for frame buffer device drivers
-      [*] Simple framebuffer support
+      <*> Support for frame buffer device drivers
+      <*> Simple framebuffer support
       [ ] Provide legacy /dev/fb* device
 
     Console display driver support  --->
@@ -129,7 +133,7 @@ Device drivers  --->
   [ ] Common Clock Framework
 
 File systems  --->
-  [*] The Extended 4 (ext4) filesystem
+  <*> The Extended 4 (ext4) filesystem
 
   Pseudo filesystems  --->
     [*] /proc file system support
