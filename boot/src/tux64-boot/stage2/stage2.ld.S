@@ -13,7 +13,6 @@ ENTRY(tux64_boot_stage2_start)
 
 SECTIONS
 {
-   /* place the stage-2 code and data into RSP IMEM */
    .rdram (TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
@@ -21,7 +20,11 @@ SECTIONS
       /* same trick with $gp from stage-1 */
       _gp = ALIGN(8) + 0x8000;
 
-      *(.sdata* .sbss);
+      *(.sdata*);
+   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+
+   .rdram.bss (ADDR(.rdram) + SIZEOF(.rdram)) : {
+      *(.sbss*);
       *(.bss*);
    } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
 }
