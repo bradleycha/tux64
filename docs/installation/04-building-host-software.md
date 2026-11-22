@@ -30,6 +30,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_HOST}-tux64-lib
       ASFLAGS="${TUX64_ASFLAGS_HOST}" \
       LDFLAGS="${TUX64_LDFLAGS_HOST}" \
       --enable-platform-cpu-signed-integer-format-twos-complement \
+      --enable-core \
       --enable-log \
       --enable-log-ansi
 )

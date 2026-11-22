@@ -33,6 +33,7 @@ cd ${TUX64_BUILD_ROOT}/builds/${TUX64_TARGET_N64_LINUX}-tux64-lib
       --enable-platform-mips-n64 \
       --enable-platform-mips-n64-procfs \
       --enable-platform-mips-vr4300 \
+      --enable-core \
       --enable-log \
       --enable-log-ansi
 )
