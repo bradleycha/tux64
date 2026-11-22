@@ -86,11 +86,11 @@ AM_CPPFLAGS = \
 
 # we have to manually link libtux64-boot first both to ensure proper build
 # dependencies, and because we get strange link issues if it's not first.
-# same deal with libtux64-core, except this time it's backwards to literally
-# every other package(???).
+# note that we don't link libtux64-core since we dont build tux64-lib with
+# --enable-core, as it would be useless here.  it also historically causes
+# insane build errors, where the cleanest solution is to just not bother.
 LDADD = \
 	$(top_builddir)/libtux64-boot.a \
-	$(libdir)/libtux64-core.a \
 	$(libdir)/libtux64.la \
 	-lgcc
 
