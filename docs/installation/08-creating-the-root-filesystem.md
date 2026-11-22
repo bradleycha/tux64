@@ -164,7 +164,17 @@ done
 ln -sf last lastb
 ```
 
-#### Chapter 8.1.10 - Installing `procps`
+#### Chapter 8.1.10 - Installing `kmod`
+
+```
+cd ${TUX64_BUILD_ROOT}/rootfs/bin
+cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/kmod ./
+for link in lsmod rmmod insmod modinfo modprobe depmod; do
+    ln -sf kmod $link
+done
+```
+
+#### Chapter 8.1.11 - Installing `procps`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs
@@ -181,7 +191,7 @@ ln -sf libproc2.so.1.0.2 libproc2.so.1
 ln -sf libproc2.so.1.0.2 libproc2.so
 ```
 
-#### Chapter 8.1.11 - Installing `dash`
+#### Chapter 8.1.12 - Installing `dash`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
@@ -189,7 +199,7 @@ cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/dash ./
 ln -sf dash sh
 ```
 
-#### Chapter 8.1.12 - Installing `grep`
+#### Chapter 8.1.13 - Installing `grep`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
@@ -198,14 +208,14 @@ for bin in grep egrep fgrep; do
 done
 ```
 
-#### Chapter 8.1.13 - Installing `sed`
+#### Chapter 8.1.14 - Installing `sed`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/sed ./
 ```
 
-#### Chapter 8.1.14 - Installing `bc`
+#### Chapter 8.1.15 - Installing `bc`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
@@ -214,7 +224,7 @@ for bin in bc dc; do
 done
 ```
 
-#### Chapter 8.1.15 - Installing `tar`
+#### Chapter 8.1.16 - Installing `tar`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs
@@ -222,7 +232,7 @@ cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/tar ./bin/
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/libexec/rmt ./libexec/
 ```
 
-#### Chapter 8.1.16 - Installing `gzip`
+#### Chapter 8.1.17 - Installing `gzip`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
@@ -232,14 +242,14 @@ for bin in gunzip gzexe gzip uncompress zcat zcmp zdiff zegrep zfgrep zforce\
 done
 ```
 
-#### Chapter 8.1.17 - Installing `time`
+#### Chapter 8.1.18 - Installing `time`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin
 cp ${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX}/bin/time ./
 ```
 
-#### Chapter 8.1.18 - Installing `nano`
+#### Chapter 8.1.19 - Installing `nano`
 
 ```
 cd ${TUX64_BUILD_ROOT}/rootfs/bin

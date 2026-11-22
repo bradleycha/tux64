@@ -291,7 +291,36 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.9 - Building `procps`
+### Chapter 5.9 - Building `kmod`
+
+`kmod` provides utilities for managing kernel modules, such as loading and
+unloading.  Importantly, it is used by the kernel to dynamically load and
+unload kernel modules on-demand.
+
+```
+mkdir ${TUX64_BUILD_ROOT}/builds/kmod
+cd ${TUX64_BUILD_ROOT}/builds/kmod
+
+(
+   . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
+      ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_LINUX}
+   ../../sources/kmod-*/configure \
+      --host=${TUX64_TARGET_N64_LINUX} \
+      --prefix=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+      CFLAGS="${TUX64_CFLAGS_N64_LINUX}" \
+      LDFLAGS="${TUX64_LDFLAGS_N64_LINUX}" \
+      --disable-dependency-tracking \
+      --disable-maintainer-mode \
+      --disable-manpages \
+      --disable-logging \
+      --with-gnu-ld
+)
+
+make -j${TUX64_MAKEOPTS}
+make -j${TUX64_MAKEOPTS} install
+```
+
+### Chapter 5.10 - Building `procps`
 
 `procps` provides many command-line utilities for interacting with Linux's
 proc filesystem, such as `ps`, `free`, and `top`.
@@ -325,7 +354,7 @@ make -j${TUX64_MAKEOPTS} install
 
 TODO: `top` segfaults on start.  This needs to be fixed.
 
-### Chapter 5.10 - Building `dash`
+### Chapter 5.11 - Building `dash`
 
 `dash` is a minimal POSIX-compliant shell which is designed for embedded or
 otherwise memory-restricted systems.
@@ -350,7 +379,7 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.11 - Building `grep`
+### Chapter 5.12 - Building `grep`
 
 `grep` is a tool which allows searching for text in files via regular
 expressions.
@@ -380,7 +409,7 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.12 - Building `sed`
+### Chapter 5.13 - Building `sed`
 
 `sed` is a stream editor which is often used in bash scripts for preforming
 transformations on text streams.
@@ -412,7 +441,7 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.13 - Building `bc`
+### Chapter 5.14 - Building `bc`
 
 `bc` is an arbitrary precision calculator with scripting support.  It can be
 useful for performing basic arithmetic from the command line.
@@ -436,7 +465,7 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.14 - Building `tar`
+### Chapter 5.15 - Building `tar`
 
 `tar` is a tool for creating, extracting, and inspecting tape archives, also
 called tarballs.
@@ -466,7 +495,7 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.15 - Building `gzip`
+### Chapter 5.16 - Building `gzip`
 
 `gzip` is a compression and decompression utility for gzip-compressed files.
 
@@ -491,7 +520,7 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.16 - Building `time`
+### Chapter 5.17 - Building `time`
 
 `time` is a program which runs another program, then reports how long it took
 to execute the program.
@@ -516,7 +545,7 @@ make -j${TUX64_MAKEOPTS}
 make -j${TUX64_MAKEOPTS} install
 ```
 
-### Chapter 5.17 - Building `nano`
+### Chapter 5.18 - Building `nano`
 
 `nano` is a simple terminal-based text editor useful for memory-constrained
 environment (such as a Nintendo 64!).
