@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ----------------------------------------------------------------------------
-#                          Copyright (c) Tux64 2025
+#                       Copyright (c) Tux64 2025, 2026
 # ----------------------------------------------------------------------------
 # This file is licensed under the GPLv3 license.  For more information, see
 # LICENSE.
@@ -24,6 +24,7 @@ make -C ${TUX64_BUILD_ROOT}/sources/linux-* -j${TUX64_MAKEOPTS} \
    INSTALL_PATH=${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_N64_BOOTLOADER} \
    INSTALL_MOD_PATH=${TUX64_BUILD_ROOT}/rootfs \
    INSTALL_HDR_PATH=${TUX64_BUILD_ROOT}/tools/${TUX64_TARGET_N64_LINUX} \
+   INSTALL_MOD_STRIP=1 \
    KCFLAGS="${TUX64_CFLAGS_N64_KERNEL}" \
    KAFLAGS="${TUX64_ASFLAGS_N64_KERNEL}" \
    KCONFIG_CONFIG=$(pwd)/kernel-config \
