@@ -54,8 +54,13 @@ Kernel hacking  --->
       (X) Rely on the toolchain's implicit default DWARF version
 ```
 
-Now recompile and install the kernel, as well as rebuild the ROM image as
-detailed in the installation guide.
+Additionally, the default `kernel-make.sh` includes `INSTALL_MOD_STRIP=1`,
+which strips debug information and unused data from kernel modules.  To disable
+this, you may either set `INSTALL_MOD_STRIP=0`, or simply remove it from the
+make command.
+
+Now recompile and install the kernel and kernel modules, as well as rebuild the
+root filesystem and ROM image as detailed in the installation guide.
 
 ### Enabling `tux64-lib` Log Origin
 
