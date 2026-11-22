@@ -19,10 +19,10 @@ AM_CFLAGS = \
 	-Wpedantic
 libtux64_la_CFLAGS = \
 	$(AM_CFLAGS) \
-	-DTUX64_IMPLEMENTATION_LIB
+	-DTUX64_TARGET_LIB
 libtux64_core_la_CFLAGS = \
 	$(AM_CFLAGS) \
-	-DTUX64_IMPLEMENTATION_CORE
+	-DTUX64_TARGET_CORE
 libtux64_la_LDFLAGS = \
 	-release $(PACKAGE_VERSION)
 libtux64_core_la_LDFLAGS = \

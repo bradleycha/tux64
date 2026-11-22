@@ -12,6 +12,20 @@
 /* this must be included first so all future includes have this available*/
 #include "tux64/config.h"
 
+/* these define whether the code should be compiled for the main libtux64, */
+/* or if it should be split into libtux64-core. */
+#if TUX64_CONFIG_CORE
+/*----------------------------------------------------------------------------*/
+#define TUX64_IMPLEMENTATION_LIB    TUX64_TARGET_LIB
+#define TUX64_IMPLEMENTATION_CORE   TUX64_TARGET_CORE
+/*----------------------------------------------------------------------------*/
+#else /* TUX64_CONFIG_CORE */
+/*----------------------------------------------------------------------------*/
+#define TUX64_IMPLEMENTATION_LIB    TUX64_TARGET_LIB
+#define TUX64_IMPLEMENTATION_CORE   TUX64_TARGET_LIB
+/*----------------------------------------------------------------------------*/
+#endif /* TUX64_CONFIG_CORE */
+
 /* i tried using AC_C_BIGENDIAN, but it fails to detect endianess for mips64 */
 #ifndef TUX64_PLATFORM_CPU_ENDIAN_NATIVE_BIG
 #ifndef __BYTE_ORDER__

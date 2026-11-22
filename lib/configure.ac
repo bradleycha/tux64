@@ -82,6 +82,11 @@ AC_ARG_ENABLE([platform-mips-vr4300],
    [tux64_config_platform_mips_vr4300=1],
    [tux64_config_platform_mips_vr4300=0]
 )
+AC_ARG_ENABLE([core],
+   AS_HELP_STRING([--enable-core], [Split small helper functions into libtux64-core]),
+   [tux64_config_core=1],
+   [tux64_config_core=0]
+)
 AC_ARG_ENABLE([log],
    AS_HELP_STRING([--enable-log], [Enable logging functions, requires stdio.h and stdarg.h]),
    [tux64_config_log=1],
@@ -125,6 +130,10 @@ AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_MIPS_N64_PROCFS],
 AC_DEFINE_UNQUOTED([CONFIG_PLATFORM_MIPS_VR4300],
    [$tux64_config_platform_mips_vr4300],
    [Enable MIPS VR4300-specific features]
+)
+AC_DEFINE_UNQUOTED([CONFIG_CORE],
+   [$tux64_config_core],
+   [Split small helper functions into libtux64-core]
 )
 AC_DEFINE_UNQUOTED([CONFIG_LOG],
    [$tux64_config_log],
