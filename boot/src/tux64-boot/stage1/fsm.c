@@ -740,6 +740,14 @@ tux64_boot_stage1_fsm_initialize_checksum(void) {
 }
 
 static void
+tux64_boot_stage1_fsm_initialize_load_info(
+   struct Tux64BootStage1FsmGlobalsLoadInfo * load_info
+) {
+   load_info->status = TUX64_LITERAL_UINT8(0u);
+   return;
+}
+
+static void
 tux64_boot_stage1_fsm_initialize_kernel_metadata(
    struct Tux64BootExecKernelMetadata * metadata,
    enum Tux64PlatformMipsN64BootConsoleType console_type,
@@ -770,6 +778,10 @@ tux64_boot_stage1_fsm_initialize(
    if (tux64_boot_flag_audio_beeps()) {
       tux64_boot_stage1_audio_play(TUX64_BOOT_STAGE1_AUDIO_SOUND_STARTUP);
    }
+
+   tux64_boot_stage1_fsm_initialize_load_info(
+      &fsm->globals.load_info
+   );
 
    tux64_boot_stage1_fsm_initialize_kernel_metadata(
       &fsm->globals.kernel_metadata,
