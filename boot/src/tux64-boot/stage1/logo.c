@@ -93,6 +93,12 @@
 #define TUX64_BOOT_STAGE1_LOGO_COLOR_TABLE_ENTRIES \
    16u
 
+/* we use 32-bit integers to help optimize the decompression loop.  also */
+/* aligned for rsp dma. */
+typedef Tux64UInt32 Tux64BootStage1LogoImagePixels
+[TUX64_BOOT_STAGE1_LOGO_BYTES / sizeof(Tux64UInt32)]
+__attribute__((aligned(8u)));
+
 static const Tux64UInt8
 tux64_boot_stage1_logo_image_pixels_compressed [] = {
    TUX64_BOOT_STAGE1_LOGO_IMAGE_PIXELS_COMPRESSED
@@ -104,11 +110,8 @@ tux64_boot_stage1_logo_image_color_table [TUX64_BOOT_STAGE1_LOGO_COLOR_TABLE_ENT
    TUX64_BOOT_STAGE1_LOGO_IMAGE_COLOR_TABLE
 };
 
-/* we use 32-bit integers to help optimize the decompression loop.  also */
-/* aligned for rsp dma. */
-static Tux64UInt32
-tux64_boot_stage1_logo_image_pixels [TUX64_BOOT_STAGE1_LOGO_BYTES / sizeof(Tux64UInt32)]
-__attribute__((aligned(8u)));
+static Tux64BootStage1LogoImagePixels
+tux64_boot_stage1_logo_image_pixels;
 
 #define TUX64_BOOT_STAGE1_LOGO_RLE_COMMAND_MASK_TYPE \
    (0x80u)

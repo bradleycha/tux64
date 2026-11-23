@@ -87,10 +87,13 @@ typedef volatile Tux64BootStage1VideoPixel Tux64BootStage1VideoContextFramebuffe
 [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL * TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT]
 __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
 
+typedef Tux64UInt64 Tux64BootStage1VideoContextClearColorRspDmaBuffer
+[0x1000u / sizeof(Tux64UInt64)]
+__attribute__((aligned(8u))); /* alignment required for RSP DMA */
+
 struct Tux64BootStage1VideoContext {
    Tux64BootStage1VideoContextFramebuffersUnified framebuffers_unified;
-   Tux64UInt64 clear_color_rsp_dma_buffer [0x1000u / sizeof(Tux64UInt64)]
-   __attribute__((aligned(8u))); /* alignment required for RSP DMA */
+   Tux64BootStage1VideoContextClearColorRspDmaBuffer clear_color_rsp_dma_buffer;
    struct Tux64BootSyncFence vblank_fence;
    Tux64UInt8 framebuffer_index_displaying;
 };

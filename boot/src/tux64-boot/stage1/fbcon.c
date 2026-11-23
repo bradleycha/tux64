@@ -63,16 +63,19 @@
 #define TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS_BYTES \
    (TUX64_BOOT_STAGE1_FBCON_CHARACTERS_COLUMNS)
 
+/* 16-bit entries so each pixel can be written at once.  also aligned for use */
+/* with RSP DMA */
+typedef Tux64BootStage1VideoPixel Tux64BootStage1FbconFontmap
+[0x1000u / sizeof(Tux64BootStage1VideoPixel)]
+__attribute__((aligned(8u)));
+
 static const Tux64UInt8
 tux64_boot_stage1_fbcon_fontmap_compressed [] = {
    TUX64_BOOT_STAGE1_FONTMAP_BIN
 };
 
-/* 16-bit entries so each pixel can be written at once.  also aligned for use */
-/* with RSP DMA */
-static Tux64BootStage1VideoPixel
-tux64_boot_stage1_fbcon_fontmap [4096u / sizeof(Tux64BootStage1VideoPixel)]
-__attribute__((aligned(8u)));
+static Tux64BootStage1FbconFontmap
+tux64_boot_stage1_fbcon_fontmap;
 
 struct Tux64BootStage1FbconCharacterMapLine {
    /* the number of characters in the line */
