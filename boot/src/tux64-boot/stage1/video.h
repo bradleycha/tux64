@@ -23,7 +23,7 @@
       TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_Y\
    )
 #define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT\
-   (8u)
+   (8u) /* for RSP DMA and required by VI */
 #define TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXEL_FORMAT\
    TUX64_PLATFORM_MIPS_N64_VI_TYPE_RGBA5553
 
@@ -33,15 +33,11 @@
 typedef Tux64UInt16 Tux64BootStage1VideoPixel; /* RGBA5551 */
 
 /*----------------------------------------------------------------------------*/
-/* A single framebuffer which can be directly accessed by the CPU.  Pixels    */
-/* are the in RGBA5553 format.                                                */
+/* The raw pixel array of a framebuffer. Pixels are in the RGBA5553 format.   */
 /*----------------------------------------------------------------------------*/
-struct Tux64BootStage1VideoFramebuffer {
-   /* marked volatile since it can be observed externally and also modified */
-   /* by RSP DMA. */
-   volatile Tux64BootStage1VideoPixel pixels [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
-   __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
-};
+typedef volatile Tux64BootStage1VideoPixel Tux64BootStage1VideoFramebuffer
+[TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
+__attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
 
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
@@ -108,7 +104,7 @@ tux64_boot_stage1_video_swap_buffers(void);
 /* cache or convert to the uncached segment, otherwise you'll get incomplete  */
 /* frames displayed on screen!                                                */
 /*----------------------------------------------------------------------------*/
-struct Tux64BootStage1VideoFramebuffer *
+Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_render_target_get(void);
 
 /*----------------------------------------------------------------------------*/

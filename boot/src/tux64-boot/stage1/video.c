@@ -80,8 +80,15 @@
 #define TUX64_BOOT_STAGE1_VIDEO_Y_SCALE\
    (0x400u)
 
+/* we combine all framebuffers into a single unified array so that we can */
+/* efficiently initialize their clear color with a single RSP DMA copy loop. */
+/* this helps cut down on a little bit of code. */
+typedef volatile Tux64BootStage1VideoPixel Tux64BootStage1VideoContextFramebuffersUnified
+[TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL * TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT]
+__attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
+
 struct Tux64BootStage1VideoContext {
-   struct Tux64BootStage1VideoFramebuffer framebuffers [TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT];
+   Tux64BootStage1VideoContextFramebuffersUnified framebuffers_unified;
    Tux64UInt64 clear_color_rsp_dma_buffer [0x1000u / sizeof(Tux64UInt64)]
    __attribute__((aligned(8u))); /* alignment required for RSP DMA */
    struct Tux64BootSyncFence vblank_fence;
@@ -91,11 +98,18 @@ struct Tux64BootStage1VideoContext {
 static struct Tux64BootStage1VideoContext
 tux64_boot_stage1_video_context;
 
-static struct Tux64BootStage1VideoFramebuffer *
+static Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_framebuffer_get(
    Tux64UInt8 idx
 ) {
-   return &tux64_boot_stage1_video_context.framebuffers[idx];
+   Tux64UInt32 offset;
+   volatile Tux64BootStage1VideoPixel * ptr;
+
+   offset   = idx * TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL);
+   ptr      = &tux64_boot_stage1_video_context.framebuffers_unified[offset];
+
+   /* cast needed because GCC doesn't know what we know. */
+   return (Tux64BootStage1VideoFramebuffer *)ptr;
 }
 
 static Tux64UInt8
@@ -122,12 +136,12 @@ static void
 tux64_boot_stage1_video_set_vi_framebuffer(
    Tux64UInt8 index
 ) {
-   const void * address;
+   Tux64BootStage1VideoFramebuffer * framebuffer;
 
    /* the upper 8 bits of the address are ignored, so we can safely write the */
    /* virtual address without having to convert to a physical address. */
-   address = tux64_boot_stage1_video_framebuffer_get(index);
-   tux64_platform_mips_n64_mmio_registers_vi.origin = (Tux64UInt32)(Tux64UIntPtr)address;
+   framebuffer = tux64_boot_stage1_video_framebuffer_get(index);
+   tux64_platform_mips_n64_mmio_registers_vi.origin = (Tux64UInt32)(Tux64UIntPtr)framebuffer;
 
    return;
 }
@@ -194,7 +208,7 @@ tux64_boot_stage1_video_framebuffer_clear(
    Tux64UInt8 idx
 ) {
    struct Tux64BootStage1VideoContext * ctx;
-   struct Tux64BootStage1VideoFramebuffer * framebuffer;
+   Tux64BootStage1VideoFramebuffer * framebuffer;
    Tux64UInt8 blocks;
    Tux64UInt16 bytes_remainder;
    struct Tux64BootRspDmaTransfer rsp_dma_transfer;
@@ -202,8 +216,8 @@ tux64_boot_stage1_video_framebuffer_clear(
    ctx         = &tux64_boot_stage1_video_context;
    framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
 
-   blocks            = TUX64_LITERAL_UINT8(sizeof(framebuffer->pixels) / sizeof(ctx->clear_color_rsp_dma_buffer));
-   bytes_remainder   = TUX64_LITERAL_UINT16(sizeof(framebuffer->pixels) % sizeof(ctx->clear_color_rsp_dma_buffer));
+   blocks            = TUX64_LITERAL_UINT8(sizeof(*framebuffer) / sizeof(ctx->clear_color_rsp_dma_buffer));
+   bytes_remainder   = TUX64_LITERAL_UINT16(sizeof(*framebuffer) % sizeof(ctx->clear_color_rsp_dma_buffer));
 
    /* here, we use RSP DMA to efficiently fill the entire framebuffer with a  */
    /* repeating pattern of pixels.  this is the fastest way to fill any chunk */
@@ -605,7 +619,7 @@ tux64_boot_stage1_video_swap_buffers(void) {
    return;
 }
 
-struct Tux64BootStage1VideoFramebuffer *
+Tux64BootStage1VideoFramebuffer *
 tux64_boot_stage1_video_render_target_get(void) {
    Tux64UInt8 idx;
 
