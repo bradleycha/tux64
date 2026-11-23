@@ -82,6 +82,17 @@ LT_INIT
 AC_CHECK_HEADER([stddef.h])
 AC_CHECK_HEADER([tux64/tux64.h])
 
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+#include <tux64/tux64.h>
+#if TUX64_CONFIG_CORE
+#error "TUX64_CONFIG_CORE != 0"
+#endif
+]])], [tux64_without_core=1], [tux64_without_core=0])
+if [[ $tux64_without_core -eq 0 ]]; then
+   $(tux64_boot_err_log "tux64-lib was compiled with --enable-core.  this is unsupported in the bootloader.  please rebuild tux64-lib without --enable-core.")
+   exit 1
+fi
+
 AC_ARG_ENABLE([safety],
    AS_HELP_STRING([--enable-safety], [Enable safety checks.  Otherwise, assume no errors will ever occur.]),
    [tux64_boot_config_safety=1],

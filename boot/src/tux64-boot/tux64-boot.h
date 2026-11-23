@@ -20,6 +20,10 @@
 #error "tux64-lib has TUX64_CONFIG_PLATFORM_MIPS_VR4300 disabled.  please rebuild tux64-lib with --enable-platform-mips-vr4300."
 #endif /* !TUX64_CONFIG_PLATFORM_MIPS_VR4300 */
 
+#if TUX64_CONFIG_CORE
+#error "tux64-lib was compiled with --enable-core.  this is unsupported in the bootloader.  please rebuild tux64-lib without --enable-core."
+#endif /* TUX64_CONFIG_CORE */
+
 #if TUX64_ENDIAN_FORMAT_NATIVE != TUX64_ENDIAN_FORMAT_BIG
 #error "only big-endian bootloaders are currently supported.  please ensure your build configuration targets a big-endian system."
 #endif /* TUX64_ENDIAN_FORMAT_NATIVE != TUX64_ENDIAN_FORMAT_BIG */
