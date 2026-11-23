@@ -139,6 +139,23 @@ be `x86_64-pc-linux-gnu`.  This needs to be specified manually.  If confused,
 running `gcc -dumpmachine` usually provides the correct target triple.  For more
 information, click [here](https://wiki.osdev.org/Target_Triplet).
 
+`${TUX64_TARGET_N64_BOOTLOADER}` is the target triple for the bootloader.  The
+default behavior is to build the bootloader with GCC's O64 ABI, which provides
+64-bit general-purpose registers and instructions with a 32-bit address space.
+This can be thought of as the standard 32-bit MIPS ABI with the addition of a
+64-bit register file.  The important note here is that it is currently
+impossible to build the bootloader as fully 64-bit (standard 64-bit MIPS ABI).
+This is because currently, the linker with `binutils` only supports emulation
+of 32-bit ELF targets.  There is no support for 64-bit ELF targets.  With a
+default bootloader target triple, this shouldn't matter.  However, if you
+attempt to build the bootloader for more exotic targets, this should be
+something you are aware of.
+
+`${TUX64_TARGET_N64_LINUX}` is the target triple for Linux running on the
+Nintendo 64.  The default behavior is to use a 32-bit ABI, however if you wish,
+you may use a 64-bit ABI as well.  The documented issues with the bootloader
+do not apply for Linux on the Nintendo 64.
+
 `${TUX64_MAKEOPTS}` specifies the number of parallel build jobs to run when
 compiling software with `make`.  By default, this is set to `$(nproc)`, which
 uses all available threads (nproc = Number of Processors, how about that!?).
