@@ -21,6 +21,11 @@
 
 #define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
    (2u) /* double-buffered */
+#define TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_UNIFIED_PIXELS_TOTAL\
+   (\
+      TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL\
+      * TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT\
+   )
 
 #define TUX64_BOOT_STAGE1_VIDEO_PIXEL_ADVANCE_DEFAULT\
    (0x3u)
@@ -84,7 +89,7 @@
 /* efficiently initialize their clear color with a single RSP DMA copy loop. */
 /* this helps cut down on a little bit of code. */
 typedef volatile Tux64BootStage1VideoPixel Tux64BootStage1VideoContextFramebuffersUnified
-[TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL * TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT]
+[TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_UNIFIED_PIXELS_TOTAL]
 __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
 
 typedef Tux64UInt64 Tux64BootStage1VideoContextClearColorRspDmaBuffer
@@ -101,18 +106,15 @@ struct Tux64BootStage1VideoContext {
 static struct Tux64BootStage1VideoContext
 tux64_boot_stage1_video_context;
 
-static Tux64BootStage1VideoFramebuffer *
+static Tux64BootStage1VideoFramebufferPtr
 tux64_boot_stage1_video_framebuffer_get(
    Tux64UInt8 idx
 ) {
    Tux64UInt32 offset;
-   volatile Tux64BootStage1VideoPixel * ptr;
 
-   offset   = idx * TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL);
-   ptr      = &tux64_boot_stage1_video_context.framebuffers_unified[offset];
+   offset = idx * TUX64_LITERAL_UINT32(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL);
 
-   /* cast needed because GCC doesn't know what we know. */
-   return (Tux64BootStage1VideoFramebuffer *)ptr;
+   return &tux64_boot_stage1_video_context.framebuffers_unified[offset];
 }
 
 static Tux64UInt8
@@ -139,7 +141,7 @@ static void
 tux64_boot_stage1_video_set_vi_framebuffer(
    Tux64UInt8 index
 ) {
-   Tux64BootStage1VideoFramebuffer * framebuffer;
+   Tux64BootStage1VideoFramebufferPtr framebuffer;
 
    /* the upper 8 bits of the address are ignored, so we can safely write the */
    /* virtual address without having to convert to a physical address. */
@@ -207,20 +209,21 @@ tux64_boot_stage1_video_initialize_context_clear_color(
 }
 
 static void
-tux64_boot_stage1_video_framebuffer_clear(
-   Tux64UInt8 idx
+tux64_boot_stage1_video_clear_color_fill(
+   volatile Tux64BootStage1VideoPixel * start,
+   volatile Tux64BootStage1VideoPixel * end
 ) {
    struct Tux64BootStage1VideoContext * ctx;
-   Tux64BootStage1VideoFramebuffer * framebuffer;
+   Tux64UInt32 bytes;
    Tux64UInt8 blocks;
    Tux64UInt16 bytes_remainder;
    struct Tux64BootRspDmaTransfer rsp_dma_transfer;
 
    ctx         = &tux64_boot_stage1_video_context;
-   framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
+   bytes       = (Tux64UInt32)((Tux64UIntPtr)end - (Tux64UIntPtr)start);
 
-   blocks            = TUX64_LITERAL_UINT8(sizeof(*framebuffer) / sizeof(ctx->clear_color_rsp_dma_buffer));
-   bytes_remainder   = TUX64_LITERAL_UINT16(sizeof(*framebuffer) % sizeof(ctx->clear_color_rsp_dma_buffer));
+   blocks            = (Tux64UInt8)(bytes / TUX64_LITERAL_UINT32(sizeof(ctx->clear_color_rsp_dma_buffer)));
+   bytes_remainder   = (Tux64UInt16)(bytes % TUX64_LITERAL_UINT32(sizeof(ctx->clear_color_rsp_dma_buffer)));
 
    /* here, we use RSP DMA to efficiently fill the entire framebuffer with a  */
    /* repeating pattern of pixels.  this is the fastest way to fill any chunk */
@@ -262,7 +265,7 @@ tux64_boot_stage1_video_framebuffer_clear(
    tux64_boot_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RSP_MEMORY);
 
    /* start filling the framebuffer with the clear color */
-   rsp_dma_transfer.addr_rdram = (Tux64UInt32)(Tux64UIntPtr)framebuffer;
+   rsp_dma_transfer.addr_rdram = (Tux64UInt32)(Tux64UIntPtr)start;
    do {
       tux64_boot_rsp_dma_wait_queue();
       tux64_boot_rsp_dma_start(&rsp_dma_transfer, TUX64_BOOT_RSP_DMA_DESTINATION_RDRAM);
@@ -285,26 +288,48 @@ tux64_boot_stage1_video_framebuffer_clear(
 }
 
 static void
+tux64_boot_stage1_video_framebuffer_clear_one(
+   Tux64UInt8 idx
+) {
+   Tux64BootStage1VideoFramebufferPtr framebuffer;
+
+   framebuffer = tux64_boot_stage1_video_framebuffer_get(idx);
+
+   tux64_boot_stage1_video_clear_color_fill(
+      &framebuffer[0u],
+      &framebuffer[TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
+   );
+
+   return;
+}
+
+static void
+tux64_boot_stage1_video_framebuffer_clear_all(void) {
+   struct Tux64BootStage1VideoContext * ctx;
+   volatile Tux64BootStage1VideoPixel * start;
+   volatile Tux64BootStage1VideoPixel * end;
+
+   ctx = &tux64_boot_stage1_video_context;
+
+   start = ctx->framebuffers_unified;
+   end   = &start[TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_UNIFIED_PIXELS_TOTAL];
+   tux64_boot_stage1_video_clear_color_fill(start, end);
+
+   return;
+}
+
+static void
 tux64_boot_stage1_video_initialize_context(
    Tux64BootStage1VideoPixel clear_color
 ) {
    struct Tux64BootStage1VideoContext * ctx;
-   Tux64UInt8 i;
 
    /* done to save on typing */
    ctx = &tux64_boot_stage1_video_context;
 
    tux64_boot_stage1_video_initialize_context_clear_color(clear_color);
    tux64_boot_sync_fence_initialize(&ctx->vblank_fence);
-
-   /* clear all framebuffers to the default clear color. */
-   i = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT);
-   do {
-      i--;
-      tux64_boot_rsp_dma_wait_queue();
-      tux64_boot_stage1_video_framebuffer_clear(i);
-   } while (i != TUX64_LITERAL_UINT8(0u));
-
+   tux64_boot_stage1_video_framebuffer_clear_all();
    ctx->framebuffer_index_displaying = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT - 1u);
 
    return;
@@ -622,7 +647,7 @@ tux64_boot_stage1_video_swap_buffers(void) {
    return;
 }
 
-Tux64BootStage1VideoFramebuffer *
+Tux64BootStage1VideoFramebufferPtr
 tux64_boot_stage1_video_render_target_get(void) {
    Tux64UInt8 idx;
 
@@ -637,7 +662,7 @@ tux64_boot_stage1_video_render_target_clear(void) {
 
    idx = tux64_boot_stage1_video_framebuffer_index_get_rendering();
 
-   tux64_boot_stage1_video_framebuffer_clear(idx);
+   tux64_boot_stage1_video_framebuffer_clear_one(idx);
    return;
 }
 

@@ -39,6 +39,8 @@ typedef volatile Tux64BootStage1VideoPixel Tux64BootStage1VideoFramebuffer
 [TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_TOTAL]
 __attribute__((aligned(TUX64_BOOT_STAGE1_VIDEO_FRAMEBUFFER_PIXELS_ALIGNMENT)));
 
+typedef volatile Tux64BootStage1VideoPixel * Tux64BootStage1VideoFramebufferPtr;
+
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
 /* using any other video functions.  Implicitly enables video output.  The    */
@@ -104,7 +106,7 @@ tux64_boot_stage1_video_swap_buffers(void);
 /* cache or convert to the uncached segment, otherwise you'll get incomplete  */
 /* frames displayed on screen!                                                */
 /*----------------------------------------------------------------------------*/
-Tux64BootStage1VideoFramebuffer *
+Tux64BootStage1VideoFramebufferPtr
 tux64_boot_stage1_video_render_target_get(void);
 
 /*----------------------------------------------------------------------------*/
