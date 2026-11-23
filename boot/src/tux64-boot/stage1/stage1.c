@@ -198,6 +198,10 @@ tux64_boot_stage1_main(
    tux64_boot_stage1_interrupt_rcp_update_mask();
    tux64_boot_stage1_interrupt_enable();
 
+   /* the RSP DMA engine may still be active from video initialization.  for  */
+   /* safety, we sync it before the main loop. */
+   tux64_boot_rsp_dma_wait_queue();
+
    /* we used to execute this at the end of stage-0, but we moved it to here. */
    /* the reason is we want to wait as late into the boot process to          */
    /* terminate booting because if we fail to boot and halt the CPU with our  */

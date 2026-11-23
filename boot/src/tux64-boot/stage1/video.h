@@ -45,7 +45,9 @@ struct Tux64BootStage1VideoFramebuffer {
 
 /*----------------------------------------------------------------------------*/
 /* Initializes the framebuffer video interface.  This must be called before   */
-/* using any other video functions.  Implicitly enables video output.         */
+/* using any other video functions.  Implicitly enables video output.  The    */
+/* RSP DMA engine must be available to queue a DMA transfer when called, and  */
+/* a DMA transfer may still be ongoing in the background.                     */
 /*----------------------------------------------------------------------------*/
 void
 tux64_boot_stage1_video_initialize(

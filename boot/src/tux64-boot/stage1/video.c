@@ -284,6 +284,7 @@ tux64_boot_stage1_video_initialize_context(
    i = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT);
    do {
       i--;
+      tux64_boot_rsp_dma_wait_queue();
       tux64_boot_stage1_video_framebuffer_clear(i);
    } while (i != TUX64_LITERAL_UINT8(0u));
 
