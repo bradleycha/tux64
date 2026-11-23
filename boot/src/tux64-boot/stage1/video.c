@@ -280,13 +280,12 @@ tux64_boot_stage1_video_initialize_context(
    tux64_boot_stage1_video_initialize_context_clear_color(clear_color);
    tux64_boot_sync_fence_initialize(&ctx->vblank_fence);
 
-   /* clear non-rendering framebuffers to prevent garbage from being */
-   /* displayed on startup */
-   i = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT - 1u);
-   while (i != TUX64_LITERAL_UINT8(0u)) {
-      tux64_boot_stage1_video_framebuffer_clear(i);
+   /* clear all framebuffers to the default clear color. */
+   i = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT);
+   do {
       i--;
-   }
+      tux64_boot_stage1_video_framebuffer_clear(i);
+   } while (i != TUX64_LITERAL_UINT8(0u));
 
    ctx->framebuffer_index_displaying = TUX64_LITERAL_UINT8(TUX64_BOOT_STAGE1_VIDEO_CONTEXT_FRAMEBUFFERS_COUNT - 1u);
 

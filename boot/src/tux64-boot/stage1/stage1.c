@@ -213,11 +213,11 @@ tux64_boot_stage1_main(
    while (TUX64_BOOLEAN_TRUE) {
       tux64_boot_stage1_fsm_execute(&tux64_boot_stage1_fsm);
 
-      /* we order all rendering code next to each other not just because   */
-      /* it makes sense, but we can also potentially keep the RSP DMA      */
-      /* engine saturated with work as a previous DMA transfer completes.  */
-      tux64_boot_stage1_video_render_target_clear();
-      tux64_boot_rsp_dma_wait_queue();
+      /* we order all rendering code next to each other not just because    */
+      /* it makes sense, but we can also potentially keep the RSP DMA       */
+      /* engine saturated with work as a previous DMA transfer completes.   */
+      /* also note that due to the way we render, it is not necessary to    */
+      /* clear the screen every frame.  this saves on code and performance. */
       tux64_boot_stage1_fbcon_render();
       if (TUX64_BOOT_CONFIG_LOGO) {
          tux64_boot_rsp_dma_wait_queue();
