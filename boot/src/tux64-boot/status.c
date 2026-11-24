@@ -17,9 +17,9 @@ struct Tux64BootStatusCode {
 
 /* defined in status.ld.h, and section specified manually to prevent */
 /* gp-relative addressing from causing issues.  */
+__attribute__((section(".tux64_boot.status")))
 extern volatile struct Tux64BootStatusCode
-tux64_boot_status_code
-__attribute__((section(".tux64_boot.status")));
+tux64_boot_status_code;
 
 void
 tux64_boot_status_code_initialize(void) {
