@@ -16,8 +16,8 @@
 SECTIONS
 {
    .rsp_dmem.status (TUX64_BOOT_LAYOUT_STATUS_ADDRESS) : {
-      *(.tux64_boot.status);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+      tux64_boot_status_code = .;
+   } :noload_rsp_dmem =0x00
 }
 
 /*----------------------------------------------------------------------------*/

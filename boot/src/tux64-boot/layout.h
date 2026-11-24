@@ -130,5 +130,12 @@
    )
 
 /*----------------------------------------------------------------------------*/
+/* Stage-0 bootloader memory layout.  Declared after stage-1 memory layout to */
+/* make it seem like we planned this to be in reverse order all along.        */
+/*----------------------------------------------------------------------------*/
+#define TUX64_BOOT_LAYOUT_STAGE0_LOAD_ADDRESS\
+   (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x40)
+
+/*----------------------------------------------------------------------------*/
 #endif /* _TUX64_BOOT_LAYOUT_H */
 

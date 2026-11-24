@@ -18,22 +18,27 @@ ENTRY(tux64_boot_stage0_start)
 TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA
  = TUX64_BOOT_LAYOUT_STATUS_ADDRESS;
 
+PHDRS
+{
+   image PT_LOAD AT(TUX64_BOOT_LAYOUT_STAGE0_LOAD_ADDRESS) FLAGS(7);
+}
+
 SECTIONS
 {
    /* the stage-0 code binary to load in place of the IPL3 */
-   .rsp_dmem (TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_ADDRESS_RSP_DMEM + 0x40) : {
+   .rsp_dmem (TUX64_BOOT_LAYOUT_STAGE0_LOAD_ADDRESS) : {
       KEEP(*(.start));
       *(.text* .rodata* .data*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+   } :image =0x00
 
    /* store the .bss items at the start of RSP IMEM */
    .rsp_imem : {
       *(.bss*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_IMEM =0x00
+   } :noload_rsp_imem =0x00
 
    /* store CIC data in seperate section to be extracted as binary data */
    .cic (TUX64_BOOT_STAGE0_MEMORY_ADDRESS_CIC_DATA) : {
       KEEP(*(.cic));
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RSP_DMEM =0x00
+   } :noload_rsp_dmem =0x00
 }
 

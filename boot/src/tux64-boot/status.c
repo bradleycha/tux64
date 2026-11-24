@@ -10,13 +10,14 @@
 
 #include <tux64/endian.h>
 
-
 struct Tux64BootStatusCode {
    Tux64UInt32 hi;
    Tux64UInt32 lo;
 };
 
-static volatile struct Tux64BootStatusCode
+/* defined in status.ld.h, and section specified manually to prevent */
+/* gp-relative addressing from causing issues.  */
+extern volatile struct Tux64BootStatusCode
 tux64_boot_status_code
 __attribute__((section(".tux64_boot.status")));
 

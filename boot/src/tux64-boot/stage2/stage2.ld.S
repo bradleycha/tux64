@@ -11,6 +11,11 @@
 
 ENTRY(tux64_boot_stage2_start)
 
+PHDRS
+{
+   image PT_LOAD AT(TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS) FLAGS(7);
+}
+
 SECTIONS
 {
    .rdram (TUX64_BOOT_LAYOUT_STAGE2_LOAD_ADDRESS) : {
@@ -21,11 +26,11 @@ SECTIONS
       _gp = ALIGN(8) + 0x8000;
 
       *(.sdata*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :image =0x00
 
    .rdram.bss (ADDR(.rdram) + SIZEOF(.rdram)) : {
       *(.sbss*);
       *(.bss*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :noload_rdram_cached =0x00
 }
 

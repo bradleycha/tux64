@@ -17,7 +17,7 @@ SECTIONS
 {
    .rdram.stack (TUX64_BOOT_LAYOUT_STAGE2_STACK_ADDRESS) : {
       . += TUX64_BOOT_LAYOUT_STAGE2_STACK_BYTES;
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :noload_rdram_cached =0x00
 }
 
 /*----------------------------------------------------------------------------*/

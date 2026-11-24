@@ -138,17 +138,9 @@
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_CHECK_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('J')
 .equ TUX64_BOOT_STAGE0_STATUS_CODE_START_STAGE1,                  TUX64_BOOT_STAGE0_STATUS_CODE('K')
 
-/* defined in stage1/boot-header.ld.h, included in stage0/stage0.ld.S */
+/* defined in status.ld.h and header.ld.h */
+.extern tux64_boot_status_code
 .extern tux64_boot_header
-
-   .section .tux64_boot.status
-tux64_boot_stage0_status:
-   /* This is a chunk of memory placed at the end of RSP DMEM to show the */
-   /* current boot status in memory to help debug early boot issues with */
-   /* memory debuggers.  It will look like "STAGE0:c" when memory is */
-   /* displayed as ASCII text, where 'c' is the current boot stage code. */
-   .skip TUX64_BOOT_LAYOUT_STATUS_BYTES
-/*tux64_boot_stage0_status*/
 
    .section .rodata
 tux64_boot_stage0_float.1div80f:
@@ -262,7 +254,7 @@ tux64_boot_stage0_dump_to_sram:
    addiu $t1,$zero,8
    jal   tux64_boot_stage0_sram_write_word
    addiu $t0,$s0,0
-   lw    $t0,%lo(tux64_boot_stage0_status)+0x04($gp)
+   lw    $t0,%lo(tux64_boot_status_code)+0x04($gp)
    jal   tux64_boot_stage0_sram_write_word
    addiu $t1,$zero,12
 
@@ -350,12 +342,12 @@ tux64_boot_stage0_status_code_write:
    lui   $t1,%hi(TUX64_BOOT_STAGE0_STATUS_WORD_LO)
    or    $t0,$t0,$t1
 #if TUX64_BOOT_CONFIG_DUMP_TO_SRAM
-   sw    $t0,%lo(tux64_boot_stage0_status)+0x04($gp)
+   sw    $t0,%lo(tux64_boot_status_code)+0x04($gp)
    b     tux64_boot_stage0_sram_write_word
    addiu $t1,$zero,4
 #else /* TUX64_BOOT_CONFIG_DUMP_TO_SRAM */
    jr    $ra
-   sw    $t0,%lo(tux64_boot_stage0_status)+0x04($gp)
+   sw    $t0,%lo(tux64_boot_status_code)+0x04($gp)
 #endif /* TUX64_BOOT_CONFIG_DUMP_TO_SRAM */
 /*tux64_boot_stage0_status_code_write*/
 
@@ -419,7 +411,7 @@ tux64_boot_stage0_start:
    ori   $t2,$t2,%lo(TUX64_BOOT_STAGE0_STATUS_WORD_HI)
    addiu $t0,$zero,TUX64_BOOT_STAGE0_STATUS_CODE_BEGIN
    jal   tux64_boot_stage0_status_code_write
-   sw    $t2,%lo(tux64_boot_stage0_status)+0x00($gp)
+   sw    $t2,%lo(tux64_boot_status_code)+0x00($gp)
 
    /* begin initializing COP0 registers */
    jal   tux64_boot_stage0_status_code_write

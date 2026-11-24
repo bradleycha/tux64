@@ -19,7 +19,7 @@ SECTIONS
       tux64_boot_exec_kernel_arguments = .;
 
       . += TUX64_BOOT_LAYOUT_EXEC_KERNEL_ARGUMENTS_BYTES;
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :noload_rdram_cached =0x00
 }
 
 /*----------------------------------------------------------------------------*/

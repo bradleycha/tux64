@@ -10,6 +10,11 @@
 #include "tux64-boot/layout.h"
 
 ENTRY(tux64_boot_stage1_start)
+
+PHDRS
+{
+   image PT_LOAD AT(TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) FLAGS(7);
+}
          
 SECTIONS
 {
@@ -19,7 +24,7 @@ SECTIONS
       tux64_boot_stage1_file_stage2 = .;
 
       . += TUX64_BOOT_LAYOUT_STAGE2_LOAD_BYTES_MAXIMUM;
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :noload_rdram_cached =0x00
 
    .rdram (TUX64_BOOT_LAYOUT_STAGE1_LOAD_ADDRESS) : {
       KEEP(*(.start));
@@ -32,7 +37,7 @@ SECTIONS
       _gp = ALIGN(8) + 0x8000;
 
       *(.sdata*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :image =0x00
 
    /* include .bss in a seperate section which we don't dump.  that way, it */
    /* won't be included in the binary and waste space.  the downside is that */
@@ -44,12 +49,12 @@ SECTIONS
       *(.sbss*);
 
       *(.bss*);
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :noload_rdram_cached =0x00
 
    /* this must be placed after all other RDRAM sections so we can find the */
    /* start of free memory, for use with the memory management functions. */
    .rdram.end (ADDR(.rdram.bss) + SIZEOF(.rdram.bss)) : {
       tux64_boot_stage1_memory_heap_start = .;
-   } >TUX64_PLATFORM_MIPS_N64_MEMORY_MAP_LAYOUT_RDRAM_CACHED =0x00
+   } :noload_rdram_cached =0x00
 }
 
