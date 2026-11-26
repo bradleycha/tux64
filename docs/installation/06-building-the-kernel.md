@@ -123,6 +123,7 @@ Device drivers  --->
       [*] 224-color Tux64 logo
 
   Input device support  --->
+    <M>   Event interface
     [ ]   Keyboards  ----
     [ ]   Mice  ----
     [*]  Joysticks/Gamepads  --->
