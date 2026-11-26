@@ -206,7 +206,12 @@ following:
 
 ```
 ${TUX64_BUILD_ROOT}/scripts/kernel-make.sh modules_install
+rm ${TUX64_BUILD_ROOT}/rootfs/lib/modules/*/build
 ```
+
+Note that we remove the symlink to the kernel sources.  This is because storing
+the kernel sources on the root filesystem would use way too much memory, in
+addition to the automatically generated symlink being broken.
 
 We will now proceed to [creating the initramfs](07-creating-the-initramfs.md).
 
