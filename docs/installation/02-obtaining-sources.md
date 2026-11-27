@@ -121,7 +121,7 @@ A couple of helper scripts are provided to make build commands less redundant.
 To do this, execute the following command:
 
 ```
-cp [TUX64 BUILD ROOT]/sources/tux64-*/scripts/*.sh [TUX64 BUILD ROOT]/scripts/
+cp -r [TUX64 BUILD ROOT]/sources/tux64-*/scripts [TUX64 BUILD ROOT]/
 ```
 
 This will copy the helper scripts to a more convenient location, and also allow
