@@ -25,6 +25,17 @@ file, such as `buildconf-dev.sh` so you may use the development
 external software and libraries with optimized compiler flags, while still
 retaining enhanced debug support for internal code.
 
+### Changes to CMake Target Configuration
+
+`${TUX64_BUILD_ROOT}/scripts/cmake` contains scripts used to configure the CMake
+build system for our various targets.  Importantly, `CMAKE_BUILD_TYPE` is set,
+which controls whether we are building with debugging enabled, or alternatively
+the release flags to use.  For debugging, replace `Release` or `MinSizeRel` with
+`Debug`.  This will enable debug symbols with compiler optimizations disabled.
+If you would like to build debug symbols with compiler optimizations enabled,
+you may instead use `RelWithDebInfo`.  For more information, see the online
+documentation for CMake.
+
 ### Enabling Dependency Tracking
 
 If you look closely, the `configure` commands from the installation guide
