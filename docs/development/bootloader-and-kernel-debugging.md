@@ -115,13 +115,9 @@ cd ${TUX64_BUILD_ROOT}/builds/ares
 (
    . ${TUX64_BUILD_ROOT}/scripts/usetoolchain.sh \
       ${TUX64_BUILD_ROOT}/tools/bin/${TUX64_TARGET_HOST}
-   cmake \
-      -DCMAKE_INSTALL_PREFIX=${TUX64_BUILD_ROOT}/tools \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_C_FLAGS="${TUX64_CFLAGS_HOST}" \
-      -DCMAKE_CXX_FLAGS="${TUX64_CXXFLAGS_HOST}" \
-      -DARES_CORES=n64 \
-      -S ../../sources/ares-*
+   cmake -S ../../sources/ares-* \
+      -DCMAKE_TOOLCHAIN_FILE=${TUX64_BUILD_ROOT}/scripts/cmake/target_host.cmake \
+      -DARES_CORES=n64
 )
 
 make C_FLAGS="${TUX64_CFLAGS_HOST}" CXX_FLAGS="${TUX64_CXXFLAGS_HOST}" -j${TUX64_MAKEOPTS}
