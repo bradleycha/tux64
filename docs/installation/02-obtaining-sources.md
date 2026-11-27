@@ -114,6 +114,7 @@ the format `[NAME]-[VERSION]`.
 | [gzip](https://www.gnu.org/software/gzip/) | 1.15 | |
 | [time](https://www.gnu.org/software/time/) | 1.10 | |
 | [nano](https://www.nano-editor.org/) | 9.3 | |
+| [fastfetch](https://github.com/fastfetch-cli/fastfetch/) | 2.71.0 | Signed tarballs are not available. |
 
 ### Chapter 2.3 - Installing Scripts
 
